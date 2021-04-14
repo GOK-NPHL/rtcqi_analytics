@@ -12,4 +12,8 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-require('./components/Example');
+require('./components/User_');
+
+require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
+
+require('../../node_modules/jquery.easing/jquery.easing.min.js');
