@@ -37,11 +37,13 @@ services:
       - rtcqianalytics
 
   nginx:
-    image: nginx:alpine
     container_name: rtcqianalytics-nginx
     restart: unless-stopped
     ports:
       - 8000:80
+    build:
+        context: ./
+        dockerfile: docker-compose/nginx/Dockerfile
     volumes:
       - ./:/var/www
       - ./docker-compose/nginx/:/etc/nginx/conf.d/
