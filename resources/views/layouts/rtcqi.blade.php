@@ -14,7 +14,8 @@
 
         <!-- Scripts -->
         <script src="{{ asset('js/app.js') }}" defer></script>
-
+        
+        <link rel="shortcut icon" href="{{ asset('images/favicon/favicon.ico') }}">
         <!-- Fonts -->
         <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
