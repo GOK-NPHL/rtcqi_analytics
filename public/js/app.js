@@ -68835,6 +68835,30 @@ var Dashboard = /*#__PURE__*/function (_React$Component) {
         text: 'Providers Enrolled',
         value: '85.5',
         faIcon: 'fa-hands'
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "col-xl-3 col-md-6 mb-4"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_stats_StatsLabel__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        textStyling: 'text-success',
+        borderStyling: 'border-left-success',
+        text: 'Sites using standardized HTC register',
+        value: '69',
+        faIcon: 'fa-book'
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "col-xl-3 col-md-6 mb-4"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_stats_StatsLabel__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        textStyling: 'text-info',
+        borderStyling: 'border-left-info',
+        text: 'Personnel Training & Certification',
+        value: '91.4',
+        faIcon: 'fa-certificate'
+      })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "col-xl-3 col-md-6 mb-4"
+      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_stats_StatsLabel__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        textStyling: ' text-warning',
+        borderStyling: 'border-left-warning',
+        text: 'Policy/MOH support',
+        value: '34.6',
+        faIcon: 'fa-hands-helping'
       }))));
     }
   }]);
