@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import StatsLabel from '../stats/StatsLabel';
 import LineGraph from '../charts/LineGraph';
 import RTCard from '../utils/RTCard';
-
+import StackedHorizontal from '../charts/StackedHorizontal'
 
 
 class Dashboard extends React.Component {
@@ -27,7 +27,70 @@ class Dashboard extends React.Component {
                 { type: 'bar' },
                 { type: 'bar' },
                 { type: 'bar' }
+            ],
+            series2: [
+                {
+                    name: 'Level 0 (<40%)',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [24, 23, 56, 34, 32]
+                },
+                {
+                    name: 'Level 1  (50-59%)',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [55, 67, 22, 76, 67]
+                },
+                {
+                    name: 'Level 2 (60-79%)',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [66, 32, 56, 87, 32]
+                },
+                {
+                    name: 'Level 3 (80-89%)',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [78, 11, 34, 75, 23]
+                },
+                {
+                    name: 'Level 4 (>90%)',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: [10, 45, 56, 76, 32]
+                }
             ]
+
         }
     }
 
@@ -94,6 +157,13 @@ class Dashboard extends React.Component {
                             <LineGraph dataset={this.state.dataset1} series={this.state.series1} />
                         </RTCard>
                     </div>
+
+                    <div className="col-xl-6 col-lg-6">
+                        <RTCard header='Percent of sites assessed'>
+                            <StackedHorizontal series = {this.state.series2}/>
+                        </RTCard>
+                    </div>
+
                 </div>
 
             </React.Fragment>
