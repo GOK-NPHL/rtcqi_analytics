@@ -21,3 +21,5 @@ Auth::routes(['register' => false]);
 //Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/reports/pt', 'PTReportController@index')->name('ptIndex');
