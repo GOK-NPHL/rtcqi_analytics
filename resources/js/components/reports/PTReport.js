@@ -14,12 +14,28 @@ class PTReport extends React.Component {
     }
 
     render() {
+        // const assetPath = document.getElementById("app").getAttribute("assetPath");
+        // console.log(this.props);
+        // console.log(document.getElementById("app").getAttribute("assetPath"));
         return (
             <React.Fragment>
 
                 {/* Page Heading */}
-                <OrguntiDrillDown/>
-                
+                <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 className="h4 mb-0 text-gray-500">PT REPORT</h1>
+                    <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                        className="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+                </div>
+
+                <OrguntiDrillDown />
+
+                <div className="row">
+                    <div className="col-sm-6">
+                        <img src={this.props.chart1}></img>
+                        
+                    </div>
+                </div>
+
 
 
             </React.Fragment>
@@ -31,5 +47,20 @@ class PTReport extends React.Component {
 export default PTReport;
 
 if (document.getElementById('PTReport')) {
-    ReactDOM.render(<PTReport />, document.getElementById('PTReport'));
+    // find element by id
+    let domValues = [];
+    let domValuesMap = {};
+    const dataChart1 = document.getElementById('data-chart1')
+    // create new props object with element's data-attributes
+    // result: {chart1: "data"}
+    domValues.push(dataChart1.dataset);
+    // domValues.push({'f':10})
+    domValues.forEach(element => {
+        for (const property in element) {
+            domValuesMap[property]= element[property];
+          }
+    });
+    
+    const props = Object.assign({}, domValuesMap);
+    ReactDOM.render(<PTReport {...props}/>, document.getElementById('PTReport'));
 }
