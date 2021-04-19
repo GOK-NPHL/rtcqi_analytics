@@ -14,6 +14,8 @@ require('./bootstrap');
 
 require('./components/dashboard/Dashboard');
 
+require('./components/reports/PTReport');
+
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 
 require('../../node_modules/jquery.easing/jquery.easing.min.js');
