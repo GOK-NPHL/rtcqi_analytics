@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import StatsLabel from '../stats/StatsLabel';
 import LineGraph from '../charts/LineGraph';
 import RTCard from '../utils/RTCard';
 import StackedHorizontal from '../charts/StackedHorizontal'
-
+import TopLabels from './TopLabels'
 
 class Dashboard extends React.Component {
 
@@ -106,50 +105,7 @@ class Dashboard extends React.Component {
                 </div>
 
 
-                <div className="row">
-
-                    <div className="col-xl-3 col-md-6 mb-4">
-                        <StatsLabel
-                            textStyling={'text-primary'}
-                            borderStyling={'border-left-primary'}
-                            text={'Providers Enrolled'}
-                            value={'85.5'}
-                            faIcon={'fa-hands'}
-                        ></StatsLabel>
-                    </div>
-
-                    <div className="col-xl-3 col-md-6 mb-4">
-                        <StatsLabel
-                            textStyling={'text-success'}
-                            borderStyling={'border-left-success'}
-                            text={'Sites using standardized HTC register'}
-                            value={'69'}
-                            faIcon={'fa-book'}
-                        ></StatsLabel>
-                    </div>
-
-                    <div className="col-xl-3 col-md-6 mb-4">
-                        <StatsLabel
-                            textStyling={'text-info'}
-                            borderStyling={'border-left-info'}
-                            text={'Personnel Training & Certification'}
-                            value={'91.4'}
-                            faIcon={'fa-certificate'}
-                        ></StatsLabel>
-                    </div>
-
-
-                    <div className="col-xl-3 col-md-6 mb-4">
-                        <StatsLabel
-                            textStyling={' text-warning'}
-                            borderStyling={'border-left-warning'}
-                            text={'Policy/MOH support'}
-                            value={'34.6'}
-                            faIcon={'fa-hands-helping'}
-                        ></StatsLabel>
-                    </div>
-
-                </div>
+                <TopLabels/>
 
                 <div className="row">
                     <div className="col-xl-6 col-lg-6">
