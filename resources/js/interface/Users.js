@@ -19,6 +19,15 @@ class User extends React.Component {
             marginBottom: "5px"
         };
 
+
+        const regForm = {
+            color: "white",
+            backgroundColor: "DodgerBlue",
+            padding: "10px",
+            fontFamily: "Arial"
+        };
+
+
         return (
             <React.Fragment>
 
@@ -32,7 +41,7 @@ class User extends React.Component {
                 {/* Users Table */}
                 <div className='row'>
                     <div className='col-sm-12 col-md-12'>
-                        <table class="table table-striped">
+                        <table className="table table-striped">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -52,10 +61,10 @@ class User extends React.Component {
                                     <td>Implementing Partner</td>
                                     <td>
                                         <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                            <i class="fas fa-user-edit"></i>
+                                            <i className="fas fa-user-edit"></i>
                                         </a>
                                         <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                            <i class="fas fa-user-times"></i>
+                                            <i className="fas fa-user-times"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -67,10 +76,10 @@ class User extends React.Component {
                                     <td>CMLC</td>
                                     <td>
                                         <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                            <i class="fas fa-user-edit"></i>
+                                            <i className="fas fa-user-edit"></i>
                                         </a>
                                         <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                            <i class="fas fa-user-times"></i>
+                                            <i className="fas fa-user-times"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -82,10 +91,10 @@ class User extends React.Component {
                                     <td>National Manager</td>
                                     <td>
                                         <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                            <i class="fas fa-user-edit"></i>
+                                            <i className="fas fa-user-edit"></i>
                                         </a>
                                         <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                            <i class="fas fa-user-times"></i>
+                                            <i className="fas fa-user-times"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -97,10 +106,10 @@ class User extends React.Component {
                                     <td>SUB CMLC</td>
                                     <td>
                                         <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                            <i class="fas fa-user-edit"></i>
+                                            <i className="fas fa-user-edit"></i>
                                         </a>
                                         <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                            <i class="fas fa-user-times"></i>
+                                            <i className="fas fa-user-times"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -112,7 +121,59 @@ class User extends React.Component {
                 {/* End Users Table */}
 
 
-            </React.Fragment>
+                {/* Registration Form */}
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Registration Form</h6>
+                    </div>
+                    <div class="card-body">
+
+                        <div className="card mb-4 py-3 border-left-secondary">
+                            <div className="card-body">
+                                <form className="needs-validation" novalidate>
+                                    <div className="form-row">
+                                        <div className="col-md-6 mb-3">
+                                            <label for="validationTooltip01">First name</label>
+                                            <input type="text" className="form-control" id="validationTooltip01" value="Mark" required />
+                                            <div className="valid-tooltip">Looks good!</div>
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label for="validationTooltip02">Last name</label>
+                                            <input type="text" className="form-control" id="validationTooltip02" value="Otto" required />
+                                            <div className="valid-tooltip">Looks good!</div>
+                                        </div>
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="col-md-6 mb-3">
+                                            <label for="validationTooltip03">Email</label>
+                                            <input type="text" className="form-control" id="validationTooltip03" required />
+                                            <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label for="validationTooltip05">Role</label>
+                                            <select className="form-control" id="exampleFormControlSelect1">
+                                                <option>National Manager</option>
+                                                <option>Implamenting Partner</option>
+                                                <option>County Medical Laboratory coordinators</option>
+                                                <option>Sub-County Medical Laboratory coordinators</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button className="btn btn-primary" type="submit">Submit form</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                {/* End Registration Form */}
+
+
+            </React.Fragment >
         );
     }
 
