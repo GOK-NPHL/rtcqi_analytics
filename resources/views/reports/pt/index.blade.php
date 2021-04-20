@@ -2,7 +2,13 @@
 
 @section('content')
 <div class="container">
-    <input type="hidden" id="data-chart1" data-chart1="{{ asset('images/undraw_profile.svg') }}"> 
+    <input type="hidden" id="data-chart1" data-chart1="{{ asset('images/pt/pt1.png') }}"> 
+    <input type="hidden" id="data-chart2" data-chart2="{{ asset('images/pt/pt2.png') }}"> 
+    <input type="hidden" id="data-chart3" data-chart3="{{ asset('images/pt/pt3.png') }}"> 
+    <input type="hidden" id="data-chart4" data-chart4="{{ asset('images/pt/pt4.png') }}"> 
+    <input type="hidden" id="data-chart5" data-chart5="{{ asset('images/pt/pt5.png') }}"> 
+    <input type="hidden" id="data-chart6" data-chart6="{{ asset('images/pt/pt6.png') }}"> 
+
     <div id="PTReport"></div>
 </div>
 @endsection

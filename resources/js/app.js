@@ -14,7 +14,16 @@ require('./bootstrap');
 
 require('./components/dashboard/Dashboard');
 
-require('./components/reports/PTReport');
+require('./components/reports/pt/PTReport');
+
+require('./components/reports/logbook/LogbookReport');
+
+require('./components/reports/spi/SpiReport');
+
+require('./components/reports/me/MEReport');
+
+require('./components/reports/summaries/SummariesReport');
+
 
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 

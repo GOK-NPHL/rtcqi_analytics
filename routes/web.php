@@ -23,3 +23,8 @@ Auth::routes(['register' => false]);
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/reports/pt', 'PTReportController@index')->name('ptIndex');
+Route::get('/reports/logbook', 'LogbookReportController@index')->name('logbookIndex');
+Route::get('/reports/spi', 'SpiReportController@index')->name('spiIndex');
+Route::get('/reports/me', 'MEReportController@index')->name('meIndex');
+Route::get('/reports/summaries', 'SummariesReportController@index')->name('summariesIndex');
+

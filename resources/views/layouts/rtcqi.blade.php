@@ -73,10 +73,10 @@
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Reports:</h6>
                             <a class="collapse-item" href="{{ route('ptIndex') }}">Pt</a>
-                            <a class="collapse-item" href="cards.html">Log book</a>
-                            <a class="collapse-item" href="cards.html">SPI-RT</a>
-                            <a class="collapse-item" href="cards.html">M&E</a>
-                            <a class="collapse-item" href="cards.html">Summaries</a>
+                            <a class="collapse-item" href="{{ route('logbookIndex') }}">Log book</a>
+                            <a class="collapse-item" href="{{ route('spiIndex') }}">SPI-RT</a>
+                            <a class="collapse-item" href="{{ route('meIndex') }}">M&E</a>
+                            <a class="collapse-item" href="{{ route('summariesIndex') }}">Summaries</a>
                         </div>
                     </div>
                 </li>
