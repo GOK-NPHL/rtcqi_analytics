@@ -63,7 +63,6 @@ class OrguntiDrillDown extends React.Component {
                             {/* <label for="exampleFormControlSelect1">Example select</label> */}
                             <select className="form-control" id="exampleFormControlSelect1">
                                 <option disabled selected>Select site</option>
-                                <option>National</option>
                                 <option>site 1</option>
                                 <option>site 2</option>
                                 <option>site 3</option>
