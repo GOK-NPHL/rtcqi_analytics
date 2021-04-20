@@ -28,3 +28,9 @@ Route::get('/reports/spi', 'SpiReportController@index')->name('spiIndex');
 Route::get('/reports/me', 'MEReportController@index')->name('meIndex');
 Route::get('/reports/summaries', 'SummariesReportController@index')->name('summariesIndex');
 
+//Services
+
+Route::get('/service/roles', 'Service\RolesController@index')->name('rolesIndex');
+Route::get('/service/users', 'Service\UsersController@index')->name('usersIndex');
+Route::get('/service/orgunits', 'Service\OrgunitsController@index')->name('orgunitsIndex');
+

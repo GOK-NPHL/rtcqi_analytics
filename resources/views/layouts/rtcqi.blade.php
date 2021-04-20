@@ -99,12 +99,12 @@
                     <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">System settings</h6>
-                            <a class="collapse-item" href="register.html">Users</a>
-                            <a class="collapse-item" href="register.html">Roles</a>
-                            <a class="collapse-item" href="register.html">Organization units</a>
+                            <a class="collapse-item" href="{{ route('usersIndex') }}">Users</a>
+                            <a class="collapse-item" href="{{ route('rolesIndex') }}">Roles</a>
+                            <a class="collapse-item" href="{{ route('orgunitsIndex') }}">Organization units</a>
                             <div class="collapse-divider"></div>
                             <h6 class="collapse-header">Administration</h6>
-                            <a class="collapse-item" href="404.html">Data backup</a>
+                            <a class="collapse-item" href="#">Data backup</a>
                         </div>
                     </div>
                 </li>
