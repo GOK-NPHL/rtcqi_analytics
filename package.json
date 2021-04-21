@@ -30,6 +30,7 @@
         "datatables.net-bs4": "^1.10.24",
         "echarts": "^5.1.0",
         "echarts-for-react": "^3.0.1",
-        "jquery.easing": "^1.4.1"
+        "jquery.easing": "^1.4.1",
+        "react-dropdown-tree-select": "^2.5.1"
     }
 }

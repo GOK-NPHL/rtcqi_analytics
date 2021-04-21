@@ -25,6 +25,9 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 
 var EchartsForReact=require('echarts-for-react');
+
+require('react-dropdown-tree-select');
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
