@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import DropdownTreeSelect from 'react-dropdown-tree-select';
+import TreeDrop from './TreeDrop';
+
 class User extends React.Component {
 
     constructor(props) {
@@ -8,7 +11,13 @@ class User extends React.Component {
         this.state = {
 
         }
+        this.onChange = this.onChange.bind(this);
     }
+
+    onChange(currentNode, selectedNodes) {
+        console.log("path::", currentNode.path);
+    };
+
 
     render() {
         const imgStyle = {
@@ -19,6 +28,7 @@ class User extends React.Component {
             marginBottom: "5px"
         };
 
+        // this.assignObjectPaths(data);
 
         const regForm = {
             color: "white",
@@ -26,7 +36,6 @@ class User extends React.Component {
             padding: "10px",
             fontFamily: "Arial"
         };
-
 
         return (
             <React.Fragment>
@@ -123,11 +132,11 @@ class User extends React.Component {
 
                 {/* Registration Form */}
 
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Registration Form</h6>
+                <div className="card shadow mb-4">
+                    <div className="card-header py-3">
+                        <h6 className="m-0 font-weight-bold text-primary">Registration Form</h6>
                     </div>
-                    <div class="card-body">
+                    <div className="card-body">
 
                         <div className="card mb-4 py-3 border-left-secondary">
                             <div className="card-body">
@@ -160,6 +169,16 @@ class User extends React.Component {
                                             </select>
                                         </div>
                                     </div>
+                                    
+
+                                    <div className="form-row">
+                                        <div className="col-md-12 mb-12">
+                                            <label for="validationTooltip03">Organisation Units</label>
+                                            <TreeDrop/>
+                                            <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                        </div>
+                                    </div>
+                                    
                                     <button className="btn btn-primary" type="submit">Submit form</button>
                                 </form>
                             </div>
@@ -167,11 +186,8 @@ class User extends React.Component {
 
                     </div>
                 </div>
-
-
-
+                
                 {/* End Registration Form */}
-
 
             </React.Fragment >
         );

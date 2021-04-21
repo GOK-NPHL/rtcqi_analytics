@@ -1,0 +1,48 @@
+[
+    {
+      "label": "National",
+      "tagClassName": "special",
+      "children": [
+        {
+          "label": "Nairobi",
+          "children": [
+            {
+              "label": "Dagoretti Sub county",
+              "children": [
+                {
+                  "label": "Site A"
+                },
+                {
+                  "label": "Site B"
+                }
+              ]
+            },
+            {
+              "label": "Lavigntom Sub County"
+            }
+          ]
+        },
+        {
+            "label": "Kisumu",
+            "children": [
+              {
+                "label": "Muhoroni Sub county",
+                "children": [
+                  {
+                    "label": "Site A"
+                  },
+                  {
+                    "label": "Site B"
+                  }
+                ]
+              },
+              {
+                "label": "Nyakach Sub County"
+              }
+            ]
+          }
+
+      ]
+    }
+  ]
+  
