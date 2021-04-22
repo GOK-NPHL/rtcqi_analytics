@@ -63,8 +63,9 @@ class Orgunit extends React.Component {
                         <tbody>
                             <tr>
                                 <th scope="row">1</th>
-                                <td>Mark Odour</td>
                                 <td>Implementing Partner</td>
+                                <td>Mark Odour</td>
+                                
                                 <td>20-04-2021</td>
                                 
                                 <td>
@@ -78,8 +79,9 @@ class Orgunit extends React.Component {
                             </tr>
                             <tr>
                                 <th scope="row">2</th>
-                                <td>Jacob juma</td>
                                 <td>CMLC</td>
+                                <td>Jacob juma</td>
+                                
                                 <td>20-04-2021</td>
                                 
                                 <td>
@@ -137,8 +139,8 @@ class Orgunit extends React.Component {
                             <form className="needs-validation" novalidate>
                                 <div className="form-row">
                                     <div className="col-md-12 mb-3">
-                                        <label for="validationTooltip01">First name</label>
-                                        <input type="text" className="form-control" id="validationTooltip01" value="Mark" required />
+                                        <label for="validationTooltip01">Role name</label>
+                                        <input type="text" className="form-control" id="validationTooltip01" value="CMLC" required />
                                         <div className="valid-tooltip">Looks good!</div>
                                     </div>
                                 </div>
