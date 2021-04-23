@@ -17,7 +17,7 @@ class CreateFormSubmissionsTable extends Migration
             $table->id();
             $table->string("lastest_submission_date");
             $table->string("form_id");
-            $table->bigIncrements('org_id');
+            $table->bigInteger("org_id");
             $table->timestamps();
         });
     }

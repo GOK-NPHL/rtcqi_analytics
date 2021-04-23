@@ -16,8 +16,8 @@ class CreateOrganisationUnirTable extends Migration
         Schema::create('organisation_unit', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->$table->bigIncrements('parent_id');
-            $table->bigIncrements('creator_id');
+            $table->bigInteger("parent_id");
+            $table->bigInteger("creator_id");
             $table->timestamps();
         });
     }
