@@ -15,8 +15,10 @@ class CreateFormSubmissionsTable extends Migration
     {
         Schema::create('form_submissions', function (Blueprint $table) {
             $table->id();
-            $table->string("lastest_submission_date");
+            $table->dateTimeTz("lastest_submission_date");
+            $table->integer("project_id");
             $table->string("form_id");
+            $table->integer("no_of_submissions");
             $table->bigInteger("org_id");
             $table->timestamps();
         });
