@@ -20,7 +20,6 @@ class ODKDataFetcher
     public function fetchData()
     {
         $autUrl = $this->baseOdkUrl . "sessions";
-        print_r(config('app.odk_user'));
         $response = Http::withOptions([
             'verify' => false, //'debug' => true
         ])->post($autUrl, [
@@ -74,19 +73,38 @@ class ODKDataFetcher
     { //  print_r($projectToFormsMap);
 
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
-            print_r($arrayValue);
-            $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms" . $arrayValue['xmlFormId'] . "submissions.csv";
-            $response = Http::withOptions([
-                'verify' => false, //'debug' => true
-            ])->withHeaders([
-                'Authorization' => 'Bearer ' . $response['token'],
-            ])->get($formSubmissionsUrl);
-            $res = $response->json();
-            print_r($res);
+            $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
+
+
+            for ($counter = 0; $counter < count($arrayValue); $counter++) {
+                // print_r($arrayValue[$counter]);
+                $formId = $arrayValue[$counter]['xmlFormId'];
+                if ($formId == "hts_register_bungoma") {
+                    print_r("hts_register_bungoma\n");
+                } else if ($formId == "spi_checklist_bungoma") {
+                    $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
+                    print_r("spi_checklist_bungoma\n");
+                    $this->downloadFormSubmissions($response, $formSubmissionsUrl);
+                } else {
+
+                    //print_r("form id $formId not found in list");
+                }
+            }
+
             //return $res;
         }
+    }
 
-        // xmlFormId
-        // v1/projects/projectId/forms/xmlFormId/submissions.csv
+    private function downloadFormSubmissions($response, $formSubmissionsUrl)
+    {
+        $response = Http::withOptions([
+            'verify' => false, 'debug' => true,
+            'sink' => storage_path('submissions.csv')
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $response['token'],
+        ])->get($formSubmissionsUrl);
+
+        $res = $response->json();
+        print_r($res);
     }
 }
