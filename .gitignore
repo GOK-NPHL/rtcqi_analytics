@@ -33,3 +33,5 @@ nbproject/
 
 # Local History for Visual Studio Code
 .history/
+
+storage/*.csv
