@@ -17,6 +17,7 @@ class CreateOrganisationUnirTable extends Migration
             $table->id();
             $table->string("name");
             $table->bigInteger("parent_id");
+            $table->bigInteger("level");
             $table->bigInteger("creator_id");
             $table->timestamps();
         });
