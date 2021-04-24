@@ -4,10 +4,12 @@ namespace App\Services;
 
 use Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 use App\FormSubmissions;
 
 use App\OdkProject;
+
 
 class ODKDataFetcher
 {
@@ -43,7 +45,6 @@ class ODKDataFetcher
         $this->getFormSubmissions($response, $projectToFormsMap);
     }
 
-    //Return
     private function getProjectLists($response)
     {
         $listUserUrl = $this->baseOdkUrl . "projects";
@@ -57,11 +58,18 @@ class ODKDataFetcher
         // print_r($res);
 
         foreach ($res as $key => $arrayValue) {
-            $odkProject = new OdkProject;
-            $odkProject->project_id = $arrayValue['id'];
-            $odkProject->project_name = $arrayValue['name'];
-            $odkProject->no_of_forms =0;
-            $odkProject->save();
+
+            $odkProject = DB::table('odk_project')
+                ->where('project_id', '=', $arrayValue['id'])
+                ->where('project_name', '=', $arrayValue['name'])
+                ->get();
+            if (count($odkProject) == 0) {
+                $odkProject = new OdkProject;
+                $odkProject->project_id = $arrayValue['id'];
+                $odkProject->project_name = $arrayValue['name'];
+                $odkProject->no_of_forms = 0;
+                $odkProject->save();
+            }
         }
         return $res;
     }
