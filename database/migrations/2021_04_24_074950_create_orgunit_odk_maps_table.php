@@ -13,9 +13,13 @@ class CreateOrgunitOdkMapsTable extends Migration
      */
     public function up()
     {
-        Schema::create('orgunit_odk_maps', function (Blueprint $table) {
+        Schema::create('odk_orgunit_maps', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->integer("org_unit_id");
+            $table->integer("level");
+            $table->bigInteger("parent_id");
+            $table->integer("odk_unit_name");
         });
     }
 
@@ -26,6 +30,6 @@ class CreateOrgunitOdkMapsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orgunit_odk_maps');
+        Schema::dropIfExists('odk_orgunit_maps');
     }
 }
