@@ -50,7 +50,6 @@ class ODKDataFetcher
                 $projectToFormsMap["$projectId"]["cur_no"] = $currentNoOfForms;
             }
         }
-        // print_r($projectToFormsMap);
         $this->getFormSubmissions($response, $projectToFormsMap);
     }
 
@@ -81,7 +80,6 @@ class ODKDataFetcher
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($listUserUrl);
         $res = $response->json();
-        // print_r($res);
         return $res;
     }
 
@@ -94,14 +92,12 @@ class ODKDataFetcher
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formUrl);
         $res = $response->json();
-        // print_r($res);
         return $res;
     }
 
 
     private function getFormSubmissions($response, $projectToFormsMap)
-    {   //print_r($projectToFormsMap);
-
+    {  
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
 
             $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
@@ -109,16 +105,10 @@ class ODKDataFetcher
             for ($counter = 0; $counter < count($arrayValue["forms"]); $counter++) {
                 // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
-                if ($formId == "hts_register_bungoma") {
-                    print_r("hts_register_bungoma\n");
-                } else if ($formId == "spi_checklist_bungoma") {
-                    $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
-                    if ($this->shouldDownloadSubmission($response, $projectId, $formId)) {
-                        $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
-                    }
-                } else {
-
-                    //print_r("form id $formId not found in list");
+                $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
+                if ($this->shouldDownloadSubmission($response, $projectId, $formId)) {
+                    print_r("Downloading $formId form\n");
+                    $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                 }
             }
 
@@ -146,14 +136,18 @@ class ODKDataFetcher
             $submission->project_id = $projectId;
             $submission->form_id = $formId;
             $submission->lastest_submission_date = $lastSubmissionDate;
-            // print_r($res);
             $submission->no_of_submissions =  $res["submissions"];
             $submission->org_id =  1;
             $submission->save();
-            return true;
-        } else if ($submission->lastest_submission_date != $lastSubmissionDate) {
-            // print_r("Updating table");
+            if($res["submissions"]>0){
+                return true;
+            }else{
+                return false;
+            }
+            
+        } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"]>0) {
             $submission->lastest_submission_date = $lastSubmissionDate;
+            $submission->no_of_submissions = $res["submissions"];
             $submission->save();
             return true;
         } else {
@@ -169,31 +163,19 @@ class ODKDataFetcher
         $submission = FormSubmissions::where('project_id', '=', $projectId)
             ->where('form_id', '=', $formId)
             ->first();
-        // print_r("=====>>".$submission);
         return $submission;
     }
 
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
-        $this->compareSubmissionData();
-
-        // $response = Http::withOptions([
-        //     'verify' => false, 'debug' => true,
-        //     'sink' => storage_path($projectId."_".$formId."_".'submissions.csv')
-        // ])->withHeaders([
-        //     'Authorization' => 'Bearer ' . $response['token'],
-        // ])->get($formSubmissionsUrl);
+        $response = Http::withOptions([
+            'verify' => false, //'debug' => true,
+            'sink' => storage_path("/app/submissions/".$projectId."_".$formId."_".'submissions.csv')
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $response['token'],
+        ])->get($formSubmissionsUrl);
 
         // $res = $response->json();
-        //print_r($res);
     }
 
-    private function compareSubmissionData()
-    {
-        $formSubmissions = FormSubmissions::all();
-
-        foreach ($formSubmissions as $formSubmission) {
-            echo $formSubmission->lastest_submission_date;
-        }
-    }
 }
