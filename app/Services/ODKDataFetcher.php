@@ -5,6 +5,9 @@ namespace App\Services;
 use Config;
 use Illuminate\Support\Facades\Http;
 
+use App\FormSubmissions;
+
+use App\OdkProject;
 
 class ODKDataFetcher
 {
@@ -52,6 +55,14 @@ class ODKDataFetcher
         ])->get($listUserUrl);
         $res = $response->json();
         // print_r($res);
+
+        foreach ($res as $key => $arrayValue) {
+            $odkProject = new OdkProject;
+            $odkProject->project_id = $arrayValue['id'];
+            $odkProject->project_name = $arrayValue['name'];
+            $odkProject->no_of_forms =0;
+            $odkProject->save();
+        }
         return $res;
     }
 
@@ -97,14 +108,25 @@ class ODKDataFetcher
 
     private function downloadFormSubmissions($response, $formSubmissionsUrl)
     {
-        $response = Http::withOptions([
-            'verify' => false, 'debug' => true,
-            'sink' => storage_path('submissions.csv')
-        ])->withHeaders([
-            'Authorization' => 'Bearer ' . $response['token'],
-        ])->get($formSubmissionsUrl);
+        $this->compareSubmissionData();
 
-        $res = $response->json();
-        print_r($res);
+        // $response = Http::withOptions([
+        //     'verify' => false, 'debug' => true,
+        //     'sink' => storage_path('submissions.csv')
+        // ])->withHeaders([
+        //     'Authorization' => 'Bearer ' . $response['token'],
+        // ])->get($formSubmissionsUrl);
+
+        // $res = $response->json();
+        //print_r($res);
+    }
+
+    private function compareSubmissionData()
+    {
+        $formSubmissions = FormSubmissions::all();
+
+        foreach ($formSubmissions as $formSubmission) {
+            echo $formSubmission->lastest_submission_date;
+        }
     }
 }
