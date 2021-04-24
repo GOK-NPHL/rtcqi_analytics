@@ -141,7 +141,7 @@ class ODKDataFetcher
         $submission = $this->getFormSubmission($projectId, $formId);
         $lastSubmissionDt = strtotime($res["lastSubmission"]);
         $lastSubmissionDate = date('Y-m-d h:i:s', $lastSubmissionDt);
-        if (count($submission) == 0) {
+        if (!$submission) {
             $submission = new FormSubmissions;
             $submission->project_id = $projectId;
             $submission->form_id = $formId;
@@ -152,9 +152,14 @@ class ODKDataFetcher
             $submission->save();
             return true;
         } else if ($submission->lastest_submission_date != $lastSubmissionDate) {
+            // print_r("Updating table");
             $submission->lastest_submission_date = $lastSubmissionDate;
             $submission->save();
             return true;
+        } else {
+            // print_r(" No action to take \n ");
+            // print_r($submission->lastest_submission_date == $lastSubmissionDate);
+            // print_r("\n");
         }
         return false;
     }
@@ -163,7 +168,8 @@ class ODKDataFetcher
     {
         $submission = FormSubmissions::where('project_id', '=', $projectId)
             ->where('form_id', '=', $formId)
-            ->get();
+            ->first();
+        // print_r("=====>>".$submission);
         return $submission;
     }
 
