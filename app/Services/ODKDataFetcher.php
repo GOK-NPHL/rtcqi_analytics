@@ -5,6 +5,7 @@ namespace App\Services;
 use Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 use App\FormSubmissions;
 
@@ -168,6 +169,12 @@ class ODKDataFetcher
 
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
+        
+        try {
+            Storage::delete("/app/submissions/".$projectId."_".$formId."_".'submissions.csv');
+          }catch(Exception $e) {
+            echo 'Message: ' .$e->getMessage();
+          }
         $response = Http::withOptions([
             'verify' => false, //'debug' => true,
             'sink' => storage_path("/app/submissions/".$projectId."_".$formId."_".'submissions.csv')
