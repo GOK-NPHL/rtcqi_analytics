@@ -29,6 +29,7 @@ class SpiReportController extends Controller
     public function getData($county,$subcounty,$facility,$site )
     {
         $odkObj = new ODKDataAggregator;
-        $res=$odkObj->getData($county,$subcounty,$facility,$site);
+        $result=$odkObj->getData($county,$subcounty,$facility,$site);
+        return $result;
     }
 }
