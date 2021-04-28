@@ -24,6 +24,8 @@ class ODKDataAggregator
         $this->reportSections["QA_counselling"] = 2;
         $this->reportSections["physical_facility"] = 3;
         $this->reportSections["safety"] = 4;
+        $this->reportSections["pre_testing_phase"] = 4;
+        
     }
 
 
@@ -39,6 +41,7 @@ class ODKDataAggregator
         $this->getQACounselling($orgUnit);
         $this->getPhysicalFacility($orgUnit);
         $this->getSafety($orgUnit);
+        $this->getPreTestingPhase($orgUnit);
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -106,9 +109,12 @@ class ODKDataAggregator
             return $this->aggregateQACounsellingScore($record);
         } else if ($section == $this->reportSections["physical_facility"]) {
             return $this->aggregatePhysicalFacilityScore($record);
-        } else if ($section == $this->reportSections["safety"] = 4) {
+        } else if ($section == $this->reportSections["safety"]) {
             return $this->aggregateSafetyScore($record);
+        }else if ($section == $this->reportSections["pre_testing_phase"]) {
+            return $this->aggregatePreTestingPhase($record);
         }
+        
     }
 
     //section 1 (Personnel Training & Certification)
@@ -213,6 +219,41 @@ class ODKDataAggregator
         $sec4_5 = $record["Section-Section4-pep_protocols"];
         $sec4_6 = $record["Section-Section4-pep_protocols_followed"];
         $score = $sec4_1 + $sec4_2 + $sec4_3 + $sec4_4 + $sec4_5 + $sec4_6;
+
+        return $score;
+    }
+
+    //section 5 (Pre Testing Phase)
+    private function getPreTestingPhase($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["pre_testing_phase"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = ($score / ($rowCounter * 14)) * 100; //get denominator   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("Pre Testing Phase rowCounter = " . $rowCounter . "\n");
+        print_r("Pre Testing Phase score = " . $score . "\n");
+    }
+
+    private function aggregatePreTestingPhase($record)
+    {
+        $sec5_1 = $record["Section-Section5-job_aides_infectious_waste"];
+        $sec5_2 = $record["Section-Section5-bloodspills"];
+        $sec5_3 = $record["Section-Section5-job_aides_nationalalgo"];
+        $sec5_4 = $record["Section-Duokit_used"];
+        $sec5_5 = $record["Section-subsec5-Duokit_jobaide"];
+        $sec5_7= $record["Section-subsec5-Determine_jobaide"];
+        $sec5_8 = $record["Section-subsec5-FirstResponce_jobaide"];
+        $sec5_9 = $record["Section-subsec5-expirationdate"];
+        $sec5_10 = $record["Section-subsec5-testkitskeptwell"];
+        $sec5_11 = $record["Section-subsec5-newconsignmentQC"];
+        $sec5_12 = $record["Section-subsec5-newkitlotQC"];
+        $sec5_13 = $record["Section-subsec5-monthlyQC"];
+        $sec5_14 = $record["Section-subsec5-qc_recorded"];
+        $sec5_15 = $record["Section-subsec5-stepstocorrect_invalid_QC"];
+        $score = $sec5_1 + $sec5_2 + $sec5_3 + $sec5_4 + $sec5_5 + $sec5_7 + $sec5_8 +$sec5_9+ $sec5_10 + $sec5_11 + $sec5_12 + $sec5_13+ $sec5_14+ $sec5_15;
 
         return $score;
     }
