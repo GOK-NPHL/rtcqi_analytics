@@ -73,6 +73,7 @@ class ODKDataAggregator
 
         foreach ($records as $record) {
             if ($orgUnit['mysites_county'] == 'Kenya') {
+                $rowCounter = $rowCounter + 1; //no or rows processed.
                 if ($section == $this->reportSections["overall_sites_level"]) {
                     $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
                 } else {
@@ -184,21 +185,29 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["personnel_training_and_certification"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 3)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Personnel Training & Certification rowCounter = " . $rowCounter . "\n");
-        print_r("Personnel Training & Certification score = " . $score . "\n");
+        // print_r("Personnel Training & Certification rowCounter = " . $rowCounter . "\n");
+        // print_r("Personnel Training & Certification score = " . $score . "\n");
         return $score;
     }
 
     private function aggregatePersonnellAndTrainingScore($record)
     {
-        $sec1_1 = $record["Section-Section1-providers_undergone_training"];
-        $sec1_2 = $record["Section-Section1-training_certificates_available"];
-        $sec1_3 = $record["Section-Section1-refresher_training"];
-        $score = $sec1_1 + $sec1_2 + $sec1_3;
-        return $score;
+
+        $values = array();
+        $values["sec_1"] = $record["Section-Section1-providers_undergone_training"];
+        $values["sec_2"] =  $record["Section-Section1-training_certificates_available"];
+        $values["sec_3"] = $record["Section-Section1-refresher_training"];
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"];
+
         return $score;
     }
 
@@ -210,23 +219,32 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["QA_counselling"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("QA in Counselling rowCounter = " . $rowCounter . "\n");
-        print_r("QA in Counselling score = " . $score . "\n");
+        // print_r("QA in Counselling rowCounter = " . $rowCounter . "\n");
+        // print_r("QA in Counselling score = " . $score . "\n");
         return $score;
     }
 
     private function aggregateQACounsellingScore($record)
     {
-        $sec2_1 = $record["Section-Section2-attended_support_supervision"];
-        $sec2_2 = $record["Section-Section2-provider_self_assessment"];
-        $sec2_3 = $record["Section-Section2-client_satisfaction_survey_done"];
-        $sec2_4 = $record["Section-Section2-observed_practice"];
-        $sec2_5 = $record["Section-Section2-scmlcsupport"];
-        $sec2_6 = $record["Section-Section2-cmlcsupport"];
-        $score = $sec2_1 + $sec2_2 + $sec2_3 + $sec2_4 + $sec2_5 + $sec2_6;
+
+        $values = array();
+        $values["sec_1"] = $record["Section-Section2-attended_support_supervision"];
+        $values["sec_2"] =  $record["Section-Section2-provider_self_assessment"];
+        $values["sec_3"] = $record["Section-Section2-client_satisfaction_survey_done"];
+        $values["sec_4"] = $record["Section-Section2-observed_practice"];
+        $values["sec_5"] = $record["Section-Section2-scmlcsupport"];
+        $values["sec_6"] = $record["Section-Section2-cmlcsupport"];
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"] +
+            $values["sec_4"] + $values["sec_5"] + $values["sec_6"];
 
         return $score;
     }
@@ -238,23 +256,33 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["physical_facility"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Physical Facility rowCounter = " . $rowCounter . "\n");
-        print_r("Physical Facility score = " . $score . "\n");
+        // print_r("Physical Facility rowCounter = " . $rowCounter . "\n");
+        // print_r("Physical Facility score = " . $score . "\n");
         return $score;
     }
 
     private function aggregatePhysicalFacilityScore($record)
     {
-        $sec3_1 = $record["Section-Section3-HIV_testing_area"];
-        $sec3_2 = $record["Section-Section3-sufficient_space"];
-        $sec3_3 = $record["Section-Section3-confidentiality"];
-        $sec3_4 = $record["Section-Section3-clean_testing_area"];
-        $sec3_5 = $record["Section-Section3-sufficient_lighting"];
-        $sec3_6 = $record["Section-Section3-secure_storage"];
-        $score = $sec3_1 + $sec3_2 + $sec3_3 + $sec3_4 + $sec3_5 + $sec3_6;
+
+        $values = array();
+        $values["sec_1"] = $record["Section-Section3-HIV_testing_area"];
+        $values["sec_2"] =  $record["Section-Section3-sufficient_space"];
+        $values["sec_3"] = $record["Section-Section3-confidentiality"];
+        $values["sec_4"] = $record["Section-Section3-clean_testing_area"];
+        $values["sec_5"] = $record["Section-Section3-sufficient_lighting"];
+        $values["sec_6"] = $record["Section-Section3-secure_storage"];
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"] +
+            $values["sec_4"] + $values["sec_5"] + $values["sec_6"];
+
         return $score;
     }
 
@@ -266,23 +294,33 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["safety"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Safety rowCounter = " . $rowCounter . "\n");
-        print_r("Safety score = " . $score . "\n");
+        // print_r("Safety rowCounter = " . $rowCounter . "\n");
+        // print_r("Safety score = " . $score . "\n");
         return $score;
     }
 
     private function aggregateSafetyScore($record)
     {
-        $sec4_1 = $record["Section-Section4-running_water"];
-        $sec4_2 = $record["Section-Section4-soap"];
-        $sec4_3 = $record["Section-Section4-wastesegregationfacility"];
-        $sec4_4 = $record["Section-Section4-segregationonsite"];
-        $sec4_5 = $record["Section-Section4-pep_protocols"];
-        $sec4_6 = $record["Section-Section4-pep_protocols_followed"];
-        $score = $sec4_1 + $sec4_2 + $sec4_3 + $sec4_4 + $sec4_5 + $sec4_6;
+
+        $values = array();
+        $values["sec_1"] = $record["Section-Section4-running_water"];
+        $values["sec_2"] =  $record["Section-Section4-soap"];
+        $values["sec_3"] = $record["Section-Section4-wastesegregationfacility"];
+        $values["sec_4"] = $record["Section-Section4-segregationonsite"];
+        $values["sec_5"] = $record["Section-Section4-pep_protocols"];
+        $values["sec_6"] = $record["Section-Section4-pep_protocols_followed"];
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"] +
+            $values["sec_4"] + $values["sec_5"] + $values["sec_6"];
+
 
         return $score;
     }
@@ -294,11 +332,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["pre_testing_phase"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 14)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Pre Testing Phase rowCounter = " . $rowCounter . "\n");
-        print_r("Pre Testing Phase score = " . $score . "\n");
+        // print_r("Pre Testing Phase rowCounter = " . $rowCounter . "\n");
+        // print_r("Pre Testing Phase score = " . $score . "\n");
         return $score;
     }
 
@@ -342,11 +380,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["testing_phase"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 11)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Testing Phase rowCounter = " . $rowCounter . "\n");
-        print_r("Testing Phase score = " . $score . "\n");
+        // print_r("Testing Phase rowCounter = " . $rowCounter . "\n");
+        // print_r("Testing Phase score = " . $score . "\n");
         return $score;
     }
 
@@ -395,11 +433,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["post_testing_phase"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 10)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Post Testing Phase rowCounter = " . $rowCounter . "\n");
-        print_r("Post Testing Phase score = " . $score . "\n");
+        // print_r("Post Testing Phase rowCounter = " . $rowCounter . "\n");
+        // print_r("Post Testing Phase score = " . $score . "\n");
         return $score;
     }
 
@@ -446,11 +484,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["external_quality_assessment"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 10)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("External Quality Assessment rowCounter = " . $rowCounter . "\n");
-        print_r("External Quality Assessment score = " . $score . "\n");
+        // print_r("External Quality Assessment rowCounter = " . $rowCounter . "\n");
+        // print_r("External Quality Assessment score = " . $score . "\n");
         return $score;
     }
 
@@ -496,11 +534,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_performance"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        print_r("raw score = " . $score . "\n");
+        // print_r("raw score = " . $score . "\n");
         $score = $score / $rowCounter;
         $score = number_format((float)$score, 1, '.', ',');
-        print_r("Overall Performance rowCounter = " . $rowCounter . "\n");
-        print_r("Overall Performance score = " . $score . "\n");
+        // print_r("Overall Performance rowCounter = " . $rowCounter . "\n");
+        // print_r("Overall Performance score = " . $score . "\n");
         return $score;
     }
 
@@ -529,15 +567,15 @@ class ODKDataAggregator
         $rowCounter = $summationValues['rowCounter'];
         // $score = $score / $rowCounter;
         // $score = number_format((float)$score, 1, '.', ',');
-        print_r(" Overall Sites Level rowCounter = " . $rowCounter . "\n");
-        print_r(" Overall Sites Level score \n");
+        // print_r(" Overall Sites Level rowCounter = " . $rowCounter . "\n");
+        // print_r(" Overall Sites Level score \n");
 
         $score["level0"] = ($score["level0"] / $rowCounter) * 100;
         $score["level1"] = ($score["level1"] / $rowCounter) * 100;
         $score["level2"] = ($score["level2"] / $rowCounter) * 100;
         $score["level3"] = ($score["level3"] / $rowCounter) * 100;
         $score["level4"] = ($score["level4"] / $rowCounter) * 100;
-        print_r($score);
+        // print_r($score);
         return $score;
     }
 
