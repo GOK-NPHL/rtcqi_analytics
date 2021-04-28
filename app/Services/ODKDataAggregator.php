@@ -33,24 +33,30 @@ class ODKDataAggregator
     }
 
 
-    public function getData($orgUnitId, $formType='spi_checklist')
+    public function getData($county, $subcounty, $facility, $site, $formType = 'spi_checklist')
     {
         $orgUnit = array();
-        $orgUnit['mysites_county'] = 'bungoma';
-        $orgUnit['mysites_subcounty'] = 'webuye_west';
-        $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
-        // $orgUnit['mysites'] = 'opd';
+        $orgUnit['mysites_county'] = $county;
+        $orgUnit['mysites_subcounty'] = $subcounty;
+        $orgUnit['mysites_facility'] = $facility;
+        $orgUnit['mysites'] = $site;
 
-        $this->getPersonellTrainingAndCertification($orgUnit);
-        $this->getQACounselling($orgUnit);
-        $this->getPhysicalFacility($orgUnit);
-        $this->getSafety($orgUnit);
-        $this->getPreTestingPhase($orgUnit);
-        $this->getTestingPhase($orgUnit);
-        $this->getPostTestingPhase($orgUnit);
-        $this->getExternalQualityAssessment($orgUnit);
-        $this->getOverallPerformance($orgUnit);
-        $this->getOverallSitesLevel($orgUnit);
+        // $orgUnit['mysites_county'] = 'bungoma';
+        // $orgUnit['mysites_subcounty'] = 'webuye_west';
+        // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
+        // $orgUnit['mysites'] = 'opd';
+        $results = array();
+        $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
+        $results["QACounselling"] = $this->getQACounselling($orgUnit);
+        $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit);
+        $results["Safety"] = $this->getSafety($orgUnit);
+        $results["PreTestingPhase"] = $this->getPreTestingPhase($orgUnit);
+        $results["TestingPhase"] = $this->getTestingPhase($orgUnit);
+        $results["PostTestingPhase"] = $this->getPostTestingPhase($orgUnit);
+        $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit);
+        $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit);
+        $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit);
+        return $results;
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -66,7 +72,14 @@ class ODKDataAggregator
         ];
 
         foreach ($records as $record) {
-
+            if ($orgUnit['mysites_county'] == 'Kenya') {
+                if ($section == $this->reportSections["overall_sites_level"]) {
+                    $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                } else {
+                    $score =  $this->callFunctionBysecition($section, $record) + $score;
+                }
+                continue;
+            }
             if (!empty($orgUnit['mysites_county'])) {
                 if ($record['mysites_county'] == $orgUnit['mysites_county']) {
                     if (!empty($orgUnit['mysites_subcounty'])) {
@@ -518,7 +531,7 @@ class ODKDataAggregator
         // $score = number_format((float)$score, 1, '.', ',');
         print_r(" Overall Sites Level rowCounter = " . $rowCounter . "\n");
         print_r(" Overall Sites Level score \n");
-        
+
         $score["level0"] = ($score["level0"] / $rowCounter) * 100;
         $score["level1"] = ($score["level1"] / $rowCounter) * 100;
         $score["level2"] = ($score["level2"] / $rowCounter) * 100;
