@@ -22,9 +22,8 @@ class ODKDataAggregator
     {
         $this->reportSections["personnel_training_and_certification"] = 1;
         $this->reportSections["QA_counselling"] = 2;
-        $this->reportSections["physical_facility"] =3;
-        
-        
+        $this->reportSections["physical_facility"] = 3;
+        $this->reportSections["safety"] = 4;
     }
 
 
@@ -38,8 +37,8 @@ class ODKDataAggregator
 
         $this->getPersonellTrainingAndCertification($orgUnit);
         $this->getQACounselling($orgUnit);
-        $this->getPhysicalFacility($orgUnit); 
-
+        $this->getPhysicalFacility($orgUnit);
+        $this->getSafety($orgUnit);
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -101,12 +100,14 @@ class ODKDataAggregator
 
     private function callFunctionBysecition($section, $record)
     {
-        if ($section == 1) {
+        if ($section == $this->reportSections["personnel_training_and_certification"]) {
             return $this->aggregatePersonnellAndTrainingScore($record);
-        } else if ($section == 2) {
+        } else if ($section == $this->reportSections["QA_counselling"]) {
             return $this->aggregateQACounsellingScore($record);
-        }else if ($section == 3) {
+        } else if ($section == $this->reportSections["physical_facility"]) {
             return $this->aggregatePhysicalFacilityScore($record);
+        } else if ($section == $this->reportSections["safety"] = 4) {
+            return $this->aggregateSafetyScore($record);
         }
     }
 
@@ -156,36 +157,63 @@ class ODKDataAggregator
         $sec2_4 = $record["Section-Section2-observed_practice"];
         $sec2_5 = $record["Section-Section2-scmlcsupport"];
         $sec2_6 = $record["Section-Section2-cmlcsupport"];
-        $score = $sec2_1 + $sec2_2 + $sec2_3+ $sec2_4 + $sec2_5+ $sec2_6;
+        $score = $sec2_1 + $sec2_2 + $sec2_3 + $sec2_4 + $sec2_5 + $sec2_6;
 
         return $score;
     }
 
-     //section 3 (Physical Facility)
-     private function getPhysicalFacility($orgUnit)
-     {
-         $records = $this->getFormRecords();
-         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["physical_facility"]);
-         $score = $summationValues['score'];
-         $rowCounter = $summationValues['rowCounter'];
-         print_r("raw score = " . $score . "\n");
-         $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
-         $score = number_format((float)$score, 1, '.', ',');
-         print_r("Physical Facility rowCounter = " . $rowCounter . "\n");
-         print_r("Physical Facility score = " . $score . "\n");
-     }
- 
-     private function aggregatePhysicalFacilityScore($record)
-     {
-         $sec3_1 = $record["Section-Section3-HIV_testing_area"];
-         $sec3_2 = $record["Section-Section3-sufficient_space"];
-         $sec3_3 = $record["Section-Section3-confidentiality"];
-         $sec3_4 = $record["Section-Section3-clean_testing_area"];
-         $sec3_5 = $record["Section-Section3-sufficient_lighting"];
-         $sec3_6 = $record["Section-Section3-secure_storage"];
-         $score = $sec3_1 + $sec3_2 + $sec3_3+ $sec3_4 + $sec3_5+ $sec3_6;
- 
-         return $score;
-     }
+    //section 3 (Physical Facility)
+    private function getPhysicalFacility($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["physical_facility"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("Physical Facility rowCounter = " . $rowCounter . "\n");
+        print_r("Physical Facility score = " . $score . "\n");
+    }
 
+    private function aggregatePhysicalFacilityScore($record)
+    {
+        $sec3_1 = $record["Section-Section3-HIV_testing_area"];
+        $sec3_2 = $record["Section-Section3-sufficient_space"];
+        $sec3_3 = $record["Section-Section3-confidentiality"];
+        $sec3_4 = $record["Section-Section3-clean_testing_area"];
+        $sec3_5 = $record["Section-Section3-sufficient_lighting"];
+        $sec3_6 = $record["Section-Section3-secure_storage"];
+        $score = $sec3_1 + $sec3_2 + $sec3_3 + $sec3_4 + $sec3_5 + $sec3_6;
+
+        return $score;
+    }
+
+
+    //section 4 (Safety)
+    private function getSafety($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["safety"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("Safety rowCounter = " . $rowCounter . "\n");
+        print_r("Safety score = " . $score . "\n");
+    }
+
+    private function aggregateSafetyScore($record)
+    {
+        $sec4_1 = $record["Section-Section4-running_water"];
+        $sec4_2 = $record["Section-Section4-soap"];
+        $sec4_3 = $record["Section-Section4-wastesegregationfacility"];
+        $sec4_4 = $record["Section-Section4-segregationonsite"];
+        $sec4_5 = $record["Section-Section4-pep_protocols"];
+        $sec4_6 = $record["Section-Section4-pep_protocols_followed"];
+        $score = $sec4_1 + $sec4_2 + $sec4_3 + $sec4_4 + $sec4_5 + $sec4_6;
+
+        return $score;
+    }
 }
