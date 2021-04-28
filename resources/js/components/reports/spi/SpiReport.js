@@ -58,8 +58,24 @@ class SpiReport extends React.Component {
         this.setState({
             orgUnits: filteredOrgs
         });
-        console.log(event.target[event.target.selectedIndex].dataset.level);
-        console.log(event.target[event.target.selectedIndex].dataset.id);
+        // console.log(event.target[event.target.selectedIndex].dataset.level);
+        // console.log(event.target[event.target.selectedIndex].dataset.id);
+
+        if(level==5){
+            let site = event.target.value;
+            let facility = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
+            let subCounty = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == facility[0]['parent_id']));
+            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == subCounty[0]['parent_id']));
+            //odk_unit_name
+        }else if(level==4){
+            
+        }else if(level==3){
+            
+        }else if(level==2){
+            
+        }else if(level==1){
+            
+        }
 
         let filteredOrg=this.state.unfilteredOrgUnits.filter(
             orgunit => ((orgunit.parent_id == parentId && orgunit.id<= level) && orgunit.id<= id)
