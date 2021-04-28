@@ -4,13 +4,47 @@ import LineGraph from '../../charts/LineGraph';
 import StackedHorizontal from '../../charts/StackedHorizontal'
 import OrguntiDrillDown from '../../utils/OrguntiDrillDown'
 
+import { FetchOrgunits, FetchOdkData } from '../../utils/Helpers'
+
 class SpiReport extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            orgUnits: [],
 
         }
+        this.handleOrgUntiChange = this.handleOrgUntiChange.bind(this);
+    }
+
+    componentDidMount() {
+        //fetch counties
+        (async () => {
+            let returnedData = await FetchOrgunits();
+            let subCountyList = [];
+            // returnedData.forEach((val) => {
+            //     console.log(val);
+            // });
+            this.setState({
+                orgUnits: returnedData,
+            });
+        })()
+
+        //fetch initial data
+        (async () => {
+             // $orgUnit['mysites_county'] = 'bungoma';
+        // $orgUnit['mysites_subcounty'] = 'webuye_west';
+        // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
+        // $orgUnit['mysites'] = 'opd';
+
+            let returnedData = await FetchOdkData('bungoma','webuye_west','15965__friends_lugulu_mission_hospital','opd');
+            console.log(returnedData);
+        })()
+    }
+    
+    handleOrgUntiChange(event) {
+        // console.log(event.target.dataset);
+        console.log(event.target[event.target.selectedIndex].dataset.level);
     }
 
     render() {
@@ -32,7 +66,80 @@ class SpiReport extends React.Component {
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                 </div>
 
-                <OrguntiDrillDown />
+                {/* <OrguntiDrillDown /> */}
+
+
+                <div className="row">
+                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
+                        <form>
+                            <div className="form-group">
+                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
+                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
+                                    <option disabled selected>Select county</option>
+                                    <option data-level='1'>Kenya</option>
+                                    {this.state.orgUnits.map((value, index) => {
+                                        if (value.level == 2)
+                                            return (<option data-level={value.level}>{value.odk_unit_name}</option>)
+                                    })}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
+                        <form>
+                            <div className="form-group">
+                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
+                                <select className="form-control" id="exampleFormControlSelect1">
+                                    <option disabled selected>Select subcounty</option>
+                                    {this.state.orgUnits.map((value, index) => {
+                                        if (value.level == 3)
+                                            return (<option>{value.odk_unit_name}</option>)
+                                    })}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+
+                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
+                        <form>
+                            <div className="form-group">
+                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
+                                <select className="form-control" id="exampleFormControlSelect1">
+                                    <option disabled selected>Select facility</option>
+                                    {this.state.orgUnits.map((value, index) => {
+                                        if (value.level == 4)
+                                            return (<option>{value.odk_unit_name}</option>)
+                                    })}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+
+                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
+                        <form>
+                            <div className="form-group">
+                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
+                                <select className="form-control" id="exampleFormControlSelect1">
+                                    <option disabled selected>Select site</option>
+                                    {this.state.orgUnits.map((value, index) => {
+                                        if (value.level == 5)
+                                            return (<option>{value.odk_unit_name}</option>)
+                                    })}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+
+
+
+
+
 
                 <div style={rowStle} className="row">
                     <div className="col-sm-6  col-xm-6 col-md-6">
