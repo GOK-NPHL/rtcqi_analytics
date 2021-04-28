@@ -16,10 +16,13 @@ use PhpParser\Node\Stmt\Continue_;
 
 class ODKDataAggregator
 {
+    private $reportSections = array();
 
     public function __construct()
     {
+        $this->reportSections["personnel_training_and_certification"] = 1;
     }
+
 
     public function getData($orgUnitId, $formType)
     {
@@ -48,12 +51,20 @@ class ODKDataAggregator
         return $records;
     }
 
-    private function getSummationValues($records,$orgUnit)
+    private function callFunctionBysecition($section, $record)
     {
+        if ($section == 1) {
+            return $this->aggregatePersonnellAndTrainingScore($record);
+        }
+    }
+
+    private function getSummationValues($records, $orgUnit, $section)
+    {
+
         $rowCounter = 0;
         $score = 0;
         foreach ($records as $record) {
-            
+
             $record["Section-Section1-providers_undergone_training"];
 
             if (!empty($orgUnit['mysites_county'])) {
@@ -64,21 +75,21 @@ class ODKDataAggregator
                                 if ($record['mysites_facility'] == $orgUnit['mysites_facility']) {
                                     if (!empty($orgUnit['mysites'])) {
                                         if ($record['mysites'] == $orgUnit['mysites']) {
-                                            $score =  $this->aggregatePersonnellAndTrainingScore($record) + $score;
+                                            $score =  $this->callFunctionBysecition($section, $record) + $score;
                                             $rowCounter = $rowCounter + 1;
                                         }
                                     } else {
-                                        $score =  $this->aggregatePersonnellAndTrainingScore($record) + $score;
+                                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                         $rowCounter = $rowCounter + 1;
                                     }
                                 }
                             } else {
-                                $score =  $this->aggregatePersonnellAndTrainingScore($record) + $score;
+                                $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                 $rowCounter = $rowCounter + 1;
                             }
                         }
                     } else {
-                        $score =  $this->aggregatePersonnellAndTrainingScore($record) + $score;
+                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
                         $rowCounter = $rowCounter + 1;
                     }
                 }
@@ -93,7 +104,7 @@ class ODKDataAggregator
     private function getPersonellTrainingAndCertification($orgUnit)
     {
         $records = $this->getFormRecords();
-        $summationValues = $this->getSummationValues($records,$orgUnit);
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["personnel_training_and_certification"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         print_r("raw score = " . $score . "\n");
