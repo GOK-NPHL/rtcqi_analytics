@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Service\OrgunitsController;
+use App\Http\Controllers\SpiReportController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,4 +23,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('org_units', function (Request $request) {
     $orgObj = new OrgunitsController();
     return $orgObj->getOrgunits();
+});
+
+Route::get('odk_data/{county?}/{subcounty?}/{facility?}/{site?}', function (
+    $county = null,
+    $subcounty = null,
+    $facility = null,
+    $site = null) {
+    $orgObj = new SpiReportController();
+    return $orgObj->getData($county,$subcounty,$facility,$site);
 });
