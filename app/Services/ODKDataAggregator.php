@@ -29,7 +29,7 @@ class ODKDataAggregator
         $this->reportSections["post_testing_phase"] = 7;
         $this->reportSections["external_quality_assessment"] = 8;
         $this->reportSections["overall_performance"] = 0;
-        
+        $this->reportSections["overall_sites_level"] = 101;
     }
 
 
@@ -50,13 +50,21 @@ class ODKDataAggregator
         $this->getPostTestingPhase($orgUnit);
         $this->getExternalQualityAssessment($orgUnit);
         $this->getOverallPerformance($orgUnit);
-        
+        $this->getOverallSitesLevel($orgUnit);
     }
 
     private function getSummationValues($records, $orgUnit, $section)
     {
         $rowCounter = 0;
         $score = 0;
+        $overallSitesLevel = [
+            "level0" => 0,
+            "level1" => 0,
+            "level2" => 0,
+            "level3" => 0,
+            "level4" => 0
+        ];
+
         foreach ($records as $record) {
 
             if (!empty($orgUnit['mysites_county'])) {
@@ -67,30 +75,53 @@ class ODKDataAggregator
                                 if ($record['mysites_facility'] == $orgUnit['mysites_facility']) {
                                     if (!empty($orgUnit['mysites'])) {
                                         if ($record['mysites'] == $orgUnit['mysites']) {
-                                            $score =  $this->callFunctionBysecition($section, $record) + $score;
-                                            $rowCounter = $rowCounter + 1;
+                                            $rowCounter = $rowCounter + 1; //no or rows processed.
+                                            if ($section == $this->reportSections["overall_sites_level"]) {
+                                                $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                                            } else {
+                                                $score =  $this->callFunctionBysecition($section, $record) + $score;
+                                            }
                                         }
                                     } else {
-                                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
-                                        $rowCounter = $rowCounter + 1;
+                                        $rowCounter = $rowCounter + 1; //no or rows processed.
+                                        if ($section == $this->reportSections["overall_sites_level"]) {
+                                            $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                                        } else {
+                                            $score =  $this->callFunctionBysecition($section, $record)  + $score;
+                                        }
                                     }
                                 }
                             } else {
-                                $score =  $this->callFunctionBysecition($section, $record)  + $score;
-                                $rowCounter = $rowCounter + 1;
+                                $rowCounter = $rowCounter + 1; //no or rows processed.
+                                if ($section == $this->reportSections["overall_sites_level"]) {
+                                    $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                                } else {
+                                    $score =  $this->callFunctionBysecition($section, $record)  + $score;
+                                }
                             }
                         }
                     } else {
-                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
-                        $rowCounter = $rowCounter + 1;
+                        $rowCounter = $rowCounter + 1; //no or rows processed.
+                        if ($section == $this->reportSections["overall_sites_level"]) {
+                            $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                        } else {
+                            $score =  $this->callFunctionBysecition($section, $record)  + $score;
+                        }
                     }
                 }
             }
         }
+
         $results = array();
-        $results['rowCounter'] = $rowCounter;
-        $results['score'] = $score;
-        return $results;
+        if ($section == $this->reportSections["overall_sites_level"]) {
+            $results['rowCounter'] = $rowCounter;
+            $results['score'] = $overallSitesLevel;
+            return $results;
+        } else {
+            $results['rowCounter'] = $rowCounter;
+            $results['score'] = $score;
+            return $results;
+        }
     }
 
     private function getFormRecords()
@@ -108,7 +139,7 @@ class ODKDataAggregator
         return $records;
     }
 
-    private function callFunctionBysecition($section, $record)
+    private function callFunctionBysecition($section, $record, $overallSites = 0)
     {
         if ($section == $this->reportSections["personnel_training_and_certification"]) {
             return $this->aggregatePersonnellAndTrainingScore($record);
@@ -126,8 +157,10 @@ class ODKDataAggregator
             return $this->aggregatePostTestingPhase($record);
         } else if ($section == $this->reportSections["external_quality_assessment"]) {
             return $this->aggregateExternalQualityAssessment($record);
-        }else if ($section == $this->reportSections["overall_performance"]) {
+        } else if ($section == $this->reportSections["overall_performance"]) {
             return $this->aggregateOverallPerformance($record);
+        } else if ($section == $this->reportSections["overall_sites_level"]) {
+            return $this->aggregateOverallSitesLevel($record, $overallSites);
         }
     }
 
@@ -143,6 +176,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Personnel Training & Certification rowCounter = " . $rowCounter . "\n");
         print_r("Personnel Training & Certification score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregatePersonnellAndTrainingScore($record)
@@ -151,6 +185,7 @@ class ODKDataAggregator
         $sec1_2 = $record["Section-Section1-training_certificates_available"];
         $sec1_3 = $record["Section-Section1-refresher_training"];
         $score = $sec1_1 + $sec1_2 + $sec1_3;
+        return $score;
         return $score;
     }
 
@@ -167,6 +202,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("QA in Counselling rowCounter = " . $rowCounter . "\n");
         print_r("QA in Counselling score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregateQACounsellingScore($record)
@@ -194,6 +230,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Physical Facility rowCounter = " . $rowCounter . "\n");
         print_r("Physical Facility score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregatePhysicalFacilityScore($record)
@@ -205,7 +242,6 @@ class ODKDataAggregator
         $sec3_5 = $record["Section-Section3-sufficient_lighting"];
         $sec3_6 = $record["Section-Section3-secure_storage"];
         $score = $sec3_1 + $sec3_2 + $sec3_3 + $sec3_4 + $sec3_5 + $sec3_6;
-
         return $score;
     }
 
@@ -222,6 +258,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Safety rowCounter = " . $rowCounter . "\n");
         print_r("Safety score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregateSafetyScore($record)
@@ -249,6 +286,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Pre Testing Phase rowCounter = " . $rowCounter . "\n");
         print_r("Pre Testing Phase score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregatePreTestingPhase($record)
@@ -296,6 +334,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Testing Phase rowCounter = " . $rowCounter . "\n");
         print_r("Testing Phase score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregateTestingPhase($record)
@@ -348,6 +387,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Post Testing Phase rowCounter = " . $rowCounter . "\n");
         print_r("Post Testing Phase score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregatePostTestingPhase($record)
@@ -398,6 +438,7 @@ class ODKDataAggregator
         $score = number_format((float)$score, 1, '.', ',');
         print_r("External Quality Assessment rowCounter = " . $rowCounter . "\n");
         print_r("External Quality Assessment score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregateExternalQualityAssessment($record)
@@ -435,7 +476,7 @@ class ODKDataAggregator
         return $score;
     }
 
-    //section 9 Overall Performance
+    //section 0 Overall Performance
     private function getOverallPerformance($orgUnit)
     {
         $records = $this->getFormRecords();
@@ -443,10 +484,11 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         print_r("raw score = " . $score . "\n");
-        $score = $score / $rowCounter;   
+        $score = $score / $rowCounter;
         $score = number_format((float)$score, 1, '.', ',');
         print_r("Overall Performance rowCounter = " . $rowCounter . "\n");
         print_r("Overall Performance score = " . $score . "\n");
+        return $score;
     }
 
     private function aggregateOverallPerformance($record)
@@ -462,5 +504,47 @@ class ODKDataAggregator
         $score = $values["sec_1"];
 
         return $score;
+    }
+
+
+    //section 101 Overall Sites Level
+    private function getOverallSitesLevel($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_sites_level"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        // $score = $score / $rowCounter;
+        // $score = number_format((float)$score, 1, '.', ',');
+        print_r(" Overall Sites Level rowCounter = " . $rowCounter . "\n");
+        print_r(" Overall Sites Level score \n");
+        
+        $score["level0"] = ($score["level0"] / $rowCounter) * 100;
+        $score["level1"] = ($score["level1"] / $rowCounter) * 100;
+        $score["level2"] = ($score["level2"] / $rowCounter) * 100;
+        $score["level3"] = ($score["level3"] / $rowCounter) * 100;
+        $score["level4"] = ($score["level4"] / $rowCounter) * 100;
+        print_r($score);
+        return $score;
+    }
+
+    private function aggregateOverallSitesLevel($record, $overallSites)
+    {
+
+        $val = $record["Section-sec91percentage"];
+
+        if ($val < 40) {
+            $overallSites["level0"] = $overallSites["level0"] + 1;
+        } else if ($val < 40) {
+            $overallSites["level1"] = $overallSites["level1"] + 1;
+        } else if ($val >= 40 && $val <= 59) {
+            $overallSites["level2"] = $overallSites["level2"] + 1;
+        } else if ($val >= 80 && $val <= 89) {
+            $overallSites["level3"] = $overallSites["level3"] + 1;
+        } else if ($val >= 90) {
+            $overallSites["level4"] = $overallSites["level4"] + 1;
+        }
+
+        return $overallSites;
     }
 }
