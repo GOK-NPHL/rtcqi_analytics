@@ -98,7 +98,7 @@ class ODKDataFetcher
 
 
     private function getFormSubmissions($response, $projectToFormsMap)
-    {  
+    {
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
 
             $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
@@ -140,13 +140,12 @@ class ODKDataFetcher
             $submission->no_of_submissions =  $res["submissions"];
             $submission->org_id =  1;
             $submission->save();
-            if($res["submissions"]>0){
+            if ($res["submissions"] > 0) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
-            
-        } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"]>0) {
+        } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0) {
             $submission->lastest_submission_date = $lastSubmissionDate;
             $submission->no_of_submissions = $res["submissions"];
             $submission->save();
@@ -169,20 +168,19 @@ class ODKDataFetcher
 
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
-        
+
         try {
-            Storage::delete("/app/submissions/".$projectId."_".$formId."_".'submissions.csv');
-          }catch(Exception $e) {
-            echo 'Message: ' .$e->getMessage();
-          }
+            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
+        } catch (Exception $e) {
+            echo 'Message: ' . $e->getMessage();
+        }
         $response = Http::withOptions([
             'verify' => false, //'debug' => true,
-            'sink' => storage_path("/app/submissions/".$projectId."_".$formId."_".'submissions.csv')
+            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
 
         // $res = $response->json();
     }
-
 }

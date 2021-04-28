@@ -28,7 +28,7 @@ class ODKDataAggregator
         $this->reportSections["testing_phase"] = 6;
         $this->reportSections["post_testing_phase"] = 7;
         $this->reportSections["external_quality_assessment"] = 8;
-        
+        $this->reportSections["overall_performance"] = 0;
         
     }
 
@@ -49,7 +49,8 @@ class ODKDataAggregator
         $this->getTestingPhase($orgUnit);
         $this->getPostTestingPhase($orgUnit);
         $this->getExternalQualityAssessment($orgUnit);
-               
+        $this->getOverallPerformance($orgUnit);
+        
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -57,8 +58,6 @@ class ODKDataAggregator
         $rowCounter = 0;
         $score = 0;
         foreach ($records as $record) {
-
-            $record["Section-Section1-providers_undergone_training"];
 
             if (!empty($orgUnit['mysites_county'])) {
                 if ($record['mysites_county'] == $orgUnit['mysites_county']) {
@@ -123,10 +122,12 @@ class ODKDataAggregator
             return $this->aggregatePreTestingPhase($record);
         } else if ($section == $this->reportSections["testing_phase"]) {
             return $this->aggregateTestingPhase($record);
-        }else if ($section == $this->reportSections["post_testing_phase"]) {
+        } else if ($section == $this->reportSections["post_testing_phase"]) {
             return $this->aggregatePostTestingPhase($record);
-        }else if ($section == $this->reportSections["external_quality_assessment"]) {
+        } else if ($section == $this->reportSections["external_quality_assessment"]) {
             return $this->aggregateExternalQualityAssessment($record);
+        }else if ($section == $this->reportSections["overall_performance"]) {
+            return $this->aggregateOverallPerformance($record);
         }
     }
 
@@ -430,6 +431,35 @@ class ODKDataAggregator
         $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"] +
             $values["sec_4"] + $values["sec_5"] + $values["sec_6"]  + $values["sec_7"] +
             $values["sec_8"] + $values["sec_9"] + $values["sec_10"];
+
+        return $score;
+    }
+
+    //section 9 Overall Performance
+    private function getOverallPerformance($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_performance"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = $score / $rowCounter;   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("Overall Performance rowCounter = " . $rowCounter . "\n");
+        print_r("Overall Performance score = " . $score . "\n");
+    }
+
+    private function aggregateOverallPerformance($record)
+    {
+        $values = array();
+        $values["sec_1"] = $record["Section-sec91percentage"];
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"];
 
         return $score;
     }
