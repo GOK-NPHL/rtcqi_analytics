@@ -32,7 +32,8 @@ class ODKDataAggregator
         $this->getPersonellTrainingAndCertification($orgUnit);
     }
 
-    private function getPersonellTrainingAndCertification($orgUnit)
+
+    private function getFormRecords()
     {
         $url = "";
         if (Storage::exists("submissions/17_spi_checklist_bungoma_submissions.csv")) {
@@ -42,14 +43,17 @@ class ODKDataAggregator
         }
         $csv = Reader::createFromPath($url, 'r');
         $csv->setHeaderOffset(0); //set the CSV header offset
-
         $stmt = Statement::create();
-
         $records = $stmt->process($csv);
+        return $records;
+    }
+
+    private function getSummationValues($records,$orgUnit)
+    {
         $rowCounter = 0;
         $score = 0;
         foreach ($records as $record) {
-
+            
             $record["Section-Section1-providers_undergone_training"];
 
             if (!empty($orgUnit['mysites_county'])) {
@@ -80,11 +84,23 @@ class ODKDataAggregator
                 }
             }
         }
+        $results = array();
+        $results['rowCounter'] = $rowCounter;
+        $results['score'] = $score;
+        return $results;
+    }
+
+    private function getPersonellTrainingAndCertification($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records,$orgUnit);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
         print_r("raw score = " . $score . "\n");
         $score = ($score / ($rowCounter * 3)) * 100; //get denominator   
         $score = number_format((float)$score, 1, '.', ',');
         print_r("rowCounter = " . $rowCounter . "\n");
-       
+
         print_r("score = " . $score . "\n");
     }
 
