@@ -24,8 +24,8 @@ class ODKDataAggregator
         $this->reportSections["QA_counselling"] = 2;
         $this->reportSections["physical_facility"] = 3;
         $this->reportSections["safety"] = 4;
-        $this->reportSections["pre_testing_phase"] = 4;
-        
+        $this->reportSections["pre_testing_phase"] = 5;
+        $this->reportSections["testing_phase"] = 6;
     }
 
 
@@ -42,6 +42,7 @@ class ODKDataAggregator
         $this->getPhysicalFacility($orgUnit);
         $this->getSafety($orgUnit);
         $this->getPreTestingPhase($orgUnit);
+        $this->getTestingPhase($orgUnit);
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -111,10 +112,11 @@ class ODKDataAggregator
             return $this->aggregatePhysicalFacilityScore($record);
         } else if ($section == $this->reportSections["safety"]) {
             return $this->aggregateSafetyScore($record);
-        }else if ($section == $this->reportSections["pre_testing_phase"]) {
+        } else if ($section == $this->reportSections["pre_testing_phase"]) {
             return $this->aggregatePreTestingPhase($record);
+        } else if ($section == $this->reportSections["testing_phase"]) {
+            return $this->aggregateTestingPhase($record);
         }
-        
     }
 
     //section 1 (Personnel Training & Certification)
@@ -238,23 +240,89 @@ class ODKDataAggregator
     }
 
     private function aggregatePreTestingPhase($record)
-    {
-        $sec5_1 = $record["Section-Section5-job_aides_infectious_waste"];
-        $sec5_2 = $record["Section-Section5-bloodspills"];
-        $sec5_3 = $record["Section-Section5-job_aides_nationalalgo"];
-        $sec5_4 = $record["Section-Duokit_used"];
-        $sec5_5 = $record["Section-subsec5-Duokit_jobaide"];
-        $sec5_7= $record["Section-subsec5-Determine_jobaide"];
-        $sec5_8 = $record["Section-subsec5-FirstResponce_jobaide"];
-        $sec5_9 = $record["Section-subsec5-expirationdate"];
-        $sec5_10 = $record["Section-subsec5-testkitskeptwell"];
-        $sec5_11 = $record["Section-subsec5-newconsignmentQC"];
-        $sec5_12 = $record["Section-subsec5-newkitlotQC"];
-        $sec5_13 = $record["Section-subsec5-monthlyQC"];
-        $sec5_14 = $record["Section-subsec5-qc_recorded"];
-        $sec5_15 = $record["Section-subsec5-stepstocorrect_invalid_QC"];
-        $score = $sec5_1 + $sec5_2 + $sec5_3 + $sec5_4 + $sec5_5 + $sec5_7 + $sec5_8 +$sec5_9+ $sec5_10 + $sec5_11 + $sec5_12 + $sec5_13+ $sec5_14+ $sec5_15;
+    {   
+        $values = array();
+        $values["sec5_1"]= $record["Section-Section5-job_aides_infectious_waste"];
+        $values["sec5_2"]= $record["Section-Section5-bloodspills"];
+        $values["sec5_3"]= $record["Section-Section5-job_aides_nationalalgo"];
+        $values["sec5_4"] = $record["Section-Duokit_used"];
+        $values["sec5_5"]= $record["Section-subsec5-Duokit_jobaide"];
+        $values["sec5_7"]= $record["Section-subsec5-Determine_jobaide"];
+        $values["sec5_8"] = $record["Section-subsec5-FirstResponce_jobaide"];
+        $values["sec5_9"] = $record["Section-subsec5-expirationdate"];
+        $values["sec5_10"] = $record["Section-subsec5-testkitskeptwell"];
+        $values["sec5_11"] = $record["Section-subsec5-newconsignmentQC"];
+        $values["sec5_12"]= $record["Section-subsec5-newkitlotQC"];
+        $values["sec5_13"]= $record["Section-subsec5-monthlyQC"];
+        $values["sec5_14"]= $record["Section-subsec5-qc_recorded"];
+        $values["sec5_15"]= $record["Section-subsec5-stepstocorrect_invalid_QC"];
+        
+        foreach ($values as $key => $val) {
+            if(empty($val)) 
+            $values[$key] = 0;
+        }
+      
+        $score = $values["sec5_1"] + $values["sec5_2"] + $values["sec5_3"]+
+        $values["sec5_4"] + $values["sec5_5"] + $values["sec5_7"] + 
+        $values["sec5_8"] + $values["sec5_9"] + $values["sec5_10"] +
+        $values["sec5_11"] + $values["sec5_12"] + $values["sec5_13"] +
+        $values["sec5_14"] + $values["sec5_15"];
 
         return $score;
+    }
+
+
+    //section 5 (Testing Phase)
+    private function getTestingPhase($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["testing_phase"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = ($score / ($rowCounter * 11)) * 100; //get denominator   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("Testing Phase rowCounter = " . $rowCounter . "\n");
+        print_r("Testing Phase score = " . $score . "\n");
+    }
+
+    private function aggregateTestingPhase($record)
+    {
+       
+        $values = array();
+        $values["sec5_1"]= $record["Section-Section6-hts_algorithmfollowed"];
+        $values["sec5_2"]=  $record["Section-Section6-duokit_algo_followed"];
+
+        $values["sec5_3"]= $record["Section-Section6-samplecollection"];
+
+        $values["sec5_4"] = $record["Section-Section6-Determine_algo"];
+
+        $values["sec5_5"]=$record["Section-Section6-Duokit_procedure"];
+
+        $values["sec5_7"]=$record["Section-Section6-FirstResponce_algo"];
+
+        $values["sec5_8"] =$record["Section-Section6-timersavailable"];
+
+        $values["sec5_9"] =$record["Section-Section6-timersused"];
+
+        $values["sec5_10"] = $record["Section-Section6-resultsinterpreted"];
+
+        $values["sec5_11"] =$record["Section-Section6-retesting"];
+
+        $values["sec5_12"]= $record["Section-Section6-retestingrecord"];
+
+        
+        foreach ($values as $key => $val) {
+            if(empty($val)) 
+            $values[$key] = 0;
+        }
+      
+        $score = $values["sec5_1"] + $values["sec5_2"] + $values["sec5_3"]+
+        $values["sec5_4"] + $values["sec5_5"] + $values["sec5_7"] + 
+        $values["sec5_8"] + $values["sec5_9"] + $values["sec5_10"] +
+        $values["sec5_11"] + $values["sec5_12"];
+
+        return $score;
+
     }
 }
