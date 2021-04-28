@@ -18,8 +18,8 @@ class CreateFormSubmissionsTable extends Migration
             $table->dateTimeTz("lastest_submission_date");
             $table->integer("project_id");
             $table->string("form_id");
+            $table->string("form_type");
             $table->integer("no_of_submissions");
-            $table->bigInteger("org_id");
             $table->timestamps();
         });
     }
