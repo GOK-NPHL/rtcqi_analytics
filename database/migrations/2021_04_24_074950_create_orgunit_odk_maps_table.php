@@ -19,7 +19,7 @@ class CreateOrgunitOdkMapsTable extends Migration
             $table->integer("org_unit_id");
             $table->integer("level");
             $table->bigInteger("parent_id");
-            $table->integer("odk_unit_name");
+            $table->string("odk_unit_name");
         });
     }
 
