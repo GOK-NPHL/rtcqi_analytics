@@ -28,7 +28,7 @@ class SpiReport extends React.Component {
             this.setState({
                 orgUnits: returnedData,
             });
-        })()
+        })();
 
         //fetch initial data
         (async () => {
@@ -36,10 +36,10 @@ class SpiReport extends React.Component {
         // $orgUnit['mysites_subcounty'] = 'webuye_west';
         // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
         // $orgUnit['mysites'] = 'opd';
-
+            console.log("fetching data")
             let returnedData = await FetchOdkData('bungoma','webuye_west','15965__friends_lugulu_mission_hospital','opd');
             console.log(returnedData);
-        })()
+        })();
     }
     
     handleOrgUntiChange(event) {

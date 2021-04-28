@@ -19,9 +19,9 @@ export async function FetchOrgunits() {
 
 export async function FetchOdkData(county, subcounty, facility, site) {
 
-    let dataUrl = `${settings.rtcqiBaseApi}/get_odk_data/${county}/${subcounty}/${facility}/${site}`;
+    let dataUrl = `${settings.rtcqiBaseApi}/odk_data/${county}/${subcounty}/${facility}/${site}`;
     const _dataObject = await fetch(dataUrl);
-    const dataObject = await __dataObject.json();
+    const dataObject = await _dataObject.json();
     return dataObject;
 
 }
