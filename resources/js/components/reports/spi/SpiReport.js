@@ -21,12 +21,13 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
-            // console.log(returnedData);
+            console.log(returnedData);
             let subCountyList = [];
             // returnedData.forEach((val) => {
             //     console.log(val);
             // });
             this.setState({
+                unfilteredOrgUnits: returnedData,
                 orgUnits: returnedData,
                 odkData: {},
                 orgLevel: 1,
@@ -50,8 +51,16 @@ class SpiReport extends React.Component {
     }
 
     handleOrgUntiChange(event) {
-        console.log(event.target.value);
+        let parentId=event.target[event.target.selectedIndex].dataset.id;
+        let level=event.target[event.target.selectedIndex].dataset.level;
+        let filteredOrgs=this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == parentId) || (orgunit.level<= level));
+        this.setState({
+            orgUnits: filteredOrgs
+        });
         console.log(event.target[event.target.selectedIndex].dataset.level);
+        console.log(event.target[event.target.selectedIndex].dataset.id);
+
+
     }
 
     render() {
@@ -103,7 +112,7 @@ class SpiReport extends React.Component {
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select county</option>
-                                    <option data-level='1'>Kenya</option>
+                                    <option data-level='1' data-id='1'>Kenya</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 2)
                                             return (<option data-level={value.level} data-id={value.id}>{value.odk_unit_name}</option>)
