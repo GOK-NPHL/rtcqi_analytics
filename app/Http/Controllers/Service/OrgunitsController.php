@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Service;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\OdkOrgunitMap;
 
 class OrgunitsController extends Controller
 {
@@ -13,7 +15,7 @@ class OrgunitsController extends Controller
      * @return void
      */
     public function __construct()
-    {
+    {  
         $this->middleware('auth');
     }
 
@@ -24,6 +26,16 @@ class OrgunitsController extends Controller
      */
     public function index()
     {
+        Log::info('This is some useful information. fff');
         return view('interface/orgunits/index');
+    }
+
+    public function getOrgunits()
+    {   
+        Log::info('This is some useful information.');
+        
+
+        return OdkOrgunitMap::all();
+        
     }
 }

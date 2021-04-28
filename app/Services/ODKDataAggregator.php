@@ -33,7 +33,7 @@ class ODKDataAggregator
     }
 
 
-    public function getData($orgUnitId, $formType)
+    public function getData($orgUnitId, $formType='spi_checklist')
     {
         $orgUnit = array();
         $orgUnit['mysites_county'] = 'bungoma';
