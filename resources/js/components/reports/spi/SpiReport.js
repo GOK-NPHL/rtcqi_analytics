@@ -21,29 +21,36 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
+            // console.log(returnedData);
             let subCountyList = [];
             // returnedData.forEach((val) => {
             //     console.log(val);
             // });
             this.setState({
                 orgUnits: returnedData,
+                odkData: {},
+                orgLevel: 1,
+                orgId: 1
             });
         })();
 
         //fetch initial data
         (async () => {
-             // $orgUnit['mysites_county'] = 'bungoma';
-        // $orgUnit['mysites_subcounty'] = 'webuye_west';
-        // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
-        // $orgUnit['mysites'] = 'opd';
+            // $orgUnit['mysites_county'] = 'bungoma';
+            // $orgUnit['mysites_subcounty'] = 'webuye_west';
+            // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
+            // $orgUnit['mysites'] = 'opd';
             console.log("fetching data")
-            let returnedData = await FetchOdkData('bungoma','webuye_west','15965__friends_lugulu_mission_hospital','opd');
-            console.log(returnedData);
+            let returnedData = await FetchOdkData('Kenya', 'webuye_west', '15965__friends_lugulu_mission_hospital', 'opd');
+
+            this.setState({
+                odkData: returnedData,
+            });
         })();
     }
-    
+
     handleOrgUntiChange(event) {
-        // console.log(event.target.dataset);
+        console.log(event.target.value);
         console.log(event.target[event.target.selectedIndex].dataset.level);
     }
 
@@ -55,13 +62,33 @@ class SpiReport extends React.Component {
         const rowStle = {
             marginBottom: "10px"
         };
-        console.log(this.props)
+
+
+        var tableData = [];
+        var overallSiteLevels = [];
+        console.log(this.state.odkData);
+        for (const property in this.state.odkData) {
+            console.log(property);
+            if (property != "OverallSitesLevel") {
+                tableData.push(<td>{this.state.odkData[property]}</td>);
+            } else {
+                overallSiteLevels.push(<td>{this.state.odkData[property]['level0']}</td>);
+                overallSiteLevels.push(<td>{this.state.odkData[property]['level1']}</td>);
+                overallSiteLevels.push(<td>{this.state.odkData[property]['level2']}</td>);
+                overallSiteLevels.push(<td>{this.state.odkData[property]['level3']}</td>);
+                overallSiteLevels.push(<td>{this.state.odkData[property]['level4']}</td>);
+
+            }
+
+        }
+
+
         return (
             <React.Fragment>
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">Logbook REPORT</h1>
+                    <h1 className="h4 mb-0 text-gray-500">SPI REPORT</h1>
                     <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                 </div>
@@ -79,7 +106,7 @@ class SpiReport extends React.Component {
                                     <option data-level='1'>Kenya</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 2)
-                                            return (<option data-level={value.level}>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -90,11 +117,11 @@ class SpiReport extends React.Component {
                         <form>
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select className="form-control" id="exampleFormControlSelect1">
+                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select subcounty</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 3)
-                                            return (<option>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -106,11 +133,11 @@ class SpiReport extends React.Component {
                         <form>
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select className="form-control" id="exampleFormControlSelect1">
+                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select facility</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 4)
-                                            return (<option>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -122,11 +149,11 @@ class SpiReport extends React.Component {
                         <form>
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select className="form-control" id="exampleFormControlSelect1">
+                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select site</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 5)
-                                            return (<option>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -136,41 +163,58 @@ class SpiReport extends React.Component {
                 </div>
 
 
-
-
-
-
-
                 <div style={rowStle} className="row">
-                    <div className="col-sm-6  col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart1}></img>
-                    </div>
-                    <div className="col-sm-6 col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart2}></img>
-                    </div>
-                </div>
+                    <div className="col-sm-12  col-xm-6 col-md-12">
+                        <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Personnel Training & Certification</th>
+                                    <th scope="col">QA in Counselling</th>
+                                    <th scope="col">Physical Facility</th>
+                                    <th scope="col">Safety</th>
+                                    <th scope="col">Pre-testing phase</th>
+                                    <th scope="col">Testing Phase</th>
+                                    <th scope="col">Post-testing Phase</th>
+                                    <th scope="col">External Quality Assessment</th>
+                                    <th scope="col">Overall Performance</th>
 
-                <div style={rowStle} className="row">
-                    <div className="col-sm-6  col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart3}></img>
-                    </div>
-                    <div className="col-sm-6 col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart4}></img>
-                    </div>
-                </div>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-                <div style={rowStle} className="row">
-                    <div className="col-sm-6  col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart6}></img>
-                    </div>
-                    <div className="col-sm-6 col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart7}></img>
-                    </div>
-                </div>
+                                <tr>
+                                    <td scope="row">1</td>
+                                    {tableData}
+                                </tr>
 
-                <div style={rowStle} className="row">
-                    <div className="col-sm-6  col-xm-6 col-md-6">
-                        <img style={imgStyle} src={this.props.chart8}></img>
+                            </tbody>
+                        </table>
+
+                        <br />
+                        <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Level 0 (&lt;40%)</th>
+                                    <th scope="col">Level 1 (40-59%)</th>
+                                    <th scope="col">Level 2 (60-79%)</th>
+                                    <th scope="col">Level 3 (80-89%)</th>
+                                    <th scope="col">Level 4 (&gt;90%)</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="row">1</td>
+                                    {overallSiteLevels}
+                                </tr>
+
+                            </tbody>
+                        </table>
+
                     </div>
 
                 </div>
