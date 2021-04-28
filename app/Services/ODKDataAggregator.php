@@ -27,6 +27,8 @@ class ODKDataAggregator
         $this->reportSections["pre_testing_phase"] = 5;
         $this->reportSections["testing_phase"] = 6;
         $this->reportSections["post_testing_phase"] = 7;
+        $this->reportSections["external_quality_assessment"] = 8;
+        
         
     }
 
@@ -46,7 +48,8 @@ class ODKDataAggregator
         $this->getPreTestingPhase($orgUnit);
         $this->getTestingPhase($orgUnit);
         $this->getPostTestingPhase($orgUnit);
-        
+        $this->getExternalQualityAssessment($orgUnit);
+               
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -122,6 +125,8 @@ class ODKDataAggregator
             return $this->aggregateTestingPhase($record);
         }else if ($section == $this->reportSections["post_testing_phase"]) {
             return $this->aggregatePostTestingPhase($record);
+        }else if ($section == $this->reportSections["external_quality_assessment"]) {
+            return $this->aggregateExternalQualityAssessment($record);
         }
     }
 
@@ -365,6 +370,56 @@ class ODKDataAggregator
         $values["sec_9"] = $record["Section-Section7-secure_doc_storage"];
 
         $values["sec_10"] = $record["Section-Section7-properly_labelled"];
+
+
+        foreach ($values as $key => $val) {
+            if (empty($val))
+                $values[$key] = 0;
+        }
+
+        $score = $values["sec_1"] + $values["sec_2"] + $values["sec_3"] +
+            $values["sec_4"] + $values["sec_5"] + $values["sec_6"]  + $values["sec_7"] +
+            $values["sec_8"] + $values["sec_9"] + $values["sec_10"];
+
+        return $score;
+    }
+
+
+    //section 8 External Quality Assessment
+    private function getExternalQualityAssessment($orgUnit)
+    {
+        $records = $this->getFormRecords();
+        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["external_quality_assessment"]);
+        $score = $summationValues['score'];
+        $rowCounter = $summationValues['rowCounter'];
+        print_r("raw score = " . $score . "\n");
+        $score = ($score / ($rowCounter * 10)) * 100; //get denominator   
+        $score = number_format((float)$score, 1, '.', ',');
+        print_r("External Quality Assessment rowCounter = " . $rowCounter . "\n");
+        print_r("External Quality Assessment score = " . $score . "\n");
+    }
+
+    private function aggregateExternalQualityAssessment($record)
+    {
+        $values = array();
+        $values["sec_1"] = $record["Section-Section8-allprovidersenrolled"];
+        $values["sec_2"] =  $record["Section-Section8-providerstestPT"];
+
+        $values["sec_3"] = $record["Section-Section8-resultssubmittedonline"];
+
+        $values["sec_4"] = $record["Section-Section8-feedbackreceived"];
+
+        $values["sec_5"] = $record["Section-Section8-feedbackreviewed"];
+
+        $values["sec_6"] = $record["Section-Section8-feedbackreportfilled"];
+
+        $values["sec_7"] = $record["Section-Section8-providerscorrectiveaction"];
+
+        $values["sec_8"] = $record["Section-Section8-technicalsupervision"];
+
+        $values["sec_9"] = $record["Section-Section8-retrainingdone"];
+
+        $values["sec_10"] = $record["Section-Section8-feedbackdocumented"];
 
 
         foreach ($values as $key => $val) {
