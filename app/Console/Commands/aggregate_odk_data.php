@@ -40,6 +40,6 @@ class aggregate_odk_data extends Command
     public function handle()
     {
         $odkObj = new ODKDataAggregator;
-        $res=$odkObj->getData(null,null);
+        $res=$odkObj->getData(null,null,null,null);
     }
 }

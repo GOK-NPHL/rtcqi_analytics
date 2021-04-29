@@ -15,6 +15,8 @@ class SpiReport extends React.Component {
 
         }
         this.handleOrgUntiChange = this.handleOrgUntiChange.bind(this);
+        this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
+
     }
 
     componentDidMount() {
@@ -35,15 +37,12 @@ class SpiReport extends React.Component {
             });
         })();
 
-        //fetch initial data
-        (async () => {
-            // $orgUnit['mysites_county'] = 'bungoma';
-            // $orgUnit['mysites_subcounty'] = 'webuye_west';
-            // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
-            // $orgUnit['mysites'] = 'opd';
-            console.log("fetching data")
-            let returnedData = await FetchOdkData('Kenya', '', '', '');
+        this.fetchOdkDataServer('kenya', '', '', '');
+    }
 
+    fetchOdkDataServer(county, subcounty, facility, site) {
+        (async () => {
+            let returnedData = await FetchOdkData(county, subcounty, facility, site);
             this.setState({
                 odkData: returnedData,
             });
@@ -51,37 +50,37 @@ class SpiReport extends React.Component {
     }
 
     handleOrgUntiChange(event) {
-        let parentId=event.target[event.target.selectedIndex].dataset.parent_id;
-        let level=event.target[event.target.selectedIndex].dataset.level;
-        let id=event.target[event.target.selectedIndex].dataset.id
-        let filteredOrgs=this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level<= level));
+        let parentId = event.target[event.target.selectedIndex].dataset.parent_id;
+        let level = event.target[event.target.selectedIndex].dataset.level;
+        let id = event.target[event.target.selectedIndex].dataset.id
+        let filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
         this.setState({
             orgUnits: filteredOrgs
         });
-        // console.log(event.target[event.target.selectedIndex].dataset.level);
-        // console.log(event.target[event.target.selectedIndex].dataset.id);
 
-        if(level==5){
+        if (level == 5) {
             let site = event.target.value;
             let facility = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
             let subCounty = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == facility[0]['parent_id']));
             let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == subCounty[0]['parent_id']));
+            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty[0]['odk_unit_name'], facility[0]['odk_unit_name'], site);
             //odk_unit_name
-        }else if(level==4){
-            
-        }else if(level==3){
-            
-        }else if(level==2){
-            
-        }else if(level==1){
-            
+        } else if (level == 4) {
+            let facility = event.target.value;
+            let subCounty = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
+            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == subCounty[0]['parent_id']));
+            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty[0]['odk_unit_name'], facility, '');
+        } else if (level == 3) {
+            let subCounty = event.target.value;
+            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
+            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty, '', '');
+        } else if (level == 2) {
+            let county = event.target.value;
+            this.fetchOdkDataServer(county, '', '', '');
+        } else if (level == 1) {
+            this.fetchOdkDataServer('kenya', '', '', '');
         }
 
-        let filteredOrg=this.state.unfilteredOrgUnits.filter(
-            orgunit => ((orgunit.parent_id == parentId && orgunit.id<= level) && orgunit.id<= id)
-        );
-        console.log("filter");
-        console.log(filteredOrg);
     }
 
     render() {
@@ -133,7 +132,7 @@ class SpiReport extends React.Component {
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select county</option>
-                                    <option data-level='1' data-id='1'>Kenya</option>
+                                    <option data-level='1' data-id='1'>kenya</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 2)
                                             return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
@@ -151,7 +150,7 @@ class SpiReport extends React.Component {
                                     <option disabled selected>Select subcounty</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 3)
-                                        return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -167,7 +166,7 @@ class SpiReport extends React.Component {
                                     <option disabled selected>Select facility</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 4)
-                                        return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>
@@ -183,7 +182,7 @@ class SpiReport extends React.Component {
                                     <option disabled selected>Select site</option>
                                     {this.state.orgUnits.map((value, index) => {
                                         if (value.level == 5)
-                                        return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                     })}
                                 </select>
                             </div>

@@ -6,6 +6,7 @@ use Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 use App\FormSubmissions;
 use App\OdkProject;
@@ -34,9 +35,11 @@ class ODKDataAggregator
 
 
     public function getData($county, $subcounty, $facility, $site, $formType = 'spi_checklist')
-    {
+    {   
+        Log::info('Processing data');
+        Log::info("$county  $subcounty  $facility  $site");
         $orgUnit = array();
-        $orgUnit['mysites_county'] = $county;
+        $orgUnit['mysites_county'] = "$county";
         $orgUnit['mysites_subcounty'] = $subcounty;
         $orgUnit['mysites_facility'] = $facility;
         $orgUnit['mysites'] = $site;
@@ -45,6 +48,7 @@ class ODKDataAggregator
         // $orgUnit['mysites_subcounty'] = 'webuye_west';
         // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
         // $orgUnit['mysites'] = 'opd';
+
         $results = array();
         $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
         $results["QACounselling"] = $this->getQACounselling($orgUnit);
@@ -56,6 +60,7 @@ class ODKDataAggregator
         $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit);
         $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit);
         $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit);
+        // print_r($results);
         return $results;
     }
 
@@ -72,7 +77,7 @@ class ODKDataAggregator
         ];
 
         foreach ($records as $record) {
-            if ($orgUnit['mysites_county'] == 'Kenya') {
+            if ($orgUnit['mysites_county'] == 'kenya') {
                 $rowCounter = $rowCounter + 1; //no or rows processed.
                 if ($section == $this->reportSections["overall_sites_level"]) {
                     $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -565,16 +570,12 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_sites_level"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        // $score = $score / $rowCounter;
-        // $score = number_format((float)$score, 1, '.', ',');
-        // print_r(" Overall Sites Level rowCounter = " . $rowCounter . "\n");
-        // print_r(" Overall Sites Level score \n");
 
-        $score["level0"] = ($score["level0"] / $rowCounter) * 100;
-        $score["level1"] = ($score["level1"] / $rowCounter) * 100;
-        $score["level2"] = ($score["level2"] / $rowCounter) * 100;
-        $score["level3"] = ($score["level3"] / $rowCounter) * 100;
-        $score["level4"] = ($score["level4"] / $rowCounter) * 100;
+        $score["level0"] = number_format((float)($score["level0"] / $rowCounter) * 100, 1, '.', ',');
+        $score["level1"] = number_format((float)($score["level1"] / $rowCounter) * 100, 1, '.', ',');
+        $score["level2"] = number_format((float)($score["level2"] / $rowCounter) * 100, 1, '.', ',');
+        $score["level3"] = number_format((float)($score["level3"] / $rowCounter) * 100, 1, '.', ',');
+        $score["level4"] = number_format((float)($score["level4"] / $rowCounter) * 100, 1, '.', ',');
         // print_r($score);
         return $score;
     }

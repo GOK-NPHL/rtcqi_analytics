@@ -26,15 +26,12 @@ class OrgunitsController extends Controller
      */
     public function index()
     {
-        Log::info('This is some useful information. fff');
         return view('interface/orgunits/index');
     }
 
     public function getOrgunits()
     {   
-        Log::info('This is some useful information.');
         
-
         return OdkOrgunitMap::all();
         
     }
