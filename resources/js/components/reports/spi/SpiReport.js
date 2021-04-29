@@ -52,8 +52,10 @@ class SpiReport extends React.Component {
     handleOrgUntiChange(event) {
         let parentId = event.target[event.target.selectedIndex].dataset.parent_id;
         let level = event.target[event.target.selectedIndex].dataset.level;
-        let id = event.target[event.target.selectedIndex].dataset.id
-        let filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
+        let id = event.target[event.target.selectedIndex].dataset.id;
+        let filteredOrgs;
+        filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
+
         this.setState({
             orgUnits: filteredOrgs
         });
