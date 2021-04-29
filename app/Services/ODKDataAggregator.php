@@ -77,7 +77,7 @@ class ODKDataAggregator
         ];
 
         foreach ($records as $record) {
-            if ($orgUnit['mysites_county'] == 'kenya') {
+            if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
                 $rowCounter = $rowCounter + 1; //no or rows processed.
                 if ($section == $this->reportSections["overall_sites_level"]) {
                     $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -146,8 +146,11 @@ class ODKDataAggregator
     private function getFormRecords()
     {
         $url = "";
-        if (Storage::exists("submissions/17_spi_checklist_bungoma_submissions.csv")) {
-            $url = Storage::path("submissions/17_spi_checklist_bungoma_submissions.csv");
+        // if (Storage::exists("submissions/17_spi_checklist_bungoma_submissions.csv")) {
+        //     $url = Storage::path("submissions/17_spi_checklist_bungoma_submissions.csv");
+        
+        if (Storage::exists("submissions/15_spi_checklist_nairobi_submissions.csv")) {
+            $url = Storage::path("submissions/15_spi_checklist_nairobi_submissions.csv");
         } else {
             return 0;
         }

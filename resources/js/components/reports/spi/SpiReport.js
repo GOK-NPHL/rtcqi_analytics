@@ -23,10 +23,9 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
-            console.log(returnedData);
             let subCountyList = [];
             // returnedData.forEach((val) => {
-            //     console.log(val);
+            console.log("mounting");
             // });
             this.setState({
                 unfilteredOrgUnits: returnedData,
@@ -53,8 +52,11 @@ class SpiReport extends React.Component {
         let parentId = event.target[event.target.selectedIndex].dataset.parent_id;
         let level = event.target[event.target.selectedIndex].dataset.level;
         let id = event.target[event.target.selectedIndex].dataset.id;
+        // filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
         let filteredOrgs;
-        filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
+        filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => ((orgunit.parent_id == id) || (orgunit.level < level)) || orgunit.parent_id == parentId);
+
+
 
         this.setState({
             orgUnits: filteredOrgs
@@ -97,9 +99,7 @@ class SpiReport extends React.Component {
 
         var tableData = [];
         var overallSiteLevels = [];
-        console.log(this.state.odkData);
         for (const property in this.state.odkData) {
-            console.log(property);
             if (property != "OverallSitesLevel") {
                 tableData.push(<td>{this.state.odkData[property]}</td>);
             } else {
