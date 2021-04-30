@@ -28,7 +28,7 @@ require('./components/reports/summaries/SummariesReport');
 require('./interface/OrgUnits');
 require('./interface/Roles');
 require('./interface/Users');
-
+require('./interface/auth/axios_login');
 
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 

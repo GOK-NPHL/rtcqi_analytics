@@ -16,7 +16,7 @@ class OrgunitsController extends Controller
      */
     public function __construct()
     {  
-        $this->middleware('auth');
+        $this->middleware('auth:sanctum');
     }
 
     /**
@@ -32,14 +32,6 @@ class OrgunitsController extends Controller
     public function getOrgunits()
     {   
         
-        return OdkOrgunitMap::all();
-        
-    }
-
-    public function getOrgunits2()
-    {   
-        Log::info("logging ...");
-        print_r("logging");
         return OdkOrgunitMap::all();
         
     }

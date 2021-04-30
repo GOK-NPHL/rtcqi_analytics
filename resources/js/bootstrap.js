@@ -23,7 +23,6 @@ window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-
 var EchartsForReact=require('echarts-for-react');
 
 require('react-dropdown-tree-select');
