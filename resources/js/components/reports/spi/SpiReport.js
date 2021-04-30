@@ -23,6 +23,8 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
+            console.log("Returned data =====>");
+            console.log(returnedData);
             let subCountyList = [];
             // returnedData.forEach((val) => {
             console.log("mounting");
