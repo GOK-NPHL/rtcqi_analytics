@@ -33,3 +33,5 @@ Route::get('odk_data/{county?}/{subcounty?}/{facility?}/{site?}', function (
     $orgObj = new SpiReportController();
     return $orgObj->getData($county,$subcounty,$facility,$site);
 });
+
+Route::get('/org_units2', 'Service\OrgunitsController@getOrgunits2');

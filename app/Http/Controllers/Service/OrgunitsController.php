@@ -35,4 +35,12 @@ class OrgunitsController extends Controller
         return OdkOrgunitMap::all();
         
     }
+
+    public function getOrgunits2()
+    {   
+        Log::info("logging ...");
+        print_r("logging");
+        return OdkOrgunitMap::all();
+        
+    }
 }
