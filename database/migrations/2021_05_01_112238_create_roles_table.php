@@ -17,6 +17,7 @@ class CreateRolesTable extends Migration
             $table->id();
             $table->timestamps();
             $table->string("name")->unique();
+            $table->integer("editor_id");
         });
     }
 
