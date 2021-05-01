@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Role;
 
 class RolesController extends Controller
 {
@@ -14,7 +16,7 @@ class RolesController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:sanctum');
     }
 
     /**
@@ -25,5 +27,13 @@ class RolesController extends Controller
     public function index()
     {
         return view('interface/roles/index');
+    }
+
+    public function getRoles()
+    {   
+        $roles=DB::table('roles')
+            ->join('users', 'editor_id', '=', 'users.id')
+            ->get();
+        return $roles;
     }
 }

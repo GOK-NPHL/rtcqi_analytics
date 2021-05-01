@@ -2,8 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Service\OrgunitsController;
 use App\Http\Controllers\SpiReportController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +32,5 @@ Route::get('odk_data/{county?}/{subcounty?}/{facility?}/{site?}', function (
 });
 
 Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
+
+Route::get('/roles', 'Service\RolesController@getRoles');

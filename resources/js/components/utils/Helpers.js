@@ -23,7 +23,6 @@ export async function FetchOrgunits() {
         return cache.orgunitList;
     }
 
-
 }
 
 
@@ -54,5 +53,19 @@ export async function FetchOdkData(county, subcounty, facility, site) {
         // Handle Error Here
         console.error(err);
     }
+
+}
+
+export async function FetchRoles() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/roles`);
+        const rolesList = response.data;
+        return rolesList;
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+
 
 }

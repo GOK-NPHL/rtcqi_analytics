@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { FetchRoles } from '../components/utils/Helpers';
 
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
@@ -15,6 +16,16 @@ class Orgunit extends React.Component {
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
+    }
+
+    componentDidMount() {
+        //fetch counties
+        (async () => {
+            let returnedData = await FetchRoles();
+            this.setState({
+                roles: returnedData,
+            });
+        })();
     }
 
     onChange(currentNode, selectedNodes) {
@@ -65,9 +76,9 @@ class Orgunit extends React.Component {
                                 <th scope="row">1</th>
                                 <td>Implementing Partner</td>
                                 <td>Mark Odour</td>
-                                
+
                                 <td>20-04-2021</td>
-                                
+
                                 <td>
                                     <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                                         <i className="fas fa-user-edit"></i>
@@ -81,9 +92,9 @@ class Orgunit extends React.Component {
                                 <th scope="row">2</th>
                                 <td>CMLC</td>
                                 <td>Jacob juma</td>
-                                
+
                                 <td>20-04-2021</td>
-                                
+
                                 <td>
                                     <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                                         <i className="fas fa-user-edit"></i>
@@ -98,7 +109,7 @@ class Orgunit extends React.Component {
                                 <td>National Manager</td>
                                 <td>Larry Mko</td>
                                 <td>20-04-2021</td>
-                                
+
                                 <td>
                                     <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                                         <i className="fas fa-user-edit"></i>
@@ -144,7 +155,7 @@ class Orgunit extends React.Component {
                                         <div className="valid-tooltip">Looks good!</div>
                                     </div>
                                 </div>
-                               
+
                                 <button className="btn btn-primary" type="submit">Save Role</button>
                             </form>
                         </div>
