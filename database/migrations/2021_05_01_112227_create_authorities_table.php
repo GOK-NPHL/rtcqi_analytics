@@ -16,7 +16,7 @@ class CreateAuthoritiesTable extends Migration
         Schema::create('authorities', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string("name");
+            $table->string("name")->unique();
         });
     }
 
