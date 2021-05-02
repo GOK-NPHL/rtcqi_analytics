@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { FetchAuthorities } from '../../utils/Helpers';
+
+
 
 class RoleCreate extends React.Component {
 
@@ -10,7 +13,12 @@ class RoleCreate extends React.Component {
     }
 
     componentDidMount() {
-
+        (async () => {
+            let returnedData = await FetchAuthorities();
+            this.setState({
+                authorities: returnedData,
+            });
+        })();
     }
 
     render() {
@@ -30,7 +38,7 @@ class RoleCreate extends React.Component {
                                     <div className="form-row">
                                         <div className="col-md-12 mb-3">
                                             <label for="validationTooltip01">Role name</label>
-                                            <input type="text" className="form-control" id="validationTooltip01" value="CMLC" required />
+                                            <input type="text" className="form-control" id="validationTooltip01" required />
                                             <div className="valid-tooltip">Looks good!</div>
                                         </div>
                                     </div>
