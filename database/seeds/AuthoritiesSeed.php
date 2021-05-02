@@ -13,18 +13,18 @@ class AuthoritiesSeed extends Seeder
     public function run()
     {
         $permmissions = array(
-            array('name'=>'add_user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'edit_user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'delete_user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'view_user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'add_orgunit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'delete_orgunit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'edit_orgunit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'view_orgunit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'add_role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'delete_role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'edit_role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
-            array('name'=>'view_role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'add_user','group'=>'user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'edit_user','group'=>'user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'delete_user','group'=>'user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'view_user','group'=>'user','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'add_orgunit','group'=>'org unit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'delete_orgunit','group'=>'org unit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'edit_orgunit','group'=>'org unit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'view_orgunit','group'=>'org unit','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'add_role','group'=>'role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'delete_role','group'=>'role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'edit_role','group'=>'role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
+            array('name'=>'view_role','group'=>'role','created_at'=>new \dateTime,'updated_at'=> new \dateTime),
             
         );
         $authObj = new Authority();
