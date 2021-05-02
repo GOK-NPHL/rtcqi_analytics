@@ -67,5 +67,17 @@ export async function FetchRoles() {
         console.error(err);
     }
 
+}
+
+export async function FetchAuthorities() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/authorities`);
+        const authoritiesList = response.data;
+        return authoritiesList;
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
 
 }
