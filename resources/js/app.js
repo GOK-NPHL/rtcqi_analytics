@@ -25,10 +25,10 @@ require('./components/reports/me/MEReport');
 require('./components/reports/summaries/SummariesReport');
 
 //Intrface code
-require('./interface/OrgUnits');
-require('./interface/Roles');
-require('./interface/Users');
-require('./interface/auth/axios_login');
+require('./components/system/OrgUnits');
+require('./components/system/Roles');
+require('./components/system/Users');
+require('./components/system/auth/axios_login');
 
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 

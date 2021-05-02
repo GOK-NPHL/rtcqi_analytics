@@ -1,9 +1,9 @@
 import React from "react";
 import { render } from "react-dom";
 import DropdownTreeSelect from "react-dropdown-tree-select";
-import "../../css/tree_dropdown.css";
+import "../../../css/tree_dropdown.css";
 import data from "./orgunits.json";
-import '../../css/drop_down.min.css'
+import '../../../css/drop_down.min.css'
 
 const onChange = (currentNode, selectedNodes) => {
   console.log("path::", currentNode.path);

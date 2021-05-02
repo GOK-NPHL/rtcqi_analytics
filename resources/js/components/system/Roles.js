@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchRoles } from '../components/utils/Helpers';
+import { FetchRoles } from '../utils/Helpers';
 
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import TreeDrop from './TreeDrop';
 
-class Orgunit extends React.Component {
+class Roles extends React.Component {
 
 
     constructor(props) {
@@ -19,7 +19,7 @@ class Orgunit extends React.Component {
     }
 
     componentDidMount() {
-        //fetch counties
+        //fetch roles
         (async () => {
             let returnedData = await FetchRoles();
             this.setState({
@@ -181,8 +181,8 @@ class Orgunit extends React.Component {
 
 }
 
-export default Orgunit;
+export default Roles;
 
 if (document.getElementById('roles')) {
-    ReactDOM.render(<Orgunit />, document.getElementById('roles'));
+    ReactDOM.render(<Roles />, document.getElementById('roles'));
 }
