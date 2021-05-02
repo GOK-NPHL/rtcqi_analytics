@@ -26,7 +26,7 @@ require('./components/reports/summaries/SummariesReport');
 
 //Intrface code
 require('./components/system/OrgUnits');
-require('./components/system/Roles');
+require('./components/system/role/Roles');
 require('./components/system/Users');
 require('./components/system/auth/axios_login');
 
