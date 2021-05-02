@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { FetchAuthorities } from '../../utils/Helpers';
-
+import DualListBox from 'react-dual-listbox';
 
 
 class RoleCreate extends React.Component {
@@ -9,7 +9,10 @@ class RoleCreate extends React.Component {
 
     constructor(props) {
         super(props);
-
+        this.state = {
+            selected: ['one'],
+        };
+        this.authoritiesOnChange = this.authoritiesOnChange.bind(this);
     }
 
     componentDidMount() {
@@ -17,11 +20,20 @@ class RoleCreate extends React.Component {
             let returnedData = await FetchAuthorities();
             this.setState({
                 authorities: returnedData,
+                selected: ['one'],
             });
         })();
     }
 
+    authoritiesOnChange(selected){
+        this.setState({ selected });
+    };
+
     render() {
+        const options = [
+            { value: 'one', label: 'Option One' },
+            { value: 'two', label: 'Option Two' },
+        ];
 
         return (
             <React.Fragment>
@@ -42,7 +54,11 @@ class RoleCreate extends React.Component {
                                             <div className="valid-tooltip">Looks good!</div>
                                         </div>
                                     </div>
-
+                                    <DualListBox
+                                        options={options}
+                                        selected={this.state.selected}
+                                        onChange={this.authoritiesOnChange}
+                                    />
                                     <button className="btn btn-primary" type="submit">Save Role</button>
                                 </form>
                             </div>
