@@ -12,30 +12,7 @@ class RoleCreate extends React.Component {
         this.state = {
             selected: [],
             roleName: '',
-            permissionOptions: [
-                {
-                    label: 'Earth',
-                    options: [
-                        { value: 'luna', label: 'Moon' },
-                    ],
-                },
-                {
-                    label: 'Mars',
-                    options: [
-                        { value: 'phobos', label: 'Phobos' },
-                        { value: 'deimos', label: 'Deimos' },
-                    ],
-                },
-                {
-                    label: 'Jupiter',
-                    options: [
-                        { value: 'io', label: 'Io' },
-                        { value: 'europa', label: 'Europa' },
-                        { value: 'ganymede', label: 'Ganymede' },
-                        { value: 'callisto', label: 'Callisto' },
-                    ],
-                },
-            ]
+            permissionOptions: [ ]
         };
 
         this.saveRole = this.saveRole.bind(this);
@@ -78,6 +55,8 @@ class RoleCreate extends React.Component {
     saveRole() {
         (async () => {
             let returnedData = await SaveRole(this.state.roleName, this.state.selected);
+            this.props.fetchRoles();
+            this.props.toggleDisplay();
         })();
     }
 

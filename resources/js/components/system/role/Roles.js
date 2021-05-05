@@ -18,10 +18,10 @@ class Roles extends React.Component {
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
+        this.fetchRoles = this.fetchRoles.bind(this);
     }
 
-    componentDidMount() {
-        //fetch roles
+    fetchRoles(){
         (async () => {
             let returnedData = await FetchRoles();
             this.setState({
@@ -30,12 +30,18 @@ class Roles extends React.Component {
         })();
     }
 
-    // componentDidUpdate(prevProps) {
-    //     if (this.props.roles != prevProps.roles) {
-    //         //fetch roles
+    componentDidMount() {
+        //fetch roles
+        this.fetchRoles();
+    }
 
-    //     }
-    // }
+    componentDidUpdate(prevProps) {
+        if (this.props.roles != prevProps.roles) {
+            this.fetchRoles();
+        }
+    }
+
+
 
     onChange(currentNode, selectedNodes) {
         console.log("path::", currentNode.path);
@@ -112,74 +118,12 @@ class Roles extends React.Component {
 
                             {tableRows}
 
-                            {/* <tr>
-                                <th scope="row">1</th>
-                                <td>Implementing Partner</td>
-                                <td>Mark Odour</td>
-
-                                <td>20-04-2021</td>
-
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>CMLC</td>
-                                <td>Jacob juma</td>
-
-                                <td>20-04-2021</td>
-
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>National Manager</td>
-                                <td>Larry Mko</td>
-                                <td>20-04-2021</td>
-
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>SUB CMLC</td>
-                                <td>Larry Mko</td>
-                                <td>20-04-2021</td>
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr> */}
-
                         </tbody>
                     </table>
                 </div>
             </div>;
         } else {
-            pageContent = <RoleCreate />;
+            pageContent = <RoleCreate fetchRoles={this.fetchRoles} toggleDisplay={this.toggleDisplay}/>;
         }
 
         return (
