@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchRoles } from '../../utils/Helpers';
+import { FetchRoles, DeleteRole } from '../../utils/Helpers';
 
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
@@ -44,7 +44,12 @@ class Roles extends React.Component {
     }
 
     deleteRole(role_id) {
-        console.log(role_id);
+        (async () => {
+            let returnedData = await DeleteRole(role_id);
+            this.setState({
+                roles: returnedData,
+            });
+        })();
     }
 
     editRole(role_id) {

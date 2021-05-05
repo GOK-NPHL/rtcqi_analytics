@@ -97,3 +97,19 @@ export async function SaveRole(roleName, authoritiesSelected) {
         console.error(err);
     }
 }
+
+export async function DeleteRole(roleId) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/delete_role`,
+            data: {
+                role_id: roleId,
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
+
