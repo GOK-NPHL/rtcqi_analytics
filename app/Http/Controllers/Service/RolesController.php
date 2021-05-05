@@ -57,4 +57,15 @@ class RolesController extends Controller
             return ['Error' => '500', 'Message' => 'Could not save role ' . $ex->getCode()];
         }
     }
+
+    public function deleteRole(Request $request)
+    {
+        try {
+            $role = Role::find($request->role_id);
+            $role->delete();
+            return response()->json(['Message' => 'Deleted successfully'], 200);
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getCode()], 500);
+        }
+    }
 }
