@@ -35,9 +35,6 @@ class RolesController extends Controller
 
     public function getRoles()
     {
-        // $roles = DB::table('roles')
-        //     ->join('users', 'editor_id', '=', 'users.id')
-        //     ->get();
         $roles = Role::select(
             "users.name as editor",
             "roles.name as role_name",
