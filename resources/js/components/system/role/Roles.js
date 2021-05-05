@@ -13,7 +13,8 @@ class Roles extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            showUserTable: true
+            showUserTable: true,
+            roles: []
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
@@ -59,6 +60,34 @@ class Roles extends React.Component {
         };
         let pageContent = '';
 
+
+        var tableRows = [];
+        {
+            if (this.state.roles.map.length) {
+                tableRows.push(<tr>
+                    <td>1</td>
+                    <td colspan="4" style={{textAlign: 'center'}}>No Roles Defined</td>
+                </tr>);
+            } else {
+                this.state.roles.map((value, index) => {
+                    tableRows.push(<tr>
+                        <td>{index}</td>
+                        <td>{value.name}</td>
+                        <td>{value.name}</td>
+                        <td>{value.updated_ata}</td>
+                        <td>
+                            <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                <i className="fas fa-user-edit"></i>
+                            </a>
+                            <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                                <i className="fas fa-user-times"></i>
+                            </a>
+                        </td>
+                    </tr>);
+                })
+            }
+        }
+
         if (this.state.showUserTable) {
             pageContent = <div id='user_table' className='row'>
                 <div className='col-sm-12 col-md-12'>
@@ -73,7 +102,10 @@ class Roles extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+
+                            {tableRows}
+
+                            {/* <tr>
                                 <th scope="row">1</th>
                                 <td>Implementing Partner</td>
                                 <td>Mark Odour</td>
@@ -133,14 +165,14 @@ class Roles extends React.Component {
                                         <i className="fas fa-user-times"></i>
                                     </a>
                                 </td>
-                            </tr>
+                            </tr> */}
 
                         </tbody>
                     </table>
                 </div>
             </div>;
         } else {
-            pageContent = <RoleCreate/>;
+            pageContent = <RoleCreate />;
         }
 
         return (
