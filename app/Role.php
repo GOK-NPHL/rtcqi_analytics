@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     protected $hidden = ['updated_at'];
+    protected $fillable = ['name'];
 
     public function authorities()
     {
@@ -15,6 +16,6 @@ class Role extends Model
 
     public function editor()
     {
-        return $this->hasOne('App\User','editor_id');
+        return $this->belongsTo('App\User','editor_id');
     }
 }

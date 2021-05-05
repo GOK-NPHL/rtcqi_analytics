@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Role');
     }
+
+    public function rolesCreated()
+    {
+        return $this->hasMany('App\Role', 'editor_id');
+    }
 }
