@@ -30,6 +30,13 @@ class Roles extends React.Component {
         })();
     }
 
+    // componentDidUpdate(prevProps) {
+    //     if (this.props.roles != prevProps.roles) {
+    //         //fetch roles
+
+    //     }
+    // }
+
     onChange(currentNode, selectedNodes) {
         console.log("path::", currentNode.path);
     };
@@ -62,31 +69,31 @@ class Roles extends React.Component {
 
 
         var tableRows = [];
-        {
-            if (this.state.roles.map.length) {
-                tableRows.push(<tr>
-                    <td>1</td>
-                    <td colspan="4" style={{textAlign: 'center'}}>No Roles Defined</td>
+        
+        if (this.state.roles.length==0) {
+            tableRows.push(<tr>
+                <td>1</td>
+                <td colspan="4" style={{ textAlign: 'center' }}>No Roles Defined</td>
+            </tr>);
+        } else {
+            this.state.roles.map((value, index) => {
+                tableRows.push(<tr id={value.role_id}>
+                    <td>{index+1}</td>
+                    <td>{value.role_name}</td>
+                    <td>{value.editor}</td>
+                    <td>{value.updated_at}</td>
+                    <td>
+                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i className="fas fa-user-edit"></i>
+                        </a>
+                        <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                            <i className="fas fa-user-times"></i>
+                        </a>
+                    </td>
                 </tr>);
-            } else {
-                this.state.roles.map((value, index) => {
-                    tableRows.push(<tr>
-                        <td>{index}</td>
-                        <td>{value.name}</td>
-                        <td>{value.name}</td>
-                        <td>{value.updated_ata}</td>
-                        <td>
-                            <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                <i className="fas fa-user-edit"></i>
-                            </a>
-                            <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                <i className="fas fa-user-times"></i>
-                            </a>
-                        </td>
-                    </tr>);
-                })
-            }
+            })
         }
+
 
         if (this.state.showUserTable) {
             pageContent = <div id='user_table' className='row'>
