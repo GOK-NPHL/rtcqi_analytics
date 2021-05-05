@@ -35,3 +35,4 @@ Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
 
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
+Route::post('/save_role', 'Service\RolesController@createRole');
