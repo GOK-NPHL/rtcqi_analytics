@@ -41,7 +41,7 @@ class RolesController extends Controller
         $roles = Role::select(
             "users.name as editor",
             "roles.name as role_name",
-            "roles.updated_at",
+            "roles.updated_at as updated_at",
             "roles.id as role_id",
         )->join('users', 'editor_id', '=', 'users.id')->get();
         return $roles;
