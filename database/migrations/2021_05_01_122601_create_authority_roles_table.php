@@ -13,11 +13,11 @@ class CreateAuthorityRolesTable extends Migration
      */
     public function up()
     {
-        Schema::create('authority_roles', function (Blueprint $table) {
+        Schema::create('authority_role', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->integer("authority_id");
-            $table->integer("roles_id");
+            $table->integer("role_id");
         });
     }
 
