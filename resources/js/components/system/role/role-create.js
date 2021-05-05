@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchAuthorities } from '../../utils/Helpers';
+import { FetchAuthorities, SaveRole } from '../../utils/Helpers';
 import DualListBox from 'react-dual-listbox';
 
 
@@ -10,30 +10,78 @@ class RoleCreate extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected: ['one'],
+            selected: [],
+            roleName: '',
+            permissionOptions: [
+                {
+                    label: 'Earth',
+                    options: [
+                        { value: 'luna', label: 'Moon' },
+                    ],
+                },
+                {
+                    label: 'Mars',
+                    options: [
+                        { value: 'phobos', label: 'Phobos' },
+                        { value: 'deimos', label: 'Deimos' },
+                    ],
+                },
+                {
+                    label: 'Jupiter',
+                    options: [
+                        { value: 'io', label: 'Io' },
+                        { value: 'europa', label: 'Europa' },
+                        { value: 'ganymede', label: 'Ganymede' },
+                        { value: 'callisto', label: 'Callisto' },
+                    ],
+                },
+            ]
         };
+
+        this.saveRole = this.saveRole.bind(this);
         this.authoritiesOnChange = this.authoritiesOnChange.bind(this);
     }
 
     componentDidMount() {
         (async () => {
             let returnedData = await FetchAuthorities();
+            let categories = [];
+            let permissionOptions = [];
+            returnedData.map((obj) => {
+                if (categories.includes(obj.group)) {
+                    permissionOptions.map((objStructure) => {
+                        if (objStructure.label == obj.group) {
+                            objStructure.options.push({ 'value': obj.id, 'label': obj.name });
+                        }
+                    });
+                } else {
+                    let selection = {};
+                    let options = [];
+                    selection['label'] = obj.group;
+                    options.push({ 'value': obj.id, 'label': obj.name });
+                    selection['options'] = options;
+                    permissionOptions.push(selection);
+                    categories.push(obj.group);
+                }
+
+            });
             this.setState({
-                authorities: returnedData,
-                selected: ['one'],
+                permissionOptions: permissionOptions,
             });
         })();
     }
 
-    authoritiesOnChange(selected){
+    authoritiesOnChange(selected) {
         this.setState({ selected });
     };
 
+    saveRole() {
+        (async () => {
+            let returnedData = await SaveRole(this.state.roleName, this.state.selected);
+        })();
+    }
+
     render() {
-        const options = [
-            { value: 'one', label: 'Option One' },
-            { value: 'two', label: 'Option Two' },
-        ];
 
         return (
             <React.Fragment>
@@ -49,17 +97,21 @@ class RoleCreate extends React.Component {
                                 <form className="needs-validation" novalidate>
                                     <div className="form-row">
                                         <div className="col-md-12 mb-3">
-                                            <label for="validationTooltip01">Role name</label>
-                                            <input type="text" className="form-control" id="validationTooltip01" required />
-                                            <div className="valid-tooltip">Looks good!</div>
+                                            <label for="role_name">Role name</label>
+                                            <input type="text" onChange={event => this.setState({ roleName: event.target.value })} className="form-control" id="role_name" required />
+                                            <div className="valid-tooltip">Role name</div>
+                                        </div>
+                                        <div className="col-md-12 mb-3">
+                                            <label for="permissions">Assign permissions</label>
+                                            <DualListBox
+                                                canFilter
+                                                options={this.state.permissionOptions}
+                                                selected={this.state.selected}
+                                                onChange={this.authoritiesOnChange}
+                                            />
                                         </div>
                                     </div>
-                                    <DualListBox
-                                        options={options}
-                                        selected={this.state.selected}
-                                        onChange={this.authoritiesOnChange}
-                                    />
-                                    <button className="btn btn-primary" type="submit">Save Role</button>
+                                    <button onClick={this.saveRole} className="btn btn-primary" type="submit">Save Role</button>
                                 </form>
                             </div>
                         </div>
