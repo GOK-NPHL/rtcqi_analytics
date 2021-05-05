@@ -81,3 +81,19 @@ export async function FetchAuthorities() {
     }
 
 }
+
+export async function SaveRole(roleName, authoritiesSelected) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/save_role`,
+            data: {
+                name: roleName,
+                authoritiesSelected: authoritiesSelected
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
