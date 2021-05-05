@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
-    protected $hidden = ['updated_at'];
+    protected $hidden = ['created_at'];
     protected $fillable = ['name'];
+    protected $casts = [
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+    ];
 
     public function authorities()
     {
