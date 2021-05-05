@@ -19,6 +19,8 @@ class Roles extends React.Component {
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
         this.fetchRoles = this.fetchRoles.bind(this);
+        this.deleteRole =this.deleteRole.bind(this);
+        this.editRole =this.editRole.bind(this);
     }
 
     fetchRoles(){
@@ -41,7 +43,13 @@ class Roles extends React.Component {
         }
     }
 
+    deleteRole(role_id) {
+        console.log(role_id);
+    }
 
+    editRole(role_id) {
+        
+    }
 
     onChange(currentNode, selectedNodes) {
         console.log("path::", currentNode.path);
@@ -83,16 +91,16 @@ class Roles extends React.Component {
             </tr>);
         } else {
             this.state.roles.map((value, index) => {
-                tableRows.push(<tr id={value.role_id}>
+                tableRows.push(<tr key={index}>
                     <td>{index+1}</td>
                     <td>{value.role_name}</td>
                     <td>{value.editor}</td>
                     <td>{value.updated_at}</td>
                     <td>
-                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                        <a data-id={value.role_id} onClick= {()=> this.deleteRole(value.role_id)} href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i className="fas fa-user-edit"></i>
                         </a>
-                        <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                        <a data-id={value.role_id} onClick= {()=> this.deleteRole(value.role_id)} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                             <i className="fas fa-user-times"></i>
                         </a>
                     </td>
