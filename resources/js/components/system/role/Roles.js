@@ -14,22 +14,26 @@ class Roles extends React.Component {
         super(props);
         this.state = {
             showUserTable: true,
-            roles: []
+            roles: [],
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
         this.fetchRoles = this.fetchRoles.bind(this);
-        this.deleteRole =this.deleteRole.bind(this);
-        this.editRole =this.editRole.bind(this);
+        this.deleteRole = this.deleteRole.bind(this);
+        this.editRole = this.editRole.bind(this);
+        this.updateEditMode = this.updateEditMode.bind(this);
+        
     }
 
-    fetchRoles(){
+    fetchRoles() {
         (async () => {
             let returnedData = await FetchRoles();
             this.setState({
                 roles: returnedData,
             });
+
         })();
+
     }
 
     componentDidMount() {
@@ -46,14 +50,23 @@ class Roles extends React.Component {
     deleteRole(role_id) {
         (async () => {
             let returnedData = await DeleteRole(role_id);
-            this.setState({
-                roles: returnedData,
-            });
+            this.fetchRoles();
         })();
     }
 
-    editRole(role_id) {
-        
+    editRole(roleToEdit) {
+        let booll = this.state.showUserTable;
+        this.setState({
+            showUserTable: !booll,
+            roleToEdit: roleToEdit,
+            editMode: true,
+        });
+    }
+
+    updateEditMode(editMode) {
+        this.setState({
+            editMode: editMode,
+        });
     }
 
     onChange(currentNode, selectedNodes) {
@@ -88,29 +101,31 @@ class Roles extends React.Component {
 
 
         var tableRows = [];
-        
-        if (this.state.roles.length==0) {
+
+        if (Object.keys(this.state.roles).length === 0 && this.state.roles.constructor === Object) {
             tableRows.push(<tr>
                 <td>1</td>
                 <td colspan="4" style={{ textAlign: 'center' }}>No Roles Defined</td>
             </tr>);
         } else {
-            this.state.roles.map((value, index) => {
+            let index = 0;
+            for (const [key, value] of Object.entries(this.state.roles)) {
+                index = index + 1;
                 tableRows.push(<tr key={index}>
-                    <td>{index+1}</td>
+                    <td>{index}</td>
                     <td>{value.role_name}</td>
                     <td>{value.editor}</td>
                     <td>{value.updated_at}</td>
                     <td>
-                        <a data-id={value.role_id} onClick= {()=> this.deleteRole(value.role_id)} href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                        <a onClick={() => this.editRole(value)} href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i className="fas fa-user-edit"></i>
                         </a>
-                        <a data-id={value.role_id} onClick= {()=> this.deleteRole(value.role_id)} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                        <a onClick={() => this.deleteRole(value.role_id)} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                             <i className="fas fa-user-times"></i>
                         </a>
                     </td>
                 </tr>);
-            })
+            }
         }
 
 
@@ -136,7 +151,13 @@ class Roles extends React.Component {
                 </div>
             </div>;
         } else {
-            pageContent = <RoleCreate fetchRoles={this.fetchRoles} toggleDisplay={this.toggleDisplay}/>;
+            pageContent = <RoleCreate
+                fetchRoles={this.fetchRoles}
+                toggleDisplay={this.toggleDisplay}
+                editMode={this.state.editMode}
+                roleToEdit={this.state.roleToEdit}
+                updateEditMode={this.updateEditMode}
+            />;
         }
 
         return (

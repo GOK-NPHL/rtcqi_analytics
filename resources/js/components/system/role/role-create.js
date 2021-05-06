@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchAuthorities, SaveRole } from '../../utils/Helpers';
+import { FetchAuthorities, SaveRole, UpdateRole } from '../../utils/Helpers';
 import DualListBox from 'react-dual-listbox';
 
 
@@ -12,7 +12,7 @@ class RoleCreate extends React.Component {
         this.state = {
             selected: [],
             roleName: '',
-            permissionOptions: [ ]
+            permissionOptions: []
         };
 
         this.saveRole = this.saveRole.bind(this);
@@ -46,19 +46,47 @@ class RoleCreate extends React.Component {
                 permissionOptions: permissionOptions,
             });
         })();
+
+        if (this.props.editMode) {
+            console.log(this.props.roleToEdit);
+            this.setState({roleName:this.props.roleToEdit.role_name});
+            let currentAuthorities = this.props.roleToEdit.authorities;
+            let selected = [];
+            for (const [key, value] of Object.entries(currentAuthorities)) {
+                for (let i = 0; i < value.length; i++) {
+                    selected.push(value[i]);
+                }
+            }
+
+            console.log(selected);
+            this.setState({ selected: selected });
+        }
+
     }
 
     authoritiesOnChange(selected) {
-        this.setState({ selected });
+        this.setState({ selected: selected });
     };
 
     saveRole() {
-        (async () => {
-            let returnedData = await SaveRole(this.state.roleName, this.state.selected);
-            this.props.fetchRoles();
-            this.props.toggleDisplay();
-        })();
+        if (this.props.editMode) {
+            (async () => {
+                console.log(this.props.roleToEdit);
+                let returnedData = await UpdateRole(this.props.roleToEdit.role_id,this.state.roleName, this.state.selected);
+                this.props.fetchRoles();
+                this.props.toggleDisplay();
+            })();
+        } else {
+            (async () => {
+                let returnedData = await SaveRole(this.state.roleName, this.state.selected);
+                this.props.fetchRoles();
+                this.props.toggleDisplay();
+            })();
+        }
+        this.props.updateEditMode(false);
     }
+
+
 
     render() {
 
@@ -77,7 +105,8 @@ class RoleCreate extends React.Component {
                                     <div className="form-row">
                                         <div className="col-md-12 mb-3">
                                             <label for="role_name">Role name</label>
-                                            <input type="text" onChange={event => this.setState({ roleName: event.target.value })} className="form-control" id="role_name" required />
+                                            <input type="text" onChange={event => this.setState({ roleName: event.target.value })}
+                                                value={this.state.roleName} className="form-control" id="role_name" required />
                                             <div className="valid-tooltip">Role name</div>
                                         </div>
                                         <div className="col-md-12 mb-3">
