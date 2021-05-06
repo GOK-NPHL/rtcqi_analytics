@@ -96,6 +96,8 @@ class RolesController extends Controller
     {
         try {
             $role = Role::find($request->role_id);
+            $role->authorities()->sync([]);
+            Log::info($role->authorities()->get());
             $role->delete();
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
@@ -112,7 +114,8 @@ class RolesController extends Controller
             Log::debug("role name req " . $request->name);
             $role->name = $request->name;
             $role->save();
-            Log:info("role name updated");
+            Log:
+            info("role name updated");
             $role->editor()->associate($user);
             $role->save();
             $role->authorities()->sync($request->authoritiesSelected);
