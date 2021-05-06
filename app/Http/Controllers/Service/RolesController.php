@@ -95,10 +95,15 @@ class RolesController extends Controller
     public function deleteRole(Request $request)
     {
         try {
+
             $role = Role::find($request->role_id);
-            $role->authorities()->sync([]);
-            Log::info($role->authorities()->get());
-            $role->delete();
+            $userRoleRelationship = $role->users()->get();
+            if (count($userRoleRelationship) != 0) {
+                return response()->json(['Message' => 'Can\'t delete Role. Role is attached to users'], 500);
+            } else {
+                $role->authorities()->sync([]);
+                $role->delete();
+            }
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
