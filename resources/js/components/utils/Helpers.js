@@ -113,3 +113,22 @@ export async function DeleteRole(roleId) {
     }
 }
 
+
+export async function UpdateRole(role_id,roleName, authoritiesSelected) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/update_role`,
+            data: {
+                role_id: role_id,
+                name: roleName,
+                authoritiesSelected: authoritiesSelected
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
+
+
