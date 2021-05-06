@@ -1,5 +1,5 @@
 import React from 'react';
-import StatsLabel from '../stats/StatsLabel';
+import StatsLabel from '../utils/stats/StatsLabel';
 
 class TopLabels extends React.Component {
 

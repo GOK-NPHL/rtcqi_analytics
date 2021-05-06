@@ -25,9 +25,9 @@ require('./components/reports/me/MEReport');
 require('./components/reports/summaries/SummariesReport');
 
 //Intrface code
-require('./components/system/OrgUnits');
+require('./components/system/org-unit/OrgUnits');
 require('./components/system/role/Roles');
-require('./components/system/Users');
+require('./components/system/users/Users');
 require('./components/system/auth/axios_login');
 
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');

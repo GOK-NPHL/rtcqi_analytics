@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import LineGraph from '../charts/LineGraph';
+import LineGraph from '../utils/charts/LineGraph';
 import RTCard from '../utils/RTCard';
-import StackedHorizontal from '../charts/StackedHorizontal'
+import StackedHorizontal from '../utils/charts/StackedHorizontal'
 import TopLabels from './TopLabels'
 
 class Dashboard extends React.Component {

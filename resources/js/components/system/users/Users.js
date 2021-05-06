@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
-import TreeDrop from './TreeDrop';
+import TreeDrop from '../TreeDrop';
 
 class User extends React.Component {
 

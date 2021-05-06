@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import LineGraph from '../../charts/LineGraph';
-import StackedHorizontal from '../../charts/StackedHorizontal'
+import LineGraph from '../../utils/charts/LineGraph';
+import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 import OrguntiDrillDown from '../../utils/OrguntiDrillDown'
 
 class PTReport extends React.Component {
