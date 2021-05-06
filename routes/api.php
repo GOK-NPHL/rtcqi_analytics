@@ -37,3 +37,6 @@ Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
 Route::post('/save_role', 'Service\RolesController@createRole');
 Route::post('/delete_role', 'Service\RolesController@deleteRole');
+Route::post('/update_role', 'Service\RolesController@updateRole');
+
+
