@@ -123,11 +123,10 @@ class TreeView extends React.Component {
                 let { name, children } = arr[index];
                 if (children.length>0) {
                     res.push(
-                        <li><span className="caret">{name}</span>
+                        <li key={`${index}__${name}`} ><span className="caret">{name}</span>
                             {children.map((item) => {
-                                console.log(item.level);
-                                return <ul className={`${item.level>2 ? "nested" : ""}`}>
-                                    <li>
+                                return <ul key={`${index}__${name}_${item.name}`} className={`${item.level>2 ? "nested" : ""}`}>
+                                    <li >
                                         <span className="caret">{item.name}</span>
                                         {arrayUIparser(item.children)}
                                     </li>
@@ -136,11 +135,11 @@ class TreeView extends React.Component {
                             })}
                         </li>);
                 } else {
-                    res.push(<li className={`${item.level>2 ? "nested" : ""}`}><span>{item.name}</span></li>);
+                    res.push(<li key={index} className={`${item.level>2 ? "nested" : ""}`}><span>{item.name}</span></li>);
                 }
             });
 
-            return <ul>{res}</ul>;
+            return <ul >{res}</ul>;
         }
         let treeStruc = arrayUIparser(this.state.orgUnits);
         let index = 0;
