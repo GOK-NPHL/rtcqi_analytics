@@ -4,7 +4,6 @@ import { FetchRoles, DeleteRole } from '../../utils/Helpers';
 
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
-import TreeDrop from '../TreeDrop';
 import RoleCreate from './role-create';
 
 class Roles extends React.Component {

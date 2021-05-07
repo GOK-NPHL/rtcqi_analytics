@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
-import TreeDrop from '../TreeDrop';
 
 class User extends React.Component {
 
@@ -168,7 +167,6 @@ class User extends React.Component {
                                 <div className="form-row">
                                     <div className="col-md-12 mb-12">
                                         <label for="validationTooltip03">Organisation Units</label>
-                                        <TreeDrop />
                                         <div className="invalid-tooltip">Please provide a valid Email. </div>
                                     </div>
                                 </div>
