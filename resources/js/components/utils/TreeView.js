@@ -95,7 +95,29 @@ class TreeView extends React.Component {
                                     name: "sub kaka 2",
                                     level: 3,
                                     children: [
+                                        {
+                                            id: 12,
+                                            name: "sub kaka 21",
+                                            level: 3,
+                                            children: [
+                                                {
+                                                    id: 12,
+                                                    name: "sub kaka 22-a",
+                                                    level: 3,
+                                                    children: [
 
+                                                    ]
+                                                },
+                                                {
+                                                    id: 12,
+                                                    name: "sub kaka 22-b",
+                                                    level: 3,
+                                                    children: [
+
+                                                    ]
+                                                }
+                                            ]
+                                        }
                                     ]
                                 }
                             ]
@@ -114,6 +136,15 @@ class TreeView extends React.Component {
 
     }
 
+    organisationUnitOnclick(event) {
+        let el = event.target.nextElementSibling;
+        while (el) {
+            console.log(el);
+            el.classList.toggle("nested");
+            el = el.nextElementSibling;
+        }
+        event.target.classList.toggle("caret-down");
+    }
 
     render() {
 
@@ -121,13 +152,13 @@ class TreeView extends React.Component {
             const res = [];
             arr.map((item, index) => {
                 let { name, children } = arr[index];
-                if (children.length>0) {
+                if (children.length > 0) {
                     res.push(
-                        <li key={`${index}__${name}`} ><span className="caret">{name}</span>
+                        <li key={`${index}__${name}`} ><span onClick={() => this.organisationUnitOnclick(event)} className="caret">{name}</span>
                             {children.map((item) => {
-                                return <ul key={`${index}__${name}_${item.name}`} className={`${item.level>2 ? "nested" : ""}`}>
-                                    <li >
-                                        <span className="caret">{item.name}</span>
+                                return <ul key={`${index}__${name}_${item.name}`} className={`${item.level > 2 ? "nested" : ""}`}>
+                                    <li>
+                                        <span onClick={() => this.organisationUnitOnclick(event)} className="caret">{item.name}</span>
                                         {arrayUIparser(item.children)}
                                     </li>
                                 </ul>
@@ -135,7 +166,7 @@ class TreeView extends React.Component {
                             })}
                         </li>);
                 } else {
-                    res.push(<li key={index} className={`${item.level>2 ? "nested" : ""}`}><span>{item.name}</span></li>);
+                    res.push(<li key={index} ><span onClick={() => this.organisationUnitOnclick(event)} >{item.name}</span></li>);
                 }
             });
 
