@@ -40,7 +40,7 @@ class SheetSelect extends React.Component {
                 <div className="row">
 
                     <div className="col-sm-4">
-                        <p>Select sheet with orunits</p>
+                        <p>Select sheet with org units</p>
                         <table className="table">
                             <thead>
                                 <tr>
