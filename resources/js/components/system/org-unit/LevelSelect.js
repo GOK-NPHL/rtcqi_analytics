@@ -8,16 +8,32 @@ class LevelSelect extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            columnHierarchy: {}
         };
+        this.columnHierarchyOrderHandler = this.columnHierarchyOrderHandler.bind(this);
 
     }
 
     componentDidMount() {
+    }
 
+    columnHierarchyOrderHandler(event) {
+        let col = event.target.dataset.column;
+        let hierValue = event.target.value;
+        let hierarMap = this.state.columnHierarchy;
+        hierarMap[col] = hierValue; 
+        this.setState({
+            columnHierarchy: hierarMap,
+
+        });
+        this.props.setOrgunitExcelFileHierachy(hierarMap);
     }
 
     render() {
+        window.$(".inputLevel").keypress(function (evt) {
+            evt.preventDefault();
+        });
+
         let sheetHeaders = {};
         let sheetDataPreview = [];
         if (this.props.sheetWithOrgs) {
@@ -42,7 +58,7 @@ class LevelSelect extends React.Component {
                     if (previewMaxRowsCounter <= 12 && R > 2) {
                         sheetDataPreview[previewArrLength - 1].push(cell.v);
                     }
-
+                    if (previewMaxRowsCounter == 12) { break; }
                 }
                 previewMaxRowsCounter += 1;
             }
@@ -55,14 +71,21 @@ class LevelSelect extends React.Component {
             colHeaders.push(
                 <tr key={key}>
                     <th scope="row">{count}</th>
-                    <td data-id={key}>{value}</td>
-                    <td><input type="number" size="3" min="1" max="9"></input></td>
+                    <td >{value}</td>
+                    <td>
+                        <input
+                            data-column={key}
+                            onInput={() => this.columnHierarchyOrderHandler(event)}
+                            type="number"
+                            size="3" min="2" max="9"
+                            className="inputLevel">
+                        </input></td>
                 </tr>
             );
-            if (key = 0) {
-                tablePreviewElHeaders.push(<th scope="col">#</th>);
+            if (key == 0) {
+                tablePreviewElHeaders.push(<th key={key} scope="col">#</th>);
             } else {
-                tablePreviewElHeaders.push(<th scope="col">{value}</th>);
+                tablePreviewElHeaders.push(<th key={key} scope="col">{value}</th>);
             }
 
             count += 1;
@@ -73,12 +96,12 @@ class LevelSelect extends React.Component {
             let rowData = [];
             for (let y = 0; y < sheetDataPreview[x].length; y++) {
                 if (y == 0) {
-                    rowData.push(<th scope="row">{x}</th>);
+                    rowData.push(<th key={y} scope="row">{x + 1}</th>);
                 } else {
-                    rowData.push(<td>{sheetDataPreview[x][y]}</td>);
+                    rowData.push(<td key={y}>{sheetDataPreview[x][y]}</td>);
                 }
             }
-            let tableRow = <tr>{rowData}</tr>;
+            let tableRow = <tr key={x}>{rowData}</tr>;
             tablePreviewEl.push(tableRow);
         }
 
@@ -110,7 +133,6 @@ class LevelSelect extends React.Component {
                                 <tr>
                                     {tablePreviewElHeaders}
                                 </tr>
-
                             </thead>
                             <tbody>
                                 {tablePreviewEl}
