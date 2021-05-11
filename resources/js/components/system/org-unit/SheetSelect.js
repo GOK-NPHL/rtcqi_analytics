@@ -20,7 +20,7 @@ class SheetSelect extends React.Component {
             this.props.workbook.SheetNames.map((value, index) => {
                 sheets.push(
                     <tr key={index}>
-                        <th scope="row">1</th>
+                        <td scope="row">{index+1}</td>
                         <td>{value}</td>
                         <td>
                             <div className="custom-control custom-radio">
