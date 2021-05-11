@@ -5,7 +5,7 @@ import DualListBox from 'react-dual-listbox';
 import XLSX from "xlsx";
 import SheetSelect from './SheetSelect';
 import LevelSelect from './LevelSelect';
-import OrderCreate from './OrderCreate';
+import OrgunitStructureCreate from './OrgunitStructureCreate';
 
 class OrgunitCreate extends React.Component {
 
@@ -78,7 +78,7 @@ class OrgunitCreate extends React.Component {
                 <hr />
                 <LevelSelect setOrgunitExcelFileHierachy={this.setOrgunitExcelFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
                 <hr/>
-                <OrderCreate orgunitExcelFileHierachy={this.state.orgunitFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
+                <OrgunitStructureCreate orgunitExcelFileHierachy={this.state.orgunitFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
 
 
             </React.Fragment>

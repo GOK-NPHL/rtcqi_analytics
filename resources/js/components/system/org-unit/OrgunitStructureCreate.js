@@ -6,7 +6,7 @@ import movies from "./movies";
 import XLSX from "xlsx";
 
 
-class OrderCreate extends React.Component {
+class OrgunitStructureCreate extends React.Component {
 
     constructor(props) {
         super(props);
@@ -194,4 +194,4 @@ class OrderCreate extends React.Component {
 
 }
 
-export default OrderCreate;
+export default OrgunitStructureCreate;
