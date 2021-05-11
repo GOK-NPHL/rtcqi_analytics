@@ -53,14 +53,14 @@ function Orgunit() {
                     <TreeView />
                 </div>
                 <div className="col-sm-9">
-                    {/* <DataTable
+                    <DataTable
                         title="Movies"
                         columns={columns}
                         data={movies}
                         defaultSortFieldId={1}
                         pagination
                         selectableRows
-                    /> */}
+                    />
                 </div>
             </div>
 

@@ -24,11 +24,11 @@ class OrgunitStructureCreate extends React.Component {
 
     }
 
-    componentDidUpdate(){
+    componentDidUpdate() {
 
     }
 
-    orgUnitStructureMaker(arr, currentOrgName, hierachyColLevel) {
+    orgUnitStructureMaker(arr, currentOrgName, hierachyColLevel,tableOrgs) {
 
         let orgsNameToSearch = currentOrgName.split('$');
 
@@ -43,6 +43,7 @@ class OrgunitStructureCreate extends React.Component {
             };
 
             arr.push(orgUnit);
+            tableOrgs.push(orgUnit);
             return arr;
         }
         for (let i = 0; i < orgsNameToSearch.length - 1; i++) { //leave out last orgunit name as it is picked by inner loop for adding to tree
@@ -63,28 +64,39 @@ class OrgunitStructureCreate extends React.Component {
 
                         }
 
-                        arr = this.orgUnitStructureMaker(item.children, nextSubSring, hierachyColLevel);
+                        arr = this.orgUnitStructureMaker(item.children, nextSubSring, hierachyColLevel,tableOrgs);
                     }
                 });
             }
 
         }
 
-
     }
 
     createOrgTree() {
-        if (this.props.sheetWithOrgs && this.props.orgunitExcelFileHierachy) {
-            let orgUnitStructure = [
-                {
-                    id: 0,
-                    name: "Kenya",
-                    level: 1,
-                    children: [
+        let tableOrgs = [
+            {
+                id: 0,
+                name: "Kenya",
+                level: 1,
+                children: [
 
-                    ]
-                }
-            ];
+                ]
+            },
+        ];
+        let orgUnitStructure = [
+            {
+                id: 0,
+                name: "Kenya",
+                level: 1,
+                children: [
+
+                ]
+            }
+        ];
+
+        if (this.props.sheetWithOrgs && this.props.orgunitExcelFileHierachy) {
+            
             let orgunitExcelFileHierachy = this.props.orgunitExcelFileHierachy;
             // console.log(orgunitExcelFileHierachy);
             // const sortedOrgunitExcelFileHierachy = new Map([...Object.entries(orgunitExcelFileHierachy)].sort());
@@ -118,6 +130,7 @@ class OrgunitStructureCreate extends React.Component {
                                     ]
                                 }
                                 orgUnitStructure[0].children.push(orgUnit); //second level orgunits
+                                tableOrgs.push(orgUnit);
                                 orgUnitsProcessed.push(rowValues[hierachyCol]);
                             }
                         } else {
@@ -139,56 +152,53 @@ class OrgunitStructureCreate extends React.Component {
                                 continue;
                             } else {
                                 // console.log("level two =>" + currentOrgName);
-                                this.orgUnitStructureMaker(orgUnitStructure[0].children, currentOrgName, hierachyColLevel);
+                                this.orgUnitStructureMaker(orgUnitStructure[0].children, currentOrgName, hierachyColLevel,tableOrgs);
                                 orgUnitsProcessed.push(currentOrgName);
                             }
                         }
                     }
                 }
             }
-            return orgUnitStructure;
+            return [orgUnitStructure,tableOrgs];
             // console.log(orgUnitsProcessed);
 
+        }else{
+            return [orgUnitStructure,tableOrgs];
         }
     }
 
     render() {
-        let orgUnitStructure=this.createOrgTree();
-
+        let orgs = this.createOrgTree();
+        let orgUnitStructure =orgs[0];
+        let tableOrgs = orgs[1];
         const columns = [
             {
-                name: "Title",
-                selector: "title",
+                name: "Org Unit Name",
+                selector: "name",
                 sortable: true
             },
             {
-                name: "Directior",
-                selector: "director",
+                name: "Org Level",
+                selector: "level",
                 sortable: true
-            },
-            {
-                name: "Runtime (m)",
-                selector: "runtime",
-                sortable: true,
-                right: true
             }
         ];
 
         return (
             <React.Fragment>
                 <div className="row">
-                    <div style={{"overflow": "scroll", "maxHeight": "700px","minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px"}} className="col-sm-3">
-                        <TreeView orgUnits={orgUnitStructure}/>
+                    <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-3">
+                        <TreeView orgUnits={orgUnitStructure} />
                     </div>
                     <div className="col-sm-8">
-                        {/* <DataTable
-                            title="Movies"
+                        <DataTable
+                            title="Organisation Units"
                             columns={columns}
-                            data={movies}
+                            data={tableOrgs}
                             defaultSortFieldId={1}
                             pagination
                             selectableRows
-                        /> */}
+                        />
                     </div>
                 </div>
             </React.Fragment>
