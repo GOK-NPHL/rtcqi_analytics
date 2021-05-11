@@ -127,7 +127,7 @@ class LevelSelect extends React.Component {
                     </div>
 
                     <div className="col-sm-9">
-                        <p>Table Preview</p>
+                        <p>Data Preview</p>
                         <table className="table table-bordered ">
                             <thead className="thead-dark">
                                 <tr>

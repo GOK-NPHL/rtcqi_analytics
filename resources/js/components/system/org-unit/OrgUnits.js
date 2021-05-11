@@ -68,7 +68,7 @@ function Orgunit() {
 
     } else {
         pageContent = <OrgunitCreate
-            toggleDisplay={setShowOrgunitLanding}
+            setShowOrgunitLanding={setShowOrgunitLanding}
         />;
     }
 

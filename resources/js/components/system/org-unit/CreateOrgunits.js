@@ -16,11 +16,12 @@ class OrgunitCreate extends React.Component {
             fileName: "Choose orgunit excel",
             sheetWithOrgs: '',
             workbook: [],
+            pageNo: 1,
         };
         this.handleFile = this.handleFile.bind(this);
         this.setSheetWithOrgs = this.setSheetWithOrgs.bind(this);
         this.setOrgunitExcelFileHierachy = this.setOrgunitExcelFileHierachy.bind(this);
-
+        this.incrementDecrementOrgUnitStep = this.incrementDecrementOrgUnitStep.bind(this);
     }
 
     componentDidMount() {
@@ -48,39 +49,100 @@ class OrgunitCreate extends React.Component {
         });
     }
 
-    setOrgunitExcelFileHierachy(orgunitFileHierachy){
+    setOrgunitExcelFileHierachy(orgunitFileHierachy) {
         this.setState({
-            orgunitFileHierachy:orgunitFileHierachy
+            orgunitFileHierachy: orgunitFileHierachy
         });
+    }
+
+    incrementDecrementOrgUnitStep(isIncrement) {
+        let pageNo = this.state.pageNo;
+        if (isIncrement) {
+            pageNo = pageNo + 1;
+        } else {
+            pageNo = pageNo - 1;
+        }
+        if (pageNo == 3) {
+            document.getElementById("nextButton").disabled = true;
+        } else {
+            document.getElementById("nextButton").disabled = false;
+        }
+        if(pageNo==0){
+            this.props.setShowOrgunitLanding(true);
+        }
+        this.setState({
+            pageNo: pageNo
+        });
+        console.log(pageNo);
     }
 
     render() {
 
-        return (
-            <React.Fragment>
-                <div className="row">
-                    <div className="col-sm-4">
-                        <div className="input-group mb-3">
-                            <div className="custom-file">
-                                <input
-                                    onChange={() => this.handleFile(event)}
-                                    type="file"
-                                    className="custom-file-input"
-                                    accept=".xls,.xlsx" id="inputGroupFile01"
-                                    aria-describedby="inputGroupFileAddon01" />
-                                <label className="custom-file-label" htmlFor="inputGroupFile01">{this.state.fileName}</label>
-                            </div>
+        let selectSheetElement = <React.Fragment></React.Fragment>;
+
+        if (this.state.workbook.length != 0 && this.state.pageNo==1) {
+            selectSheetElement = <SheetSelect workbook={this.state.workbook} setSheetWithOrgs={this.setSheetWithOrgs} />
+        }
+
+        let selectLevelElement = <React.Fragment></React.Fragment>;
+        if (this.state.pageNo == 2) {
+            selectLevelElement = <React.Fragment>
+                <hr />
+                <LevelSelect setOrgunitExcelFileHierachy={this.setOrgunitExcelFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
+            </React.Fragment>;
+        }
+
+        let orgunitStructureElement = <React.Fragment></React.Fragment>;
+        if (this.state.pageNo == 3) {
+            orgunitStructureElement = <React.Fragment>
+                <hr />
+                <OrgunitStructureCreate orgunitExcelFileHierachy={this.state.orgunitFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
+            </React.Fragment>;
+        }
+
+        let nextBar = <div className="row">
+            <div className="col-sm-4 .float-left" style={{ "textAlign": "left" }}>
+                <button id="previousButton" type="button" className="btn btn-primary" onClick={() => this.incrementDecrementOrgUnitStep(false)}><i className="fa fa-arrow-left" aria-hidden="true">
+                </i> Prev</button>
+            </div>
+            <div className="col-sm-4" style={{ "textAlign": "center" }}>Step {this.state.pageNo} of 3</div>
+            <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} onClick={() => this.incrementDecrementOrgUnitStep(true)}>
+                <button id="nextButton" type="button" className="btn btn-primary">Next <i className="fa fa-arrow-right" aria-hidden="true"></i>
+                </button></div>
+        </div>;
+
+        let createOrgsLanding = <>
+            <br />
+            <div className="row">
+                <div className="col-sm-12"><p style={{"fontWeight": "700"}}>Upload Excel file with ODK central organusation units cascade</p></div>
+                <br />
+                <div className="col-sm-4">
+                    <div className="input-group mb-3">
+                        <div className="custom-file">
+                            <input
+                                onChange={() => this.handleFile(event)}
+                                type="file"
+                                className="custom-file-input"
+                                accept=".xls,.xlsx" id="inputGroupFile01"
+                                aria-describedby="inputGroupFileAddon01" />
+                            <label className="custom-file-label" htmlFor="inputGroupFile01">{this.state.fileName}</label>
                         </div>
                     </div>
                 </div>
+            </div>
+        </>;
 
-                <SheetSelect workbook={this.state.workbook} setSheetWithOrgs={this.setSheetWithOrgs} />
-                <hr />
-                <LevelSelect setOrgunitExcelFileHierachy={this.setOrgunitExcelFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
-                <hr/>
-                <OrgunitStructureCreate orgunitExcelFileHierachy={this.state.orgunitFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
+        if (this.state.pageNo != 1) {
+            createOrgsLanding = <></>
+        }
 
-
+        return (
+            <React.Fragment>
+                {nextBar}
+                {createOrgsLanding}
+                {selectSheetElement}
+                {selectLevelElement}
+                {orgunitStructureElement}
             </React.Fragment>
         );
     }

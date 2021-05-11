@@ -37,10 +37,12 @@ class SheetSelect extends React.Component {
             <React.Fragment>
 
                 {/* Sheet with orgunit selector */}
+                <br/>
+                <hr/>
                 <div className="row">
 
                     <div className="col-sm-4">
-                        <p>Select sheet with org units</p>
+                        <p style={{"fontWeight": "700"}}>Select sheet with org units</p>
                         <table className="table">
                             <thead>
                                 <tr>

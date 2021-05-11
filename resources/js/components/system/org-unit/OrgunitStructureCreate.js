@@ -177,10 +177,10 @@ class OrgunitStructureCreate extends React.Component {
         return (
             <React.Fragment>
                 <div className="row">
-                    <div className="col-sm-3">
+                    <div style={{"overflow": "scroll", "maxHeight": "700px","minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px"}} className="col-sm-3">
                         <TreeView orgUnits={orgUnitStructure}/>
                     </div>
-                    <div className="col-sm-9">
+                    <div className="col-sm-8">
                         {/* <DataTable
                             title="Movies"
                             columns={columns}
