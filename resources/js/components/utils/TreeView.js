@@ -4,7 +4,6 @@ import '../../../css/TreeView.css';
 
 class TreeView extends React.Component {
 
-
     constructor(props) {
         super(props);
         this.state = {
@@ -132,9 +131,9 @@ class TreeView extends React.Component {
 
     }
 
-    componentDidUpdate(prevProps) {
+    // componentDidUpdate(prevProps) {
 
-    }
+    // }
 
     organisationUnitOnclick(event) {
         let el = event.target.nextElementSibling;
@@ -175,12 +174,13 @@ class TreeView extends React.Component {
         let treeStruc = [
             {
                 id: 0,
-                name: "No Orgunit Defined",
+                name: "No Orgunits Defined",
                 level: 0,
                 children: []
             }
         ];
         if (this.props.orgUnits) {
+            console.log(this.props.orgUnits);
             treeStruc = arrayUIparser(this.props.orgUnits);
         }else{
             treeStruc = arrayUIparser(treeStruc);

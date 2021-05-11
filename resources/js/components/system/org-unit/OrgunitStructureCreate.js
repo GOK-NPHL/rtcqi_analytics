@@ -24,6 +24,9 @@ class OrgunitStructureCreate extends React.Component {
 
     }
 
+    componentDidUpdate(){
+
+    }
 
     orgUnitStructureMaker(arr, currentOrgName, hierachyColLevel) {
 
@@ -143,17 +146,14 @@ class OrgunitStructureCreate extends React.Component {
                     }
                 }
             }
-            console.log(orgUnitStructure);
-            this.setState({
-                orgUnitStructure: orgUnitStructure
-            });
+            return orgUnitStructure;
             // console.log(orgUnitsProcessed);
 
         }
     }
 
     render() {
-        this.createOrgTree();
+        let orgUnitStructure=this.createOrgTree();
 
         const columns = [
             {
@@ -178,17 +178,17 @@ class OrgunitStructureCreate extends React.Component {
             <React.Fragment>
                 <div className="row">
                     <div className="col-sm-3">
-                        <TreeView orgUnits={this.state.orgUnitStructure}/>
+                        <TreeView orgUnits={orgUnitStructure}/>
                     </div>
                     <div className="col-sm-9">
-                        <DataTable
+                        {/* <DataTable
                             title="Movies"
                             columns={columns}
                             data={movies}
                             defaultSortFieldId={1}
                             pagination
                             selectableRows
-                        />
+                        /> */}
                     </div>
                 </div>
             </React.Fragment>
