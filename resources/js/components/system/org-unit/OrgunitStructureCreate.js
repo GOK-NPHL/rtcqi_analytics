@@ -11,7 +11,7 @@ class OrgunitStructureCreate extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            orgUnitStructure: []
         }
 
         this.createOrgTree = this.createOrgTree.bind(this);
@@ -144,6 +144,9 @@ class OrgunitStructureCreate extends React.Component {
                 }
             }
             console.log(orgUnitStructure);
+            this.setState({
+                orgUnitStructure: orgUnitStructure
+            });
             // console.log(orgUnitsProcessed);
 
         }
@@ -175,7 +178,7 @@ class OrgunitStructureCreate extends React.Component {
             <React.Fragment>
                 <div className="row">
                     <div className="col-sm-3">
-                        <TreeView />
+                        <TreeView orgUnits={this.state.orgUnitStructure}/>
                     </div>
                     <div className="col-sm-9">
                         <DataTable

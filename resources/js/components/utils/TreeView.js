@@ -8,123 +8,123 @@ class TreeView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            orgUnits: [
-                {
-                    id: 0,
-                    name: "Kenya",
-                    level: 1,
-                    children: [
-                        {
-                            id: 1,
-                            name: "Nairobi",
-                            level: 2,
-                            children: [
-                                {
-                                    id: 5,
-                                    name: "sub Nai 1",
-                                    level: 3,
-                                    children: [
+            // orgUnits: [
+            //     {
+            //         id: 0,
+            //         name: "Kenya",
+            //         level: 1,
+            //         children: [
+            //             {
+            //                 id: 1,
+            //                 name: "Nairobi",
+            //                 level: 2,
+            //                 children: [
+            //                     {
+            //                         id: 5,
+            //                         name: "sub Nai 1",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }, {
-                                    id: 6,
-                                    name: "sub Nai 2",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }, {
+            //                         id: 6,
+            //                         name: "sub Nai 2",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            id: 2,
-                            name: "Kisumu",
-                            level: 2,
-                            children: [
-                                {
-                                    id: 7,
-                                    name: "sub kisumu 1",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }
+            //                 ]
+            //             },
+            //             {
+            //                 id: 2,
+            //                 name: "Kisumu",
+            //                 level: 2,
+            //                 children: [
+            //                     {
+            //                         id: 7,
+            //                         name: "sub kisumu 1",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }, {
-                                    id: 8,
-                                    name: "sub kisumu 2",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }, {
+            //                         id: 8,
+            //                         name: "sub kisumu 2",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }
-                            ]
-                        }, {
-                            id: 3,
-                            name: "Nakuru",
-                            level: 2,
-                            children: [
-                                {
-                                    id: 9,
-                                    name: "sub Naks 1",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }
+            //                 ]
+            //             }, {
+            //                 id: 3,
+            //                 name: "Nakuru",
+            //                 level: 2,
+            //                 children: [
+            //                     {
+            //                         id: 9,
+            //                         name: "sub Naks 1",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }, {
-                                    id: 10,
-                                    name: "sub Naks 2",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }, {
+            //                         id: 10,
+            //                         name: "sub Naks 2",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }
-                            ]
-                        }, {
-                            id: 4,
-                            name: "Kakamega",
-                            level: 2,
-                            children: [
-                                {
-                                    id: 11,
-                                    name: "sub kaka 1",
-                                    level: 3,
-                                    children: [
+            //                         ]
+            //                     }
+            //                 ]
+            //             }, {
+            //                 id: 4,
+            //                 name: "Kakamega",
+            //                 level: 2,
+            //                 children: [
+            //                     {
+            //                         id: 11,
+            //                         name: "sub kaka 1",
+            //                         level: 3,
+            //                         children: [
 
-                                    ]
-                                }, {
-                                    id: 12,
-                                    name: "sub kaka 2",
-                                    level: 3,
-                                    children: [
-                                        {
-                                            id: 12,
-                                            name: "sub kaka 21",
-                                            level: 3,
-                                            children: [
-                                                {
-                                                    id: 12,
-                                                    name: "sub kaka 22-a",
-                                                    level: 3,
-                                                    children: [
+            //                         ]
+            //                     }, {
+            //                         id: 12,
+            //                         name: "sub kaka 2",
+            //                         level: 3,
+            //                         children: [
+            //                             {
+            //                                 id: 12,
+            //                                 name: "sub kaka 21",
+            //                                 level: 3,
+            //                                 children: [
+            //                                     {
+            //                                         id: 12,
+            //                                         name: "sub kaka 22-a",
+            //                                         level: 3,
+            //                                         children: [
 
-                                                    ]
-                                                },
-                                                {
-                                                    id: 12,
-                                                    name: "sub kaka 22-b",
-                                                    level: 3,
-                                                    children: [
+            //                                         ]
+            //                                     },
+            //                                     {
+            //                                         id: 12,
+            //                                         name: "sub kaka 22-b",
+            //                                         level: 3,
+            //                                         children: [
 
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+            //                                         ]
+            //                                     }
+            //                                 ]
+            //                             }
+            //                         ]
+            //                     }
+            //                 ]
+            //             }
+            //         ]
+            //     }
+            // ]
         }
     }
 
@@ -172,7 +172,19 @@ class TreeView extends React.Component {
 
             return <ul >{res}</ul>;
         }
-        let treeStruc = arrayUIparser(this.state.orgUnits);
+        let treeStruc = [
+            {
+                id: 0,
+                name: "No Orgunit Defined",
+                level: 0,
+                children: []
+            }
+        ];
+        if (this.props.orgUnits) {
+            treeStruc = arrayUIparser(this.props.orgUnits);
+        }else{
+            treeStruc = arrayUIparser(treeStruc);
+        }
         let index = 0;
 
         return (
