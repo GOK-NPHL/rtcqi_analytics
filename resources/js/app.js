@@ -30,6 +30,7 @@ require('./components/system/role/Roles');
 require('./components/system/users/Users');
 require('./components/system/auth/axios_login');
 require('xlsx');
+require("uuid/v4");
 
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 

@@ -4,7 +4,7 @@ import TreeView from '../../utils/TreeView';
 import DataTable from "react-data-table-component";
 import movies from "./movies";
 import XLSX from "xlsx";
-
+import { v4 as uuidv4 } from 'uuid';
 
 class OrgunitStructureCreate extends React.Component {
 
@@ -34,7 +34,7 @@ class OrgunitStructureCreate extends React.Component {
 
         if (orgsNameToSearch.length == 1) {
             let orgUnit = {
-                id: orgsNameToSearch[0],
+                id: uuidv4(),
                 name: orgsNameToSearch[0],
                 level: hierachyColLevel,
                 children: [
@@ -122,7 +122,7 @@ class OrgunitStructureCreate extends React.Component {
                         if (hierachyColLevel == 2) {
                             if (!orgUnitsProcessed.includes(rowValues[hierachyCol])) { //contains second level org unit hierachy
                                 let orgUnit = {
-                                    id: rowValues[hierachyCol],
+                                    id: uuidv4(),
                                     name: rowValues[hierachyCol],
                                     level: 2,
                                     children: [
