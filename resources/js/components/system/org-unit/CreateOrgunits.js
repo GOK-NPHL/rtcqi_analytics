@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchAuthorities, SaveRole, UpdateRole } from '../../utils/Helpers';
+import { SaveOrgUnits } from '../../utils/Helpers';
 import DualListBox from 'react-dual-listbox';
 import XLSX from "xlsx";
 import SheetSelect from './SheetSelect';
@@ -73,8 +73,15 @@ class OrgunitCreate extends React.Component {
     }
 
     saveOrgUnits(orgUnits) {
-        console.log(orgUnits);
-        this.props.setShowOrgunitLanding(true);
+
+        (async () => {
+            let response = await SaveOrgUnits(orgUnits);
+            // this.props.setShowOrgunitLanding(true);
+            // this.setState({
+            //     permissionOptions: permissionOptions,
+            // });
+        })();
+
     }
 
     render() {
@@ -108,7 +115,7 @@ class OrgunitCreate extends React.Component {
                     sheetWithOrgs={this.state.sheetWithOrgs}
                     saveOrgUnits={this.saveOrgUnits}
                     isSaveOrgs={this.state.isSaveOrgs}
-                     />
+                />
             </React.Fragment>;
 
             nextSaveButton = <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >

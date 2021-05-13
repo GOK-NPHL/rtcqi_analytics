@@ -131,4 +131,18 @@ export async function UpdateRole(role_id,roleName, authoritiesSelected) {
     }
 }
 
+export async function SaveOrgUnits(orgUnits) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/save_orgunits`,
+            data: {
+                orgunits: orgUnits,
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.log(err);
+    }
+}
 
