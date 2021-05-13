@@ -104,7 +104,7 @@ function Orgunit() {
                     className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>
             </div>
             <div className="row">
-                <div className="col-sm-3">
+                <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-3">
                     <TreeView orgUnits={tableOrgs} />
                 </div>
                 <div className="col-sm-9">
