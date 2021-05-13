@@ -180,7 +180,6 @@ class TreeView extends React.Component {
             }
         ];
         if (this.props.orgUnits) {
-            console.log(this.props.orgUnits);
             treeStruc = arrayUIparser(this.props.orgUnits);
         }else{
             treeStruc = arrayUIparser(treeStruc);
