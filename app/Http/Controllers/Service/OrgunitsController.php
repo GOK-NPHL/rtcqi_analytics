@@ -33,8 +33,19 @@ class OrgunitsController extends Controller
 
     public function getOrgunits()
     {
+        $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
+        $levelsArr = array();
+        foreach ($levels as $level) {
+            $levelsArr[] = $level->level;
+        }
 
-        return OdkOrgunit::all();
+        $orgUnitsPayload = [
+            'metadata' =>
+            ['levels' => $levelsArr],
+            'payload' => [OdkOrgunit::all()]
+        ];
+
+        return $orgUnitsPayload;
     }
 
     public function saveOrgunits(Request $request)
