@@ -8,15 +8,15 @@ let cache = {
 
 export async function FetchOrgunits() {
     if (cache.orgunitList == null) {
-
+        let response;
         try {
-            const response = await axios.get(`${settings.rtcqiBaseApi}/org_units`);
+            response = await axios.get(`${settings.rtcqiBaseApi}/org_units`);
             const orgunitList = response.data;
             cache.orgunitList = orgunitList;
             return orgunitList;
         } catch (err) {
-            // Handle Error Here
             console.error(err);
+            return response;
         }
 
     } else {
@@ -147,3 +147,30 @@ export async function SaveOrgUnits(orgUnits) {
     }
 }
 
+
+
+export function OrgUnitStructureMaker(arr, orgUnitToAdd) {
+    if (arr != undefined) {
+        
+        arr.map((item) => {
+            // if (item.level != 1) { //skip country org
+           
+                if (item.id == orgUnitToAdd.parent_id) {
+                    
+                    let orgUnit = {
+                        id: orgUnitToAdd.org_unit_id,
+                        name: orgUnitToAdd.odk_unit_name,
+                        level: orgUnitToAdd.level,
+                        parentId: orgUnitToAdd.parent_id,
+                        updatedAt: orgUnitToAdd.updated_at,
+                        children: [
+                        ]
+                    };
+                    item.children.push(orgUnit);
+                } else {
+                    arr = OrgUnitStructureMaker(item.children, orgUnitToAdd);
+                }
+            // }
+        });
+    }
+}
