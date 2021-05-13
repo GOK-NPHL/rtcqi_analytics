@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Service;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\OdkOrgunitMap;
+use App\OdkOrgunit;
+use Exception;
+
 
 class OrgunitsController extends Controller
 {
@@ -15,7 +17,7 @@ class OrgunitsController extends Controller
      * @return void
      */
     public function __construct()
-    {  
+    {
         $this->middleware('auth:sanctum');
     }
 
@@ -30,9 +32,29 @@ class OrgunitsController extends Controller
     }
 
     public function getOrgunits()
-    {   
-        
-        return OdkOrgunitMap::all();
-        
+    {
+
+        return OdkOrgunit::all();
+    }
+
+    public function saveOrgunits(Request $request)
+    {
+        try {
+            $organisationUnit = $request->orgunits;
+            for ($x = 0; $x < count($organisationUnit); $x++) {
+                $orgUnit = new OdkOrgunit([
+                    'org_unit_id' => $organisationUnit[$x]['id'],
+                    'odk_unit_name' => $organisationUnit[$x]['name'],
+                    'level' => $organisationUnit[$x]['level'],
+                    'parent_id' => $organisationUnit[$x]['parentId'],
+
+                ]);
+                $orgUnit->save();
+            }
+            return response()->json(['Message' => 'Created successfully'], 200);
+        } catch (Exception $ex) {
+            Log::error($ex);
+            return ['Error' => '500', 'Message' => 'Could not save organisation units: ' . $ex->getMessage()];
+        }
     }
 }
