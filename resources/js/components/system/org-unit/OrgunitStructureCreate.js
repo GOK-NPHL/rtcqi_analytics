@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import DataTable from "react-data-table-component";
-import movies from "./movies";
 import XLSX from "xlsx";
 import { v4 as uuidv4 } from 'uuid';
 
