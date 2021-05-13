@@ -16,9 +16,9 @@ class CreateOrgunitOdkMapsTable extends Migration
         Schema::create('odk_orgunit_maps', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->integer("org_unit_id");
+            $table->uuid('org_unit_id');
             $table->integer("level");
-            $table->bigInteger("parent_id");
+            $table->uuid('parent_id');
             $table->string("odk_unit_name");
         });
     }
