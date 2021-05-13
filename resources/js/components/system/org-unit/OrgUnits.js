@@ -57,8 +57,6 @@ function Orgunit() {
             developOrgStructure(httpOrgUnits);
             setTableOrgsStruct(httpOrgUnits); ///save to state
         }
-        // console.log(tableOrgs);
-
     })();
 
     const imgStyle = {
@@ -79,9 +77,14 @@ function Orgunit() {
             name: "Org Level",
             selector: "level",
             sortable: true
+        },
+        {
+            name: "Last updated",
+            selector: "updated_at",
+            sortable: true
         }
     ];
-
+   
     let pageContent = '';
     let tableEl = <></>;
     if (httpOrgUnits.length != 0) {
