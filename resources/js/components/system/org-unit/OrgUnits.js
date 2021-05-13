@@ -3,14 +3,63 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import movies from "./movies";
+import { FetchOrgunits, OrgUnitStructureMaker } from '../../utils/Helpers';
 
+let httpOrgUnits = [];
 
+let tableOrgs = [
+    {
+        id: 0,
+        name: "Kenya",
+        level: 1,
+        parentId: 0,
+        children: [
+
+        ]
+    }
+];
+
+function developOrgStructure(orunitData) {
+
+    orunitData.metadata.levels.map(hierchayLevel => {
+        // console.log(orunitData.payload);
+        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.name == 'Kenya');
+        tableOrgs[0]['id'] = kenya.org_unit_id;
+        let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
+        orgUnits.map((orgUnitToAdd) => {
+            if (orgUnitToAdd.level == 2) {
+                let orgUnit = {
+                    id: orgUnitToAdd.org_unit_id,
+                    name: orgUnitToAdd.odk_unit_name,
+                    level: orgUnitToAdd.level,
+                    parentId: orgUnitToAdd.parent_id,
+                    updatedAt: orgUnitToAdd.updated_at,
+                    children: [
+                    ]
+                };
+                tableOrgs[0].children.push(orgUnit);
+            } else {
+                OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
+            }
+
+        });
+
+    });
+}
 
 function Orgunit() {
 
     const [showOrgunitLanding, setShowOrgunitLanding] = useState(true);
+    const [tableOrgsStruct, setTableOrgsStruct] = useState();
+    (async () => {
+        if (httpOrgUnits.length == 0) {
+            httpOrgUnits = await FetchOrgunits();
+            developOrgStructure(httpOrgUnits);
+            setTableOrgsStruct(httpOrgUnits); ///save to state
+        }
+        // console.log(tableOrgs);
 
+    })();
 
     const imgStyle = {
         width: "100%"
@@ -22,24 +71,30 @@ function Orgunit() {
 
     const columns = [
         {
-            name: "Title",
-            selector: "title",
+            name: "Org Unit Name",
+            selector: "odk_unit_name",
             sortable: true
         },
         {
-            name: "Directior",
-            selector: "director",
+            name: "Org Level",
+            selector: "level",
             sortable: true
-        },
-        {
-            name: "Runtime (m)",
-            selector: "runtime",
-            sortable: true,
-            right: true
         }
     ];
 
     let pageContent = '';
+    let tableEl = <></>;
+    if (httpOrgUnits.length != 0) {
+        tableEl = <DataTable
+            title="Organisation Unit"
+            columns={columns}
+            data={httpOrgUnits.payload[0]}
+            defaultSortFieldId={1}
+            pagination
+            selectableRows
+        />
+    }
+
 
     if (showOrgunitLanding) {
         pageContent = <React.Fragment>
@@ -50,17 +105,10 @@ function Orgunit() {
             </div>
             <div className="row">
                 <div className="col-sm-3">
-                    <TreeView />
+                    <TreeView orgUnits={tableOrgs} />
                 </div>
                 <div className="col-sm-9">
-                    <DataTable
-                        title="Movies"
-                        columns={columns}
-                        data={movies}
-                        defaultSortFieldId={1}
-                        pagination
-                        selectableRows
-                    />
+                    {tableEl}
                 </div>
             </div>
 
