@@ -22,21 +22,23 @@ class OrgunitStructureCreate extends React.Component {
     componentDidMount() {
         // orgunitExcelFileHierachy
 
+
     }
 
     componentDidUpdate() {
 
     }
 
-    orgUnitStructureMaker(arr, currentOrgName, hierachyColLevel,tableOrgs) {
+    orgUnitStructureMaker(arr, currentOrgName, hierachyColLevel, tableOrgs, uuid4, parentId) {
 
         let orgsNameToSearch = currentOrgName.split('$');
 
         if (orgsNameToSearch.length == 1) {
             let orgUnit = {
-                id: uuidv4(),
+                id: uuid4,
                 name: orgsNameToSearch[0],
                 level: hierachyColLevel,
+                parentId: parentId,
                 children: [
 
                 ]
@@ -64,7 +66,7 @@ class OrgunitStructureCreate extends React.Component {
 
                         }
 
-                        arr = this.orgUnitStructureMaker(item.children, nextSubSring, hierachyColLevel,tableOrgs);
+                        arr = this.orgUnitStructureMaker(item.children, nextSubSring, hierachyColLevel, tableOrgs, uuid4, parentId);
                     }
                 });
             }
@@ -79,6 +81,7 @@ class OrgunitStructureCreate extends React.Component {
                 id: 0,
                 name: "Kenya",
                 level: 1,
+                parentId: 0,
                 children: [
 
                 ]
@@ -89,6 +92,7 @@ class OrgunitStructureCreate extends React.Component {
                 id: 0,
                 name: "Kenya",
                 level: 1,
+                parentId: 0,
                 children: [
 
                 ]
@@ -96,7 +100,7 @@ class OrgunitStructureCreate extends React.Component {
         ];
 
         if (this.props.sheetWithOrgs && this.props.orgunitExcelFileHierachy) {
-            
+
             let orgunitExcelFileHierachy = this.props.orgunitExcelFileHierachy;
             // console.log(orgunitExcelFileHierachy);
             // const sortedOrgunitExcelFileHierachy = new Map([...Object.entries(orgunitExcelFileHierachy)].sort());
@@ -105,6 +109,7 @@ class OrgunitStructureCreate extends React.Component {
             let sheet = this.props.workbook.Sheets[sheetName];
             let range = XLSX.utils.decode_range(sheet['!ref']); // get the range
             let orgUnitsProcessed = [];
+            let orgUnitsIdMapping = {};
             for (var R = range.s.r; R <= range.e.r; ++R) {
 
                 let rowValues = new Map();
@@ -121,10 +126,12 @@ class OrgunitStructureCreate extends React.Component {
                     if (rowValues[hierachyCol] != undefined) {
                         if (hierachyColLevel == 2) {
                             if (!orgUnitsProcessed.includes(rowValues[hierachyCol])) { //contains second level org unit hierachy
+                                let uuid4 = uuidv4();
                                 let orgUnit = {
-                                    id: uuidv4(),
+                                    id: uuid4,
                                     name: rowValues[hierachyCol],
                                     level: 2,
+                                    parentId: 0,
                                     children: [
 
                                     ]
@@ -132,12 +139,13 @@ class OrgunitStructureCreate extends React.Component {
                                 orgUnitStructure[0].children.push(orgUnit); //second level orgunits
                                 tableOrgs.push(orgUnit);
                                 orgUnitsProcessed.push(rowValues[hierachyCol]);
+                                orgUnitsIdMapping[rowValues[hierachyCol]] = uuid4;
                             }
                         } else {
 
                             let currentOrgName = '';
                             let intialLoop = true;
-                            for (const [col, roow] of sortedOrgunitExcelFileHierachy.entries()) { //construct name of current orgunit
+                            for (const [col, roow] of sortedOrgunitExcelFileHierachy.entries()) { //construct unique name of current orgunit being processed.
                                 if (intialLoop) {
                                     intialLoop = false;
                                     currentOrgName = rowValues[col];
@@ -152,25 +160,36 @@ class OrgunitStructureCreate extends React.Component {
                                 continue;
                             } else {
                                 // console.log("level two =>" + currentOrgName);
-                                this.orgUnitStructureMaker(orgUnitStructure[0].children, currentOrgName, hierachyColLevel,tableOrgs);
+                                let uuid4 = uuidv4();
+                                var parentNameLength = currentOrgName.lastIndexOf("$");
+                                var parentName = currentOrgName.substring(0, parentNameLength);
+                                let parentId = orgUnitsIdMapping[parentName];
+                                this.orgUnitStructureMaker(orgUnitStructure[0].children, currentOrgName, hierachyColLevel, tableOrgs, uuid4, parentId);
                                 orgUnitsProcessed.push(currentOrgName);
+                                orgUnitsIdMapping[currentOrgName] = uuid4;
+
                             }
                         }
                     }
                 }
             }
-            return [orgUnitStructure,tableOrgs];
-            // console.log(orgUnitsProcessed);
+            //this.props.setFinalOrgunitStructure(tableOrgs);
+            return [orgUnitStructure, tableOrgs];
 
-        }else{
-            return [orgUnitStructure,tableOrgs];
+
+        } else {
+            return [orgUnitStructure, tableOrgs];
         }
     }
 
     render() {
+
         let orgs = this.createOrgTree();
-        let orgUnitStructure =orgs[0];
+        let orgUnitStructure = orgs[0];
         let tableOrgs = orgs[1];
+        if (this.props.isSaveOrgs) {
+            this.props.saveOrgUnits(tableOrgs);
+        }
         const columns = [
             {
                 name: "Org Unit Name",
