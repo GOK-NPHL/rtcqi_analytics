@@ -114,7 +114,7 @@ export async function DeleteRole(roleId) {
 }
 
 
-export async function UpdateRole(role_id,roleName, authoritiesSelected) {
+export async function UpdateRole(role_id, roleName, authoritiesSelected) {
     try {
         const response = await axios({
             method: 'post',
@@ -132,17 +132,18 @@ export async function UpdateRole(role_id,roleName, authoritiesSelected) {
 }
 
 export async function SaveOrgUnits(orgUnits) {
+    let response;
     try {
-        const response = await axios({
+        response = await axios({
             method: 'post',
             url: `${settings.rtcqiBaseApi}/save_orgunits`,
             data: {
                 orgunits: orgUnits,
             }
         });
+        return response;
     } catch (err) {
-        // Handle Error Here
-        console.log(err);
+        return response;
     }
 }
 

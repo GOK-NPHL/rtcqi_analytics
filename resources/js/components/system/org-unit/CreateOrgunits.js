@@ -76,10 +76,11 @@ class OrgunitCreate extends React.Component {
 
         (async () => {
             let response = await SaveOrgUnits(orgUnits);
-            // this.props.setShowOrgunitLanding(true);
-            // this.setState({
-            //     permissionOptions: permissionOptions,
-            // });
+            console.log(response);
+            if (response['status'] == 200) {
+                this.props.setShowOrgunitLanding(true);
+            }
+           
         })();
 
     }
