@@ -157,6 +157,7 @@ export async function UpdateOrg(org) {
                 org: org,
             }
         });
+        return response.data.Message;
     } catch (err) {
         // Handle Error Here
         console.error(err);
