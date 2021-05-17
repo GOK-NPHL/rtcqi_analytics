@@ -126,8 +126,7 @@ class RolesController extends Controller
             $role->authorities()->sync($request->authoritiesSelected);
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
-
-            return ['Error' => '500', 'Message' => 'Could not save role: ' . $ex->getMessage()];
+            return response()->json(['Message' => 'Could not save role: '  . $ex->getMessage()], 500);
         }
     }
 }
