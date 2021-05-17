@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+
 
 
 class OrgunitsController extends Controller
@@ -66,6 +68,18 @@ class OrgunitsController extends Controller
         } catch (Exception $ex) {
             Log::error($ex);
             return ['Error' => '500', 'Message' => 'Could not save organisation units: ' . $ex->getMessage()];
+        }
+    }
+
+    public function updateOrg(Request $request)
+    {
+        try {
+            $org = OdkOrgunit::find($request->org['id']);
+            $org->odk_unit_name = $request->org['odk_unit_name'];
+            $org->save();
+            return response()->json(['Message' => 'Updated successfully'], 200);
+        } catch (Exception $ex) {
+            return ['Error' => '500', 'Message' => 'Could not save role: ' . $ex->getMessage()];
         }
     }
 }
