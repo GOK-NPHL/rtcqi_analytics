@@ -148,6 +148,21 @@ export async function SaveOrgUnits(orgUnits) {
 }
 
 
+export async function UpdateOrg(org) {
+    try {
+        const response = await axios({
+            method: 'put',
+            url: `${settings.rtcqiBaseApi}/update_org`,
+            data: {
+                org: org,
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
+
 
 export function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {

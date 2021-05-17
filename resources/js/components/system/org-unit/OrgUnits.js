@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, OrgUnitStructureMaker } from '../../utils/Helpers';
+import { FetchOrgunits, OrgUnitStructureMaker, UpdateOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
 
@@ -48,7 +48,10 @@ function developOrgStructure(orunitData) {
 }
 
 function updateOrg(org) {
-    console.log(org);
+    (async () => {
+        let returnedData = await UpdateOrg(org);
+        console.log(returnedData);
+    })();
 }
 
 function editOrg(org, setOrgToEdit) {
