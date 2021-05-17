@@ -34,6 +34,8 @@ Route::get('odk_data/{county?}/{subcounty?}/{facility?}/{site?}', function (
 Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
 Route::post('/save_orgunits', 'Service\OrgunitsController@saveOrgunits');
 Route::put('/update_org', 'Service\OrgunitsController@updateOrg');
+Route::delete('/delete_org', 'Service\OrgunitsController@deleteOrg');
+
 
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
