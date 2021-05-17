@@ -47,10 +47,15 @@ function developOrgStructure(orunitData) {
     });
 }
 
-function updateOrg(org) {
+function updateOrg(org,setOrgToEdit) {
     (async () => {
         let returnedData = await UpdateOrg(org);
-        console.log(returnedData);
+        $("#org_success").html(returnedData);
+        $("#org_success").show();
+        $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
+            $("#org_success").alert(500);
+            setOrgToEdit();
+        });
     })();
 }
 
@@ -100,10 +105,11 @@ function createOrgunitTable(tableData, setOrgToEdit) {
 
 
 function Orgunit() {
-
+    $("#org_success").hide();
     const [showOrgunitLanding, setShowOrgunitLanding] = useState(true);
     const [tableOrgsStruct, setTableOrgsStruct] = useState();
     const [orgToEdit, setOrgToEdit] = useState();
+
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
@@ -130,7 +136,11 @@ function Orgunit() {
                 <a href="#" onClick={() => setShowOrgunitLanding(false)} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                     className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>
             </div>
+
             <div className="row">
+                <div id="org_success" className="alert alert-success col-sm-12 fade show" role="alert">
+                    
+                </div>
                 <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-3">
                     <TreeView orgUnits={tableOrgs} />
                 </div>
@@ -176,7 +186,7 @@ function Orgunit() {
                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button"
                                 onClick={() => {
-                                    updateOrg(orgToEdit);
+                                    updateOrg(orgToEdit,setOrgToEdit);
                                     $('#editOrgModal').modal('toggle');
                                 }}
                                 className="btn btn-primary">Save changes</button>
@@ -184,7 +194,6 @@ function Orgunit() {
                     </div>
                 </div>
             </div>
-
 
         </React.Fragment>
 
