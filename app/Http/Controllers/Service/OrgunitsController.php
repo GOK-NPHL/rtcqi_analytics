@@ -67,7 +67,7 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Created successfully'], 200);
         } catch (Exception $ex) {
             Log::error($ex);
-            return ['Error' => '500', 'Message' => 'Could not save organisation units: ' . $ex->getMessage()];
+            return response()->json(['Message' => 'Could not save organisation units: ' . $ex->getMessage()], 500);
         }
     }
 
@@ -79,7 +79,29 @@ class OrgunitsController extends Controller
             $org->save();
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
-            return ['Error' => '500', 'Message' => 'Could not save role: ' . $ex->getMessage()];
+            return response()->json(['Message' => 'Could not save role: ' . $ex->getMessage()], 500);
+        }
+    }
+
+    public function deleteOrg(Request $request)
+    {
+        try {
+            log::info("delete org 1");
+            $dependentOrgs = OdkOrgunit::where('parent_id', $request->org['org_unit_id'])
+                ->get();
+            log::info("delete org 2");
+            if (count($dependentOrgs) != 0) {
+                log::info("delete org 4");
+                return response()->json(['Message' => 'Can\'t delete orgunit as it contains children orgunits'], 500);
+            } else {
+                log::info("delete org 4");
+                $org = OdkOrgunit::find($request->org['id']);
+                $org->delete();
+            }
+            log::info("delete org 5");
+            return response()->json(['Message' => 'Deleted successfully'], 200);
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
         }
     }
 }
