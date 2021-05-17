@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, OrgUnitStructureMaker, UpdateOrg } from '../../utils/Helpers';
+import { FetchOrgunits, OrgUnitStructureMaker, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
 
@@ -47,7 +47,7 @@ function developOrgStructure(orunitData) {
     });
 }
 
-function updateOrg(org,setOrgToEdit) {
+function updateOrg(org, setOrgToEdit) {
     (async () => {
         let returnedData = await UpdateOrg(org);
         $("#org_success").html(returnedData);
@@ -64,8 +64,16 @@ function editOrg(org, setOrgToEdit) {
     setOrgToEdit(org);
 }
 
-function deleteOrg(orgId) {
-    console.log(orgId);
+function deleteOrg(org, setOrgToEdit) {
+    (async () => {
+        let returnedData = await DeleteOrg(org);
+        $("#org_success").html(returnedData);
+        $("#org_success").show();
+        $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
+            $("#org_success").alert(500);
+            setOrgToEdit(org);
+        });
+    })();
 }
 
 
@@ -92,7 +100,7 @@ function createOrgunitTable(tableData, setOrgToEdit) {
                         className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                         <i className="fas fa-user-edit"></i>
                     </a>
-                    <a onClick={() => deleteOrg(value.org_unit_id)} style={{ "display": "inlineBlock" }}
+                    <a onClick={() => deleteOrg(value, setOrgToEdit)} style={{ "display": "inlineBlock" }}
                         className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                         <i className="fas fa-user-times"></i>
                     </a>
@@ -139,7 +147,7 @@ function Orgunit() {
 
             <div className="row">
                 <div id="org_success" className="alert alert-success col-sm-12 fade show" role="alert">
-                    
+
                 </div>
                 <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-3">
                     <TreeView orgUnits={tableOrgs} />
@@ -186,7 +194,7 @@ function Orgunit() {
                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button"
                                 onClick={() => {
-                                    updateOrg(orgToEdit,setOrgToEdit);
+                                    updateOrg(orgToEdit, setOrgToEdit);
                                     $('#editOrgModal').modal('toggle');
                                 }}
                                 className="btn btn-primary">Save changes</button>

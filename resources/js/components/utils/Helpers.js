@@ -164,6 +164,22 @@ export async function UpdateOrg(org) {
     }
 }
 
+export async function DeleteOrg(org) {
+    try {
+        const response = await axios({
+            method: 'delete',
+            url: `${settings.rtcqiBaseApi}/delete_org`,
+            data: {
+                org: org,
+            }
+        });
+        console.log(response);
+        return response.data.Message;
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
 
 export function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {
