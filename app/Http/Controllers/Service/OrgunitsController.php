@@ -104,4 +104,24 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
         }
     }
+
+    public function addSubOrg(Request $request)
+    {
+        try {
+            $childOrg = $request->child_org;
+            $parentOrg = $request->parent_org;
+            Log::info($childOrg);
+            $childOrgs = OdkOrgunit::where('parent_id', $parentOrg['id'])
+                ->where('odk_unit_name', $childOrg)
+                ->get();
+            if (count($childOrgs) != 0) {
+                return response()->json(['Message' => 'Orgunit already exists'], 500);
+            } else {
+                return response()->json(['Message' => 'Created successfully'], 200);
+            }
+        } catch (Exception $ex) {
+            Log::error($ex);
+            return response()->json(['Message' => 'Could not save organisation unit: ' . $ex->getMessage()], 500);
+        }
+    }
 }
