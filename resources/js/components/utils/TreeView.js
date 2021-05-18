@@ -8,17 +8,30 @@ class TreeView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            orgUnitAction: 'add'
         }
         this.getXYCoordinates = this.getXYCoordinates.bind(this);
+        this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
+        
     }
 
     componentDidMount() {
-
+        console.log("loding component");
     }
 
-    // componentDidUpdate(prevProps) {
-
+    // componentDidUpdate(prevProps, prevState) {
+    //     if (prevState.pokemons !== this.state.pokemons) {
+    //         console.log('pokemons state has changed.')
+    //     }
     // }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.orgUnitAction !== nextProps.orgUnitAction) {
+            return false;
+        }else{
+            return true;
+        }
+    }
 
     organisationUnitOnclick(event) {
         let el = event.target.nextElementSibling;
@@ -37,8 +50,14 @@ class TreeView extends React.Component {
             showMenu: true
         });
 
-    }
+    }   
 
+    updateOrgActionStatus(status){
+        console.log(status);
+        this.setState({
+            orgUnitAction: status
+        });
+    }
 
     render() {
 
@@ -125,23 +144,28 @@ class TreeView extends React.Component {
                                         <div className="col-sm-12">
 
                                             <ul id="tabs" className="nav nav-tabs">
-                                                <li className="nav-item"><a href="" data-target="#home1" data-toggle="tab"
-                                                    className="nav-link small text-uppercase">Home</a></li>
-                                                <li className="nav-item"><a href="" data-target="#profile1" data-toggle="tab"
-                                                    className="nav-link small text-uppercase active">Profile</a></li>
-                                                <li className="nav-item"><a href="" data-target="#messages1" data-toggle="tab"
-                                                    className="nav-link small text-uppercase">Messages</a></li>
+                                                <li className="nav-item"><a href="" onClick={() => this.updateOrgActionStatus('Add')} data-target="#home1" data-toggle="tab"
+                                                    className="nav-link small text-uppercase active">Add Sub-Orgunit</a></li>
+                                                <li className="nav-item"><a href="" onClick={() => this.updateOrgActionStatus('Edit')} data-target="#profile1" data-toggle="tab"
+                                                    className="nav-link small text-uppercase ">Edit Orgunit</a></li>
+                                                <li className="nav-item"><a href="" onClick={() => this.updateOrgActionStatus('Delete')} data-target="#messages1" data-toggle="tab"
+                                                    className="nav-link small text-uppercase">Delete Orgunit</a></li>
                                             </ul>
                                             <br />
                                             <div id="tabsContent" className="tab-content">
-                                                <div id="home1" className="tab-pane fade">
-                                                    home
+                                                <div id="home1" className="tab-pane active show fade">
+                                                    <h6 className="text-left">Add a sub-orgunit to selected orgunit</h6>
+                                                    <br />
+                                                    Orgunit name <input type="text" onChange={() => {
+                                                        
+                                                    }} />
+
                                                 </div>
-                                                <div id="profile1" className="tab-pane fade active show">
-                                                    profile
+                                                <div id="profile1" className="tab-pane fade ">
+                                                    Edit Orgunit
                                                 </div>
                                                 <div id="messages1" className="tab-pane fade">
-                                                    message
+                                                    Delete Orgunit
                                                 </div>
                                             </div>
                                         </div>
