@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Service;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
@@ -117,6 +118,13 @@ class OrgunitsController extends Controller
             if (count($childOrgs) != 0) {
                 return response()->json(['Message' => 'Orgunit already exists'], 500);
             } else {
+                $orgUnit = new OdkOrgunit([
+                    'org_unit_id' =>  (string) Str::uuid(),
+                    'odk_unit_name' => $childOrg,
+                    'level' => $parentOrg['level']+1,
+                    'parent_id' => $parentOrg['id'],
+                ]);
+                $orgUnit->save();
                 return response()->json(['Message' => 'Created successfully'], 200);
             }
         } catch (Exception $ex) {
