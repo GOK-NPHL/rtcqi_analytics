@@ -190,7 +190,7 @@ export async function AddSubOrg(org, name) {
             url: `${settings.rtcqiBaseApi}/add_sub_org`,
             data: {
                 parent_org: org,
-                child_ord: name
+                child_org: name
             }
         });
         console.log(response);
