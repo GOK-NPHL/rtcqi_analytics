@@ -1,18 +1,19 @@
 import React from 'react';
 
 import '../../../css/TreeView.css';
-import AddOrgUnit from '../system/org-unit/AddOrgUnit';
+import { AddSubOrg } from './Helpers';
 
 class TreeView extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            orgUnitAction: 'add'
+            orgUnitAction: 'add',
+            currentSelectedOrg: null,
         }
         this.getXYCoordinates = this.getXYCoordinates.bind(this);
         this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
-        
+        this.addSubOrgUnit = this.addSubOrgUnit.bind(this);
     }
 
     componentDidMount() {
@@ -26,9 +27,12 @@ class TreeView extends React.Component {
     // }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.orgUnitAction !== nextProps.orgUnitAction) {
+        if (
+            nextProps.orgUnitAction !== nextProps.orgUnitAction ||
+            nextProps.currentSelectedOrg !== nextProps.currentSelectedOrg
+        ) {
             return false;
-        }else{
+        } else {
             return true;
         }
     }
@@ -50,22 +54,21 @@ class TreeView extends React.Component {
             showMenu: true
         });
 
-    }   
+    }
 
-    updateOrgActionStatus(status){
-        console.log(status);
+    updateOrgActionStatus(status) {
         this.setState({
             orgUnitAction: status
         });
     }
 
+    addSubOrgUnit() {
+        (async () => {
+            let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
+        })();
+    }
+
     render() {
-
-        let selectedAction = <>
-
-        </>;
-
-        <AddOrgUnit />;
 
         let arrayUIparser = (arr) => {
             const res = [];
@@ -76,6 +79,9 @@ class TreeView extends React.Component {
                         <li key={`${index}__${name}`} >
                             <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                 event.preventDefault();
+                                this.setState({
+                                    currentSelectedOrg: item
+                                });
                                 $('#editOrgModal').modal('toggle');
                             }} className="caret">{name}</span>
 
@@ -84,6 +90,9 @@ class TreeView extends React.Component {
                                     <li>
                                         <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                             event.preventDefault();
+                                            this.setState({
+                                                currentSelectedOrg: item
+                                            });
                                             $('#editOrgModal').modal('toggle');
                                         }} className="caret">{item.name}</span>
 
@@ -97,6 +106,9 @@ class TreeView extends React.Component {
                     res.push(<li key={index} >
                         <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                             event.preventDefault();
+                            this.setState({
+                                currentSelectedOrg: item
+                            });
                             $('#editOrgModal').modal('toggle');
                         }}>{item.name}</span>
 
@@ -156,8 +168,10 @@ class TreeView extends React.Component {
                                                 <div id="home1" className="tab-pane active show fade">
                                                     <h6 className="text-left">Add a sub-orgunit to selected orgunit</h6>
                                                     <br />
-                                                    Orgunit name <input type="text" onChange={() => {
-                                                        
+                                                    Orgunit name <input type="text" onChange={(event) => {
+                                                        this.setState({
+                                                            newOrgUnitName: event.target.value
+                                                        });
                                                     }} />
 
                                                 </div>
@@ -177,7 +191,7 @@ class TreeView extends React.Component {
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="button"
                                     onClick={() => {
-                                        updateOrg(orgToEdit, setOrgToEdit);
+                                        this.addSubOrgUnit();
                                         $('#editOrgModal').modal('toggle');
                                     }}
                                     className="btn btn-primary">Save changes</button>
