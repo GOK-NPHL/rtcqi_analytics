@@ -182,10 +182,10 @@ export async function DeleteOrg(org) {
 }
 
 export async function AddSubOrg(org, name) {
-    console.log(org);
-    console.log(name);
+    
+    let response;
     try {
-        const response = await axios({
+     response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/add_sub_org`,
             data: {
@@ -197,7 +197,7 @@ export async function AddSubOrg(org, name) {
         return response;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
