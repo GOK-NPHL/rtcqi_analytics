@@ -181,6 +181,26 @@ export async function DeleteOrg(org) {
     }
 }
 
+export async function AddSubOrg(org, name) {
+    console.log(org);
+    console.log(name);
+    try {
+        const response = await axios({
+            method: 'put',
+            url: `${settings.rtcqiBaseApi}/add_sub_org`,
+            data: {
+                parent_org: org,
+                child_ord: name
+            }
+        });
+        console.log(response);
+        return response;
+    } catch (err) {
+        // Handle Error Here
+        console.error(err);
+    }
+}
+
 export function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {
         
