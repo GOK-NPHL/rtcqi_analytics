@@ -29,7 +29,8 @@ class TreeView extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (
             nextProps.orgUnitAction !== nextProps.orgUnitAction ||
-            nextProps.currentSelectedOrg !== nextProps.currentSelectedOrg
+            nextProps.currentSelectedOrg !== nextProps.currentSelectedOrg ||
+            nextProps.alertMessage !== nextProps.alertMessage
         ) {
             return false;
         } else {
@@ -65,6 +66,10 @@ class TreeView extends React.Component {
     addSubOrgUnit() {
         (async () => {
             let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
+            this.setState({
+                alertMessage: response.data.Message
+            });
+            $('#alertMessageModal').modal('toggle');
         })();
     }
 
@@ -138,7 +143,7 @@ class TreeView extends React.Component {
             <React.Fragment>
 
                 {treeStruc}
-
+                {/* Contenxt menu modal*/}
                 <div className="modal fade" id="editOrgModal" tabIndex="-1" role="dialog" aria-labelledby="editOrgModalTitle" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered" role="document">
                         <div className="modal-content">
@@ -150,7 +155,7 @@ class TreeView extends React.Component {
                             </div>
                             <div className="modal-body">
 
-                                {/* Orgunit menu */}
+                                {/* Orgunit menu Action Tabs*/}
                                 <section className="container">
                                     <div className="row">
                                         <div className="col-sm-12">
@@ -200,6 +205,32 @@ class TreeView extends React.Component {
                     </div>
                 </div>
 
+                {/* Alert message modal*/}
+                <div className="modal fade" id="alertMessageModal" tabIndex="-1" role="dialog" aria-labelledby="alertMessageModalTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">                                
+                                    <p>{this.state.alertMessage}</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button"
+                                    onClick={() => {
+                                        $('#alertMessageModal').modal('toggle');
+                                        this.setState({
+                                            alertMessage: null
+                                        });
+                                    }}
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </React.Fragment>
 
         );
