@@ -203,6 +203,10 @@ export async function AddSubOrg(org, name) {
 
 export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
     try {
+        let orgsId =[];
+        for(const[key,value] in Object.entries(orgunits)){
+            orgsId.push(key);
+        }
         const response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/save_user`,
@@ -211,8 +215,8 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
                 last_name: last_name,
                 email: email,
                 password: password,
-                orgunits: orgunits,
-                role
+                orgunits: orgsId,
+                role: role
             }
         });
     } catch (err) {
