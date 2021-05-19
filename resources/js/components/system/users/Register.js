@@ -14,7 +14,8 @@ class Register extends React.Component {
             role: '',
             roles: {},
             selectedOrgs: {},
-            permissionOptions: []
+            permissionOptions: [],
+            message: ''
         };
 
         this.saveUser = this.saveUser.bind(this);
@@ -46,15 +47,17 @@ class Register extends React.Component {
                 this.state.selectedOrgs,
                 this.state.role
             );
+            console.log(response);
+            this.setState({
+                message: response.data.Message
+            });
+            $('#saveUserModal').modal('toggle');
             // this.props.fetchRoles();
             // this.props.toggleDisplay();
         })();
-
-        this.props.toggleDisplay();
     }
 
     roleOnChange(event) {
-        console.log(event.target.value);
         this.setState({ role: event.target.value });
     };
 
@@ -186,6 +189,25 @@ class Register extends React.Component {
                             </div>
                         </div>
 
+                    </div>
+                </div>
+                {/* user persist alert box */}
+                <div className="modal fade" id="saveUserModal" tabIndex="-1" role="dialog" aria-labelledby="saveUserModalTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <p>{this.state.message}</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" onClick={() => this.props.toggleDisplay()} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </React.Fragment>
