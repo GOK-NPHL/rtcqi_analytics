@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Role;
+use Exception;
 
 class AuthController extends Controller
 {
@@ -21,27 +22,31 @@ class AuthController extends Controller
     public function register(Request $request)
     {
 
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'email'    => 'unique:users|required',
-            'role' => 'required',
-            'password' => 'required',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required',
+                'email'    => 'unique:users|required',
+                'role' => 'required',
+                'password' => 'required',
+            ]);
 
-        $name = $request->name;
-        $email    = $request->email;
-        $password = $request->password;
-        $role_id = $request->role;
+            $name = $request->name;
+            $email    = $request->email;
+            $password = $request->password;
+            $role_id = $request->role;
 
-        $role =  Role::find($role_id);
-        $user = new User([
-            'name' => $name,
-            'email' => $email,
-            'password' => Hash::make($password)
-        ]);
-        $user->role()->associate($role);
-        $user->save();
-        $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
-
+            $role =  Role::find($role_id);
+            $user = new User([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($password)
+            ]);
+            $user->role()->associate($role);
+            $user->save();
+            $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
+            return response()->json(['Message' => 'Created successfully'], 200);
+        } catch (Exception $ex) {
+            return ['Error' => '500', 'Message' => 'Could not save user ' . $ex->getMessage()];
+        }
     }
 }

@@ -30,7 +30,7 @@ class UsersController extends Controller
     }
 
     public function getUsers()
-    {
+    {   
         $user = Auth::user();
         $users = User::select(
             "users.name as first_name",
