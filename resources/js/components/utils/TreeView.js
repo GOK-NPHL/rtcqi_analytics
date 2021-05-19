@@ -83,7 +83,7 @@ class TreeView extends React.Component {
                     res.push(
                         <li key={`${index}__${name}`} >
                             {this.props.addCheckBox ?
-                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                 : ''
                             }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                 event.preventDefault();
@@ -97,7 +97,7 @@ class TreeView extends React.Component {
                                 return <ul key={`${index}__${name}_${item.name}`} className={`${item.level > 2 ? "nested" : ""}`}>
                                     <li>
                                         {this.props.addCheckBox ?
-                                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                             : ''
                                         }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                             event.preventDefault();
@@ -116,7 +116,7 @@ class TreeView extends React.Component {
                 } else {
                     res.push(<li key={index} >
                         {this.props.addCheckBox ?
-                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                             : ''
                         }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                             event.preventDefault();
