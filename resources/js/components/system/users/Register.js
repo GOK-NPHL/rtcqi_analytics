@@ -54,6 +54,7 @@ class Register extends React.Component {
     }
 
     roleOnChange(event) {
+        console.log(event.target.value);
         this.setState({ role: event.target.value });
     };
 
