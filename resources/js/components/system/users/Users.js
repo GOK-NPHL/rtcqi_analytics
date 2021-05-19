@@ -27,6 +27,16 @@ class User extends React.Component {
         })();
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.showUserTable !== this.state.showUserTable) {
+            (async () => {
+                let users = await FetchUsers();
+                this.setState({
+                    users: users,
+                });
+            })();
+        }
+    }
     onChange(currentNode, selectedNodes) {
         console.log("path::", currentNode.path);
     };
