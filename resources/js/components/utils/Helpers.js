@@ -182,10 +182,10 @@ export async function DeleteOrg(org) {
 }
 
 export async function AddSubOrg(org, name) {
-    
+
     let response;
     try {
-     response = await axios({
+        response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/add_sub_org`,
             data: {
@@ -201,28 +201,68 @@ export async function AddSubOrg(org, name) {
     }
 }
 
-export function OrgUnitStructureMaker(arr, orgUnitToAdd) {
+function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {
-        
+
         arr.map((item) => {
             // if (item.level != 1) { //skip country org
-           
-                if (item.id == orgUnitToAdd.parent_id) {
-                    
-                    let orgUnit = {
-                        id: orgUnitToAdd.org_unit_id,
-                        name: orgUnitToAdd.odk_unit_name,
-                        level: orgUnitToAdd.level,
-                        parentId: orgUnitToAdd.parent_id,
-                        updatedAt: orgUnitToAdd.updated_at,
-                        children: [
-                        ]
-                    };
-                    item.children.push(orgUnit);
-                } else {
-                    arr = OrgUnitStructureMaker(item.children, orgUnitToAdd);
-                }
+
+            if (item.id == orgUnitToAdd.parent_id) {
+
+                let orgUnit = {
+                    id: orgUnitToAdd.org_unit_id,
+                    name: orgUnitToAdd.odk_unit_name,
+                    level: orgUnitToAdd.level,
+                    parentId: orgUnitToAdd.parent_id,
+                    updatedAt: orgUnitToAdd.updated_at,
+                    children: [
+                    ]
+                };
+                item.children.push(orgUnit);
+            } else {
+                arr = OrgUnitStructureMaker(item.children, orgUnitToAdd);
+            }
             // }
         });
     }
+}
+
+export function DevelopOrgStructure(orunitData) {
+
+    let tableOrgs = [
+        {
+            id: 0,
+            name: "Kenya",
+            level: 1,
+            parentId: 0,
+            children: [
+
+            ]
+        }
+    ];
+    orunitData.metadata.levels.map(hierchayLevel => {
+        // console.log(orunitData.payload);
+        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.name == 'Kenya');
+        tableOrgs[0]['id'] = kenya.org_unit_id;
+        let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
+        orgUnits.map((orgUnitToAdd) => {
+            if (orgUnitToAdd.level == 2) {
+                let orgUnit = {
+                    id: orgUnitToAdd.org_unit_id,
+                    name: orgUnitToAdd.odk_unit_name,
+                    level: orgUnitToAdd.level,
+                    parentId: orgUnitToAdd.parent_id,
+                    updatedAt: orgUnitToAdd.updated_at,
+                    children: [
+                    ]
+                };
+                tableOrgs[0].children.push(orgUnit);
+            } else {
+                OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
+            }
+
+        });
+
+    });
+    return tableOrgs;
 }
