@@ -16,7 +16,7 @@ class CreateUserOrganisationunit extends Migration
         Schema::create('odkorgunit_user', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->integer("odkorgunit_id");
+            $table->integer("odk_orgunit_id");
             $table->integer("user_id");
         });
     }
