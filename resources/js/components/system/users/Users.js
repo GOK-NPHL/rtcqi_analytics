@@ -20,7 +20,7 @@ class User extends React.Component {
     };
 
     toggleDisplay() {
-        let booll= this.state.showUserTable;
+        let booll = this.state.showUserTable;
         this.setState({
             showUserTable: !booll
         });
@@ -75,58 +75,13 @@ class User extends React.Component {
                                     </a>
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Jacob juma</td>
-                                <td>Jacob@mail.com</td>
-                                <td>Kakamega</td>
-                                <td>CMLC</td>
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>Larry Mko</td>
-                                <td>Larry@mail.com</td>
-                                <td>Kenya</td>
-                                <td>National Manager</td>
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>Larry Mko</td>
-                                <td>Larry@mail.com</td>
-                                <td>Dagoretti North Subcounty</td>
-                                <td>SUB CMLC</td>
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
 
                         </tbody>
                     </table>
                 </div>
             </div>;
         } else {
-            pageContent = <Register/>;
+            pageContent = <Register toggleDisplay={this.toggleDisplay}/>;
         }
 
         return (
