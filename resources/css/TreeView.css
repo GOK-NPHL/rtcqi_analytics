@@ -32,6 +32,10 @@ ul {
     display: none;
   }
   
+  li{
+    white-space: nowrap;
+  }
+
   /* .active {
     display: none;
   } */
