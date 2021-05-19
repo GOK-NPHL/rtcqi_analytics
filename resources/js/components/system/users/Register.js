@@ -12,27 +12,40 @@ class Register extends React.Component {
         super(props);
         this.state = {
             selected: [],
-            roleName: '',
+            role: '',
+            roles: {},
+            selectedOrgs: {},
             permissionOptions: []
         };
 
         this.saveRole = this.saveRole.bind(this);
         this.authoritiesOnChange = this.authoritiesOnChange.bind(this);
+        this.selectOrgUnitHandler = this.selectOrgUnitHandler.bind(this);
     }
 
     componentDidMount() {
         (async () => {
             let roles = await FetchRoles();
-            // console.log(roles);
+            console.log(roles);
             let httpOrgUnits = await FetchOrgunits();
-            console.log(httpOrgUnits);
-            httpOrgUnits=DevelopOrgStructure(httpOrgUnits);
+            // console.log(httpOrgUnits);
+            httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
             this.setState({
                 orgUnits: httpOrgUnits,
                 roles: roles
             });
         })();
     }
+
+    //    shouldComponentUpdate(nextProps, nextState) {
+    // if (
+    //     nextProps.selectedOrgs !== nextProps.selectedOrgs 
+    // ) {
+    //     return false;
+    // } else {
+    //     return true;
+    // }
+    // }
 
     authoritiesOnChange(selected) {
         this.setState({ selected: selected });
@@ -56,9 +69,30 @@ class Register extends React.Component {
         this.props.updateEditMode(false);
     }
 
+    selectOrgUnitHandler(orgunit) {
 
+        let selectedOrgs = this.state.selectedOrgs;
+        if (orgunit.id in selectedOrgs) {
+            delete selectedOrgs[orgunit.id];
+        } else {
+            selectedOrgs[orgunit.id] = orgunit;
+        }
+        this.setState({
+            selectedOrgs: selectedOrgs
+        });
+    }
 
     render() {
+        let roles = [];
+        let selectedOrgs = [];
+        for (const [key, value] of Object.entries(this.state.roles)) {
+            roles.push(<option key={key} id={key}>{value.role_name}</option>);
+        }
+        let count = 1;
+        for (const [key, value] of Object.entries(this.state.selectedOrgs)) {
+            selectedOrgs.push(<p key={key} data-id={key}>{count}. {value.name}</p>);
+            count += 1;
+        }
 
         return (
             <React.Fragment>
@@ -93,10 +127,8 @@ class Register extends React.Component {
                                         <div className="col-md-6 mb-3">
                                             <label htmlFor="validationTooltip05">Role</label>
                                             <select className="form-control" id="exampleFormControlSelect1">
-                                                <option>National Manager</option>
-                                                <option>Implamenting Partner</option>
-                                                <option>County Medical Laboratory coordinators</option>
-                                                <option>Sub-County Medical Laboratory coordinators</option>
+                                                <option defaultValue>--Select user role--</option>
+                                                {roles}
                                             </select>
                                         </div>
                                     </div>
@@ -106,7 +138,13 @@ class Register extends React.Component {
                                         <div className="col-md-6 mb-6">
                                             <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
                                                 <p> Select Organisation Unit </p>
-                                                <TreeView orgUnits={this.state.orgUnits} />
+                                                <TreeView addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
+                                            </div>
+                                        </div>
+                                        <div id="selectedOrgs" className="col-md-6 mb-6">
+                                            <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                                <p> Selected Organisation Units </p>
+                                                {selectedOrgs}
                                             </div>
                                         </div>
                                     </div>
