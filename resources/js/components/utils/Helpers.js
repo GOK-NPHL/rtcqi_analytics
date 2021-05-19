@@ -227,6 +227,19 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
 }
 
 
+export async function FetchUsers() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/users`);
+        const userList = response.data;
+        return userList;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+
+}
+
 function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {
 
