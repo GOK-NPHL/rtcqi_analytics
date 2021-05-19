@@ -219,6 +219,7 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
                 role: role
             }
         });
+        return response;
     } catch (err) {
         // Handle Error Here
         console.log(err);
