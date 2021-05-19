@@ -39,7 +39,7 @@ class User extends Authenticatable
 
     public function OdkOrgunit()
     {
-        return $this->belongsToMany('App\OrganisationUnit');
+        return $this->belongsToMany('App\OdkOrgunit','odkorgunit_user');
     }
 
     public function rolesCreated()
