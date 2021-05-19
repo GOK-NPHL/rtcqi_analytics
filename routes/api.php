@@ -43,7 +43,7 @@ Route::post('/save_role', 'Service\RolesController@createRole');
 Route::post('/delete_role', 'Service\RolesController@deleteRole');
 Route::post('/update_role', 'Service\RolesController@updateRole');
 
-Route::put('/save_user', 'AuthController@register');
+Route::put('/save_user', 'Service\AuthController@register');
 
 
 
