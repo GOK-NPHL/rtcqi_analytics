@@ -51,7 +51,7 @@ function createOrgunitTable(tableData, setOrgToEdit) {
             index = index + 1;
             tableRows.push(<tr key={index}>
                 <td>{index}</td>
-                <td >{value.odk_unit_name}</td>
+                <td style={{"width": "10px"}}>{value.odk_unit_name}</td>
                 <td>{value.level}</td>
                 <td>{value.updated_at}</td>
                 <td>
@@ -111,10 +111,10 @@ function Orgunit() {
                 <div id="org_success" className="alert alert-success col-sm-12 fade show" role="alert">
 
                 </div>
-                <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-3">
+                <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-4">
                     <TreeView orgUnits={tableOrgs} />
                 </div>
-                <div className="col-sm-9">
+                <div className="col-sm-8">
                     <table className="table table-striped" >
                         <thead>
                             <tr>
