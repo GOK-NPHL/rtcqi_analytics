@@ -13,7 +13,7 @@ class CreateOrgunitOdkMapsTable extends Migration
      */
     public function up()
     {
-        Schema::create('odk_orgunit_maps', function (Blueprint $table) {
+        Schema::create('odkorgunit', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->uuid('org_unit_id');
@@ -30,6 +30,6 @@ class CreateOrgunitOdkMapsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('odk_orgunit_maps');
+        Schema::dropIfExists('odkorgunit');
     }
 }
