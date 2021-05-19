@@ -242,8 +242,8 @@ export function DevelopOrgStructure(orunitData) {
     ];
     orunitData.metadata.levels.map(hierchayLevel => {
         // console.log(orunitData.payload);
-        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.name == 'Kenya');
-        tableOrgs[0]['id'] = kenya.org_unit_id;
+        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0);
+        tableOrgs[0]['id'] = kenya[0]['org_unit_id'];
         let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
         orgUnits.map((orgUnitToAdd) => {
             if (orgUnitToAdd.level == 2) {
