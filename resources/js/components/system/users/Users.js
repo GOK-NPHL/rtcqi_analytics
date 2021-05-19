@@ -3,16 +3,28 @@ import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import Register from './Register';
+import { FetchUsers } from '../../utils/Helpers';
 
 class User extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            showUserTable: true
+            showUserTable: true,
+            users: []
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
+    }
+
+    componentDidMount() {
+        (async () => {
+            let users = await FetchUsers();
+            console.log(users);
+            this.setState({
+                users: users,
+            });
+        })();
     }
 
     onChange(currentNode, selectedNodes) {
@@ -35,6 +47,27 @@ class User extends React.Component {
             marginBottom: "5px"
         };
 
+        let users = [];
+        if (this.state.users.length > 0) {
+            this.state.users.map((user, index) => {
+                users.push(<tr key={index}>
+                    <th scope="row">{index + 1}</th>
+                    <td>{user.first_name} {user.last_name}</td>
+                    <td>{user.email}</td>
+                    <td>{user.role_name}</td>
+                    <td>
+                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i className="fas fa-user-edit"></i>
+                        </a>
+                        <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                            <i className="fas fa-user-times"></i>
+                        </a>
+                    </td>
+                </tr>
+                );
+            });
+        }
+
         // this.assignObjectPaths(data);
 
         const regForm = {
@@ -54,34 +87,18 @@ class User extends React.Component {
                                 <th scope="col">#</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
-                                <th scope="col">Organisation Unit</th>
                                 <th scope="col">Role</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Mark Odour</td>
-                                <td>mark@mail.com</td>
-                                <td>Nairobi</td>
-                                <td>Implementing Partner</td>
-                                <td>
-                                    <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                        <i className="fas fa-user-edit"></i>
-                                    </a>
-                                    <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                                        <i className="fas fa-user-times"></i>
-                                    </a>
-                                </td>
-                            </tr>
-
+                            {users}
                         </tbody>
                     </table>
                 </div>
             </div>;
         } else {
-            pageContent = <Register toggleDisplay={this.toggleDisplay}/>;
+            pageContent = <Register toggleDisplay={this.toggleDisplay} />;
         }
 
         return (
