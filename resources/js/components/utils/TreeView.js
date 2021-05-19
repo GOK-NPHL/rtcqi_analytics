@@ -82,7 +82,10 @@ class TreeView extends React.Component {
                 if (children.length > 0) {
                     res.push(
                         <li key={`${index}__${name}`} >
-                            <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
+                            {this.props.addCheckBox ?
+                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                                : ''
+                            }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                 event.preventDefault();
                                 this.setState({
                                     currentSelectedOrg: item
@@ -93,7 +96,10 @@ class TreeView extends React.Component {
                             {children.map((item) => {
                                 return <ul key={`${index}__${name}_${item.name}`} className={`${item.level > 2 ? "nested" : ""}`}>
                                     <li>
-                                        <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
+                                        {this.props.addCheckBox ?
+                                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                                            : ''
+                                        }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                             event.preventDefault();
                                             this.setState({
                                                 currentSelectedOrg: item
@@ -109,7 +115,10 @@ class TreeView extends React.Component {
                         </li>);
                 } else {
                     res.push(<li key={index} >
-                        <span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
+                        {this.props.addCheckBox ?
+                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(event)} />
+                            : ''
+                        }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                             event.preventDefault();
                             this.setState({
                                 currentSelectedOrg: item
@@ -215,8 +224,8 @@ class TreeView extends React.Component {
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <div className="modal-body">                                
-                                    <p>{this.state.alertMessage}</p>
+                            <div className="modal-body">
+                                <p>{this.state.alertMessage}</p>
                             </div>
                             <div className="modal-footer">
                                 <button type="button"
