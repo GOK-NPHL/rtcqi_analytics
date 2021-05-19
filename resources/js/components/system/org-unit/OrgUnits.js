@@ -3,49 +3,11 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, OrgUnitStructureMaker, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
+import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
 
-let tableOrgs = [
-    {
-        id: 0,
-        name: "Kenya",
-        level: 1,
-        parentId: 0,
-        children: [
-
-        ]
-    }
-];
-
-function developOrgStructure(orunitData) {
-
-    orunitData.metadata.levels.map(hierchayLevel => {
-        // console.log(orunitData.payload);
-        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.name == 'Kenya');
-        tableOrgs[0]['id'] = kenya.org_unit_id;
-        let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
-        orgUnits.map((orgUnitToAdd) => {
-            if (orgUnitToAdd.level == 2) {
-                let orgUnit = {
-                    id: orgUnitToAdd.org_unit_id,
-                    name: orgUnitToAdd.odk_unit_name,
-                    level: orgUnitToAdd.level,
-                    parentId: orgUnitToAdd.parent_id,
-                    updatedAt: orgUnitToAdd.updated_at,
-                    children: [
-                    ]
-                };
-                tableOrgs[0].children.push(orgUnit);
-            } else {
-                OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
-            }
-
-        });
-
-    });
-}
+let tableOrgs;
 
 function updateOrg(org, setOrgToEdit) {
     (async () => {
@@ -121,7 +83,7 @@ function Orgunit() {
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
-            developOrgStructure(httpOrgUnits);
+            tableOrgs=DevelopOrgStructure(httpOrgUnits,tableOrgs);
             setTableOrgsStruct(httpOrgUnits); ///save to state
         }
     })();
