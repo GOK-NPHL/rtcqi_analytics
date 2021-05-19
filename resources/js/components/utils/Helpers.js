@@ -51,7 +51,7 @@ export async function FetchOdkData(county, subcounty, facility, site) {
         return dataObject;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 
 }
@@ -64,7 +64,7 @@ export async function FetchRoles() {
         return rolesList;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 
 }
@@ -77,7 +77,7 @@ export async function FetchAuthorities() {
         return authoritiesList;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 
 }
@@ -94,7 +94,7 @@ export async function SaveRole(roleName, authoritiesSelected) {
         });
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
@@ -109,7 +109,7 @@ export async function DeleteRole(roleId) {
         });
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
@@ -127,7 +127,7 @@ export async function UpdateRole(role_id, roleName, authoritiesSelected) {
         });
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
@@ -143,7 +143,7 @@ export async function SaveOrgUnits(orgUnits) {
         });
         return response;
     } catch (err) {
-        return response;
+        return err.response
     }
 }
 
@@ -160,7 +160,7 @@ export async function UpdateOrg(org) {
         return response.data.Message;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
@@ -177,7 +177,7 @@ export async function DeleteOrg(org) {
         return response.data.Message;
     } catch (err) {
         // Handle Error Here
-        console.error(err);
+        return err.response
     }
 }
 
@@ -200,6 +200,28 @@ export async function AddSubOrg(org, name) {
         return err.response
     }
 }
+
+export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
+    try {
+        const response = await axios({
+            method: 'put',
+            url: `${settings.rtcqiBaseApi}/save_user`,
+            data: {
+                name: first_name,
+                last_name: last_name,
+                email: email,
+                password: password,
+                orgunits: orgunits,
+                role
+            }
+        });
+    } catch (err) {
+        // Handle Error Here
+        console.log(err);
+        return err.response
+    }
+}
+
 
 function OrgUnitStructureMaker(arr, orgUnitToAdd) {
     if (arr != undefined) {
