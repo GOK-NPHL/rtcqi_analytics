@@ -6,7 +6,7 @@ import DataTable from "react-data-table-component";
 import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
-
+let message ='dsds';
 let tableOrgs;
 
 function updateOrg(org, setOrgToEdit) {
@@ -29,12 +29,15 @@ function editOrg(org, setOrgToEdit) {
 function deleteOrg(org, setOrgToEdit) {
     (async () => {
         let returnedData = await DeleteOrg(org);
-        $("#org_success").html(returnedData);
-        $("#org_success").show();
-        $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
-            $("#org_success").alert(500);
-            setOrgToEdit(org);
-        });
+        // $("#org_success").html(returnedData.data.Message);
+        message=returnedData.data.Message;
+        $('#returnedMessage').html(message);
+        $('#messageModal').modal('toggle');
+        // $("#org_success").show();
+        // $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
+        //     $("#org_success").alert(500);
+        //     setOrgToEdit(org);
+        // });
     })();
 }
 
@@ -51,7 +54,7 @@ function createOrgunitTable(tableData, setOrgToEdit) {
             index = index + 1;
             tableRows.push(<tr key={index}>
                 <td>{index}</td>
-                <td style={{"width": "10px"}}>{value.odk_unit_name}</td>
+                <td style={{ "width": "10px" }}>{value.odk_unit_name}</td>
                 <td>{value.level}</td>
                 <td>{value.updated_at}</td>
                 <td>
@@ -83,7 +86,7 @@ function Orgunit() {
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
-            tableOrgs=DevelopOrgStructure(httpOrgUnits,tableOrgs);
+            tableOrgs = DevelopOrgStructure(httpOrgUnits, tableOrgs);
             setTableOrgsStruct(httpOrgUnits); ///save to state
         }
     })();
@@ -160,6 +163,26 @@ function Orgunit() {
                                     $('#editOrgModal').modal('toggle');
                                 }}
                                 className="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* user persist alert box */}
+            <div className="modal fade" id="messageModal" tabIndex="-1" role="dialog" aria-labelledby="messageModalTitle" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                        <p id="returnedMessage">{message}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
