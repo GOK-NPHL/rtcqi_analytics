@@ -6,7 +6,7 @@ import DataTable from "react-data-table-component";
 import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
-let message ='dsds';
+let message ='';
 let tableOrgs;
 
 function updateOrg(org, setOrgToEdit) {
@@ -30,6 +30,7 @@ function deleteOrg(org, setOrgToEdit) {
     (async () => {
         let returnedData = await DeleteOrg(org);
         // $("#org_success").html(returnedData.data.Message);
+        console.log(returnedData);
         message=returnedData.data.Message;
         $('#returnedMessage').html(message);
         $('#messageModal').modal('toggle');
