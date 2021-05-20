@@ -90,7 +90,7 @@ class TreeView extends React.Component {
                                 this.setState({
                                     currentSelectedOrg: item
                                 });
-                                $('#editOrgModal').modal('toggle');
+                                $('#orgActionModal').modal('toggle');
                             }} className="caret">{name}</span>
 
                             {children.map((item) => {
@@ -104,7 +104,7 @@ class TreeView extends React.Component {
                                             this.setState({
                                                 currentSelectedOrg: item
                                             });
-                                            $('#editOrgModal').modal('toggle');
+                                            $('#orgActionModal').modal('toggle');
                                         }} className="caret">{item.name}</span>
 
                                         {arrayUIparser(item.children)}
@@ -123,7 +123,7 @@ class TreeView extends React.Component {
                             this.setState({
                                 currentSelectedOrg: item
                             });
-                            $('#editOrgModal').modal('toggle');
+                            $('#orgActionModal').modal('toggle');
                         }}>{item.name}</span>
 
                     </li>);
@@ -153,7 +153,7 @@ class TreeView extends React.Component {
 
                 {treeStruc}
                 {/* Contenxt menu modal*/}
-                <div className="modal fade" id="editOrgModal" tabIndex="-1" role="dialog" aria-labelledby="editOrgModalTitle" aria-hidden="true">
+                <div className="modal fade" id="orgActionModal" tabIndex="-1" role="dialog" aria-labelledby="orgActionModalTitle" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered" role="document">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -206,7 +206,7 @@ class TreeView extends React.Component {
                                 <button type="button"
                                     onClick={() => {
                                         this.addSubOrgUnit();
-                                        $('#editOrgModal').modal('toggle');
+                                        $('#orgActionModal').modal('toggle');
                                     }}
                                     className="btn btn-primary">Save changes</button>
                             </div>
