@@ -174,7 +174,7 @@ export async function DeleteOrg(org) {
             }
         });
         console.log(response);
-        return response.data.Message;
+        return response;
     } catch (err) {
         // Handle Error Here
         return err.response
