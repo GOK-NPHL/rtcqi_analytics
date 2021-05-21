@@ -45,6 +45,8 @@ Route::post('/update_role', 'Service\RolesController@updateRole');
 
 Route::put('/save_user', 'Service\AuthController@register');
 Route::get('/users', 'Service\UsersController@getUsers');
+Route::delete('/delete_user', 'Service\UsersController@deleteUser');
+
 
 
 
