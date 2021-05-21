@@ -92,21 +92,26 @@ export async function SaveRole(roleName, authoritiesSelected) {
                 authoritiesSelected: authoritiesSelected
             }
         });
+        console.log("saved role");
     } catch (err) {
         // Handle Error Here
+        console.log(err);
         return err.response
     }
 }
 
 export async function DeleteRole(roleId) {
+    let response = '';
     try {
-        const response = await axios({
+        response = await axios({
             method: 'post',
             url: `${settings.rtcqiBaseApi}/delete_role`,
             data: {
                 role_id: roleId,
             }
+
         });
+        return response;
     } catch (err) {
         // Handle Error Here
         return err.response
@@ -203,8 +208,8 @@ export async function AddSubOrg(org, name) {
 
 export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
     try {
-        let orgsId =[];
-        for(const[key,value] in Object.entries(orgunits)){
+        let orgsId = [];
+        for (const [key, value] in Object.entries(orgunits)) {
             orgsId.push(key);
         }
         const response = await axios({
@@ -239,6 +244,22 @@ export async function FetchUsers() {
         return err.response
     }
 
+}
+
+export async function DeleteUser(user) {
+    try {
+        const response = await axios({
+            method: 'delete',
+            url: `${settings.rtcqiBaseApi}/delete_user`,
+            data: {
+                user: user,
+            }
+        });
+        return response;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
 }
 
 function OrgUnitStructureMaker(arr, orgUnitToAdd) {
