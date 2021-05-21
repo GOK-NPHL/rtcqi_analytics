@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import Register from './Register';
-import { FetchUsers } from '../../utils/Helpers';
+import { FetchUsers,DeleteUser } from '../../utils/Helpers';
 
 class User extends React.Component {
 
@@ -11,10 +11,12 @@ class User extends React.Component {
         super(props);
         this.state = {
             showUserTable: true,
-            users: []
+            users: [],
+            selectedUser: null
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
+        this.getUsers = this.getUsers.bind(this);
     }
 
     componentDidMount() {
@@ -27,14 +29,18 @@ class User extends React.Component {
         })();
     }
 
+    getUsers() {
+        (async () => {
+            let users = await FetchUsers();
+            this.setState({
+                users: users,
+            });
+        })();
+    }
+
     componentDidUpdate(prevProps, prevState) {
         if (prevState.showUserTable !== this.state.showUserTable) {
-            (async () => {
-                let users = await FetchUsers();
-                this.setState({
-                    users: users,
-                });
-            })();
+            this.getUsers();
         }
     }
     onChange(currentNode, selectedNodes) {
@@ -46,6 +52,25 @@ class User extends React.Component {
         this.setState({
             showUserTable: !booll
         });
+    }
+
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (this.state.nextState != nextState.selectedUser) {
+    //         return false;
+    //     } else {
+    //         return true;
+    //     }
+    // }
+
+    deleteUser() {
+        (async () => {
+            let response = await DeleteUser(this.state.selectedUser);
+            this.setState({
+                responseMessage: response.data.Message
+            });
+            $('#deleteUserModal').modal('toggle');
+            this.getUsers();
+        })();
     }
 
     render() {
@@ -69,7 +94,13 @@ class User extends React.Component {
                         <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i className="fas fa-user-edit"></i>
                         </a>
-                        <a className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                        <a
+                            onClick={() => {
+                                this.setState({
+                                    selectedUser: user
+                                });
+                                $('#deleteConfirmModal').modal('toggle');
+                            }} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                             <i className="fas fa-user-times"></i>
                         </a>
                     </td>
@@ -111,6 +142,56 @@ class User extends React.Component {
             pageContent = <Register toggleDisplay={this.toggleDisplay} />;
         }
 
+        let confirmationBox =
+            < div className="modal fade" id="deleteConfirmModal" tabIndex="-1" role="dialog" aria-labelledby="deleteConfirmModalTitle" aria-hidden="true" >
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title">Notice!</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            Delete {
+                                this.state.selectedUser ? this.state.selectedUser.first_name : ''
+                            }?
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button"
+                                onClick={() => {
+                                    this.deleteUser();
+                                    $('#deleteConfirmModal').modal('toggle');
+                                }}
+                                className="btn btn-primary">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div >
+
+        let alertBox =
+            < div className="modal fade" id="deleteUserModal" tabIndex="-1" role="dialog" aria-labelledby="deleteUserModalTitle" aria-hidden="true" >
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {
+                                this.state.responseMessage ? this.state.responseMessage : ''
+                            }
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div >
+
         return (
             <React.Fragment>
 
@@ -122,7 +203,8 @@ class User extends React.Component {
                 </div>
 
                 {pageContent}
-
+                {confirmationBox}
+                {alertBox}
             </React.Fragment >
         );
     }
