@@ -21,7 +21,7 @@ class Roles extends React.Component {
         this.deleteRole = this.deleteRole.bind(this);
         this.editRole = this.editRole.bind(this);
         this.updateEditMode = this.updateEditMode.bind(this);
-        
+
     }
 
     fetchRoles() {
@@ -49,7 +49,14 @@ class Roles extends React.Component {
     deleteRole(role_id) {
         (async () => {
             let returnedData = await DeleteRole(role_id);
-            this.fetchRoles();
+            if (returnedData) {
+                this.setState({
+                    responseMessage: returnedData.data.Message
+                })
+                $('#deleteRoleModal').modal('toggle');
+                this.fetchRoles();
+            }
+
         })();
     }
 
@@ -127,6 +134,27 @@ class Roles extends React.Component {
             }
         }
 
+        let alertBox =
+            < div className="modal fade" id="deleteRoleModal" tabIndex="-1" role="dialog" aria-labelledby="deleteRoleModalTitle" aria-hidden="true" >
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {
+                                this.state.responseMessage ? this.state.responseMessage : ''
+                            }
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div >
 
         if (this.state.showUserTable) {
             pageContent = <div id='user_table' className='row'>
@@ -169,6 +197,7 @@ class Roles extends React.Component {
                         className="fas fa-users fa-sm text-white-50"></i> Create Roles</a>
                 </div>
                 {pageContent}
+                {alertBox}
             </React.Fragment>
         );
     }
