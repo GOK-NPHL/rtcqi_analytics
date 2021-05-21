@@ -48,12 +48,13 @@ class Register extends React.Component {
                 this.state.role
             );
             console.log(response);
-            this.setState({
-                message: response.data.Message
-            });
-            $('#saveUserModal').modal('toggle');
-            // this.props.fetchRoles();
-            // this.props.toggleDisplay();
+            if (response) {
+                this.setState({
+                    message: response.data.Message
+                });
+                $('#saveUserModal').modal('toggle');
+            }
+
         })();
     }
 
