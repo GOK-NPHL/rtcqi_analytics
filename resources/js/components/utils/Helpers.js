@@ -291,20 +291,21 @@ function OrgUnitStructureMaker(arr, orgUnitToAdd) {
 export function DevelopOrgStructure(orunitData) {
 
     let tableOrgs = [
-        {
-            id: 0,
-            name: "Kenya",
-            level: 1,
-            parentId: 0,
-            children: [
+        // {
+        //     id: 0,
+        //     name: "Kenya",
+        //     level: 1,
+        //     parentId: 0,
+        //     children: [
 
-            ]
-        }
+        //     ]
+        // }
     ];
     orunitData.metadata.levels.map(hierchayLevel => {
         // console.log(orunitData.payload);
         let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0);
-        tableOrgs[0]['id'] = kenya[0]['org_unit_id'];
+        tableOrgs.push(kenya);
+        // tableOrgs[0]['id'] = kenya[0]['org_unit_id'];
         let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
         orgUnits.map((orgUnitToAdd) => {
             if (orgUnitToAdd.level == 2) {
