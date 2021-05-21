@@ -124,7 +124,7 @@ class OrgunitCreate extends React.Component {
                     id="saveButton"
                     type="button"
                     onClick={() => this.setState({ isSaveOrgs: true })}
-                    className="btn btn-primary"> Save & Exit <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                    className="btn btn-primary"> Save & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
                 </button></div>;
         }
 

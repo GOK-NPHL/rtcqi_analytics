@@ -48,7 +48,7 @@ function createOrgunitTable(tableData, setOrgToEdit) {
     if (tableData.length == 0) {
         tableRows.push(<tr key={1}>
             <td>1</td>
-            <td colSpan="4" style={{ textAlign: 'center' }}>No Roles Defined</td>
+            <td colSpan="4" style={{ textAlign: 'center' }}>No Org units Defined</td>
         </tr>);
     } else {
         tableData.payload[0].map((value, index) => {
@@ -87,7 +87,7 @@ function Orgunit() {
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
-            tableOrgs = DevelopOrgStructure(httpOrgUnits, tableOrgs);
+            tableOrgs = DevelopOrgStructure(httpOrgUnits);
             setTableOrgsStruct(httpOrgUnits); ///save to state
         }
     })();

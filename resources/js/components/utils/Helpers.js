@@ -301,11 +301,20 @@ export function DevelopOrgStructure(orunitData) {
         //     ]
         // }
     ];
+
+    let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0)[0];
+    console.log(kenya);
+    let orgUnit = {
+        id: kenya.org_unit_id,
+        name: kenya.odk_unit_name,
+        level: kenya.level,
+        parentId: kenya.parent_id,
+        updatedAt: kenya.updated_at,
+        children: [
+        ]
+    };
+    tableOrgs.push(orgUnit);
     orunitData.metadata.levels.map(hierchayLevel => {
-        // console.log(orunitData.payload);
-        let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0);
-        tableOrgs.push(kenya);
-        // tableOrgs[0]['id'] = kenya[0]['org_unit_id'];
         let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
         orgUnits.map((orgUnitToAdd) => {
             if (orgUnitToAdd.level == 2) {
@@ -319,7 +328,7 @@ export function DevelopOrgStructure(orunitData) {
                     ]
                 };
                 tableOrgs[0].children.push(orgUnit);
-            } else {
+            } else if (orgUnitToAdd.level > 2) {
                 OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
             }
 
