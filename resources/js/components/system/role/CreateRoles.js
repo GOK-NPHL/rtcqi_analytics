@@ -71,7 +71,6 @@ class RoleCreate extends React.Component {
     saveRole() {
         if (this.props.editMode) {
             (async () => {
-                console.log(this.props.roleToEdit);
                 let returnedData = await UpdateRole(this.props.roleToEdit.role_id,this.state.roleName, this.state.selected);
                 this.props.fetchRoles();
                 this.props.toggleDisplay();
@@ -101,16 +100,16 @@ class RoleCreate extends React.Component {
 
                         <div className="card mb-4 py-3 border-left-secondary">
                             <div className="card-body">
-                                <form className="needs-validation" novalidate>
+                                <form className="needs-validation" noValidate>
                                     <div className="form-row">
                                         <div className="col-md-12 mb-3">
-                                            <label for="role_name">Role name</label>
+                                            <label htmlFor="role_name">Role name</label>
                                             <input type="text" onChange={event => this.setState({ roleName: event.target.value })}
                                                 value={this.state.roleName} className="form-control" id="role_name" required />
                                             <div className="valid-tooltip">Role name</div>
                                         </div>
                                         <div className="col-md-12 mb-3">
-                                            <label for="permissions">Assign permissions</label>
+                                            <label htmlFor="permissions">Assign permissions</label>
                                             <DualListBox
                                                 canFilter
                                                 options={this.state.permissionOptions}
