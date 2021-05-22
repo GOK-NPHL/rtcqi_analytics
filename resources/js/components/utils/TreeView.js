@@ -8,12 +8,14 @@ class TreeView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            orgUnitAction: 'add',
+            orgUnitAction: '',
             currentSelectedOrg: null,
+            newOrgUnitName: '',
+            newEditOrgUnitName: ''
         }
         this.getXYCoordinates = this.getXYCoordinates.bind(this);
         this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
-        this.addSubOrgUnit = this.addSubOrgUnit.bind(this);
+        this.orgUnitAction = this.orgUnitAction.bind(this);
     }
 
     componentDidMount() {
@@ -63,14 +65,23 @@ class TreeView extends React.Component {
         });
     }
 
-    addSubOrgUnit() {
-        (async () => {
-            let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
-            this.setState({
-                alertMessage: response.data.Message
-            });
-            $('#alertMessageModal').modal('toggle');
-        })();
+    orgUnitAction() {
+        if (this.state.orgUnitAction == 'Add') {
+            (async () => {
+                let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
+                this.setState({
+                    alertMessage: response.data.Message
+                });
+                $('#alertMessageModal').modal('toggle');
+            })();
+        } else if (this.state.orgUnitAction == 'Edit') {
+            this.props.updateOrg(
+                this.state.currentSelectedOrg['id'],
+                this.state.newEditOrgUnitName,
+                this.props.setNewOrgToName,
+                this.props.setOrgToEdit);
+        }
+
     }
 
     render() {
@@ -88,7 +99,8 @@ class TreeView extends React.Component {
                             }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                 event.preventDefault();
                                 this.setState({
-                                    currentSelectedOrg: item
+                                    currentSelectedOrg: item,
+                                    newOrgUnitName: item.name
                                 });
                                 $('#orgActionModal').modal('toggle');
                             }} className="caret">{name}</span>
@@ -102,7 +114,8 @@ class TreeView extends React.Component {
                                         }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                             event.preventDefault();
                                             this.setState({
-                                                currentSelectedOrg: item
+                                                currentSelectedOrg: item,
+                                                newOrgUnitName: item.name
                                             });
                                             $('#orgActionModal').modal('toggle');
                                         }} className="caret">{item.name}</span>
@@ -121,7 +134,8 @@ class TreeView extends React.Component {
                         }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                             event.preventDefault();
                             this.setState({
-                                currentSelectedOrg: item
+                                currentSelectedOrg: item,
+                                newOrgUnitName: item.name
                             });
                             $('#orgActionModal').modal('toggle');
                         }}>{item.name}</span>
@@ -194,7 +208,16 @@ class TreeView extends React.Component {
 
                                                 </div>
                                                 <div id="profile1" className="tab-pane fade ">
-                                                    Edit Orgunit
+                                                    <h6 className="text-left">Edit orgunit</h6>
+                                                    <br />
+                                                    Orgunit name <input type="text"
+                                                        defaultValue={this.state.currentSelectedOrg ? this.state.currentSelectedOrg.name : ''}
+                                                        onChange={event => {
+                                                            this.setState({
+                                                                newEditOrgUnitName: event.target.value
+                                                            });
+                                                        }}
+                                                    />
                                                 </div>
                                                 <div id="messages1" className="tab-pane fade">
                                                     Delete Orgunit
@@ -209,7 +232,7 @@ class TreeView extends React.Component {
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="button"
                                     onClick={() => {
-                                        this.addSubOrgUnit();
+                                        this.orgUnitAction();
                                         $('#orgActionModal').modal('toggle');
                                     }}
                                     className="btn btn-primary">Save changes</button>
