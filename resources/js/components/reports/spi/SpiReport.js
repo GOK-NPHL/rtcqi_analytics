@@ -137,10 +137,13 @@ class SpiReport extends React.Component {
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select county</option>
                                     <option data-level='1' data-id='1'>kenya</option>
-                                    {this.state.orgUnits.map((value, index) => {
-                                        if (value.level == 2)
-                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                    })}
+                                    {
+                                        this.state.orgUnits.payload ?
+                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                                if (value.level == 2)
+                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            }) : ''
+                                    }
                                 </select>
                             </div>
                         </form>
@@ -152,10 +155,13 @@ class SpiReport extends React.Component {
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select subcounty</option>
-                                    {this.state.orgUnits.map((value, index) => {
-                                        if (value.level == 3)
-                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                    })}
+                                    {
+                                        this.state.orgUnits.payload ?
+                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                                if (value.level == 3)
+                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            }) : ''
+                                    }
                                 </select>
                             </div>
                         </form>
@@ -168,10 +174,13 @@ class SpiReport extends React.Component {
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select facility</option>
-                                    {this.state.orgUnits.map((value, index) => {
-                                        if (value.level == 4)
-                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                    })}
+                                    {
+                                        this.state.orgUnits.payload ?
+                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                                if (value.level == 4)
+                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            }) : ''
+                                    }
                                 </select>
                             </div>
                         </form>
@@ -184,10 +193,13 @@ class SpiReport extends React.Component {
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
                                     <option disabled selected>Select site</option>
-                                    {this.state.orgUnits.map((value, index) => {
-                                        if (value.level == 5)
-                                            return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                    })}
+                                    {
+                                        this.state.orgUnits.payload ?
+                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                                if (value.level == 5)
+                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                            }) : ''
+                                    }
                                 </select>
                             </div>
                         </form>
@@ -199,8 +211,8 @@ class SpiReport extends React.Component {
                 <div style={rowStle} className="row">
                     <div className="col-sm-12  col-xm-6 col-md-12">
                         <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
-                        <table class="table">
-                            <thead class="thead-dark">
+                        <table className="table">
+                            <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
                                     <th scope="col">Personnel Training & Certification</th>
@@ -227,8 +239,8 @@ class SpiReport extends React.Component {
 
                         <br />
                         <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-                        <table class="table">
-                            <thead class="thead-dark">
+                        <table className="table">
+                            <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
                                     <th scope="col">Level 0 (&lt;40%)</th>
