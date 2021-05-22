@@ -75,12 +75,12 @@ class OrgunitsController extends Controller
     public function updateOrg(Request $request)
     {
         try {
-            $org = OdkOrgunit::find($request->org['id']);
-            $org->odk_unit_name = $request->org['odk_unit_name'];
+            $org = OdkOrgunit::where('org_unit_id',$request->id)->first();
+            $org->odk_unit_name = $request->name;
             $org->save();
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
-            return response()->json(['Message' => 'Could not save role: ' . $ex->getMessage()], 500);
+            return response()->json(['Message' => 'Could not save org: ' . $ex->getMessage()], 500);
         }
     }
 
