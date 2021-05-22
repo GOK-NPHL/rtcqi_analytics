@@ -153,13 +153,14 @@ export async function SaveOrgUnits(orgUnits) {
 }
 
 
-export async function UpdateOrg(org) {
+export async function UpdateOrg(org_unit_id,name) {
     try {
         const response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/update_org`,
             data: {
-                org: org,
+                id: org_unit_id,
+                name,name
             }
         });
         return response.data.Message;
