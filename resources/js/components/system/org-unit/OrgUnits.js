@@ -9,14 +9,15 @@ let httpOrgUnits = [];
 let message ='';
 let tableOrgs;
 
-function updateOrg(org, setOrgToEdit) {
+function updateOrg(org, newOrgToName,setNewOrgToName,setOrgToEdit) {
     (async () => {
-        let returnedData = await UpdateOrg(org);
+        let returnedData = await UpdateOrg(org,newOrgToName);
         $("#org_success").html(returnedData);
         $("#org_success").show();
         $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
             $("#org_success").alert(500);
             setOrgToEdit();
+            setNewOrgToName();
         });
     })();
 }
@@ -43,7 +44,7 @@ function deleteOrg(org, setOrgToEdit) {
 }
 
 
-function createOrgunitTable(tableData, setOrgToEdit) {
+function createOrgunitTable(tableData, setOrgToEdit,setNewOrgToName) {
     var tableRows = [];
     if (tableData.length == 0) {
         tableRows.push(<tr key={1}>
@@ -83,7 +84,8 @@ function Orgunit() {
     const [showOrgunitLanding, setShowOrgunitLanding] = useState(true);
     const [tableOrgsStruct, setTableOrgsStruct] = useState();
     const [orgToEdit, setOrgToEdit] = useState();
-
+    const [newOrgToName, setNewOrgToName] = useState();
+    
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
@@ -116,7 +118,7 @@ function Orgunit() {
 
                 </div>
                 <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-4">
-                    <TreeView orgUnits={tableOrgs} />
+                    <TreeView orgUnits={tableOrgs}  updateOrg={updateOrg} setNewOrgToName={setNewOrgToName} setOrgToEdit={setOrgToEdit}/>
                 </div>
                 <div className="col-sm-8">
                     <table className="table table-striped" >
@@ -152,7 +154,7 @@ function Orgunit() {
                             <input id="" type="text"
                                 defaultValue={orgToEdit ? orgToEdit.odk_unit_name : ''}
                                 onChange={event => {
-                                    orgToEdit.odk_unit_name = event.target.value;
+                                    setNewOrgToName(event.target.value);
                                 }}
                             />
                         </div>
@@ -160,7 +162,7 @@ function Orgunit() {
                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button"
                                 onClick={() => {
-                                    updateOrg(orgToEdit, setOrgToEdit);
+                                    updateOrg(orgToEdit.org_unit_id,newOrgToName,setNewOrgToName, setOrgToEdit);
                                     $('#editOrgModal').modal('toggle');
                                 }}
                                 className="btn btn-primary">Save changes</button>
