@@ -28,12 +28,15 @@ export async function FetchOrgunits() {
 export async function FetchOdkData(orgUnitIds) {
 
     try {
+
         const response = await axios({
-            method: 'get',
-            url: `${settings.rtcqiBaseApi}/odk_data/${orgUnitIds}`,
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/odk_data`,
+            data: {
+                orgUnitIds: orgUnitIds,
+            }
         });
-        const dataObject = response.data;
-        return dataObject;
+        return response;
     } catch (err) {
         return err.response
     }
@@ -138,14 +141,14 @@ export async function SaveOrgUnits(orgUnits, orgunitMetadata) {
 }
 
 
-export async function UpdateOrg(org_unit_id,name) {
+export async function UpdateOrg(org_unit_id, name) {
     try {
         const response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/update_org`,
             data: {
                 id: org_unit_id,
-                name,name
+                name, name
             }
         });
         return response.data.Message;
