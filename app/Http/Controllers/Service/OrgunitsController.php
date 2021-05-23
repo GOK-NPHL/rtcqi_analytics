@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
+use App\OrgunitLevelMap;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -65,6 +66,18 @@ class OrgunitsController extends Controller
                 ]);
                 $orgUnit->save();
             }
+
+            $orgunitMetadata = $request->orgunit_metadata;
+            Log::info($orgunitMetadata);
+            for ($x = 0; $x < count($orgunitMetadata); $x++) {
+                $orgunitMetadataTable = new OrgunitLevelMap([
+                    'sheet' => $orgunitMetadata[$x]['sheet'],
+                    'column' => $orgunitMetadata[$x]['column'],
+                    'level' => $orgunitMetadata[$x]['level'],
+                ]);
+                $orgunitMetadataTable->save();
+            }
+
             return response()->json(['Message' => 'Created successfully'], 200);
         } catch (Exception $ex) {
             Log::error($ex);
@@ -75,7 +88,7 @@ class OrgunitsController extends Controller
     public function updateOrg(Request $request)
     {
         try {
-            $org = OdkOrgunit::where('org_unit_id',$request->id)->first();
+            $org = OdkOrgunit::where('org_unit_id', $request->id)->first();
             $org->odk_unit_name = $request->name;
             $org->save();
             return response()->json(['Message' => 'Updated successfully'], 200);
@@ -121,7 +134,7 @@ class OrgunitsController extends Controller
                 $orgUnit = new OdkOrgunit([
                     'org_unit_id' =>  (string) Str::uuid(),
                     'odk_unit_name' => $childOrg,
-                    'level' => $parentOrg['level']+1,
+                    'level' => $parentOrg['level'] + 1,
                     'parent_id' => $parentOrg['id'],
                 ]);
                 $orgUnit->save();
