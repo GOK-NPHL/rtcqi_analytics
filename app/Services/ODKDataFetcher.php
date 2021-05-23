@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use App\FormSubmissions;
 
 use App\OdkProject;
-
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ODKDataFetcher
 {
@@ -45,8 +46,7 @@ class ODKDataFetcher
                 ->value('no_of_forms');
 
             if (count($forms) > 0) {
-                if (count($forms) > 0)
-                    $projectToFormsMap["$projectId"] = array();
+                $projectToFormsMap["$projectId"] = array();
                 $projectToFormsMap["$projectId"]["forms"] = $forms;
                 $projectToFormsMap["$projectId"]["cur_no"] = $currentNoOfForms;
             }
@@ -100,10 +100,9 @@ class ODKDataFetcher
     private function getFormSubmissions($response, $projectToFormsMap)
     {
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
-
-            $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
-
+           
             for ($counter = 0; $counter < count($arrayValue["forms"]); $counter++) {
+                $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv.zip?attachments=false";
                 // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
                 $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
@@ -168,15 +167,15 @@ class ODKDataFetcher
 
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
-
+        Log::info('Url: '.$formSubmissionsUrl);
         try {
-            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
+            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
         }
         $response = Http::withOptions([
             'verify' => false, //'debug' => true,
-            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
+            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
