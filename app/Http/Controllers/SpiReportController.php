@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Services\ODKDataAggregator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SpiReportController extends Controller
 {
@@ -26,10 +27,11 @@ class SpiReportController extends Controller
         return view('reports/spi/index');
     }
 
-    public function getData($county,$subcounty,$facility,$site )
-    {
+    public function getData(Request $request )
+    {   
         $odkObj = new ODKDataAggregator;
-        $result=$odkObj->getData($county,$subcounty,$facility,$site);
+        Log::info($request->orgUnitIds);
+        $result=$odkObj->getData($request->orgUnitIds);
         return $result;
     }
 }
