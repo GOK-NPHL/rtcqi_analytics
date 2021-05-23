@@ -6,10 +6,13 @@ use Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use App\FormSubmissions;
-
+use App\OdkOrgunit;
 use App\OdkProject;
+use App\OrgunitLevelMap;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -75,24 +78,24 @@ class ODKDataFetcher
     {
         $listUserUrl = $this->baseOdkUrl . "projects";
 
-        $response = Http::withOptions([
+        $res = Http::withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($listUserUrl);
-        $res = $response->json();
+        $res = $res->json();
         return $res;
     }
 
     private function getProjectForm($response, $projectId)
     {
         $formUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms";
-        $response = Http::withOptions([
+        $res = Http::withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formUrl);
-        $res = $response->json();
+        $res = $res->json();
         return $res;
     }
 
@@ -100,14 +103,13 @@ class ODKDataFetcher
     private function getFormSubmissions($response, $projectToFormsMap)
     {
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
-           
+
             for ($counter = 0; $counter < count($arrayValue["forms"]); $counter++) {
-                $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv.zip?attachments=false";
+                $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
                 // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
                 $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
                 if ($this->shouldDownloadSubmission($response, $projectId, $formId)) {
-                    print_r("Downloading $formId form\n");
                     $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                 }
             }
@@ -119,29 +121,39 @@ class ODKDataFetcher
     //check if there is new submissions on form
     private function shouldDownloadSubmission($response, $projectId, $formId)
     {
+
+
         $formSubmissionsDetails =  $this->baseOdkUrl . "projects/" . $projectId . "/forms/$formId";
-        $response = Http::withOptions([
+        $res = Http::withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
             'X-Extended-Metadata' => 'true',
         ])->get($formSubmissionsDetails);
-        $res = $response->json();
+        $res = $res->json();
 
         $submission = $this->getFormSubmission($projectId, $formId);
         $lastSubmissionDt = strtotime($res["lastSubmission"]);
         $lastSubmissionDate = date('Y-m-d h:i:s', $lastSubmissionDt);
         if (!$submission) {
-            $submission = new FormSubmissions;
-            $submission->project_id = $projectId;
-            $submission->form_id = $formId;
-            $submission->lastest_submission_date = $lastSubmissionDate;
-            $submission->no_of_submissions =  $res["submissions"];
-            $submission->org_id =  1;
-            $submission->save();
-            if ($res["submissions"] > 0) {
-                return true;
-            } else {
+            try {
+                $this->downloadFormOrgunitCascades($response, $projectId, $formId);
+                $orgUnitId = $this->getOrgunitIdOfsubmmission($response, $projectId, $formId);
+                if (empty($orgUnitId)) throw new Exception("Org unit for form id " . $formId . " not found in organisation structure");
+                $formSubmission = new FormSubmissions;
+                $formSubmission->project_id = $projectId;
+                $formSubmission->form_id = $formId;
+                $formSubmission->lastest_submission_date = $lastSubmissionDate;
+                $formSubmission->no_of_submissions =  $res["submissions"];
+                $formSubmission->org_id =  $orgUnitId;
+                $formSubmission->save();
+                if ($res["submissions"] > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception $ex) {
+                Log::error(" error =====> " . $ex->getMessage() . " \n");
                 return false;
             }
         } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0) {
@@ -167,19 +179,88 @@ class ODKDataFetcher
 
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
-        Log::info('Url: '.$formSubmissionsUrl);
+        //delete previous downloade data
         try {
-            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
+            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
         }
-        $response = Http::withOptions([
+
+        Http::withOptions([
             'verify' => false, //'debug' => true,
-            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
+            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
+    }
 
-        // $res = $response->json();
+    private function getOrgunitIdOfsubmmission($response, $projectId, $formId)
+    {
+        try {
+
+            $version = $this->getFormVersion($response, $projectId, $formId);
+            $definationURI = "/app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
+
+            $fileUri = storage_path($definationURI);
+            /** Load $inputFileName to a Spreadsheet Object  **/
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileUri);
+            $orgUnitLevel2 = OrgunitLevelMap::where('level', 2)->get();
+            $sheetName = $orgUnitLevel2[0]['sheet'];
+            $column = $orgUnitLevel2[0]['column'];
+            $sheet = $spreadsheet->getSheetByName($sheetName);
+
+            $data = array(1, $sheet->toArray(null, true, true, true));
+            $alphabet = array(
+                'A', 'B', 'C', 'D', 'E',
+                'F', 'G', 'H', 'I', 'J',
+                'K'
+            );
+            $orgUnit = OdkOrgunit::where('level', 2)->where('odk_unit_name', $data[1][3][$alphabet[$column]])->get();
+            $orgUnitId = '';
+            foreach ($orgUnit as $unit) {
+                $orgUnitId = $unit->org_unit_id;
+            }
+            return $orgUnitId;
+        } catch (Exception $ex) {
+            Log::error(" error =====> " . $ex->getMessage() . " \n");
+            throw new Exception($ex->getMessage() . " " . $formId);
+        }
+    }
+
+    private function getFormVersion($response, $projectId, $formId)
+    {
+        $formVerisonUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId;
+        //get for version number
+        $version = Http::withOptions([
+            'verify' => false, //'debug' => true,
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $response['token'],
+        ])->get($formVerisonUrl)['version'];
+
+        if (!isset($version)) {
+            throw new Exception("no form version defined");
+        }
+        return  $version;
+    }
+
+    private function downloadFormOrgunitCascades($response, $projectId, $formId)
+    {
+        $version = $this->getFormVersion($response, $projectId, $formId);
+        $definationURI = "/app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
+
+        try {
+            Storage::delete($definationURI);
+        } catch (Exception $e) {
+            echo 'Message: ' . $e->getMessage();
+        }
+
+        //download new files
+        $formDefinationUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId . "/versions/" . $version . ".xls";
+        Http::withOptions([
+            'verify' => false, //'debug' => true,
+            'sink' => storage_path($definationURI)
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $response['token'],
+        ])->get($formDefinationUrl);
     }
 }
