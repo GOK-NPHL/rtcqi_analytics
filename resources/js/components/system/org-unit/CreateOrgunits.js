@@ -17,7 +17,8 @@ class OrgunitCreate extends React.Component {
             sheetWithOrgs: '',
             workbook: [],
             pageNo: 1,
-            isSaveOrgs: false
+            isSaveOrgs: false,
+            orgunitFileHierachy: {}
         };
         this.handleFile = this.handleFile.bind(this);
         this.setSheetWithOrgs = this.setSheetWithOrgs.bind(this);
@@ -73,14 +74,24 @@ class OrgunitCreate extends React.Component {
     }
 
     saveOrgUnits(orgUnits) {
+        let orgunitMetadata = [];
+        console.log(this.state.orgunitFileHierachy);
+        for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
+            let orgMeta = {
+                'sheet': this.state.sheetWithOrgs,
+                'column': column,
+                'level': level,
+            };
+            orgunitMetadata.push(orgMeta);
+        }
 
         (async () => {
-            let response = await SaveOrgUnits(orgUnits);
+            let response = await SaveOrgUnits(orgUnits, orgunitMetadata);
             console.log(response);
             if (response['status'] == 200) {
                 this.props.setShowOrgunitLanding(true);
             }
-           
+
         })();
 
     }

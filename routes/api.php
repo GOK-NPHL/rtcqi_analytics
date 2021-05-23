@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SpiReportController;
 
 
 
@@ -21,15 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('odk_data/{county?}/{subcounty?}/{facility?}/{site?}', function (
-    $county = null,
-    $subcounty = null,
-    $facility = null,
-    $site = null
-) {
-    $orgObj = new SpiReportController();
-    return $orgObj->getData($county, $subcounty, $facility, $site);
-});
+Route::get('/odk_data', 'SpiReportController@getData');
 
 Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
 Route::post('/save_orgunits', 'Service\OrgunitsController@saveOrgunits');

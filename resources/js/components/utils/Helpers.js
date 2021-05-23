@@ -120,7 +120,7 @@ export async function UpdateRole(role_id, roleName, authoritiesSelected) {
     }
 }
 
-export async function SaveOrgUnits(orgUnits) {
+export async function SaveOrgUnits(orgUnits, orgunitMetadata) {
     let response;
     try {
         response = await axios({
@@ -128,6 +128,7 @@ export async function SaveOrgUnits(orgUnits) {
             url: `${settings.rtcqiBaseApi}/save_orgunits`,
             data: {
                 orgunits: orgUnits,
+                orgunit_metadata: orgunitMetadata,
             }
         });
         return response;
