@@ -25,32 +25,16 @@ export async function FetchOrgunits() {
 
 }
 
-
-export async function FetchOdkData2(county, subcounty, facility, site) {
-
-    let dataUrl = `${settings.rtcqiBaseApi}/odk_data/${county}/${subcounty}/${facility}/${site}`;
-    const _dataObject = await fetch(dataUrl);
-    const dataObject = await _dataObject.json();
-    return dataObject;
-
-}
-
-
-export async function FetchOdkData(county, subcounty, facility, site) {
+export async function FetchOdkData(orgUnitIds) {
 
     try {
         const response = await axios({
             method: 'get',
-            url: `${settings.rtcqiBaseApi}/odk_data/${county}/${subcounty}/${facility}/${site}`,
-            // data: {
-            //   firstName: 'Fred',
-            //   lastName: 'Flintstone'
-            // }
+            url: `${settings.rtcqiBaseApi}/odk_data/${orgUnitIds}`,
         });
         const dataObject = response.data;
         return dataObject;
     } catch (err) {
-        // Handle Error Here
         return err.response
     }
 
