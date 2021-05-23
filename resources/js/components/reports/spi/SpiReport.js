@@ -23,30 +23,30 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
-            console.log("Returned data =====>");
-            console.log(returnedData);
             let subCountyList = [];
             // returnedData.forEach((val) => {
-            console.log("mounting");
             // });
             this.setState({
                 unfilteredOrgUnits: returnedData,
-                orgUnits: returnedData,
+                orgUnits: returnedData.payload[0],
                 odkData: {},
                 orgLevel: 1,
                 orgId: 1
             });
         })();
 
-        this.fetchOdkDataServer('kenya', '', '', '');
+        this.fetchOdkDataServer([0]);
     }
 
-    fetchOdkDataServer(county, subcounty, facility, site) {
+    fetchOdkDataServer(orgUnitIds) {
         (async () => {
-            let returnedData = await FetchOdkData(county, subcounty, facility, site);
-            this.setState({
-                odkData: returnedData,
-            });
+            let returnedData = await FetchOdkData(orgUnitIds);
+            if (returnedData.status == 200) {
+                this.setState({
+                    odkData: returnedData.data,
+                });
+            }
+
         })();
     }
 
@@ -55,10 +55,9 @@ class SpiReport extends React.Component {
         let level = event.target[event.target.selectedIndex].dataset.level;
         let id = event.target[event.target.selectedIndex].dataset.id;
         // filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
-        let filteredOrgs;
-        filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => ((orgunit.parent_id == id) || (orgunit.level < level)) || orgunit.parent_id == parentId);
 
 
+        let filteredOrgs = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => ((orgunit.parent_id == id) || (orgunit.level < level)) || orgunit.parent_id == parentId);
 
         this.setState({
             orgUnits: filteredOrgs
@@ -66,30 +65,28 @@ class SpiReport extends React.Component {
 
         if (level == 5) {
             let site = event.target.value;
-            let facility = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
-            let subCounty = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == facility[0]['parent_id']));
-            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == subCounty[0]['parent_id']));
-            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty[0]['odk_unit_name'], facility[0]['odk_unit_name'], site);
+            let facility = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
+            let subCounty = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == facility[0]['parent_id']));
+            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == subCounty[0]['parent_id']));
             //odk_unit_name
         } else if (level == 4) {
             let facility = event.target.value;
-            let subCounty = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
-            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == subCounty[0]['parent_id']));
-            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty[0]['odk_unit_name'], facility, '');
+            let subCounty = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
+            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == subCounty[0]['parent_id']));
         } else if (level == 3) {
             let subCounty = event.target.value;
-            let county = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.id == parentId));
-            this.fetchOdkDataServer(county[0]['odk_unit_name'], subCounty, '', '');
+            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
         } else if (level == 2) {
             let county = event.target.value;
-            this.fetchOdkDataServer(county, '', '', '');
         } else if (level == 1) {
-            this.fetchOdkDataServer('kenya', '', '', '');
-        }
 
+        }
+        let orgIds = [id];
+        this.fetchOdkDataServer(orgIds);
     }
 
     render() {
+       
         const imgStyle = {
             width: "100%"
         };
@@ -101,15 +98,18 @@ class SpiReport extends React.Component {
 
         var tableData = [];
         var overallSiteLevels = [];
+        console.log("====>22");
+            console.log(this.state.odkData);
         for (const property in this.state.odkData) {
+            
             if (property != "OverallSitesLevel") {
-                tableData.push(<td>{this.state.odkData[property]}</td>);
+                tableData.push(<td key={this.state.odkData[property]}>{this.state.odkData[property]}</td>);
             } else {
-                overallSiteLevels.push(<td>{this.state.odkData[property]['level0']}</td>);
-                overallSiteLevels.push(<td>{this.state.odkData[property]['level1']}</td>);
-                overallSiteLevels.push(<td>{this.state.odkData[property]['level2']}</td>);
-                overallSiteLevels.push(<td>{this.state.odkData[property]['level3']}</td>);
-                overallSiteLevels.push(<td>{this.state.odkData[property]['level4']}</td>);
+                overallSiteLevels.push(<td key='level0'>{this.state.odkData[property]['level0']}</td>);
+                overallSiteLevels.push(<td key='level1'>{this.state.odkData[property]['level1']}</td>);
+                overallSiteLevels.push(<td key='level2'>{this.state.odkData[property]['level2']}</td>);
+                overallSiteLevels.push(<td key='level3'>{this.state.odkData[property]['level3']}</td>);
+                overallSiteLevels.push(<td key='level4'>{this.state.odkData[property]['level4']}</td>);
 
             }
 
@@ -135,13 +135,13 @@ class SpiReport extends React.Component {
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected>Select county</option>
+                                    <option disabled selected={true}>Select county</option>
                                     <option data-level='1' data-id='1'>kenya</option>
                                     {
-                                        this.state.orgUnits.payload ?
-                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                        this.state.orgUnits ?
+                                            this.state.orgUnits.map((value, index) => {
                                                 if (value.level == 2)
-                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                             }) : ''
                                     }
                                 </select>
@@ -154,12 +154,12 @@ class SpiReport extends React.Component {
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected>Select subcounty</option>
+                                    <option disabled selected={true}>Select subcounty</option>
                                     {
-                                        this.state.orgUnits.payload ?
-                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                        this.state.orgUnits ?
+                                            this.state.orgUnits.map((value, index) => {
                                                 if (value.level == 3)
-                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                                    return (<option key={value.org_unit_id} data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                             }) : ''
                                     }
                                 </select>
@@ -173,12 +173,12 @@ class SpiReport extends React.Component {
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected>Select facility</option>
+                                    <option disabled selected={true}>Select facility</option>
                                     {
-                                        this.state.orgUnits.payload ?
-                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                        this.state.orgUnits ?
+                                            this.state.orgUnits.map((value, index) => {
                                                 if (value.level == 4)
-                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                             }) : ''
                                     }
                                 </select>
@@ -192,12 +192,12 @@ class SpiReport extends React.Component {
                             <div className="form-group">
                                 {/* <label for="exampleFormControlSelect1">Example select</label> */}
                                 <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected>Select site</option>
+                                    <option disabled selected={true}>Select site</option>
                                     {
-                                        this.state.orgUnits.payload ?
-                                            this.state.orgUnits.payload[0].map((value, index) => {
+                                        this.state.orgUnits ?
+                                            this.state.orgUnits.map((value, index) => {
                                                 if (value.level == 5)
-                                                    return (<option data-level={value.level} data-id={value.id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
+                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
                                             }) : ''
                                     }
                                 </select>
