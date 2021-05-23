@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 use App\FormSubmissions;
+use App\OdkOrgunit;
 use App\OdkProject;
+use Exception;
 use Illuminate\Support\Arr;
 use League\Csv\Reader;
 use League\Csv\Statement;
@@ -34,34 +36,117 @@ class ODKDataAggregator
     }
 
 
-    public function getData($county, $subcounty, $facility, $site, $formType = 'spi_checklist')
-    {   
-        Log::info('Processing data');
-        Log::info("$county  $subcounty  $facility  $site");
-        $orgUnit = array();
-        $orgUnit['mysites_county'] = "$county";
-        $orgUnit['mysites_subcounty'] = $subcounty;
-        $orgUnit['mysites_facility'] = $facility;
-        $orgUnit['mysites'] = $site;
+    public function getData($orgUnitIds, $formType = 'spi_checklist')
+    {
+        try {
+            for ($x = 0; $x < count($orgUnitIds); $x++) {
+                // $orgToProcess = $this->getOrganisationUntiHierchacyLine($orgUnitIds[$x]);
+                $orgToProcess = $this->getOrgsByLevel($orgUnitIds[$x]);
+                $orgUnit = array();
+                // if ($orgToProcess[1] == 1) {
+                // $orgUnit['mysites_county'] = "$county";
+                // $orgUnit['mysites_subcounty'] = $subcounty;
+                // $orgUnit['mysites_facility'] = $facility;
+                // $orgUnit['mysites'] = $site;
+                // }else if($orgToProcess[1] == 2){
 
-        // $orgUnit['mysites_county'] = 'bungoma';
-        // $orgUnit['mysites_subcounty'] = 'webuye_west';
-        // $orgUnit['mysites_facility'] = '15965__friends_lugulu_mission_hospital';
-        // $orgUnit['mysites'] = 'opd';
+                // }else if($orgToProcess[1] == 3){
 
-        $results = array();
-        $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
-        $results["QACounselling"] = $this->getQACounselling($orgUnit);
-        $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit);
-        $results["Safety"] = $this->getSafety($orgUnit);
-        $results["PreTestingPhase"] = $this->getPreTestingPhase($orgUnit);
-        $results["TestingPhase"] = $this->getTestingPhase($orgUnit);
-        $results["PostTestingPhase"] = $this->getPostTestingPhase($orgUnit);
-        $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit);
-        $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit);
-        $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit);
-        // print_r($results);
-        return $results;
+                // }else if($orgToProcess[1] == 4){
+
+                // }else if($orgToProcess[1] == 5){
+
+                // }
+
+                $orgUnit['mysites_county'] = $orgToProcess[1];
+                $orgUnit['mysites_subcounty'] = $orgToProcess[2];
+                $orgUnit['mysites_facility'] = $orgToProcess[3];
+                $orgUnit['mysites'] = $orgToProcess[4];
+
+                $results = array();
+                $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
+
+                $results["QACounselling"] = $this->getQACounselling($orgUnit);
+                $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit);
+                $results["Safety"] = $this->getSafety($orgUnit);
+                $results["PreTestingPhase"] = $this->getPreTestingPhase($orgUnit);
+                $results["TestingPhase"] = $this->getTestingPhase($orgUnit);
+                $results["PostTestingPhase"] = $this->getPostTestingPhase($orgUnit);
+                $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit);
+                $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit);
+                $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit);
+                return $results;
+            }
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Could not save org: ' . $ex->getMessage()], 500);
+        }
+    }
+
+    private function getOrganisationUntiHierchacyLine($orgUnitId)
+    {
+        $org = OdkOrgunit::where("org_unit_id", $orgUnitId)->first();
+        return [$org->odk_unit_name, $org->level];
+
+        // OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
+        // $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
+        // $levelsArr = array();
+        // foreach ($levels as $level) {
+        //     $levelsArr[] = $level->level;
+        // }
+
+    }
+
+    private function getOrgsByLevel($orgUnitId)
+    {
+
+        $orgUnitObject = OdkOrgunit::select(
+            "odkorgunit.odk_unit_name as site",
+            "org4.odk_unit_name as facility",
+            "org3.odk_unit_name as subcounty",
+            "org2.odk_unit_name as county",
+            "org1.odk_unit_name as country"
+        )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
+            ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
+            ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
+            ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
+            ->where('odkorgunit.org_unit_id', $orgUnitId)
+            ->first();
+
+        $orgUnitSruc =  array();
+        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
+        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
+        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
+        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
+
+        return $orgUnitSruc;
+        // if ($orgToProcess[1] == 1) {
+        //     $orgUnit['mysites_county'] = "$county";
+        //     $orgUnit['mysites_subcounty'] = $subcounty;
+        //     $orgUnit['mysites_facility'] = $facility;
+        //     $orgUnit['mysites'] = $site;
+        // }else if($orgToProcess[1] == 2){
+
+        // }else if($orgToProcess[1] == 3){
+
+        // }else if($orgToProcess[1] == 4){
+
+        // }else if($orgToProcess[1] == 5){
+
+        // }
+
+        // $roles = Role::select(
+        //     "users.name as editor",
+        //     "roles.name as role_name",
+        //     "roles.updated_at as updated_at",
+        //     "roles.id as role_id",
+        //     "authorities.name as authority_name",
+        //     "authorities.id as authority_id",
+        //     "authorities.group as authority_group"
+        // )->join('users', 'editor_id', '=', 'users.id')
+        //     ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
+        //     ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
+        //     ->get();
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -77,7 +162,10 @@ class ODKDataAggregator
         ];
 
         foreach ($records as $record) {
+            Log::info("==================>>>>found");
+
             if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
+                Log::info("here==> ");
                 $rowCounter = $rowCounter + 1; //no or rows processed.
                 if ($section == $this->reportSections["overall_sites_level"]) {
                     $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -87,13 +175,22 @@ class ODKDataAggregator
                 continue;
             }
             if (!empty($orgUnit['mysites_county'])) {
-                if ($record['mysites_county'] == $orgUnit['mysites_county']) {
+                Log::info("Start ");
+                Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
+                if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
+                    Log::info("facility 1 " . $orgUnit['mysites_county']);
                     if (!empty($orgUnit['mysites_subcounty'])) {
-                        if ($record['mysites_subcounty'] == $orgUnit['mysites_subcounty']) {
+                        Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
+                        if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
+
                             if (!empty($orgUnit['mysites_facility'])) {
-                                if ($record['mysites_facility'] == $orgUnit['mysites_facility']) {
+                                Log::info(strtolower($record['mysites_facility']) . " facility3 " . $orgUnit['mysites_facility']);
+                                if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
+                                    Log::info(strtolower($record['mysites']) . " site1 " . $orgUnit['mysites']);
                                     if (!empty($orgUnit['mysites'])) {
-                                        if ($record['mysites'] == $orgUnit['mysites']) {
+                                        Log::info(strtolower($record['mysites']) . " site2 " . $orgUnit['mysites']);
+                                        if (strtolower($record['mysites']) == $orgUnit['mysites']) {
+                                            Log::info(strtolower($record['mysites']) . " site3 " . $orgUnit['mysites']);
                                             $rowCounter = $rowCounter + 1; //no or rows processed.
                                             if ($section == $this->reportSections["overall_sites_level"]) {
                                                 $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -148,7 +245,7 @@ class ODKDataAggregator
         $url = "";
         // if (Storage::exists("submissions/17_spi_checklist_bungoma_submissions.csv")) {
         //     $url = Storage::path("submissions/17_spi_checklist_bungoma_submissions.csv");
-        
+
         if (Storage::exists("submissions/15_spi_checklist_nairobi_submissions.csv")) {
             $url = Storage::path("submissions/15_spi_checklist_nairobi_submissions.csv");
         } else {
