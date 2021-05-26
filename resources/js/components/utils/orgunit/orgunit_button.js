@@ -8,10 +8,9 @@ class OrgUnitButton extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            startDate: new Date()
+            selectedOrgs: {}
         };
         this.selectOrgUnitHandler = this.selectOrgUnitHandler.bind(this);
-        this.onDateChange = this.onDateChange.bind(this);
     }
 
     componentDidMount() {
@@ -27,22 +26,26 @@ class OrgUnitButton extends React.Component {
 
     selectOrgUnitHandler(orgunit) {
 
-        let selectedOrgs = this.state.selectedOrgs;
-        if (orgunit.id in selectedOrgs) {
-            delete selectedOrgs[orgunit.id];
-        } else {
-            selectedOrgs[orgunit.id] = orgunit;
+        if (orgunit.length != 0) {
+            let selectedOrgs = this.state.selectedOrgs;
+            if (orgunit.id in selectedOrgs) {
+                delete selectedOrgs[orgunit.id];
+            } else {
+                selectedOrgs[orgunit.id] = orgunit;
+            }
+            this.setState({
+                selectedOrgs: selectedOrgs
+            });
+            let orgUnitsList = [];
+            for (let [key, value] of Object.entries(selectedOrgs)) {
+                orgUnitsList.push(key);
+            }
+            console.log(orgUnitsList);
+            this.props.orgUnitChangeHandler(orgUnitsList);
         }
-        this.setState({
-            selectedOrgs: selectedOrgs
-        });
+
     }
 
-    onDateChange(date) {
-        this.setState({
-            startDate: date
-        });
-    }
 
     render() {
         return (
@@ -59,7 +62,15 @@ class OrgUnitButton extends React.Component {
                     Organisation Unit<i className="fa fa-filter"></i>
                 </button>
 
-                <div className="card" id="spi_orgunits" style={{ "display": "none" }}>
+                <div className="card"
+                    id="spi_orgunits"
+                    style={{
+                        "display": "none",
+                        "position": "absolute",
+                        "zIndex": "999",
+                        "backgroundColor": "white"
+                    }}
+                >
                     <div className="card-body">
                         <div>
                             <div
@@ -80,7 +91,7 @@ class OrgUnitButton extends React.Component {
                                         $("#spi_orgunits").toggle();
                                     }}
                                     type="button"
-                                    className="btn btn-outline-primary">Set Selected Orgunits</button>
+                                    className="btn btn-primary">Set Selected Orgunits</button>
                             </div>
                         </div>
                     </div>
