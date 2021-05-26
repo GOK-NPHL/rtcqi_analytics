@@ -31,7 +31,7 @@ require('./components/system/users/Users');
 require('./components/system/auth/axios_login');
 require('xlsx');
 require("uuid/v4");
-
+require("react-datepicker");
 require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
 
 require('../../node_modules/jquery.easing/jquery.easing.min.js');
