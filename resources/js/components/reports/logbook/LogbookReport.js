@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
-import OrguntiDrillDown from '../../utils/OrguntiDrillDown'
 
 class LogbookReport extends React.Component {
 
@@ -32,7 +31,7 @@ class LogbookReport extends React.Component {
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                 </div>
 
-                <OrguntiDrillDown />
+                {/* <OrguntiDrillDown /> */}
 
                 <div style={rowStle} className="row">
                     <div className="col-sm-6  col-xm-6 col-md-6">
