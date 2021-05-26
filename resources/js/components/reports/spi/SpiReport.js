@@ -2,9 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
-import OrguntiDrillDown from '../../utils/OrguntiDrillDown'
 
 import { FetchOrgunits, FetchOdkData } from '../../utils/Helpers'
+import OrgUnitButton from '../../utils/orgunit/orgunit_button';
+import OrgDate from '../../utils/orgunit/OrgDate';
+import { v4 as uuidv4 } from 'uuid';
+
 
 class SpiReport extends React.Component {
 
@@ -14,7 +17,6 @@ class SpiReport extends React.Component {
             orgUnits: [],
 
         }
-        this.handleOrgUntiChange = this.handleOrgUntiChange.bind(this);
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
 
     }
@@ -39,54 +41,27 @@ class SpiReport extends React.Component {
     }
 
     fetchOdkDataServer(orgUnitIds) {
-        (async () => {
-            let returnedData = await FetchOdkData(orgUnitIds);
-            if (returnedData.status == 200) {
-                this.setState({
-                    odkData: returnedData.data,
-                });
+        if (orgUnitIds) {
+            if (orgUnitIds.length != 0) {
+                (async () => {
+                    let returnedData = await FetchOdkData(orgUnitIds);
+                    console.log("Server data log");
+                    console.log(returnedData);
+                    console.log("Server data");
+                    if (returnedData.status == 200) {
+                        this.setState({
+                            odkData: returnedData.data,
+                        });
+                    }
+
+                })();
             }
-
-        })();
-    }
-
-    handleOrgUntiChange(event) {
-        let parentId = event.target[event.target.selectedIndex].dataset.parent_id;
-        let level = event.target[event.target.selectedIndex].dataset.level;
-        let id = event.target[event.target.selectedIndex].dataset.id;
-        // filteredOrgs = this.state.unfilteredOrgUnits.filter(orgunit => (orgunit.parent_id == id) || (orgunit.level <= level));
-
-
-        let filteredOrgs = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => ((orgunit.parent_id == id) || (orgunit.level < level)) || orgunit.parent_id == parentId);
-
-        this.setState({
-            orgUnits: filteredOrgs
-        });
-
-        if (level == 5) {
-            let site = event.target.value;
-            let facility = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
-            let subCounty = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == facility[0]['parent_id']));
-            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == subCounty[0]['parent_id']));
-            //odk_unit_name
-        } else if (level == 4) {
-            let facility = event.target.value;
-            let subCounty = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
-            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == subCounty[0]['parent_id']));
-        } else if (level == 3) {
-            let subCounty = event.target.value;
-            let county = this.state.unfilteredOrgUnits.payload[0].filter(orgunit => (orgunit.org_unit_id == parentId));
-        } else if (level == 2) {
-            let county = event.target.value;
-        } else if (level == 1) {
-
         }
-        let orgIds = [id];
-        this.fetchOdkDataServer(orgIds);
+
     }
 
     render() {
-       
+
         const imgStyle = {
             width: "100%"
         };
@@ -98,22 +73,40 @@ class SpiReport extends React.Component {
 
         var tableData = [];
         var overallSiteLevels = [];
-        console.log("====>22");
-            console.log(this.state.odkData);
-        for (const property in this.state.odkData) {
-            
-            if (property != "OverallSitesLevel") {
-                tableData.push(<td key={this.state.odkData[property]}>{this.state.odkData[property]}</td>);
-            } else {
-                overallSiteLevels.push(<td key='level0'>{this.state.odkData[property]['level0']}</td>);
-                overallSiteLevels.push(<td key='level1'>{this.state.odkData[property]['level1']}</td>);
-                overallSiteLevels.push(<td key='level2'>{this.state.odkData[property]['level2']}</td>);
-                overallSiteLevels.push(<td key='level3'>{this.state.odkData[property]['level3']}</td>);
-                overallSiteLevels.push(<td key='level4'>{this.state.odkData[property]['level4']}</td>);
 
+        if (this.state.odkData) {
+            let rowCounter = 1;
+            for (let [orgUnitId, orgUnitSpiData] of Object.entries(this.state.odkData)) {
+                let tableRow = [];
+                let overaRowllSiteLevels = [];
+
+                tableRow.push(<td key={uuidv4()} scope="row">{rowCounter}</td>);
+                overaRowllSiteLevels.push(<td key={uuidv4()} scope="row">{rowCounter}</td>);
+
+                for (const property in orgUnitSpiData) {
+
+                    if (property != "OverallSitesLevel") {
+
+                        tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property]}</td>);
+                    } else {
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level0']}</td>);
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level1']}</td>);
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level2']}</td>);
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level3']}</td>);
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level4']}</td>);
+
+                    }
+
+                }
+                let tbRow = <tr key={uuidv4()}>{tableRow}</tr>;
+                let tbRowSiteLevel = <tr key={uuidv4()}>{overaRowllSiteLevels}</tr>;
+                tableData.push(tbRow);
+                overallSiteLevels.push(tbRowSiteLevel);
+                rowCounter+=1;
             }
-
         }
+
+
 
 
         return (
@@ -126,88 +119,11 @@ class SpiReport extends React.Component {
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                 </div>
 
-                {/* <OrguntiDrillDown /> */}
-
-
                 <div className="row">
-                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
-                        <form>
-                            <div className="form-group">
-                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected={true}>Select county</option>
-                                    <option data-level='1' data-id='1'>kenya</option>
-                                    {
-                                        this.state.orgUnits ?
-                                            this.state.orgUnits.map((value, index) => {
-                                                if (value.level == 2)
-                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                            }) : ''
-                                    }
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
-                        <form>
-                            <div className="form-group">
-                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected={true}>Select subcounty</option>
-                                    {
-                                        this.state.orgUnits ?
-                                            this.state.orgUnits.map((value, index) => {
-                                                if (value.level == 3)
-                                                    return (<option key={value.org_unit_id} data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                            }) : ''
-                                    }
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-
-
-                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
-                        <form>
-                            <div className="form-group">
-                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected={true}>Select facility</option>
-                                    {
-                                        this.state.orgUnits ?
-                                            this.state.orgUnits.map((value, index) => {
-                                                if (value.level == 4)
-                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                            }) : ''
-                                    }
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-
-
-                    <div className="col-md-3 col-sm-3 col-xl-3 col-xs-3">
-                        <form>
-                            <div className="form-group">
-                                {/* <label for="exampleFormControlSelect1">Example select</label> */}
-                                <select onChange={this.handleOrgUntiChange} className="form-control" id="exampleFormControlSelect1">
-                                    <option disabled selected={true}>Select site</option>
-                                    {
-                                        this.state.orgUnits ?
-                                            this.state.orgUnits.map((value, index) => {
-                                                if (value.level == 5)
-                                                    return (<option data-level={value.level} data-id={value.org_unit_id} data-parent_id={value.parent_id}>{value.odk_unit_name}</option>)
-                                            }) : ''
-                                    }
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-
+                    <OrgUnitButton orgUnitChangeHandler={this.fetchOdkDataServer}></OrgUnitButton>
+                    <OrgDate></OrgDate>
                 </div>
-
-
+                <br />
                 <div style={rowStle} className="row">
                     <div className="col-sm-12  col-xm-6 col-md-12">
                         <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
@@ -228,12 +144,7 @@ class SpiReport extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-
-                                <tr>
-                                    <td scope="row">1</td>
-                                    {tableData}
-                                </tr>
-
+                                {tableData}
                             </tbody>
                         </table>
 
@@ -252,11 +163,7 @@ class SpiReport extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td scope="row">1</td>
-                                    {overallSiteLevels}
-                                </tr>
-
+                                {overallSiteLevels}
                             </tbody>
                         </table>
 
