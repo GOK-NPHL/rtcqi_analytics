@@ -38,30 +38,38 @@ class ODKDataAggregator
 
     public function getData($orgUnitIds, $formType = 'spi_checklist')
     {
-        try {
-            for ($x = 0; $x < count($orgUnitIds); $x++) {
+
+        $payload = array();
+        for ($x = 0; $x < count($orgUnitIds); $x++) {
+            try {
                 // $orgToProcess = $this->getOrganisationUntiHierchacyLine($orgUnitIds[$x]);
                 $orgToProcess = $this->getOrgsByLevel($orgUnitIds[$x]);
                 $orgUnit = array();
-                // if ($orgToProcess[1] == 1) {
-                // $orgUnit['mysites_county'] = "$county";
-                // $orgUnit['mysites_subcounty'] = $subcounty;
-                // $orgUnit['mysites_facility'] = $facility;
-                // $orgUnit['mysites'] = $site;
-                // }else if($orgToProcess[1] == 2){
 
-                // }else if($orgToProcess[1] == 3){
+                try {
+                    $orgUnit['mysites_county'] = $orgToProcess[1];
+                } catch (Exception $ex) {
+                    $orgUnit['mysites_county'] = null;
+                }
 
-                // }else if($orgToProcess[1] == 4){
+                try {
+                    $orgUnit['mysites_subcounty'] = $orgToProcess[2];
+                } catch (Exception $ex) {
+                    $orgUnit['mysites_subcounty'] = null;
+                }
 
-                // }else if($orgToProcess[1] == 5){
+                try {
+                    $orgUnit['mysites_facility'] = $orgToProcess[3];
+                } catch (Exception $ex) {
+                    $orgUnit['mysites_facility'] = null;
+                }
 
-                // }
+                try {
+                    $orgUnit['mysites'] = $orgToProcess[4];
+                } catch (Exception $ex) {
+                    $orgUnit['mysites'] = null;
+                }
 
-                $orgUnit['mysites_county'] = $orgToProcess[1];
-                $orgUnit['mysites_subcounty'] = $orgToProcess[2];
-                $orgUnit['mysites_facility'] = $orgToProcess[3];
-                $orgUnit['mysites'] = $orgToProcess[4];
 
                 $results = array();
                 $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
@@ -75,11 +83,13 @@ class ODKDataAggregator
                 $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit);
                 $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit);
                 $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit);
-                return $results;
+                $payload[$orgUnitIds[$x]] = $results;
+            } catch (Exception $ex) {
+                Log::error($ex);
+                // return response()->json(['Message' => 'Could not save org: ' . $ex->getMessage()], 500);
             }
-        } catch (Exception $ex) {
-            return response()->json(['Message' => 'Could not save org: ' . $ex->getMessage()], 500);
         }
+        return $payload;
     }
 
     private function getOrganisationUntiHierchacyLine($orgUnitId)
@@ -98,55 +108,93 @@ class ODKDataAggregator
 
     private function getOrgsByLevel($orgUnitId)
     {
+        $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnitId)->first();
 
-        $orgUnitObject = OdkOrgunit::select(
-            "odkorgunit.odk_unit_name as site",
-            "org4.odk_unit_name as facility",
-            "org3.odk_unit_name as subcounty",
-            "org2.odk_unit_name as county",
-            "org1.odk_unit_name as country"
-        )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
-            ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
-            ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
-            ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
-            ->where('odkorgunit.org_unit_id', $orgUnitId)
-            ->first();
+        $orgUnitObject = null;
+        $level = $levelObj->level;
 
-        $orgUnitSruc =  array();
-        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
-        $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
+        if ($level == 1) {
 
-        return $orgUnitSruc;
-        // if ($orgToProcess[1] == 1) {
-        //     $orgUnit['mysites_county'] = "$county";
-        //     $orgUnit['mysites_subcounty'] = $subcounty;
-        //     $orgUnit['mysites_facility'] = $facility;
-        //     $orgUnit['mysites'] = $site;
-        // }else if($orgToProcess[1] == 2){
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.odk_unit_name as country"
+            )->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->first();
 
-        // }else if($orgToProcess[1] == 3){
+            $orgUnitSruc =  array();
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            return $orgUnitSruc;
+        } else if ($level == 2) {
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.odk_unit_name as county",
+                "org1.odk_unit_name as country"
+            )->join('odkorgunit as org1', 'odkorgunit.parent_id', '=', 'org1.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->first();
 
-        // }else if($orgToProcess[1] == 4){
+            $orgUnitSruc =  array();
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
 
-        // }else if($orgToProcess[1] == 5){
+            return $orgUnitSruc;
+        } else if ($level == 3) {
 
-        // }
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.odk_unit_name as subcounty",
+                "org2.odk_unit_name as county",
+                "org1.odk_unit_name as country"
+            )->join('odkorgunit as org2', 'odkorgunit.parent_id', '=', 'org2.org_unit_id')
+                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->first();
 
-        // $roles = Role::select(
-        //     "users.name as editor",
-        //     "roles.name as role_name",
-        //     "roles.updated_at as updated_at",
-        //     "roles.id as role_id",
-        //     "authorities.name as authority_name",
-        //     "authorities.id as authority_id",
-        //     "authorities.group as authority_group"
-        // )->join('users', 'editor_id', '=', 'users.id')
-        //     ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
-        //     ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
-        //     ->get();
+            $orgUnitSruc =  array();
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
+
+            return $orgUnitSruc;
+        } else if ($level == 4) {
+
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.odk_unit_name as facility",
+                "org3.odk_unit_name as subcounty",
+                "org2.odk_unit_name as county",
+                "org1.odk_unit_name as country"
+            )->join('odkorgunit as org3', 'odkorgunit.parent_id', '=', 'org3.org_unit_id')
+                ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
+                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->first();
+
+            $orgUnitSruc =  array();
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
+            return $orgUnitSruc;
+        } else if ($level == 5) {
+
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.odk_unit_name as site",
+                "org4.odk_unit_name as facility",
+                "org3.odk_unit_name as subcounty",
+                "org2.odk_unit_name as county",
+                "org1.odk_unit_name as country"
+            )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
+                ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
+                ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
+                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->first();
+
+            $orgUnitSruc =  array();
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
+            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
+            return $orgUnitSruc;
+        }
     }
 
     private function getSummationValues($records, $orgUnit, $section)
@@ -162,10 +210,8 @@ class ODKDataAggregator
         ];
 
         foreach ($records as $record) {
-            Log::info("==================>>>>found");
-
+            Log::info("Start record traversal =========>>");
             if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-                Log::info("here==> ");
                 $rowCounter = $rowCounter + 1; //no or rows processed.
                 if ($section == $this->reportSections["overall_sites_level"]) {
                     $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -175,7 +221,7 @@ class ODKDataAggregator
                 continue;
             }
             if (!empty($orgUnit['mysites_county'])) {
-                Log::info("Start ");
+
                 Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
                 if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
                     Log::info("facility 1 " . $orgUnit['mysites_county']);
@@ -226,6 +272,7 @@ class ODKDataAggregator
                     }
                 }
             }
+            Log::info("end record traversal ========>>");
         }
 
         $results = array();
