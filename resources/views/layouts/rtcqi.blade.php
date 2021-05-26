@@ -75,8 +75,8 @@
                             <a class="collapse-item" href="{{ route('ptIndex') }}">Pt</a>
                             <a class="collapse-item" href="{{ route('logbookIndex') }}">Log book</a>
                             <a class="collapse-item" href="{{ route('spiIndex') }}">SPI-RT</a>
-                            <a class="collapse-item" href="{{ route('meIndex') }}">M&E</a>
-                            <a class="collapse-item" href="{{ route('summariesIndex') }}">Summaries</a>
+                            <!-- <a class="collapse-item" href="{{ route('meIndex') }}">M&E</a>
+                            <a class="collapse-item" href="{{ route('summariesIndex') }}">Summaries</a> -->
                         </div>
                     </div>
                 </li>
