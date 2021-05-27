@@ -87,13 +87,13 @@ class SpiReport extends React.Component {
 
                     if (property != "OverallSitesLevel") {
                         if (property == 'orgName') {
-                            tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property].toUpperCase()}</td>);
+                            tableRow.push(<td style={{ "wordWrap": "break-word","maxWidth": "150px"  }} key={uuidv4()}>{orgUnitSpiData[property].toUpperCase()}</td>);
                         } else {
                             tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property]}</td>);
                         }
 
                     } else {
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
+                        overaRowllSiteLevels.push(<td style={{ "wordWrap": "break-word","maxWidth": "150px"  }} key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level0']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level1']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level2']}</td>);
@@ -132,7 +132,7 @@ class SpiReport extends React.Component {
                 <div style={rowStle} className="row">
                     <div className="col-sm-12  col-xm-6 col-md-12">
                         <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
-                        <table className="table">
+                        <table className="table table-responsive">
                             <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
@@ -156,7 +156,7 @@ class SpiReport extends React.Component {
 
                         <br />
                         <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-                        <table className="table">
+                        <table className="table table-responsive">
                             <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
