@@ -42,29 +42,35 @@ class ODKDataAggregator
         $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
-                $orgToProcess = $this->getOrgsByLevel($orgUnitIds[$x]);
+                $orgMeta = $this->getOrgsByLevel($orgUnitIds[$x]);
+                $orgToProcess = $orgMeta[0];
+                $level = $orgMeta[1];
                 $orgUnit = array();
-
+                $orgUnitName = '';
                 try {
                     $orgUnit['mysites_county'] = $orgToProcess[1];
+                    $orgUnitName = $orgToProcess[1];
                 } catch (Exception $ex) {
                     $orgUnit['mysites_county'] = null;
                 }
 
                 try {
                     $orgUnit['mysites_subcounty'] = $orgToProcess[2];
+                    $orgUnitName = $orgToProcess[2];
                 } catch (Exception $ex) {
                     $orgUnit['mysites_subcounty'] = null;
                 }
 
                 try {
                     $orgUnit['mysites_facility'] = $orgToProcess[3];
+                    $orgUnitName = $orgToProcess[3];
                 } catch (Exception $ex) {
                     $orgUnit['mysites_facility'] = null;
                 }
 
                 try {
                     $orgUnit['mysites'] = $orgToProcess[4];
+                    $orgUnitName = $orgToProcess[3] . "/" . $orgUnitName = $orgToProcess[4];;
                 } catch (Exception $ex) {
                     $orgUnit['mysites'] = null;
                 }
@@ -72,6 +78,7 @@ class ODKDataAggregator
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x];
 
                 $results = array();
+                $results["orgName"] = $orgUnitName;
                 $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit);
                 $results["QACounselling"] = $this->getQACounselling($orgUnit);
                 $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit);
@@ -107,7 +114,7 @@ class ODKDataAggregator
 
             $orgUnitSruc =  array();
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            return $orgUnitSruc;
+            return [$orgUnitSruc, $level];
         } else if ($level == 2) {
             $orgUnitObject = OdkOrgunit::select(
                 "odkorgunit.odk_unit_name as county",
@@ -119,7 +126,7 @@ class ODKDataAggregator
             $orgUnitSruc =  array();
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            return $orgUnitSruc;
+            return [$orgUnitSruc, $level];
         } else if ($level == 3) {
 
             $orgUnitObject = OdkOrgunit::select(
@@ -135,7 +142,7 @@ class ODKDataAggregator
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-            return $orgUnitSruc;
+            return [$orgUnitSruc, $level];
         } else if ($level == 4) {
 
             $orgUnitObject = OdkOrgunit::select(
@@ -154,7 +161,7 @@ class ODKDataAggregator
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
-            return $orgUnitSruc;
+            return [$orgUnitSruc, $level];
         } else if ($level == 5) {
 
             $orgUnitObject = OdkOrgunit::select(
@@ -176,7 +183,7 @@ class ODKDataAggregator
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
             $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
-            return $orgUnitSruc;
+            return [$orgUnitSruc, $level];
         }
     }
 
@@ -284,16 +291,15 @@ class ODKDataAggregator
                 ->where('org_id', $orgUnit['org_unit_id'])
                 ->where('form_id', 'like', "spi%") // for spi data
                 ->first();
-            Log::info("org id on ==>");
-            $xx = FormSubmissions::select("project_id", "form_id")
-                ->where('org_id', $orgUnit['org_unit_id'])
-                ->where('form_id', 'like', "%spi");
             $projectId = $submissionOrgUnitmap->project_id;
             $formId = $submissionOrgUnitmap->form_id;
             $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
         } else {
             $countyId = $this->getCountyIdOfOrg($orgUnit['org_unit_id'], $levelObj);
-            $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")->where('org_id', $countyId)->first();
+            $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
+                ->where('org_id', $countyId)
+                ->where('form_id', 'like', "spi%") // for spi data
+                ->first();
             $projectId = $submissionOrgUnitmap->project_id;
             $formId = $submissionOrgUnitmap->form_id;
             $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
@@ -767,84 +773,48 @@ class ODKDataAggregator
         if ($level == 1) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.odk_unit_name as country"
+                "odkorgunit.org_unit_id as org_unit_id"
             )->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
 
-            $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            return $orgUnitSruc;
+            return $orgUnitObject->org_unit_id;
         } else if ($level == 2) {
             $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.odk_unit_name as county",
-                "org1.odk_unit_name as country"
-            )->join('odkorgunit as org1', 'odkorgunit.parent_id', '=', 'org1.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                "org1.org_unit_id as org_unit_id"
+            )->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
 
-            $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-
-            return $orgUnitSruc;
+            return $orgUnitObject->org_unit_id;
         } else if ($level == 3) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.odk_unit_name as subcounty",
-                "org2.odk_unit_name as county",
-                "org1.odk_unit_name as country"
+                "org2.org_unit_id as org_unit_id",
             )->join('odkorgunit as org2', 'odkorgunit.parent_id', '=', 'org2.org_unit_id')
-                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
 
-            $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-
-            return $orgUnitSruc;
+            return $orgUnitObject->org_unit_id;
         } else if ($level == 4) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.odk_unit_name as facility",
-                "org3.odk_unit_name as subcounty",
-                "org2.odk_unit_name as county",
-                "org1.odk_unit_name as country"
+                "org2.org_unit_id as org_unit_id",
             )->join('odkorgunit as org3', 'odkorgunit.parent_id', '=', 'org3.org_unit_id')
                 ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
-                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
 
-            $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
-            return $orgUnitSruc;
+            return $orgUnitObject->org_unit_id;
         } else if ($level == 5) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.odk_unit_name as site",
-                "org4.odk_unit_name as facility",
-                "org3.odk_unit_name as subcounty",
-                "org2.odk_unit_name as county",
-                "org1.odk_unit_name as country"
+                "org2.odk_unit_name as org_unit_id",
             )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
                 ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
                 ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
-                ->join('odkorgunit as org1', 'org2.parent_id', '=', 'org1.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
 
-            $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
-            return $orgUnitSruc;
+            return $orgUnitObject->org_unit_id;
         }
     }
 
