@@ -86,9 +86,14 @@ class SpiReport extends React.Component {
                 for (const property in orgUnitSpiData) {
 
                     if (property != "OverallSitesLevel") {
+                        if (property == 'orgName') {
+                            tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property].toUpperCase()}</td>);
+                        } else {
+                            tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property]}</td>);
+                        }
 
-                        tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property]}</td>);
                     } else {
+                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level0']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level1']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level2']}</td>);
@@ -102,7 +107,7 @@ class SpiReport extends React.Component {
                 let tbRowSiteLevel = <tr key={uuidv4()}>{overaRowllSiteLevels}</tr>;
                 tableData.push(tbRow);
                 overallSiteLevels.push(tbRowSiteLevel);
-                rowCounter+=1;
+                rowCounter += 1;
             }
         }
 
@@ -131,6 +136,7 @@ class SpiReport extends React.Component {
                             <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
+                                    <th scope="col">___</th>
                                     <th scope="col">Personnel Training & Certification</th>
                                     <th scope="col">QA in Counselling</th>
                                     <th scope="col">Physical Facility</th>
@@ -154,6 +160,7 @@ class SpiReport extends React.Component {
                             <thead className="thead-dark">
                                 <tr>
                                     <th scope="col">#</th>
+                                    <th scope="col">___</th>
                                     <th scope="col">Level 0 (&lt;40%)</th>
                                     <th scope="col">Level 1 (40-59%)</th>
                                     <th scope="col">Level 2 (60-79%)</th>
