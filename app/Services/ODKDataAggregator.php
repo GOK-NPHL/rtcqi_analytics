@@ -189,7 +189,6 @@ class ODKDataAggregator
 
     private function sumValues($record, $scores, $rowCounters, $section)
     {
-        Log::info("SUmming values ============>>");
         if ($record["baselinefollowup"] == 'Baseline') {
             $scores['Baseline'] += $this->callFunctionBysecition($section, $record);
             $rowCounters['Baseline'] += 1;
@@ -212,12 +211,20 @@ class ODKDataAggregator
     {
         $rowCounter = 0;
         $score = 0;
-        $overallSitesLevel = [
+        $overallSitesLevelScores = [
             "level0" => 0,
             "level1" => 0,
             "level2" => 0,
             "level3" => 0,
-            "level4" => 0
+            "level4" => 0,
+            "counter" => 0
+        ];
+
+        $overallSitesLevel = [
+            'Baseline' => $overallSitesLevelScores,
+            'Follow_Up1' => $overallSitesLevelScores,
+            'Follow_Up2' => $overallSitesLevelScores,
+            'Follow_Up3' => $overallSitesLevelScores,
         ];
 
         $rowCounters = [
@@ -317,7 +324,7 @@ class ODKDataAggregator
 
         $results = array();
         if ($section == $this->reportSections["overall_sites_level"]) {
-            $results['rowCounter'] = $rowCounter;
+            // $results['rowCounter'] = $rowCounter;
             $results['score'] = $overallSitesLevel;
             return $results;
         } else {
@@ -763,7 +770,7 @@ class ODKDataAggregator
                 $score[$key] = ($value / $rowCounter[$key]); //get denominator   
                 $score[$key] = number_format((float)$score[$key], 1, '.', ',');
             } catch (Exception $ex) {
-                Log::error($ex);
+                $score[$key] = 0;
             }
         }
 
@@ -791,33 +798,106 @@ class ODKDataAggregator
     {
         $records = $this->getFormRecords($orgUnit);
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_sites_level"]);
-        $score = $summationValues['score'];
-        $rowCounter = $summationValues['rowCounter'];
+        $overallSitesLevel = $summationValues['score'];
 
-        $score["level0"] = number_format((float)($score["level0"] / $rowCounter) * 100, 1, '.', ',');
-        $score["level1"] = number_format((float)($score["level1"] / $rowCounter) * 100, 1, '.', ',');
-        $score["level2"] = number_format((float)($score["level2"] / $rowCounter) * 100, 1, '.', ',');
-        $score["level3"] = number_format((float)($score["level3"] / $rowCounter) * 100, 1, '.', ',');
-        $score["level4"] = number_format((float)($score["level4"] / $rowCounter) * 100, 1, '.', ',');
+        foreach ($overallSitesLevel as $timeLine => $timeLineData) {
+            try {
+                $timeLineData["level0"] = number_format((float)($timeLineData["level0"] / $timeLineData["counter"]) * 100, 1, '.', ',');
+            } catch (Exception $ex) {
+                $timeLineData["level0"] = '';
+            }
+            try {
+                $timeLineData["level1"] = number_format((float)($timeLineData["level1"] / $timeLineData["counter"]) * 100, 1, '.', ',');
+            } catch (Exception $ex) {
+                $timeLineData["level1"] = '';
+            }
+            try {
+
+                $timeLineData["level2"] = number_format((float)($timeLineData["level2"] / $timeLineData["counter"]) * 100, 1, '.', ',');
+            } catch (Exception $ex) {
+                $timeLineData["level2"] = '';
+            }
+            try {
+                $timeLineData["level3"] = number_format((float)($timeLineData["level3"] / $timeLineData["counter"]) * 100, 1, '.', ',');
+            } catch (Exception $ex) {
+                $timeLineData["level3"] = '';
+            }
+            try {
+                $timeLineData["level4"] = number_format((float)($timeLineData["level4"] / $timeLineData["counter"]) * 100, 1, '.', ',');
+            } catch (Exception $ex) {
+                $timeLineData["level4"] = '';
+            }
+        }
+
+        // $score["level0"] = number_format((float)($score["level0"] / $rowCounter) * 100, 1, '.', ',');
+        // $score["level1"] = number_format((float)($score["level1"] / $rowCounter) * 100, 1, '.', ',');
+        // $score["level2"] = number_format((float)($score["level2"] / $rowCounter) * 100, 1, '.', ',');
+        // $score["level3"] = number_format((float)($score["level3"] / $rowCounter) * 100, 1, '.', ',');
+        // $score["level4"] = number_format((float)($score["level4"] / $rowCounter) * 100, 1, '.', ',');
         // print_r($score);
-        return $score;
+        return $overallSitesLevel;
     }
 
     private function aggregateOverallSitesLevel($record, $overallSites)
     {
 
         $val = $record["Section-sec91percentage"];
+        if ($record["baselinefollowup"] == 'Baseline') {
 
-        if ($val < 40) {
-            $overallSites["level0"] = $overallSites["level0"] + 1;
-        } else if ($val < 40) {
-            $overallSites["level1"] = $overallSites["level1"] + 1;
-        } else if ($val >= 40 && $val <= 59) {
-            $overallSites["level2"] = $overallSites["level2"] + 1;
-        } else if ($val >= 80 && $val <= 89) {
-            $overallSites["level3"] = $overallSites["level3"] + 1;
-        } else if ($val >= 90) {
-            $overallSites["level4"] = $overallSites["level4"] + 1;
+            $overallSites['Baseline']["counter"] = $overallSites['Baseline']["counter"] + 1;
+
+            if ($val < 40) {
+                $overallSites['Baseline']["level0"] = $overallSites['Baseline']["level0"] + 1;
+            } else if ($val < 40) {
+                $overallSites['Baseline']["level1"] = $overallSites['Baseline']["level1"] + 1;
+            } else if ($val >= 40 && $val <= 59) {
+                $overallSites['Baseline']["level2"] = $overallSites['Baseline']["level2"] + 1;
+            } else if ($val >= 80 && $val <= 89) {
+                $overallSites['Baseline']["level3"] = $overallSites['Baseline']["level3"] + 1;
+            } else if ($val >= 90) {
+                $overallSites['Baseline']["level4"] = $overallSites['Baseline']["level4"] + 1;
+            }
+        } else if ($record["baselinefollowup"] == 'followup') {
+            if ($record["followup"] == 'followup1') {
+                $overallSites['Follow_Up1']["counter"] = $overallSites['Follow_Up1']["counter"] + 1;
+                if ($val < 40) {
+                    $overallSites['Follow_Up1']["level0"] = $overallSites['Follow_Up1']["level0"] + 1;
+                } else if ($val < 40) {
+                    $overallSites['Follow_Up1']["level1"] = $overallSites['Follow_Up1']["level1"] + 1;
+                } else if ($val >= 40 && $val <= 59) {
+                    $overallSites['Follow_Up1']["level2"] = $overallSites['Follow_Up1']["level2"] + 1;
+                } else if ($val >= 80 && $val <= 89) {
+                    $overallSites['Follow_Up1']["level3"] = $overallSites['Follow_Up1']["level3"] + 1;
+                } else if ($val >= 90) {
+                    $overallSites['Follow_Up1']["level4"] = $overallSites['Follow_Up1']["level4"] + 1;
+                }
+            } else if ($record["followup"] == 'followup2') {
+                $overallSites['Follow_Up2']["counter"] = $overallSites['Follow_Up2']["counter"] + 1;
+                if ($val < 40) {
+                    $overallSites['Follow_Up2']["level0"] = $overallSites['Follow_Up2']["level0"] + 1;
+                } else if ($val < 40) {
+                    $overallSites['Follow_Up2']["level1"] = $overallSites['Follow_Up2']["level1"] + 1;
+                } else if ($val >= 40 && $val <= 59) {
+                    $overallSites['Follow_Up2']["level2"] = $overallSites['Follow_Up2']["level2"] + 1;
+                } else if ($val >= 80 && $val <= 89) {
+                    $overallSites['Follow_Up2']["level3"] = $overallSites['Follow_Up2']["level3"] + 1;
+                } else if ($val >= 90) {
+                    $overallSites['Follow_Up2']["level4"] = $overallSites['Follow_Up2']["level4"] + 1;
+                }
+            } else if ($record["followup"] == 'followup3') {
+                $overallSites['Follow_Up3']["counter"] = $overallSites['Follow_Up3']["counter"] + 1;
+                if ($val < 40) {
+                    $overallSites['Follow_Up3']["level0"] = $overallSites['Follow_Up3']["level0"] + 1;
+                } else if ($val < 40) {
+                    $overallSites['Follow_Up3']["level1"] = $overallSites['Follow_Up3']["level1"] + 1;
+                } else if ($val >= 40 && $val <= 59) {
+                    $overallSites['Follow_Up3']["level2"] = $overallSites['Follow_Up3']["level2"] + 1;
+                } else if ($val >= 80 && $val <= 89) {
+                    $overallSites['Follow_Up3']["level3"] = $overallSites['Follow_Up3']["level3"] + 1;
+                } else if ($val >= 90) {
+                    $overallSites['Follow_Up3']["level4"] = $overallSites['Follow_Up3']["level4"] + 1;
+                }
+            }
         }
 
         return $overallSites;
