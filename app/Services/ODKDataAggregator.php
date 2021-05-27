@@ -296,6 +296,7 @@ class ODKDataAggregator
             $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
         } else {
             $countyId = $this->getCountyIdOfOrg($orgUnit['org_unit_id'], $levelObj);
+            Log::info("county id for file search =====>".$countyId);
             $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
                 ->where('org_id', $countyId)
                 ->where('form_id', 'like', "spi%") // for spi data
@@ -807,7 +808,7 @@ class ODKDataAggregator
         } else if ($level == 5) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "org2.odk_unit_name as org_unit_id",
+                "org2.org_unit_id as org_unit_id",
             )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
                 ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
                 ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
