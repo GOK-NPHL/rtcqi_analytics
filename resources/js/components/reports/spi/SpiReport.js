@@ -70,15 +70,16 @@ class SpiReport extends React.Component {
             marginBottom: "10px"
         };
 
-        var overallSiteLevels = [];
+        // var overallSiteLevels = [];
+        let overaRowllSiteLevels = [];
         let tableData = [];
         if (this.state.odkData) {
 
             for (let [orgUnitId, orgUnitSpiData] of Object.entries(this.state.odkData)) {
 
-                let overaRowllSiteLevels = [];
+
                 let rowCounter = 1;
-                overaRowllSiteLevels.push(<td key={uuidv4()} scope="row">{rowCounter}</td>);
+
                 rowCounter += 1;
 
                 let timeLines = [];
@@ -93,13 +94,18 @@ class SpiReport extends React.Component {
                     }
                 }
 
-                tableData.push(<tr key={uuidv4()}><td colSpan={4} scope="row"><strong>{orgunitName}</strong></td></tr>);
+                tableData.push(
+                    <tr key={uuidv4()}>
+                        <td colSpan={4} scope="row">
+                            <strong>{orgunitName}</strong>
+                        </td>
+                    </tr>);
 
                 timeLines.map((timeline) => {
                     let row = [];
                     row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
                     for (let [indicator, data] of Object.entries(orgUnitSpiData)) {
-                        if (indicator != 'orgName') {
+                        if (indicator != 'orgName' && indicator != "OverallSitesLevel") {
                             row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
                         }
                     }
@@ -107,20 +113,38 @@ class SpiReport extends React.Component {
                     tableData.push(<tr key={uuidv4()}>{row}</tr>);
                 });
 
-                for (const property in orgUnitSpiData) {
+                //======= Add  overaRowllSiteLevels table data =====//
+                overaRowllSiteLevels.push(
+                    <tr key={uuidv4()}>
+                        <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
+                            <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
+                        </td>
+                    </tr>);
 
-                    if (property == "OverallSitesLevel") {
-                        overaRowllSiteLevels.push(<td style={{ "wordWrap": "break-word", "maxWidth": "150px" }} key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level0']}</td>);
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level1']}</td>);
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level2']}</td>);
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level3']}</td>);
-                        overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level4']}</td>);
+                timeLines.map((timeline) => {
+                    let row = [];
+                    row.push(<td key={uuidv4()}>{timeline}</td>);
+                    for (let [key, val] of Object.entries(orgUnitSpiData)) {
+                        if (key == "OverallSitesLevel") {
+                            let level0 = orgUnitSpiData["OverallSitesLevel"][timeline]['level0'];
+                            let level1 = orgUnitSpiData["OverallSitesLevel"][timeline]['level1'];
+                            let level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
+                            let level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
+                            let level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
+                            console.log("orgUnitSpiData");
+                            console.log(level0);
+                            row.push(<td key={uuidv4()}>{level0}</td>);
+                            row.push(<td key={uuidv4()}>{level1}</td>);
+                            row.push(<td key={uuidv4()}>{level2}</td>);
+                            row.push(<td key={uuidv4()}>{level3}</td>);
+                            row.push(<td key={uuidv4()}>{level4}</td>);
+                        }
+
                     }
-                }
+                    overaRowllSiteLevels.push(<tr>{row}</tr>);
+                });
 
-                let tbRowSiteLevel = <tr key={uuidv4()}>{overaRowllSiteLevels}</tr>;
-                overallSiteLevels.push(tbRowSiteLevel);
+
 
             }
         }
@@ -172,7 +196,6 @@ class SpiReport extends React.Component {
                         <table className="table table-responsive">
                             <thead className="thead-dark">
                                 <tr>
-                                    <th scope="col">#</th>
                                     <th scope="col">___</th>
                                     <th scope="col">Level 0 (&lt;40%)</th>
                                     <th scope="col">Level 1 (40-59%)</th>
@@ -183,7 +206,7 @@ class SpiReport extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {overallSiteLevels}
+                                {overaRowllSiteLevels}
                             </tbody>
                         </table>
 
