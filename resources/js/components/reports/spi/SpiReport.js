@@ -70,47 +70,60 @@ class SpiReport extends React.Component {
             marginBottom: "10px"
         };
 
-
-        var tableData = [];
         var overallSiteLevels = [];
-
+        let tableData = [];
         if (this.state.odkData) {
-            let rowCounter = 1;
-            for (let [orgUnitId, orgUnitSpiData] of Object.entries(this.state.odkData)) {
-                let tableRow = [];
-                let overaRowllSiteLevels = [];
 
-                tableRow.push(<td key={uuidv4()} scope="row">{rowCounter}</td>);
+            for (let [orgUnitId, orgUnitSpiData] of Object.entries(this.state.odkData)) {
+
+                let overaRowllSiteLevels = [];
+                let rowCounter = 1;
                 overaRowllSiteLevels.push(<td key={uuidv4()} scope="row">{rowCounter}</td>);
+                rowCounter += 1;
+
+                let timeLines = [];
+                let orgunitName = '';
+                for (let [key, val] of Object.entries(orgUnitSpiData)) {
+                    if (key != "OverallSitesLevel" && key != 'orgName') {
+                        for (let [timeline, value] of Object.entries(val)) {
+                            if (!timeLines.includes(timeline)) timeLines.push(timeline);
+                        }
+                    } else if (key == 'orgName') {
+                        orgunitName = val.toUpperCase();
+                    }
+                }
+
+                tableData.push(<tr key={uuidv4()}><td colSpan={4} scope="row"><strong>{orgunitName}</strong></td></tr>);
+
+                timeLines.map((timeline) => {
+                    let row = [];
+                    row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
+                    for (let [indicator, data] of Object.entries(orgUnitSpiData)) {
+                        if (indicator != 'orgName') {
+                            row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
+                        }
+                    }
+
+                    tableData.push(<tr key={uuidv4()}>{row}</tr>);
+                });
 
                 for (const property in orgUnitSpiData) {
 
-                    if (property != "OverallSitesLevel") {
-                        if (property == 'orgName') {
-                            tableRow.push(<td style={{ "wordWrap": "break-word","maxWidth": "150px"  }} key={uuidv4()}>{orgUnitSpiData[property].toUpperCase()}</td>);
-                        } else {
-                            tableRow.push(<td key={uuidv4()}>{orgUnitSpiData[property]}</td>);
-                        }
-
-                    } else {
-                        overaRowllSiteLevels.push(<td style={{ "wordWrap": "break-word","maxWidth": "150px"  }} key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
+                    if (property == "OverallSitesLevel") {
+                        overaRowllSiteLevels.push(<td style={{ "wordWrap": "break-word", "maxWidth": "150px" }} key={uuidv4()}>{orgUnitSpiData['orgName'].toUpperCase()}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level0']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level1']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level2']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level3']}</td>);
                         overaRowllSiteLevels.push(<td key={uuidv4()}>{orgUnitSpiData[property]['level4']}</td>);
-
                     }
-
                 }
-                let tbRow = <tr key={uuidv4()}>{tableRow}</tr>;
+
                 let tbRowSiteLevel = <tr key={uuidv4()}>{overaRowllSiteLevels}</tr>;
-                tableData.push(tbRow);
                 overallSiteLevels.push(tbRowSiteLevel);
-                rowCounter += 1;
+
             }
         }
-
 
 
 
@@ -135,7 +148,7 @@ class SpiReport extends React.Component {
                         <table className="table table-responsive">
                             <thead className="thead-dark">
                                 <tr>
-                                    <th scope="col">#</th>
+                                    {/* <th scope="col">#</th> */}
                                     <th scope="col">___</th>
                                     <th scope="col">Personnel Training & Certification</th>
                                     <th scope="col">QA in Counselling</th>
