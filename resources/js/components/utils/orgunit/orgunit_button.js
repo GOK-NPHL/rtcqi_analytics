@@ -76,7 +76,7 @@ class OrgUnitButton extends React.Component {
                             <div
                                 style={{
                                     "overflow": "scroll",
-                                    "maxHeight": "20px", "minHeight": "300px",
+                                    "maxHeight": "320px", //"minHeight": "220px",
                                     "paddingBottom": "6px",
                                     "paddingRight": "16px",
                                 }} >
