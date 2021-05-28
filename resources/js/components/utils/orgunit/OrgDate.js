@@ -29,17 +29,55 @@ class OrgDate extends React.Component {
 
     render() {
         const marginLeft = {
-            marginLeft: "16px",
+            // marginLeft: "16px",
+            paddingLeft: "0px"
         };
+        const label = {
+            paddingRight: "0px",
+            marginRight: "0px",
+            textAlign: "center"
+        }
+        // $(".react-datepicker__input-container>input").css("width", "100px");
+        // $(".react-datepicker__input-container>input").addClass("form-control");
+        // $(".react-datepicker__input-container").css("height", "100px");
+        // $(".react-datepicker__input-container>input").css("height", "100px");
+        // $( ".react-datepicker-wrapper").css("height", "100px");
+
         return (
             <React.Fragment>
-                <span style={marginLeft}>
-                    Start Date: <DatePicker selected={this.state.startDate} onChange={this.onStartDateChange} />
-                </span>
-                
-                <span style={marginLeft}>
-                    End Date: <DatePicker selected={this.state.endData} onChange={this.onEndDateChange} />
-                </span>
+                <div className="row">
+
+                    <div className="col-sm-6">
+                        <form>
+                            <div className="form-group row">
+                                <label for="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
+                                <div className="col-sm-9">
+                                    <input type="date"
+                                        class="form-control form-control form-control-sm"
+                                        id="colFormLabelSm"
+                                        placeholder="start date" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="col-sm-6">
+                        <form>
+                            <div className="form-group row">
+                                <label for="colFormLabelSm"
+                                    className="col-sm-3 col-form-label col-form-label-sm">End date</label>
+                                <div className="col-sm-9">
+                                    <input type="date" 
+                                    class="form-control form-control form-control-sm" 
+                                    id="colFormLabelSm"
+                                     placeholder="start date" />
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
             </React.Fragment>
         );
     }
