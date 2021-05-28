@@ -799,42 +799,20 @@ class ODKDataAggregator
         $records = $this->getFormRecords($orgUnit);
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_sites_level"]);
         $overallSitesLevel = $summationValues['score'];
-
+        //$overallSites['Baseline']["level0"]
         foreach ($overallSitesLevel as $timeLine => $timeLineData) {
-            try {
-                $timeLineData["level0"] = number_format((float)($timeLineData["level0"] / $timeLineData["counter"]) * 100, 1, '.', ',');
-            } catch (Exception $ex) {
-                $timeLineData["level0"] = '';
-            }
-            try {
-                $timeLineData["level1"] = number_format((float)($timeLineData["level1"] / $timeLineData["counter"]) * 100, 1, '.', ',');
-            } catch (Exception $ex) {
-                $timeLineData["level1"] = '';
-            }
-            try {
-
-                $timeLineData["level2"] = number_format((float)($timeLineData["level2"] / $timeLineData["counter"]) * 100, 1, '.', ',');
-            } catch (Exception $ex) {
-                $timeLineData["level2"] = '';
-            }
-            try {
-                $timeLineData["level3"] = number_format((float)($timeLineData["level3"] / $timeLineData["counter"]) * 100, 1, '.', ',');
-            } catch (Exception $ex) {
-                $timeLineData["level3"] = '';
-            }
-            try {
-                $timeLineData["level4"] = number_format((float)($timeLineData["level4"] / $timeLineData["counter"]) * 100, 1, '.', ',');
-            } catch (Exception $ex) {
-                $timeLineData["level4"] = '';
+            // value level0, level1 etc
+            foreach ($timeLineData as $key => $value) {
+                if ($key != 'counter') {
+                    try {
+                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 1, '.', ',');
+                    } catch (Exception $ex) {
+                        $timeLineData[$key] = '';
+                    }
+                }
             }
         }
 
-        // $score["level0"] = number_format((float)($score["level0"] / $rowCounter) * 100, 1, '.', ',');
-        // $score["level1"] = number_format((float)($score["level1"] / $rowCounter) * 100, 1, '.', ',');
-        // $score["level2"] = number_format((float)($score["level2"] / $rowCounter) * 100, 1, '.', ',');
-        // $score["level3"] = number_format((float)($score["level3"] / $rowCounter) * 100, 1, '.', ',');
-        // $score["level4"] = number_format((float)($score["level4"] / $rowCounter) * 100, 1, '.', ',');
-        // print_r($score);
         return $overallSitesLevel;
     }
 
