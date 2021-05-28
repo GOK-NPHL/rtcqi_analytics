@@ -50,10 +50,10 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label for="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
+                                <label forHtml="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
                                 <div className="col-sm-9">
                                     <input type="date"
-                                        class="form-control form-control form-control-sm"
+                                        className="form-control form-control form-control-sm"
                                         id="colFormLabelSm"
                                         placeholder="start date" />
                                 </div>
@@ -64,11 +64,11 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label for="colFormLabelSm"
+                                <label forHtml="colFormLabelSm"
                                     className="col-sm-3 col-form-label col-form-label-sm">End date</label>
                                 <div className="col-sm-9">
                                     <input type="date" 
-                                    class="form-control form-control form-control-sm" 
+                                    className="form-control form-control form-control-sm" 
                                     id="colFormLabelSm"
                                      placeholder="start date" />
                                 </div>

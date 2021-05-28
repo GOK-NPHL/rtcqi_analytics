@@ -36,7 +36,7 @@ class ODKDataAggregator
     }
 
 
-    public function getData($orgUnitIds, $formType = 'spi_checklist')
+    public function getData($orgUnitIds)
     {
 
         $payload = array();
@@ -74,7 +74,9 @@ class ODKDataAggregator
                 } catch (Exception $ex) {
                     $orgUnit['mysites'] = null;
                 }
-
+                if($level==1){
+                    $orgUnitName='Kenya';
+                }
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x];
 
                 $results = array();
@@ -342,7 +344,18 @@ class ODKDataAggregator
         $fileName = null;
 
         if ($level == 1) {
-            // getAllRecords
+            $combinedRecords = [];
+            $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
+                ->where('form_id', 'like', "spi%") // for spi data
+                ->get();
+            foreach ($submissionOrgUnitmap as $mapping) {
+                $projectId = $mapping->project_id;
+                $formId = $mapping->form_id;
+                $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
+                $perCountyRecords = $this->getSingleFileRecords($fileName);
+                $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords,true ));
+            }
+            return $combinedRecords;
         } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
             $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
                 ->where('org_id', $orgUnit['org_unit_id'])
@@ -363,9 +376,14 @@ class ODKDataAggregator
             $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
         }
 
+        if ($level != 1) {
+            return $this->getSingleFileRecords($fileName);
+        }
+    }
 
+    private function getSingleFileRecords($fileName)
+    {
         $url = "";
-        //"submissions/15_spi_checklist_bungoma_submissions.csv"
 
         if (Storage::exists($fileName)) {
             $url = Storage::path($fileName);
@@ -765,10 +783,6 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_performance"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
-        Log::info("the total values ======> 1");
-        Log::info(print_r($score, true));
-        Log::info(print_r($rowCounter, true));
-        Log::info("the total values ======> 2");
 
         foreach ($score as $key => $value) {
             try {
@@ -811,8 +825,8 @@ class ODKDataAggregator
                 if ($key != 'counter') {
                     try {
                         Log::info("ths value of data ==>");
-                        Log::info(print_r($timeLineData[$key],true));
-                        Log::info(print_r($timeLineData["counter"],true));
+                        Log::info(print_r($timeLineData[$key], true));
+                        Log::info(print_r($timeLineData["counter"], true));
                         Log::info($key);
                         Log::info("ths value of data ==> 2");
                         $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 1, '.', ',');
@@ -826,7 +840,8 @@ class ODKDataAggregator
         return $overallSitesLevel;
     }
 
-    private function summTimelineData($timeLine,$val,$overallSites){
+    private function summTimelineData($timeLine, $val, $overallSites)
+    {
         if (round($val) < 40) {
             $overallSites[$timeLine]["level0"] = $overallSites[$timeLine]["level0"] + 1;
         } else if (round($val) >= 40 && round($val) <= 59) {
@@ -848,21 +863,17 @@ class ODKDataAggregator
         if ($record["baselinefollowup"] == 'Baseline') {
 
             $overallSites['Baseline']["counter"] = $overallSites['Baseline']["counter"] + 1;
-            $overallSites=$this->summTimelineData('Baseline',$val,$overallSites);
-            
+            $overallSites = $this->summTimelineData('Baseline', $val, $overallSites);
         } else if ($record["baselinefollowup"] == 'followup') {
             if ($record["followup"] == 'followup1') {
                 $overallSites['Follow_Up1']["counter"] = $overallSites['Follow_Up1']["counter"] + 1;
-                $overallSites=$this->summTimelineData('Follow_Up1',$val,$overallSites);
-                
+                $overallSites = $this->summTimelineData('Follow_Up1', $val, $overallSites);
             } else if ($record["followup"] == 'followup2') {
                 $overallSites['Follow_Up2']["counter"] = $overallSites['Follow_Up2']["counter"] + 1;
-                $overallSites=$this->summTimelineData('Follow_Up2',$val,$overallSites);
-               
+                $overallSites = $this->summTimelineData('Follow_Up2', $val, $overallSites);
             } else if ($record["followup"] == 'followup3') {
                 $overallSites['Follow_Up3']["counter"] = $overallSites['Follow_Up3']["counter"] + 1;
-                $overallSites=$this->summTimelineData('Follow_Up3',$val,$overallSites);
-              
+                $overallSites = $this->summTimelineData('Follow_Up3', $val, $overallSites);
             }
         }
 
