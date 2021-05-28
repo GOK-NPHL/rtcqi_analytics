@@ -805,6 +805,11 @@ class ODKDataAggregator
             foreach ($timeLineData as $key => $value) {
                 if ($key != 'counter') {
                     try {
+                        Log::info("ths value of data ==>");
+                        Log::info(print_r($timeLineData[$key],true));
+                        Log::info(print_r($timeLineData["counter"],true));
+                        Log::info($key);
+                        Log::info("ths value of data ==> 2");
                         $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 1, '.', ',');
                     } catch (Exception $ex) {
                         $timeLineData[$key] = '';
@@ -816,6 +821,21 @@ class ODKDataAggregator
         return $overallSitesLevel;
     }
 
+    private function summTimelineData($timeLine,$val,$overallSites){
+        if ($val < 40) {
+            $overallSites[$timeLine]["level0"] = $overallSites[$timeLine]["level0"] + 1;
+        } else if ($val >= 40 && $val <= 59) {
+            $overallSites[$timeLine]["level1"] = $overallSites[$timeLine]["level1"] + 1;
+        } else if ($val >= 60 && $val <= 79) {
+            $overallSites[$timeLine]["level2"] = $overallSites[$timeLine]["level2"] + 1;
+        } else if ($val >= 80 && $val <= 89) {
+            $overallSites[$timeLine]["level3"] = $overallSites[$timeLine]["level3"] + 1;
+        } else if ($val >= 90) {
+            $overallSites[$timeLine]["level4"] = $overallSites[$timeLine]["level4"] + 1;
+        }
+        return $overallSites;
+    }
+
     private function aggregateOverallSitesLevel($record, $overallSites)
     {
 
@@ -823,58 +843,21 @@ class ODKDataAggregator
         if ($record["baselinefollowup"] == 'Baseline') {
 
             $overallSites['Baseline']["counter"] = $overallSites['Baseline']["counter"] + 1;
-
-            if ($val < 40) {
-                $overallSites['Baseline']["level0"] = $overallSites['Baseline']["level0"] + 1;
-            } else if ($val < 40) {
-                $overallSites['Baseline']["level1"] = $overallSites['Baseline']["level1"] + 1;
-            } else if ($val >= 40 && $val <= 59) {
-                $overallSites['Baseline']["level2"] = $overallSites['Baseline']["level2"] + 1;
-            } else if ($val >= 80 && $val <= 89) {
-                $overallSites['Baseline']["level3"] = $overallSites['Baseline']["level3"] + 1;
-            } else if ($val >= 90) {
-                $overallSites['Baseline']["level4"] = $overallSites['Baseline']["level4"] + 1;
-            }
+            $overallSites=$this->summTimelineData('Baseline',$val,$overallSites);
+            
         } else if ($record["baselinefollowup"] == 'followup') {
             if ($record["followup"] == 'followup1') {
                 $overallSites['Follow_Up1']["counter"] = $overallSites['Follow_Up1']["counter"] + 1;
-                if ($val < 40) {
-                    $overallSites['Follow_Up1']["level0"] = $overallSites['Follow_Up1']["level0"] + 1;
-                } else if ($val < 40) {
-                    $overallSites['Follow_Up1']["level1"] = $overallSites['Follow_Up1']["level1"] + 1;
-                } else if ($val >= 40 && $val <= 59) {
-                    $overallSites['Follow_Up1']["level2"] = $overallSites['Follow_Up1']["level2"] + 1;
-                } else if ($val >= 80 && $val <= 89) {
-                    $overallSites['Follow_Up1']["level3"] = $overallSites['Follow_Up1']["level3"] + 1;
-                } else if ($val >= 90) {
-                    $overallSites['Follow_Up1']["level4"] = $overallSites['Follow_Up1']["level4"] + 1;
-                }
+                $overallSites=$this->summTimelineData('Follow_Up1',$val,$overallSites);
+                
             } else if ($record["followup"] == 'followup2') {
                 $overallSites['Follow_Up2']["counter"] = $overallSites['Follow_Up2']["counter"] + 1;
-                if ($val < 40) {
-                    $overallSites['Follow_Up2']["level0"] = $overallSites['Follow_Up2']["level0"] + 1;
-                } else if ($val < 40) {
-                    $overallSites['Follow_Up2']["level1"] = $overallSites['Follow_Up2']["level1"] + 1;
-                } else if ($val >= 40 && $val <= 59) {
-                    $overallSites['Follow_Up2']["level2"] = $overallSites['Follow_Up2']["level2"] + 1;
-                } else if ($val >= 80 && $val <= 89) {
-                    $overallSites['Follow_Up2']["level3"] = $overallSites['Follow_Up2']["level3"] + 1;
-                } else if ($val >= 90) {
-                    $overallSites['Follow_Up2']["level4"] = $overallSites['Follow_Up2']["level4"] + 1;
-                }
+                $overallSites=$this->summTimelineData('Follow_Up2',$val,$overallSites);
+               
             } else if ($record["followup"] == 'followup3') {
                 $overallSites['Follow_Up3']["counter"] = $overallSites['Follow_Up3']["counter"] + 1;
-                if ($val < 40) {
-                    $overallSites['Follow_Up3']["level0"] = $overallSites['Follow_Up3']["level0"] + 1;
-                } else if ($val < 40) {
-                    $overallSites['Follow_Up3']["level1"] = $overallSites['Follow_Up3']["level1"] + 1;
-                } else if ($val >= 40 && $val <= 59) {
-                    $overallSites['Follow_Up3']["level2"] = $overallSites['Follow_Up3']["level2"] + 1;
-                } else if ($val >= 80 && $val <= 89) {
-                    $overallSites['Follow_Up3']["level3"] = $overallSites['Follow_Up3']["level3"] + 1;
-                } else if ($val >= 90) {
-                    $overallSites['Follow_Up3']["level4"] = $overallSites['Follow_Up3']["level4"] + 1;
-                }
+                $overallSites=$this->summTimelineData('Follow_Up3',$val,$overallSites);
+              
             }
         }
 
