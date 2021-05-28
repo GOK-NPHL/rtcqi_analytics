@@ -765,6 +765,11 @@ class ODKDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_performance"]);
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
+        Log::info("the total values ======> 1");
+        Log::info(print_r($score, true));
+        Log::info(print_r($rowCounter, true));
+        Log::info("the total values ======> 2");
+
         foreach ($score as $key => $value) {
             try {
                 $score[$key] = ($value / $rowCounter[$key]); //get denominator   
@@ -822,15 +827,15 @@ class ODKDataAggregator
     }
 
     private function summTimelineData($timeLine,$val,$overallSites){
-        if ($val < 40) {
+        if (round($val) < 40) {
             $overallSites[$timeLine]["level0"] = $overallSites[$timeLine]["level0"] + 1;
-        } else if ($val >= 40 && $val <= 59) {
+        } else if (round($val) >= 40 && round($val) <= 59) {
             $overallSites[$timeLine]["level1"] = $overallSites[$timeLine]["level1"] + 1;
-        } else if ($val >= 60 && $val <= 79) {
+        } else if (round($val) >= 60 && round($val) <= 79) {
             $overallSites[$timeLine]["level2"] = $overallSites[$timeLine]["level2"] + 1;
-        } else if ($val >= 80 && $val <= 89) {
+        } else if (round($val) >= 80 && round($val) <= 89) {
             $overallSites[$timeLine]["level3"] = $overallSites[$timeLine]["level3"] + 1;
-        } else if ($val >= 90) {
+        } else if (round($val) >= 90) {
             $overallSites[$timeLine]["level4"] = $overallSites[$timeLine]["level4"] + 1;
         }
         return $overallSites;
