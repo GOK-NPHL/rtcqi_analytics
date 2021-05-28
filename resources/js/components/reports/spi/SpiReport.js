@@ -7,6 +7,8 @@ import { FetchOrgunits, FetchOdkData } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
+import OrgType from '../../utils/orgunit/OrgType';
+import OrgProgramme from '../../utils/orgunit/OrgProgramme';
 
 
 class SpiReport extends React.Component {
@@ -131,8 +133,7 @@ class SpiReport extends React.Component {
                             let level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
                             let level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
                             let level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
-                            console.log("orgUnitSpiData");
-                            console.log(level0);
+
                             row.push(<td key={uuidv4()}>{level0}</td>);
                             row.push(<td key={uuidv4()}>{level1}</td>);
                             row.push(<td key={uuidv4()}>{level2}</td>);
@@ -143,7 +144,6 @@ class SpiReport extends React.Component {
                     }
                     overaRowllSiteLevels.push(<tr>{row}</tr>);
                 });
-
 
 
             }
@@ -162,8 +162,28 @@ class SpiReport extends React.Component {
                 </div>
 
                 <div className="row">
-                    <OrgUnitButton orgUnitChangeHandler={this.fetchOdkDataServer}></OrgUnitButton>
-                    <OrgDate></OrgDate>
+
+                    <div className="col-md-2">
+                        <OrgUnitButton orgUnitChangeHandler={this.fetchOdkDataServer}></OrgUnitButton>
+                    </div>
+                    <div className="col-md-2">
+                        <OrgType></OrgType>
+                    </div>
+
+                    <div className="col-md-2">
+                        <OrgProgramme></OrgProgramme>
+                    </div>
+
+                    <div className="col-md-5">
+                        <OrgDate></OrgDate>
+                    </div>
+
+                    <div className="col-md-1">
+                        <button type="button" class="btn btn-sm btn-info">
+                             <i className="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
                 </div>
                 <br />
                 <div style={rowStle} className="row">
