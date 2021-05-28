@@ -58,8 +58,8 @@ class OrgUnitButton extends React.Component {
                         $("#spi_orgunits").toggle();
                     }}
                     type="button"
-                    className="btn btn-outline-primary">
-                    Organisation Unit<i className="fa fa-filter"></i>
+                    className="btn btn-sm btn-outline-primary">
+                    Organisation unit<i className="fa fa-filter"></i>
                 </button>
 
                 <div className="card"
@@ -69,8 +69,7 @@ class OrgUnitButton extends React.Component {
                         "position": "absolute",
                         "zIndex": "999",
                         "backgroundColor": "white"
-                    }}
-                >
+                    }}>
                     <div className="card-body">
                         <div>
                             <div
