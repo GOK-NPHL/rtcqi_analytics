@@ -31,7 +31,9 @@ class SpiReportController extends Controller
     {   
         $odkObj = new ODKDataAggregator;
         Log::info($request->orgUnitIds);
-        $result=$odkObj->getData($request->orgUnitIds);
+        $orgTimeline = $request->orgTimeline;
+        $orgUnitIds=$request->orgUnitIds;
+        $result=$odkObj->getData($orgUnitIds,$orgTimeline);
         return $result;
     }
 }
