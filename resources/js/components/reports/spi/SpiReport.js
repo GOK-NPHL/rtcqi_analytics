@@ -8,7 +8,7 @@ import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
 import OrgTimeline from '../../utils/orgunit/OrgTimeline';
-import OrgProgramme from '../../utils/orgunit/OrgProgramme';
+import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 
 
 class SpiReport extends React.Component {
@@ -18,12 +18,14 @@ class SpiReport extends React.Component {
         this.state = {
             orgUnits: [],
             orgUnitDataIds: [0],
-            orgUnitTimeline: []
+            orgUnitTimeline: [],
+            siteType: null
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
         this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
+        this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
     }
 
     componentDidMount() {
@@ -44,14 +46,14 @@ class SpiReport extends React.Component {
             });
         })();
 
-        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline, this.state.siteType);
     }
 
-    fetchOdkDataServer(orgUnitIds, orgTimeline) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -73,6 +75,12 @@ class SpiReport extends React.Component {
     orgUnitChangeHandler(orgUnitIds) {
         this.setState({
             orgUnitDataIds: orgUnitIds
+        });
+    }
+
+    orgUnitTypeChangeHandler(siteType) {
+        this.setState({
+            siteType: siteType
         });
     }
 
@@ -204,7 +212,7 @@ class SpiReport extends React.Component {
                     </div>
 
                     <div className="col-md-2">
-                        <OrgProgramme></OrgProgramme>
+                        <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
                     <div className="col-md-5">
@@ -213,7 +221,7 @@ class SpiReport extends React.Component {
 
                     <div className="col-md-1">
                         <button
-                            onClick={()=>this.onFilterButtonClickEvent()}
+                            onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
                             className="btn btn-sm btn-info">
                             <i className="fa fa-search" aria-hidden="true"></i>
