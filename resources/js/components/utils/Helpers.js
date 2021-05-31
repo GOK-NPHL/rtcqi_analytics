@@ -25,7 +25,7 @@ export async function FetchOrgunits() {
 
 }
 
-export async function FetchOdkData(orgUnitIds) {
+export async function FetchOdkData(orgUnitIds,orgTimeline) {
 
     try {
 
@@ -34,6 +34,7 @@ export async function FetchOdkData(orgUnitIds) {
             url: `${settings.rtcqiBaseApi}/odk_data`,
             data: {
                 orgUnitIds: orgUnitIds,
+                orgTimeline: orgTimeline
             }
         });
         return response;
