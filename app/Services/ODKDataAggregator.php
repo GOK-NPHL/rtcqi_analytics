@@ -20,8 +20,8 @@ use PhpParser\Node\Stmt\Continue_;
 class ODKDataAggregator
 {
     private $reportSections = array();
-    private $timeLines =['baseline','followup1','followup2','followup3'];
-
+    private $timeLines = ['baseline', 'followup1', 'followup2', 'followup3'];
+    private $userOrgTimelineParams = array();
     public function __construct()
     {
         $this->reportSections["personnel_training_and_certification"] = 1;
@@ -37,9 +37,9 @@ class ODKDataAggregator
     }
 
 
-    public function getData($orgUnitIds,$orgTimeline)
+    public function getData($orgUnitIds, $orgTimeline)
     {
-        
+        $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
         $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
@@ -75,8 +75,8 @@ class ODKDataAggregator
                 } catch (Exception $ex) {
                     $orgUnit['mysites'] = null;
                 }
-                if($level==1){
-                    $orgUnitName='Kenya';
+                if ($level == 1) {
+                    $orgUnitName = 'Kenya';
                 }
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x];
 
@@ -193,18 +193,20 @@ class ODKDataAggregator
     private function sumValues($record, $scores, $rowCounters, $section)
     {
         if ($record["baselinefollowup"] == 'Baseline') {
-            $scores[$this->timeLines[0]] += $this->callFunctionBysecition($section, $record);
-            $rowCounters[$this->timeLines[0]] += 1;
+            if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                $scores[$this->timeLines[0]] += $this->callFunctionBysecition($section, $record);
+                $rowCounters[$this->timeLines[0]] += 1;
+            }
         } else if ($record["baselinefollowup"] == 'followup') {
-            if ($record["followup"] == $this->timeLines[1]) {
-                $rowCounters[$this->timeLines[1]] += 1;
-                $scores[$this->timeLines[1]] += $this->callFunctionBysecition($section, $record);
-            } else if ($record["followup"] == $this->timeLines[2]) {
-                $rowCounters[$this->timeLines[2]] += 1;
-                $scores[$this->timeLines[2]] += $this->callFunctionBysecition($section, $record);
-            } else if ($record["followup"] == $this->timeLines[3]) {
-                $rowCounters[$this->timeLines[3]] += 1;
-                $scores[$this->timeLines[3]] += $this->callFunctionBysecition($section, $record);
+
+            $followupType = $record["followup"];
+            for ($x = 0; $x < count($this->timeLines); $x++) {
+                if ($followupType == $this->timeLines[$x]) {
+                    if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                        $rowCounters[$this->timeLines[$x]] += 1;
+                        $scores[$this->timeLines[$x]] += $this->callFunctionBysecition($section, $record);
+                    }
+                }
             }
         }
         return [$scores, $rowCounters];
@@ -222,27 +224,17 @@ class ODKDataAggregator
             "level4" => 0,
             "counter" => 0
         ];
+        $overallSitesLevel = [];
+        $rowCounters = [];
+        $scores = [];
 
-        $overallSitesLevel = [
-            $this->timeLines[0] => $overallSitesLevelScores,
-            $this->timeLines[1] => $overallSitesLevelScores,
-            $this->timeLines[2] => $overallSitesLevelScores,
-            $this->timeLines[3] => $overallSitesLevelScores,
-        ];
-
-        $rowCounters = [
-            $this->timeLines[0] => 0,
-            $this->timeLines[1] => 0,
-            $this->timeLines[2] => 0,
-            $this->timeLines[3] => 0,
-        ];
-
-        $scores = [
-            $this->timeLines[0] => 0,
-            $this->timeLines[1] => 0,
-            $this->timeLines[2] => 0,
-            $this->timeLines[3] => 0,
-        ];
+        for ($x = 0; $x < count($this->timeLines); $x++) {
+            if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                $overallSitesLevel[$this->timeLines[$x]] = $overallSitesLevelScores;
+                $rowCounters[$this->timeLines[$x]] = 0;
+                $scores[$this->timeLines[$x]] = 0;
+            }
+        }
 
         foreach ($records as $record) {
             Log::info("Start record traversal =========>>");
@@ -354,7 +346,7 @@ class ODKDataAggregator
                 $formId = $mapping->form_id;
                 $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
                 $perCountyRecords = $this->getSingleFileRecords($fileName);
-                $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords,true ));
+                $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
             }
             return $combinedRecords;
         } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
@@ -861,19 +853,19 @@ class ODKDataAggregator
 
         $val = $record["Section-sec91percentage"];
         if ($record["baselinefollowup"] == 'Baseline') {
-
-            $overallSites[$this->timeLines[0]]["counter"] = $overallSites[$this->timeLines[0]]["counter"] + 1;
-            $overallSites = $this->summTimelineData($this->timeLines[0], $val, $overallSites);
+            if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                $overallSites[$this->timeLines[0]]["counter"] = $overallSites[$this->timeLines[0]]["counter"] + 1;
+                $overallSites = $this->summTimelineData($this->timeLines[0], $val, $overallSites);
+            }
         } else if ($record["baselinefollowup"] == 'followup') {
-            if ($record["followup"] == $this->timeLines[1]) {
-                $overallSites[$this->timeLines[1]]["counter"] = $overallSites[$this->timeLines[1]]["counter"] + 1;
-                $overallSites = $this->summTimelineData($this->timeLines[1], $val, $overallSites);
-            } else if ($record["followup"] == $this->timeLines[2]) {
-                $overallSites[$this->timeLines[2]]["counter"] = $overallSites[$this->timeLines[2]]["counter"] + 1;
-                $overallSites = $this->summTimelineData($this->timeLines[2], $val, $overallSites);
-            } else if ($record["followup"] == $this->timeLines[3]) {
-                $overallSites[$this->timeLines[3]]["counter"] = $overallSites[$this->timeLines[3]]["counter"] + 1;
-                $overallSites = $this->summTimelineData($this->timeLines[3], $val, $overallSites);
+            $followupType = $record["followup"];
+            for ($x = 0; $x < count($this->timeLines); $x++) {
+                if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                    if ($followupType == $this->timeLines[$x]) {
+                        $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
+                        $overallSites = $this->summTimelineData($this->timeLines[$x], $val, $overallSites);
+                    }
+                }
             }
         }
 
