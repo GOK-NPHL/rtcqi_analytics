@@ -17,7 +17,8 @@ class SpiReport extends React.Component {
         super(props);
         this.state = {
             orgUnits: [],
-            orgUnitDataIds: [0]
+            orgUnitDataIds: [0],
+            orgUnitTimeline: []
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
@@ -43,7 +44,7 @@ class SpiReport extends React.Component {
             });
         })();
 
-        this.fetchOdkDataServer(this.state.orgUnitDataIds, null);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline);
     }
 
     fetchOdkDataServer(orgUnitIds, orgTimeline) {
