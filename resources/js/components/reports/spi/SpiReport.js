@@ -8,7 +8,7 @@ import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
 import OrgTimeline from '../../utils/orgunit/OrgTimeline';
-import OrgProgramme from '../../utils/orgunit/OrgProgramme';
+import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 
 
 class SpiReport extends React.Component {
@@ -18,12 +18,16 @@ class SpiReport extends React.Component {
         this.state = {
             orgUnits: [],
             orgUnitDataIds: [0],
-            orgUnitTimeline: []
+            orgUnitTimeline: [],
+            siteType: []
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
         this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
+        this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
+        this.getTimelineAndOrgunits = this.getTimelineAndOrgunits.bind(this);
+        this.ff = this.ff.bind(this);
     }
 
     componentDidMount() {
@@ -43,15 +47,14 @@ class SpiReport extends React.Component {
                 orgUnitTimeline: []
             });
         })();
-
-        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline, this.state.siteType);
     }
 
-    fetchOdkDataServer(orgUnitIds, orgTimeline) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -76,17 +79,25 @@ class SpiReport extends React.Component {
         });
     }
 
+    orgUnitTypeChangeHandler(siteType) {
+        this.setState({
+            siteType: siteType
+        });
+    }
+
     onFilterButtonClickEvent() {
         this.fetchOdkDataServer(
             this.state.orgUnitDataIds,
-            this.state.orgUnitTimeline
+            this.state.orgUnitTimeline,
+            this.state.siteType
         );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
-            this.state.orgUnitDataIds !== nextState.orgUnitDataIds ||
-            this.state.orgUnitTimeline !== nextState.orgUnitTimeline
+            this.state.orgUnitDataIds != nextState.orgUnitDataIds ||
+            this.state.orgUnitTimeline != nextState.orgUnitTimeline ||
+            this.state.siteType != nextState.siteType
         ) {
             return false;
         } else {
@@ -94,7 +105,91 @@ class SpiReport extends React.Component {
         }
     }
 
+    getTimelineAndOrgunits(orgUnitSpiData) {
+        let timeLines = [];
+        let orgunitName = '';
+        for (let [key, val] of Object.entries(orgUnitSpiData)) {
+            if (key != "OverallSitesLevel" && key != 'orgName' && key != 'OrgUniType') {
+                for (let [timeline, value] of Object.entries(val)) {
+                    if (!timeLines.includes(timeline)) timeLines.push(timeline);
+                }
+            } else if (key == 'orgName') {
+                orgunitName = val.toUpperCase();
+            }
+        }
+        return [timeLines, orgunitName];
+    }
 
+    ff(tableData, overaRowllSiteLevels, dataToParse) {
+        for (let [orgUnitId, orgUnitSpiData] of Object.entries(dataToParse)) {
+
+            let [timeLines, orgunitName] = this.getTimelineAndOrgunits(orgUnitSpiData);
+            tableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={4} scope="row">
+                        <strong>{orgunitName}</strong>
+                    </td>
+                </tr>);
+
+            timeLines.map((timeline) => {
+                let row = [];
+                row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
+
+                if (this.state.siteType != null) {
+                    if (this.state.siteType.length != 0) {
+                        row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                    }
+                }
+
+                for (let [indicator, data] of Object.entries(orgUnitSpiData)) {
+                    if (indicator != 'orgName' && indicator != "OverallSitesLevel") {
+
+                        row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
+                    }
+                }
+
+                tableData.push(<tr key={uuidv4()}>{row}</tr>);
+            });
+
+            //======= Add  overaRowllSiteLevels table data =====//
+            overaRowllSiteLevels.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
+                        <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
+                    </td>
+                </tr>);
+
+            timeLines.map((timeline) => {
+                let row = [];
+                if (this.state.siteType != null) {
+                    if (this.state.siteType.length != 0) {
+                        row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                    }
+                }
+                row.push(<td key={uuidv4()}>{timeline}</td>);
+                for (let [key, val] of Object.entries(orgUnitSpiData)) {
+                    if (key == "OverallSitesLevel") {
+
+                        let level0 = orgUnitSpiData["OverallSitesLevel"][timeline]['level0'];
+                        let level1 = orgUnitSpiData["OverallSitesLevel"][timeline]['level1'];
+                        let level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
+                        let level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
+                        let level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
+
+                        row.push(<td key={uuidv4()}>{level0}</td>);
+                        row.push(<td key={uuidv4()}>{level1}</td>);
+                        row.push(<td key={uuidv4()}>{level2}</td>);
+                        row.push(<td key={uuidv4()}>{level3}</td>);
+                        row.push(<td key={uuidv4()}>{level4}</td>);
+                    }
+
+                }
+                overaRowllSiteLevels.push(<tr key={uuidv4()}>{row}</tr>);
+            });
+
+        }
+        return [tableData, overaRowllSiteLevels];
+    }
     render() {
 
         const imgStyle = {
@@ -108,77 +203,67 @@ class SpiReport extends React.Component {
         // var overallSiteLevels = [];
         let overaRowllSiteLevels = [];
         let tableData = [];
+        let tableHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Personnel Training & Certification</th>
+            <th scope="col">QA in Counselling</th>
+            <th scope="col">Physical Facility</th>
+            <th scope="col">Safety</th>
+            <th scope="col">Pre-testing phase</th>
+            <th scope="col">Testing Phase</th>
+            <th scope="col">Post-testing Phase</th>
+            <th scope="col">External Quality Assessment</th>
+            <th scope="col">Overall Performance</th>
+        </tr>;
+
+        let overallSitesHeaders = <tr>
+            <th scope="col">___</th>
+            <th scope="col">Level 0 (&lt;40%)</th>
+            <th scope="col">Level 1 (40-59%)</th>
+            <th scope="col">Level 2 (60-79%)</th>
+            <th scope="col">Level 3 (80-89%)</th>
+            <th scope="col">Level 4 (&gt;90%)</th>
+        </tr>;
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                tableHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Personnel Training & Certification</th>
+                    <th scope="col">QA in Counselling</th>
+                    <th scope="col">Physical Facility</th>
+                    <th scope="col">Safety</th>
+                    <th scope="col">Pre-testing phase</th>
+                    <th scope="col">Testing Phase</th>
+                    <th scope="col">Post-testing Phase</th>
+                    <th scope="col">External Quality Assessment</th>
+                    <th scope="col">Overall Performance</th>
+                </tr>;
+
+                overallSitesHeaders = <tr>
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Level 0 (&lt;40%)</th>
+                    <th scope="col">Level 1 (40-59%)</th>
+                    <th scope="col">Level 2 (60-79%)</th>
+                    <th scope="col">Level 3 (80-89%)</th>
+                    <th scope="col">Level 4 (&gt;90%)</th>
+
+                </tr>
+            }
+        }
+
         if (this.state.odkData) {
-
-            for (let [orgUnitId, orgUnitSpiData] of Object.entries(this.state.odkData)) {
-
-
-                let rowCounter = 1;
-
-                rowCounter += 1;
-
-                let timeLines = [];
-                let orgunitName = '';
-                for (let [key, val] of Object.entries(orgUnitSpiData)) {
-                    if (key != "OverallSitesLevel" && key != 'orgName') {
-                        for (let [timeline, value] of Object.entries(val)) {
-                            if (!timeLines.includes(timeline)) timeLines.push(timeline);
-                        }
-                    } else if (key == 'orgName') {
-                        orgunitName = val.toUpperCase();
-                    }
-                }
-
-                tableData.push(
-                    <tr key={uuidv4()}>
-                        <td colSpan={4} scope="row">
-                            <strong>{orgunitName}</strong>
-                        </td>
-                    </tr>);
-
-                timeLines.map((timeline) => {
-                    let row = [];
-                    row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
-                    for (let [indicator, data] of Object.entries(orgUnitSpiData)) {
-                        if (indicator != 'orgName' && indicator != "OverallSitesLevel") {
-                            row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
-                        }
-                    }
-
-                    tableData.push(<tr key={uuidv4()}>{row}</tr>);
+            //if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                this.state.odkData.map((displayData) => {
+                    [tableData, overaRowllSiteLevels] = this.ff(tableData, overaRowllSiteLevels, displayData);
                 });
-
-                //======= Add  overaRowllSiteLevels table data =====//
-                overaRowllSiteLevels.push(
-                    <tr key={uuidv4()}>
-                        <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
-                            <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
-                        </td>
-                    </tr>);
-
-                timeLines.map((timeline) => {
-                    let row = [];
-                    row.push(<td key={uuidv4()}>{timeline}</td>);
-                    for (let [key, val] of Object.entries(orgUnitSpiData)) {
-                        if (key == "OverallSitesLevel") {
-                            let level0 = orgUnitSpiData["OverallSitesLevel"][timeline]['level0'];
-                            let level1 = orgUnitSpiData["OverallSitesLevel"][timeline]['level1'];
-                            let level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
-                            let level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
-                            let level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
-
-                            row.push(<td key={uuidv4()}>{level0}</td>);
-                            row.push(<td key={uuidv4()}>{level1}</td>);
-                            row.push(<td key={uuidv4()}>{level2}</td>);
-                            row.push(<td key={uuidv4()}>{level3}</td>);
-                            row.push(<td key={uuidv4()}>{level4}</td>);
-                        }
-
-                    }
-                    overaRowllSiteLevels.push(<tr key={uuidv4()}>{row}</tr>);
-                });
-
-
+            } else {
+                [tableData, overaRowllSiteLevels] = this.ff(tableData, overaRowllSiteLevels, this.state.odkData);
             }
         }
 
@@ -204,7 +289,7 @@ class SpiReport extends React.Component {
                     </div>
 
                     <div className="col-md-2">
-                        <OrgProgramme></OrgProgramme>
+                        <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
                     <div className="col-md-5">
@@ -213,7 +298,7 @@ class SpiReport extends React.Component {
 
                     <div className="col-md-1">
                         <button
-                            onClick={()=>this.onFilterButtonClickEvent()}
+                            onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
                             className="btn btn-sm btn-info">
                             <i className="fa fa-search" aria-hidden="true"></i>
@@ -227,20 +312,7 @@ class SpiReport extends React.Component {
                         <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
                         <table className="table table-responsive">
                             <thead className="thead-dark">
-                                <tr>
-                                    {/* <th scope="col">#</th> */}
-                                    <th scope="col">___</th>
-                                    <th scope="col">Personnel Training & Certification</th>
-                                    <th scope="col">QA in Counselling</th>
-                                    <th scope="col">Physical Facility</th>
-                                    <th scope="col">Safety</th>
-                                    <th scope="col">Pre-testing phase</th>
-                                    <th scope="col">Testing Phase</th>
-                                    <th scope="col">Post-testing Phase</th>
-                                    <th scope="col">External Quality Assessment</th>
-                                    <th scope="col">Overall Performance</th>
-
-                                </tr>
+                                {tableHeaders}
                             </thead>
                             <tbody>
                                 {tableData}
@@ -251,15 +323,7 @@ class SpiReport extends React.Component {
                         <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
                         <table className="table table-responsive">
                             <thead className="thead-dark">
-                                <tr>
-                                    <th scope="col">___</th>
-                                    <th scope="col">Level 0 (&lt;40%)</th>
-                                    <th scope="col">Level 1 (40-59%)</th>
-                                    <th scope="col">Level 2 (60-79%)</th>
-                                    <th scope="col">Level 3 (80-89%)</th>
-                                    <th scope="col">Level 4 (&gt;90%)</th>
-
-                                </tr>
+                                {overallSitesHeaders}
                             </thead>
                             <tbody>
                                 {overaRowllSiteLevels}
