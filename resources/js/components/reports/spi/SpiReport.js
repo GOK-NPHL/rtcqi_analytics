@@ -142,7 +142,7 @@ class SpiReport extends React.Component {
                         }
 
                     }
-                    overaRowllSiteLevels.push(<tr>{row}</tr>);
+                    overaRowllSiteLevels.push(<tr key={uuidv4()}>{row}</tr>);
                 });
 
 
@@ -179,7 +179,7 @@ class SpiReport extends React.Component {
                     </div>
 
                     <div className="col-md-1">
-                        <button type="button" class="btn btn-sm btn-info">
+                        <button type="button" className="btn btn-sm btn-info">
                              <i className="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
