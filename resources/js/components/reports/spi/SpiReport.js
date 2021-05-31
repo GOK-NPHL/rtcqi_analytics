@@ -17,11 +17,13 @@ class SpiReport extends React.Component {
         super(props);
         this.state = {
             orgUnits: [],
-            orgUnitDataIds: [0]
+            orgUnitDataIds: [0],
+            orgUnitTimeline: []
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
+        this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
     }
 
     componentDidMount() {
@@ -42,14 +44,14 @@ class SpiReport extends React.Component {
             });
         })();
 
-        this.fetchOdkDataServer(this.state.orgUnitDataIds,null);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline);
     }
 
-    fetchOdkDataServer(orgUnitIds,orgTimeline) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds,orgTimeline);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -66,13 +68,19 @@ class SpiReport extends React.Component {
         this.setState({
             orgUnitTimeline: orgTimeline
         });
-        console.log(orgTimeline);
     }
 
     orgUnitChangeHandler(orgUnitIds) {
         this.setState({
             orgUnitDataIds: orgUnitIds
         });
+    }
+
+    onFilterButtonClickEvent() {
+        this.fetchOdkDataServer(
+            this.state.orgUnitDataIds,
+            this.state.orgUnitTimeline
+        );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -204,7 +212,10 @@ class SpiReport extends React.Component {
                     </div>
 
                     <div className="col-md-1">
-                        <button type="button" className="btn btn-sm btn-info">
+                        <button
+                            onClick={()=>this.onFilterButtonClickEvent()}
+                            type="button"
+                            className="btn btn-sm btn-info">
                             <i className="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
