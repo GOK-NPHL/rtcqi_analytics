@@ -7,7 +7,7 @@ import { FetchOrgunits, FetchOdkData } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
-import OrgType from '../../utils/orgunit/OrgType';
+import OrgTimeline from '../../utils/orgunit/OrgTimeline';
 import OrgProgramme from '../../utils/orgunit/OrgProgramme';
 
 
@@ -17,10 +17,11 @@ class SpiReport extends React.Component {
         super(props);
         this.state = {
             orgUnits: [],
-
+            orgUnitDataIds: [0]
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
-
+        this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
+        this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
     }
 
     componentDidMount() {
@@ -35,21 +36,20 @@ class SpiReport extends React.Component {
                 orgUnits: returnedData.payload[0],
                 odkData: {},
                 orgLevel: 1,
-                orgId: 1
+                orgId: 1,
+                orgUnitDataIds: [0],
+                orgUnitTimeline: []
             });
         })();
 
-        this.fetchOdkDataServer([0]);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds,null);
     }
 
-    fetchOdkDataServer(orgUnitIds) {
+    fetchOdkDataServer(orgUnitIds,orgTimeline) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds);
-                    console.log("Server data log");
-                    console.log(returnedData);
-                    console.log("Server data");
+                    let returnedData = await FetchOdkData(orgUnitIds,orgTimeline);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -61,6 +61,31 @@ class SpiReport extends React.Component {
         }
 
     }
+
+    onOrgTimelineChange(orgTimeline) {
+        this.setState({
+            orgUnitTimeline: orgTimeline
+        });
+        console.log(orgTimeline);
+    }
+
+    orgUnitChangeHandler(orgUnitIds) {
+        this.setState({
+            orgUnitDataIds: orgUnitIds
+        });
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (
+            this.state.orgUnitDataIds !== nextState.orgUnitDataIds ||
+            this.state.orgUnitTimeline !== nextState.orgUnitTimeline
+        ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     render() {
 
@@ -164,10 +189,10 @@ class SpiReport extends React.Component {
                 <div className="row">
 
                     <div className="col-md-2">
-                        <OrgUnitButton orgUnitChangeHandler={this.fetchOdkDataServer}></OrgUnitButton>
+                        <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
                     <div className="col-md-2">
-                        <OrgType></OrgType>
+                        <OrgTimeline onOrgTimelineChange={this.onOrgTimelineChange}></OrgTimeline>
                     </div>
 
                     <div className="col-md-2">
@@ -180,7 +205,7 @@ class SpiReport extends React.Component {
 
                     <div className="col-md-1">
                         <button type="button" className="btn btn-sm btn-info">
-                             <i className="fa fa-search" aria-hidden="true"></i>
+                            <i className="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>
 
