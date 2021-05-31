@@ -25,17 +25,15 @@ export async function FetchOrgunits() {
 
 }
 
-export async function FetchOdkData(orgUnitIds, orgTimeline) {
-
+export async function FetchOdkData(orgUnitIds, orgTimeline, siteType) {
     try {
-        console.log(orgUnitIds);
-        console.log(orgTimeline);
         const response = await axios({
             method: 'post',
             url: `${settings.rtcqiBaseApi}/odk_data`,
             data: {
                 orgUnitIds: orgUnitIds,
-                orgTimeline: orgTimeline
+                orgTimeline: orgTimeline,
+                siteType: siteType
             }
         });
         return response;
