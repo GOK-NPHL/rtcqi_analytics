@@ -41,8 +41,6 @@ class OrgProgramme extends React.Component {
                         <a className="dropdown-item" href="#">VMMC</a>
                         <a className="dropdown-item" href="#">PSC/CCC</a>
                         <a className="dropdown-item" href="#">PEDIATRIC</a>
-                        <div className="dropdown-divider"></div>
-                        <a className="dropdown-item" href="#">IPD</a>
                     </div>
                 </div>
             </React.Fragment>

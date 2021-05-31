@@ -50,7 +50,7 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label forHtml="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
+                                <label htmlFor="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
                                 <div className="col-sm-9">
                                     <input type="date"
                                         className="form-control form-control form-control-sm"
@@ -64,7 +64,7 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label forHtml="colFormLabelSm"
+                                <label htmlFor="colFormLabelSm"
                                     className="col-sm-3 col-form-label col-form-label-sm">End date</label>
                                 <div className="col-sm-9">
                                     <input type="date" 
