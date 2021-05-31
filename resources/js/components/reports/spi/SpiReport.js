@@ -161,12 +161,12 @@ class SpiReport extends React.Component {
 
             timeLines.map((timeline) => {
                 let row = [];
+                row.push(<td key={uuidv4()}>{timeline}</td>);
                 if (this.state.siteType != null) {
                     if (this.state.siteType.length != 0) {
                         row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
                     }
                 }
-                row.push(<td key={uuidv4()}>{timeline}</td>);
                 for (let [key, val] of Object.entries(orgUnitSpiData)) {
                     if (key == "OverallSitesLevel") {
 
