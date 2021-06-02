@@ -9,6 +9,7 @@ import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
 import OrgTimeline from '../../utils/orgunit/OrgTimeline';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
+import BarColumnCharts from './BarColumnCharts';
 
 
 class SpiReport extends React.Component {
@@ -311,6 +312,7 @@ class SpiReport extends React.Component {
             </table>
         </div>;
 
+        let columnsTab = <BarColumnCharts serverData={this.state.odkData}/>
 
         return (
             <React.Fragment>
@@ -354,27 +356,30 @@ class SpiReport extends React.Component {
 
                     <div className="col-sm-12  col-xm-12 col-md-12">
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
                                     <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="columnsTab" data-toggle="tab" href="#columns" role="tab" aria-controls="profile" aria-selected="false">
-                                <i class="fas fa-chart-bar"></i> Bar & Columns</a>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="columnsTab" data-toggle="tab" href="#columns" role="tab" aria-controls="profile" aria-selected="false">
+                                    <i className="fas fa-chart-bar"></i> Bar & Columns</a>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
-                                <i class="fas fa-atom"></i> Spider</a>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
+                                    <i className="fas fa-atom"></i> Spider</a>
                             </li>
                         </ul>
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
+                        <div className="tab-content" id="myTabContent">
+                            <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
                                 <br />
                                 {tablesTab}
                             </div>
 
-                            <div class="tab-pane fade" id="columns" role="columnsTab" aria-labelledby="profile-tab">..2.</div>
-                            <div class="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">..3.</div>
+                            <div className="tab-pane fade" id="columns" role="columnsTab" aria-labelledby="profile-tab">
+                                <br />
+                                {columnsTab}
+                            </div>
+                            <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">..3.</div>
                         </div>
 
                     </div>
