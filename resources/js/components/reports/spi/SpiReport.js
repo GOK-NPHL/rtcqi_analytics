@@ -27,7 +27,8 @@ class SpiReport extends React.Component {
         this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
         this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
         this.getTimelineAndOrgunits = this.getTimelineAndOrgunits.bind(this);
-        this.ff = this.ff.bind(this);
+        this.addTableRows = this.addTableRows.bind(this);
+        this.orgDateChangeHandler=this.orgDateChangeHandler.bind(this);
     }
 
     componentDidMount() {
@@ -44,17 +45,24 @@ class SpiReport extends React.Component {
                 orgLevel: 1,
                 orgId: 1,
                 orgUnitDataIds: [0],
-                orgUnitTimeline: []
+                orgUnitTimeline: [],
+                startDate: '',
+                endDate: ''
             });
         })();
-        this.fetchOdkDataServer(this.state.orgUnitDataIds, this.state.orgUnitTimeline, this.state.siteType);
+        this.fetchOdkDataServer(this.state.orgUnitDataIds,
+            this.state.orgUnitTimeline,
+            this.state.siteType,
+            this.state.startDate,
+            this.state.endDate
+        );
     }
 
-    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -85,11 +93,22 @@ class SpiReport extends React.Component {
         });
     }
 
+    orgDateChangeHandler(startDate, endDate) {
+        console.log(startDate);
+        console.log(endDate);
+        this.setState({
+            startDate: startDate,
+            endDate: endDate
+        });
+    }
+
     onFilterButtonClickEvent() {
         this.fetchOdkDataServer(
             this.state.orgUnitDataIds,
             this.state.orgUnitTimeline,
-            this.state.siteType
+            this.state.siteType,
+            this.state.startDate,
+            this.state.endDate
         );
     }
 
@@ -97,7 +116,9 @@ class SpiReport extends React.Component {
         if (
             this.state.orgUnitDataIds != nextState.orgUnitDataIds ||
             this.state.orgUnitTimeline != nextState.orgUnitTimeline ||
-            this.state.siteType != nextState.siteType
+            this.state.siteType != nextState.siteType ||
+            this.state.startDate != nextState.startDate ||
+            this.state.endDate != nextState.endDate
         ) {
             return false;
         } else {
@@ -120,7 +141,7 @@ class SpiReport extends React.Component {
         return [timeLines, orgunitName];
     }
 
-    ff(tableData, overaRowllSiteLevels, dataToParse) {
+    addTableRows(tableData, overaRowllSiteLevels, dataToParse) {
         for (let [orgUnitId, orgUnitSpiData] of Object.entries(dataToParse)) {
 
             let [timeLines, orgunitName] = this.getTimelineAndOrgunits(orgUnitSpiData);
@@ -260,10 +281,10 @@ class SpiReport extends React.Component {
             //if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
                 this.state.odkData.map((displayData) => {
-                    [tableData, overaRowllSiteLevels] = this.ff(tableData, overaRowllSiteLevels, displayData);
+                    [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, displayData);
                 });
             } else {
-                [tableData, overaRowllSiteLevels] = this.ff(tableData, overaRowllSiteLevels, this.state.odkData);
+                [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData);
             }
         }
 
@@ -293,7 +314,7 @@ class SpiReport extends React.Component {
                     </div>
 
                     <div className="col-md-5">
-                        <OrgDate></OrgDate>
+                        <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
                     <div className="col-md-1">
