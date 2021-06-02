@@ -189,14 +189,14 @@ class TreeView extends React.Component {
 
                                             <ul id="tabs" className="nav nav-tabs">
 
-                                                <li class="nav-item" role="presentation">
-                                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home1" role="tab" aria-controls="home" aria-selected="true">Add Sub-Orgunit</a>
+                                                <li className="nav-item" role="presentation">
+                                                    <a className="nav-link active" id="home-tab" data-toggle="tab" href="#home1" role="tab" aria-controls="home" aria-selected="true">Add Sub-Orgunit</a>
                                                 </li>
-                                                <li class="nav-item" role="presentation">
-                                                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit</a>
+                                                <li className="nav-item" role="presentation">
+                                                    <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit</a>
                                                 </li>
-                                                <li class="nav-item" role="presentation">
-                                                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#messages1" role="tab" aria-controls="contact" aria-selected="false">Delete</a>
+                                                <li className="nav-item" role="presentation">
+                                                    <a className="nav-link" id="contact-tab" data-toggle="tab" href="#messages1" role="tab" aria-controls="contact" aria-selected="false">Delete</a>
                                                 </li>
 
                                             </ul>
