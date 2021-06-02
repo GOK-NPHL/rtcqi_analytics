@@ -28,7 +28,7 @@ class SpiReport extends React.Component {
         this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
         this.getTimelineAndOrgunits = this.getTimelineAndOrgunits.bind(this);
         this.addTableRows = this.addTableRows.bind(this);
-        this.orgDateChangeHandler=this.orgDateChangeHandler.bind(this);
+        this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
     }
 
     componentDidMount() {
@@ -288,6 +288,28 @@ class SpiReport extends React.Component {
             }
         }
 
+        let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
+            <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
+            <table className="table table-responsive">
+                <thead className="thead-dark">
+                    {tableHeaders}
+                </thead>
+                <tbody>
+                    {tableData}
+                </tbody>
+            </table>
+
+            <br />
+            <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+            <table className="table table-responsive">
+                <thead className="thead-dark">
+                    {overallSitesHeaders}
+                </thead>
+                <tbody>
+                    {overaRowllSiteLevels}
+                </tbody>
+            </table>
+        </div>;
 
 
         return (
@@ -329,27 +351,31 @@ class SpiReport extends React.Component {
                 </div>
                 <br />
                 <div style={rowStle} className="row">
-                    <div className="col-sm-12  col-xm-6 col-md-12">
-                        <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
-                        <table className="table table-responsive">
-                            <thead className="thead-dark">
-                                {tableHeaders}
-                            </thead>
-                            <tbody>
-                                {tableData}
-                            </tbody>
-                        </table>
 
-                        <br />
-                        <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-                        <table className="table table-responsive">
-                            <thead className="thead-dark">
-                                {overallSitesHeaders}
-                            </thead>
-                            <tbody>
-                                {overaRowllSiteLevels}
-                            </tbody>
-                        </table>
+                    <div className="col-sm-12  col-xm-12 col-md-12">
+                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
+                                    <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="columnsTab" data-toggle="tab" href="#columns" role="tab" aria-controls="profile" aria-selected="false">
+                                <i class="fas fa-chart-bar"></i> Bar & Columns</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
+                                <i class="fas fa-atom"></i> Spider</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
+                                <br />
+                                {tablesTab}
+                            </div>
+
+                            <div class="tab-pane fade" id="columns" role="columnsTab" aria-labelledby="profile-tab">..2.</div>
+                            <div class="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">..3.</div>
+                        </div>
 
                     </div>
 
