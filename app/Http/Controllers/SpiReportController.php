@@ -36,7 +36,10 @@ class SpiReportController extends Controller
             $orgTimeline = $request->orgTimeline;
             $orgUnitIds = $request->orgUnitIds;
             $siteType = $request->siteType;
-            $result = $odkObj->getData($orgUnitIds, $orgTimeline, $siteType);
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+
+            $result = $odkObj->getData($orgUnitIds, $orgTimeline, $siteType, $startDate, $endDate);
             return $result;
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
