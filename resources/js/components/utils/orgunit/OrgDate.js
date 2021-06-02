@@ -50,11 +50,11 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
+                                <label htmlFor="startDate" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
                                 <div className="col-sm-9">
                                     <input type="date"
                                         className="form-control form-control form-control-sm"
-                                        id="colFormLabelSm"
+                                        id="startDate"
                                         placeholder="start date" />
                                 </div>
                             </div>
@@ -64,13 +64,13 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="colFormLabelSm"
+                                <label htmlFor="endDate"
                                     className="col-sm-3 col-form-label col-form-label-sm">End date</label>
                                 <div className="col-sm-9">
-                                    <input type="date" 
-                                    className="form-control form-control form-control-sm" 
-                                    id="colFormLabelSm"
-                                     placeholder="start date" />
+                                    <input type="date"
+                                        className="form-control form-control form-control-sm"
+                                        id="endDate"
+                                        placeholder="start date" />
                                 </div>
                             </div>
                         </form>
