@@ -31,15 +31,20 @@ class StackedHorizontal extends React.Component {
                     type: 'category',
                     data: ['baseline(Y1_Q4)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)']
                 },
-                series: ''
+
             }
         }
     }
 
     componentDidMount() {
+        console.log("load data 2");
+            console.log(this.props.series);
         this.setState({
             option: {
-                series: this.props.series
+                series: this.props.series,
+                yAxis: {
+                    data: this.props.category
+                }
             }
         });
     }
@@ -49,9 +54,14 @@ class StackedHorizontal extends React.Component {
             ||
             this.props.series != prevProps.series
         ) {
+            console.log("load data 1");
+            console.log(this.props.series);
             this.setState({
                 option: {
-                    series: this.props.series
+                    series: this.props.series,
+                    yAxis: {
+                        data: this.props.category
+                    }
                 }
             });
         }
