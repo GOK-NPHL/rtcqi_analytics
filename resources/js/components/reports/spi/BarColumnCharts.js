@@ -23,7 +23,7 @@ class BarColumnCharts extends React.Component {
                 }
             ]
         };
-        this.createOverallSiteGraphsDisplays = this.createOverallSiteGraphsDisplays.bind(this);
+        this.addGraphsToArray = this.addGraphsToArray.bind(this);
         this.prepareOverallLevelSiteData = this.prepareOverallLevelSiteData.bind(this);
 
     }
@@ -45,7 +45,7 @@ class BarColumnCharts extends React.Component {
 
         let orgName = dataObject['orgName'];
         if (dataObject['OrgUniType']) orgName += ' ' + dataObject['OrgUniType'];
-
+        orgName = orgName.toUpperCase();
         let overallSitesObject = dataObject['OverallSitesLevel'];
         let levelData = { 'level0': [], 'level1': [], 'level2': [], 'level3': [], 'level4': [] };
         let category = [];
@@ -91,8 +91,21 @@ class BarColumnCharts extends React.Component {
         </RTCard>
     }
 
-    createOverallSiteGraphsDisplays(overallSiteGraphsData, counter) {
 
+    addGraphsToArray(counter, row, columns, overLay, singChart) {
+        console.log("adding to chart")
+        if (counter % 2 == 0) {
+            overLay.push(row);
+            columns = [];
+            row = <div key={uuidv4()} className="row">
+                {columns}
+            </div>;
+        }
+        columns.push(<div key={uuidv4()} className="col-sm-6 col-xm-12">
+            {singChart}
+        </div>);
+        counter += 1;
+        return [counter, row, columns, overLay];
     }
 
     render() {
@@ -103,26 +116,32 @@ class BarColumnCharts extends React.Component {
             {columns}
         </div>;
         if (this.props.serverData) {
-            if (Array.isArray(this.props.serverData)) {
-                console.log("last");
-                console.log(this.props.serverData);
 
-                this.props.serverData.map((dataObject) => {
-                    let singChart = this.prepareOverallLevelSiteData(dataObject);
-                    if (counter % 2 == 0) {
-                        overLay.push(row);
-                        columns = [];
-                        row = <div key={uuidv4()} className="row">
-                            {columns}
-                        </div>;
+            // if (Array.isArray(this.props.serverData)) {
+
+
+            if (this.props.siteType != null && this.props.siteType.length != 0) {
+                console.log("first 1");
+                console.log(this.props.serverData);
+                if (Array.isArray(this.props.serverData[0])) {
+                    this.props.serverData.map((dataObjectParent) => {
+                        //data returned comes in two different formtat. Should be written to standardize
+                        let singChart = this.prepareOverallLevelSiteData(dataObjectParent[0]);
+                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    });
+                    if (columns.length > 0) {
+                        overLay.push(row); //push remaining graphs in display
                     }
-                    columns.push(<div key={uuidv4()} className="col-sm-6 col-xm-12">
-                        {singChart}
-                    </div>);
-                    counter += 1;
-                });
-                if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
+                } else {
+                    this.props.serverData.map((dataObjectParent) => {
+                        for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
+                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        }
+                    });
+                    if (columns.length > 0) {
+                        overLay.push(row); //push remaining graphs in display
+                    }
                 }
 
             } else {
@@ -130,18 +149,7 @@ class BarColumnCharts extends React.Component {
                 console.log(this.props.serverData);
                 for (let [key, dataObject] of Object.entries(this.props.serverData)) {
                     let singChart = this.prepareOverallLevelSiteData(dataObject);
-
-                    if (counter % 2 == 0) {
-                        overLay.push(row);
-                        columns = [];
-                        row = <div key={uuidv4()} className="row">
-                            {columns}
-                        </div>;
-                    }
-                    columns.push(<div key={uuidv4()} className="col-sm-6 col-xm-12">
-                        {singChart}
-                    </div>);
-                    counter += 1;
+                    [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
                 }
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display

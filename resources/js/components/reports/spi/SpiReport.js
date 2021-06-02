@@ -279,12 +279,16 @@ class SpiReport extends React.Component {
         }
 
         if (this.state.odkData) {
+            console.log("legelnd");
+            console.log(this.state.odkData);
             //if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) { //return data comes in different form. list od data
                 this.state.odkData.map((displayData) => {
+                    console.log("choice one");
                     [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, displayData);
                 });
             } else {
+                console.log("choice two");
                 [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData);
             }
         }
@@ -312,7 +316,7 @@ class SpiReport extends React.Component {
             </table>
         </div>;
 
-        let columnsTab = <BarColumnCharts serverData={this.state.odkData}/>
+        let columnsTab = <BarColumnCharts serverData={this.state.odkData} siteType ={this.state.siteType}/>
 
         return (
             <React.Fragment>
