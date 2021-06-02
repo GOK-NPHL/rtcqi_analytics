@@ -8,7 +8,7 @@ class OrgDate extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            startDate: new Date(),
+            startDate: null,
             endData: null
         };
         this.onStartDateChange = this.onStartDateChange.bind(this);
@@ -16,15 +16,25 @@ class OrgDate extends React.Component {
 
     }
 
-    onStartDateChange(date) {
+    onStartDateChange(event) {
+        let date = event.target.value;
         this.setState({
             startDate: date
         });
+        this.props.orgDateChangeHandler(
+            date,
+            this.state.endData
+        );
     }
-    onEndDateChange(date) {
+    onEndDateChange(event) {
+        let date = event.target.value;
         this.setState({
-            startDate: date
+            endData: date
         });
+        this.props.orgDateChangeHandler(
+            this.state.startDate,
+            date
+        );
     }
 
     render() {
@@ -50,11 +60,11 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="colFormLabelSm" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
+                                <label htmlFor="startDate" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
                                 <div className="col-sm-9">
-                                    <input type="date"
+                                    <input onChange={() => this.onStartDateChange(event)} type="date"
                                         className="form-control form-control form-control-sm"
-                                        id="colFormLabelSm"
+                                        id="startDate"
                                         placeholder="start date" />
                                 </div>
                             </div>
@@ -64,13 +74,13 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="colFormLabelSm"
+                                <label htmlFor="endDate"
                                     className="col-sm-3 col-form-label col-form-label-sm">End date</label>
                                 <div className="col-sm-9">
-                                    <input type="date" 
-                                    className="form-control form-control form-control-sm" 
-                                    id="colFormLabelSm"
-                                     placeholder="start date" />
+                                    <input onChange={() => this.onEndDateChange(event)} type="date"
+                                        className="form-control form-control form-control-sm"
+                                        id="endDate"
+                                        placeholder="end date" />
                                 </div>
                             </div>
                         </form>

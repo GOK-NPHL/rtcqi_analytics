@@ -25,7 +25,7 @@ export async function FetchOrgunits() {
 
 }
 
-export async function FetchOdkData(orgUnitIds, orgTimeline, siteType) {
+export async function FetchOdkData(orgUnitIds, orgTimeline, siteType,startDate,endDate) {
     try {
         const response = await axios({
             method: 'post',
@@ -33,7 +33,9 @@ export async function FetchOdkData(orgUnitIds, orgTimeline, siteType) {
             data: {
                 orgUnitIds: orgUnitIds,
                 orgTimeline: orgTimeline,
-                siteType: siteType
+                siteType: siteType,
+                startDate: startDate,
+                endDate: endDate
             }
         });
         return response;

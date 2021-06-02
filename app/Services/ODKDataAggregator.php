@@ -23,6 +23,8 @@ class ODKDataAggregator
     private $timeLines = ['baseline', 'followup1', 'followup2', 'followup3'];
     private $userOrgTimelineParams = array();
     private $siteType = null;
+    private $startDate = null;
+    private $endDate = null;
     public function __construct()
     {
         $this->reportSections["personnel_training_and_certification"] = 1;
@@ -38,22 +40,24 @@ class ODKDataAggregator
     }
 
 
-    public function getData($orgUnitIds, $orgTimeline, $siteTypes)
+    public function getData($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
     {
         $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+
         $recordsReadData = [];
-        $payload=null;
+        $payload = null;
         if (isset($siteTypes) && !empty($siteTypes)) {
             $payload = array();
             for ($x = 0; $x < count($siteTypes); $x++) {
-                $this->siteType = strtolower($siteTypes[$x]);            
+                $this->siteType = strtolower($siteTypes[$x]);
                 [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
                 for ($i = 0; $i < count($orgUnitIds); $i++) {
                     $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
                 }
-                
-                $payload[]= $payld;
-                
+
+                $payload[] = $payld;
             }
         } else {
             [$recordsReadData, $payload] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
@@ -63,7 +67,8 @@ class ODKDataAggregator
     }
 
     private function getDataLoopOrgs($orgUnitIds, $recordsReadData)
-    {   $payload = array();
+    {
+        $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
                 $orgMeta = $this->getOrgsByLevel($orgUnitIds[$x]);
@@ -349,16 +354,49 @@ class ODKDataAggregator
 
         foreach ($records as $record) {
             Log::info("Start record traversal =========>>");
-            if (
-                (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) == $this->siteType)
-            ) {
-                [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
-                    $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
-            } else if (!isset($this->siteType)) {
-                [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
-                    $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
-            } else {
+            $shouldProcessRecord = true;
+           
+            if (isset($this->startDate) && !empty($this->startDate)) {
+
+                $recordDate = strtotime($record['start']);
+                $newRecordformat = date('Y-m-d', $recordDate);
+
+                $userStartDate = strtotime($this->startDate);
+                $newUserStartDate = date('Y-m-d', $userStartDate);
+                Log::info("start date =====>> 2");
+                    Log::info($newUserStartDate);
+                    Log::info($userStartDate);
+                if ($newUserStartDate > $newRecordformat) {
+                    Log::info("start date =====>>");
+                    Log::info($newUserStartDate);
+                    Log::info($userStartDate);
+                    $shouldProcessRecord = false;
+                }
             }
+            if (isset($this->endDate) && !empty($this->endDate)) {
+
+                $recordDate = strtotime($record['start']);
+                $newRecordformat = date('Y-m-d', $recordDate);
+
+                $userEndDate = strtotime($this->endDate);
+                $newUserEndDate = date('Y-m-d', $userEndDate);
+
+                if ($newRecordformat > $newUserEndDate) {
+                    $shouldProcessRecord = false;
+                }
+            }
+
+            if (
+                (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) != $this->siteType)
+            ) {
+                $shouldProcessRecord = false;
+            }
+
+            if ($shouldProcessRecord) {
+                [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
+                    $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
+            }
+
             Log::info("end record traversal ========>>");
         }
 
