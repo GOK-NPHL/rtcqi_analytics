@@ -280,7 +280,7 @@ class SpiReport extends React.Component {
 
         if (this.state.odkData) {
             //if (this.state.siteType != null) {
-            if (this.state.siteType.length != 0) {
+            if (this.state.siteType.length != 0) { //return data comes in different form. list od data
                 this.state.odkData.map((displayData) => {
                     [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, displayData);
                 });
