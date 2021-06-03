@@ -6,12 +6,12 @@ import DataTable from "react-data-table-component";
 import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
-let message ='';
+let message = '';
 let tableOrgs;
 
-function updateOrg(org, newOrgToName,setNewOrgToName,setOrgToEdit) {
+function updateOrg(org, newOrgToName, setNewOrgToName, setOrgToEdit) {
     (async () => {
-        let returnedData = await UpdateOrg(org,newOrgToName);
+        let returnedData = await UpdateOrg(org, newOrgToName);
         $("#org_success").html(returnedData);
         $("#org_success").show();
         $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
@@ -32,7 +32,7 @@ function deleteOrg(org, setOrgToEdit) {
         let returnedData = await DeleteOrg(org);
         // $("#org_success").html(returnedData.data.Message);
         console.log(returnedData);
-        message=returnedData.data.Message;
+        message = returnedData.data.Message;
         $('#returnedMessage').html(message);
         $('#messageModal').modal('toggle');
         // $("#org_success").show();
@@ -44,7 +44,7 @@ function deleteOrg(org, setOrgToEdit) {
 }
 
 
-function createOrgunitTable(tableData, setOrgToEdit,setNewOrgToName) {
+function createOrgunitTable(tableData, setOrgToEdit, setNewOrgToName) {
     var tableRows = [];
     if (tableData.length == 0) {
         tableRows.push(<tr key={1}>
@@ -67,7 +67,11 @@ function createOrgunitTable(tableData, setOrgToEdit,setNewOrgToName) {
                         className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                         <i className="fas fa-user-edit"></i>
                     </a>
-                    <a onClick={() => deleteOrg(value, setOrgToEdit)} style={{ "display": "inlineBlock" }}
+                    <a onClick={() => {
+                        deleteOrg(value, setOrgToEdit);
+                        localStorage.removeItem('orgunitList');
+                    }}
+                        style={{ "display": "inlineBlock" }}
                         className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
                         <i className="fas fa-user-times"></i>
                     </a>
@@ -85,7 +89,7 @@ function Orgunit() {
     const [tableOrgsStruct, setTableOrgsStruct] = useState();
     const [orgToEdit, setOrgToEdit] = useState();
     const [newOrgToName, setNewOrgToName] = useState();
-    
+
     (async () => {
         if (httpOrgUnits.length == 0) {
             httpOrgUnits = await FetchOrgunits();
@@ -118,7 +122,7 @@ function Orgunit() {
 
                 </div>
                 <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-4">
-                    <TreeView orgUnits={tableOrgs}  updateOrg={updateOrg} setNewOrgToName={setNewOrgToName} setOrgToEdit={setOrgToEdit}/>
+                    <TreeView orgUnits={tableOrgs} updateOrg={updateOrg} setNewOrgToName={setNewOrgToName} setOrgToEdit={setOrgToEdit} />
                 </div>
                 <div className="col-sm-8">
                     <table className="table table-striped" >
@@ -162,7 +166,7 @@ function Orgunit() {
                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button"
                                 onClick={() => {
-                                    updateOrg(orgToEdit.org_unit_id,newOrgToName,setNewOrgToName, setOrgToEdit);
+                                    updateOrg(orgToEdit.org_unit_id, newOrgToName, setNewOrgToName, setOrgToEdit);
                                     $('#editOrgModal').modal('toggle');
                                 }}
                                 className="btn btn-primary">Save changes</button>
@@ -182,7 +186,7 @@ function Orgunit() {
                             </button>
                         </div>
                         <div className="modal-body">
-                        <p id="returnedMessage">{message}</p>
+                            <p id="returnedMessage">{message}</p>
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>

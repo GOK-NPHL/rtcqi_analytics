@@ -4,15 +4,17 @@ const axios = require('axios');
 
 let cache = {
     orgunitList: null,
+
 }
 
 export async function FetchOrgunits() {
-    if (cache.orgunitList == null) {
+    let cacheOrgUnit = localStorage.getItem("orgunitList");
+    if (cacheOrgUnit == null) {
         let response;
         try {
             response = await axios.get(`${settings.rtcqiBaseApi}/org_units`);
             const orgunitList = response.data;
-            cache.orgunitList = orgunitList;
+            localStorage.setItem("orgunitList", JSON.stringify(orgunitList));
             return orgunitList;
         } catch (err) {
             console.error(err);
@@ -20,12 +22,12 @@ export async function FetchOrgunits() {
         }
 
     } else {
-        return cache.orgunitList;
+        return  JSON.parse(cacheOrgUnit);
     }
 
 }
 
-export async function FetchOdkData(orgUnitIds, orgTimeline, siteType,startDate,endDate) {
+export async function FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
     try {
         const response = await axios({
             method: 'post',

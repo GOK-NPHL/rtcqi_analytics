@@ -18,10 +18,6 @@ class TreeView extends React.Component {
         this.orgUnitAction = this.orgUnitAction.bind(this);
     }
 
-    componentDidMount() {
-        console.log("loding component");
-    }
-
     // componentDidUpdate(prevProps, prevState) {
     //     if (prevState.pokemons !== this.state.pokemons) {
     //         console.log('pokemons state has changed.')
@@ -81,7 +77,7 @@ class TreeView extends React.Component {
                 this.props.setNewOrgToName,
                 this.props.setOrgToEdit);
         }
-
+        localStorage.removeItem('orgunitList'); 
     }
 
     render() {
@@ -155,8 +151,13 @@ class TreeView extends React.Component {
             }
         ];
         if (this.props.orgUnits) {
+           
             if (this.props.orgUnits.length != 0) {
-                treeStruc = arrayUIparser(this.props.orgUnits);
+                treeStruc = localStorage.getItem("treeStruc");
+                if (treeStruc == null) {
+                    treeStruc = arrayUIparser(this.props.orgUnits);
+                    //localStorage.setItem("treeStruc", treeStruc);
+                }
             } else {
                 treeStruc = arrayUIparser(treeStruc);
             }

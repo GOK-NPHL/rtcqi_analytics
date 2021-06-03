@@ -36,6 +36,7 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
+        
             let subCountyList = [];
             // returnedData.forEach((val) => {
             // });
@@ -95,8 +96,6 @@ class SpiReport extends React.Component {
     }
 
     orgDateChangeHandler(startDate, endDate) {
-        console.log(startDate);
-        console.log(endDate);
         this.setState({
             startDate: startDate,
             endDate: endDate
@@ -279,16 +278,12 @@ class SpiReport extends React.Component {
         }
 
         if (this.state.odkData) {
-            console.log("legelnd");
-            console.log(this.state.odkData);
             //if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) { //return data comes in different form. list od data
                 this.state.odkData.map((displayData) => {
-                    console.log("choice one");
                     [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, displayData);
                 });
             } else {
-                console.log("choice two");
                 [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData);
             }
         }
