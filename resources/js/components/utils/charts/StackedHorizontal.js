@@ -31,7 +31,7 @@ class StackedHorizontal extends React.Component {
                     type: 'category',
                     data: ['baseline(Y1_Q4)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)']
                 },
-
+                color: ['#5470c6', '#91cc75', '#fac858','#d24dff', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
             }
         }
     }
