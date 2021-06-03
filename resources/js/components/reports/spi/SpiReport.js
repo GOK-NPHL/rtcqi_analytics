@@ -360,8 +360,12 @@ class SpiReport extends React.Component {
                                     <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
                             </li>
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="columnsTab" data-toggle="tab" href="#columns" role="tab" aria-controls="profile" aria-selected="false">
-                                    <i className="fas fa-chart-bar"></i> Bar & Columns</a>
+                                <a className="nav-link" id="SiteColumnsTab" data-toggle="tab" href="#sitecolumns" role="tab" aria-controls="profile" aria-selected="false">
+                                    <i className="fas fa-chart-bar"></i> Site Level Columns</a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="averagecolumnsTab" data-toggle="tab" href="#averagecolumns" role="tab" aria-controls="profile" aria-selected="false">
+                                    <i className="fas fa-chart-bar"></i> Average Performance Columns</a>
                             </li>
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
@@ -374,9 +378,14 @@ class SpiReport extends React.Component {
                                 {tablesTab}
                             </div>
 
-                            <div className="tab-pane fade" id="columns" role="columnsTab" aria-labelledby="profile-tab">
+                            <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
                                 <br />
+                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
                                 {columnsTab}
+                            </div>
+                            <div className="tab-pane fade" id="averagecolumns" role="averagecolumns" aria-labelledby="profile-tab">
+                                <br />
+                                Average
                             </div>
                             <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">..3.</div>
                         </div>
