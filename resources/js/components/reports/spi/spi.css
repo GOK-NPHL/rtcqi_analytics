@@ -1,0 +1,7 @@
+.echarts-for-react {
+    min-height: 470px !important;
+}
+
+.card-body {
+    min-height: 500px;
+}

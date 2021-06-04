@@ -9,8 +9,8 @@ import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
 import OrgTimeline from '../../utils/orgunit/OrgTimeline';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
-import BarColumnCharts from './BarColumnCharts';
-
+import SiteLevelBarColumnCharts from './SiteLevelBarColumnCharts';
+import OverallPerformanceRadar from './OverallPerformanceRadar';
 
 class SpiReport extends React.Component {
 
@@ -36,7 +36,7 @@ class SpiReport extends React.Component {
         //fetch counties
         (async () => {
             let returnedData = await FetchOrgunits();
-        
+
             let subCountyList = [];
             // returnedData.forEach((val) => {
             // });
@@ -311,7 +311,8 @@ class SpiReport extends React.Component {
             </table>
         </div>;
 
-        let columnsTab = <BarColumnCharts serverData={this.state.odkData} siteType ={this.state.siteType}/>
+        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts serverData={this.state.odkData} siteType={this.state.siteType} />
+        let overallPerformanceRadar = <OverallPerformanceRadar serverData={this.state.odkData} siteType={this.state.siteType} />
 
         return (
             <React.Fragment>
@@ -363,13 +364,13 @@ class SpiReport extends React.Component {
                                 <a className="nav-link" id="SiteColumnsTab" data-toggle="tab" href="#sitecolumns" role="tab" aria-controls="profile" aria-selected="false">
                                     <i className="fas fa-chart-bar"></i> Site Level Columns</a>
                             </li>
-                            <li className="nav-item" role="presentation">
+                            {/* <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="averagecolumnsTab" data-toggle="tab" href="#averagecolumns" role="tab" aria-controls="profile" aria-selected="false">
                                     <i className="fas fa-chart-bar"></i> Average Performance Columns</a>
-                            </li>
+                            </li> */}
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
-                                    <i className="fas fa-atom"></i> Spider</a>
+                                    <i className="fas fa-atom"></i> Average Performance Radar</a>
                             </li>
                         </ul>
                         <div className="tab-content" id="myTabContent">
@@ -381,13 +382,16 @@ class SpiReport extends React.Component {
                             <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
                                 <br />
                                 <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-                                {columnsTab}
+                                {siteLevelBarColumnCharts}
                             </div>
                             <div className="tab-pane fade" id="averagecolumns" role="averagecolumns" aria-labelledby="profile-tab">
                                 <br />
-                                Average
                             </div>
-                            <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">..3.</div>
+                            <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">
+                                <br />
+                                <p style={{ fontWeight: "900" }}>Average Performance per QA element</p>
+                                {overallPerformanceRadar}
+                            </div>
                         </div>
 
                     </div>

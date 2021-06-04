@@ -70,7 +70,7 @@ class OrgUnitButton extends React.Component {
                         "zIndex": "999",
                         "backgroundColor": "white"
                     }}>
-                    <div className="card-body">
+                    <div className="card-body" style={{ "minHeight": "100px", "minWidth":"260px" }} >
                         <div>
                             <div
                                 style={{

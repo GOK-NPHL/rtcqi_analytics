@@ -1,9 +1,10 @@
 import React from 'react';
 import RTCard from '../../utils/RTCard'
-import StackedHorizontal from '../../utils/charts/StackedHorizontal'
+import AvgPerformanceSpider from '../../utils/charts/AvgPerformanceSpider'
 import { v4 as uuidv4 } from 'uuid';
+import './spi.css';
 
-class BarColumnCharts extends React.Component {
+class OverallPerformanceRadar extends React.Component {
 
     constructor(props) {
         super(props);
@@ -33,61 +34,68 @@ class BarColumnCharts extends React.Component {
     }
 
     prepareOverallLevelSiteData(dataObject) {
-        let overallSiteGraphsData = {};
-        let levelsMap = {
-            'level0': 'Level 0 (<40%)',
-            'level1': 'Level 1 (50-59%)',
-            'level2': 'Level 2 (60-79%)',
-            'level3': 'Level 3 (80-89%)',
-            'level4': 'Level 4 (>90%)'
-        }
-
-
+        
         let orgName = dataObject['orgName'];
-        if (dataObject['OrgUniType']) orgName += ' ' + dataObject['OrgUniType'];
+        if (dataObject['OrgUniType']) {
+            orgName += ' ' + dataObject['OrgUniType']
+        };
         orgName = orgName.toUpperCase();
-        let overallSitesObject = dataObject['OverallSitesLevel'];
-        let levelData = { 'level0': [], 'level1': [], 'level2': [], 'level3': [], 'level4': [] };
-        let category = [];
+
+        let indicators = [
+            { text: "Personnel \n Training \n& Certification", max: 100 },
+            { text: "QA in\n Counselling", max: 100 },
+            { text: "Physical\n Facility", max: 100 },
+            { text: 'Pre-testing\n phase', max: 100 },
+            { text: 'Testing\n Phase', max: 100 },
+            { text: 'Post-testing\n Phase', max: 100 },
+            { text: 'External\n Quality\n Assessment', max: 100 },
+            { text: 'Overall\n Performance', max: 100 }
+        ];
+        let legend = [];
+        let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
+            "PersonellTrainingAndCertification",, "OverallPerformance"];
+
+        let timelineData = {};
+        dataKeys.map((key) => {
+            let valueObj = dataObject[key];
+            for (let [timeLine, data] of Object.entries(valueObj)) {
+                if (!legend.includes(timeLine)) {
+                    legend.push(timeLine);
+                }
+                if (timeLine in timelineData) {
+                    timelineData[timeLine].push(data);
+                } else {
+                    timelineData[timeLine] = [];
+                    timelineData[timeLine].push(data);
+                }
+            }
+        });
+        console.log("Reach 4");
+        console.log(timelineData);
         let letSeriesData = [];
 
-        for (let [timeline, timeLineObjectValue] of Object.entries(overallSitesObject)) {
-            if (!category.includes(timeline)) {
-                category.push(timeline);
-            }
-
-            for (let [levelName, levelValue] of Object.entries(timeLineObjectValue)) {
-
-                if (levelName != 'counter') {
-                    levelData[levelName].push(levelValue);
-                }
-
-            }
-        }
-        for (let [level, dataArray] of Object.entries(levelData)) {
-            let seriesEntry = {
-                name: '',
-                type: 'bar',
-                stack: 'total',
+        for (let [timeline, dataArray] of Object.entries(timelineData)) {
+            console.log("Reach 3");
+            let seriesData = {
+                value: dataArray,
+                name: timeline,
+                symbol: 'rect',
+                symbolSize: 12,
                 label: {
-                    show: true
-                },
-                emphasis: {
-                    focus: 'series'
-                },
-                data: ''
-            };
-            seriesEntry['data'] = dataArray;
-            seriesEntry['name'] = levelsMap[level];
-            letSeriesData.push(seriesEntry);
+                    show: true,
+                    formatter: function (params) {
+                        return params.value;
+                    }
+                }
+            }
+
+            letSeriesData.push(seriesData);
         }
-        overallSiteGraphsData[orgName] = [category, letSeriesData];
 
-        //prepare percentage of sites assessed graph data
-
-        // return this.createOverallSiteGraphsDisplays(overallSiteGraphsData, counter);
-        return <RTCard header={orgName}>
-            <StackedHorizontal category={category} series={letSeriesData} />
+        console.log("Reach 5");
+        console.log(letSeriesData);
+         return <RTCard header={orgName}>
+            <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
     }
 
@@ -169,4 +177,4 @@ class BarColumnCharts extends React.Component {
 
 }
 
-export default BarColumnCharts;
+export default OverallPerformanceRadar;
