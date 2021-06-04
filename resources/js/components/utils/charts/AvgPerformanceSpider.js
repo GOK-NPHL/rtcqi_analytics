@@ -30,7 +30,7 @@ class AvgPerformanceSpider extends React.Component {
 
                     // indicator: this.props.indicators,
                     center: ['50%', '55%'],
-                    radius: 100,
+                    radius: 120,
                     name: {
                         textStyle: {
                             color: '#fff',

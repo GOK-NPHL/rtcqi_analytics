@@ -42,25 +42,22 @@ class OverallPerformanceRadar extends React.Component {
         orgName = orgName.toUpperCase();
 
         let indicators = [
-            { text: "Personnel Training & Certification", max: 100 },
-            { text: "QA in Counselling", max: 100 },
-            { text: "Physical Facility", max: 100 },
-            { text: 'Pre-testing phase', max: 100 },
-            { text: 'Testing Phase', max: 100 },
-            { text: 'Post-testing Phase', max: 100 },
-            { text: 'External Quality Assessment', max: 100 },
-            { text: 'Overall Performance', max: 100 }
+            { text: "Personnel \n Training \n& Certification", max: 100 },
+            { text: "QA in\n Counselling", max: 100 },
+            { text: "Physical\n Facility", max: 100 },
+            { text: 'Pre-testing\n phase', max: 100 },
+            { text: 'Testing\n Phase', max: 100 },
+            { text: 'Post-testing\n Phase', max: 100 },
+            { text: 'External\n Quality\n Assessment', max: 100 },
+            { text: 'Overall\n Performance', max: 100 }
         ];
         let legend = [];
         let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
             "PersonellTrainingAndCertification",, "OverallPerformance"];
-        console.log("te data object");
-        console.log(dataObject);
+
         let timelineData = {};
         dataKeys.map((key) => {
             let valueObj = dataObject[key];
-            console.log("Reach 1");
-            console.log(valueObj);
             for (let [timeLine, data] of Object.entries(valueObj)) {
                 if (!legend.includes(timeLine)) {
                     legend.push(timeLine);
