@@ -20,7 +20,8 @@ class SpiReport extends React.Component {
             orgUnits: [],
             orgUnitDataIds: [0],
             orgUnitTimeline: [],
-            siteType: []
+            siteType: [],
+            echartsMinHeight: '',
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
@@ -65,6 +66,7 @@ class SpiReport extends React.Component {
 
         //change echarts layout to allow graph to fit for spider charts only.
         let div = $("#spiders");
+       
         let observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
                 if (mutation.attributeName === "class") {
@@ -145,7 +147,8 @@ class SpiReport extends React.Component {
             this.state.orgUnitTimeline != nextState.orgUnitTimeline ||
             this.state.siteType != nextState.siteType ||
             this.state.startDate != nextState.startDate ||
-            this.state.endDate != nextState.endDate
+            this.state.endDate != nextState.endDate ||
+            this.state.echartsMinHeight !== nextState.echartsMinHeight
         ) {
             return false;
         } else {
@@ -339,7 +342,7 @@ class SpiReport extends React.Component {
         </div>;
 
         let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts serverData={this.state.odkData} siteType={this.state.siteType} />
-        let overallPerformanceRadar = <OverallPerformanceRadar serverData={this.state.odkData} siteType={this.state.siteType} />
+        let overallPerformanceRadar = <OverallPerformanceRadar minHeight={this.state.echartsMinHeight} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
 
 
         return (
@@ -397,7 +400,15 @@ class SpiReport extends React.Component {
                                     <i className="fas fa-chart-bar"></i> Average Performance Columns</a>
                             </li> */}
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="spidersTab" data-toggle="tab" href="#spiders" role="tab" aria-controls="contact" aria-selected="false">
+                                <a className="nav-link" id="spidersTab" 
+                                data-toggle="tab" href="#spiders" role="tab" 
+                                aria-controls="contact" aria-selected="false"
+                                onClick={()=>{
+                                    this.setState({
+                                        echartsMinHeight: "500px"
+                                    })
+                                }}
+                                >
                                     <i className="fas fa-atom"></i> Average Performance Radar</a>
                             </li>
                         </ul>

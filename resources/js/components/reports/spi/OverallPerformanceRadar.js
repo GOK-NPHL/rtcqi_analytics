@@ -9,6 +9,7 @@ class OverallPerformanceRadar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            
             series2: [
                 {
                     name: 'Level 0 (<40%)',
@@ -29,8 +30,13 @@ class OverallPerformanceRadar extends React.Component {
 
     }
 
-    componentDidMount() {
 
+    componentDidUpdate() {
+        if (this.props.setMinHeight) {
+            $(".echarts-for-react").css('min-height', this.props.minHeight);
+        } else {
+            $(".echarts-for-react").css('min-height', '');
+        }
     }
 
     prepareOverallLevelSiteData(dataObject) {
