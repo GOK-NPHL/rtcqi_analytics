@@ -42,14 +42,14 @@ class OverallPerformanceRadar extends React.Component {
         orgName = orgName.toUpperCase();
 
         let indicators = [
-            { text: "Personnel \n Training \n& Certification", max: 100 },
-            { text: "QA in\n Counselling", max: 100 },
-            { text: "Physical\n Facility", max: 100 },
-            { text: 'Pre-testing\n phase', max: 100 },
-            { text: 'Testing\n Phase', max: 100 },
-            { text: 'Post-testing\n Phase', max: 100 },
-            { text: 'External\n Quality\n Assessment', max: 100 },
-            { text: 'Overall\n Performance', max: 100 }
+            { text: "Personnel\nTraining\n& Certification", max: 100 },
+            { text: "QA in\nCounselling", max: 100 },
+            { text: "Physical\nFacility", max: 100 },
+            { text: 'Pre-testing\nphase', max: 100 },
+            { text: 'Testing\nPhase', max: 100 },
+            { text: 'Post-testing\nPhase', max: 100 },
+            { text: 'External\nQuality\nAssessment', max: 100 },
+            { text: 'Overall\nPerformance', max: 100 }
         ];
         let legend = [];
         let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
@@ -94,7 +94,7 @@ class OverallPerformanceRadar extends React.Component {
 
         console.log("Reach 5");
         console.log(letSeriesData);
-         return <RTCard header={orgName}>
+         return <RTCard style={{"padding":"0px"}} header={orgName}>
             <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
     }

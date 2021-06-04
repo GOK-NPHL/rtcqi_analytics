@@ -45,7 +45,7 @@ class RTCard extends React.Component {
                         </div>
                     </div>
                     {/* Card Body */}
-                    <div className="card-body">
+                    <div style={this.props.style} className="card-body">
                         <div className="chart-area">
                             {this.props.children}
                         </div>
