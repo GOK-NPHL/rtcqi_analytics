@@ -1,6 +1,6 @@
 import React from 'react';
-import RTCard from '../../utils/RTCard'
-import AvgPerformanceSpider from '../../utils/charts/AvgPerformanceSpider'
+import RTCard from '../../utils/RTCard';
+import AvgPerformanceSpider from '../../utils/charts/AvgPerformanceSpider';
 import { v4 as uuidv4 } from 'uuid';
 import './spi.css';
 
@@ -34,7 +34,7 @@ class OverallPerformanceRadar extends React.Component {
     }
 
     prepareOverallLevelSiteData(dataObject) {
-        
+
         let orgName = dataObject['orgName'];
         if (dataObject['OrgUniType']) {
             orgName += ' ' + dataObject['OrgUniType']
@@ -53,7 +53,7 @@ class OverallPerformanceRadar extends React.Component {
         ];
         let legend = [];
         let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
-            "PersonellTrainingAndCertification",, "OverallPerformance"];
+            "PersonellTrainingAndCertification", "OverallPerformance"];
 
         let timelineData = {};
         dataKeys.map((key) => {
@@ -94,7 +94,7 @@ class OverallPerformanceRadar extends React.Component {
 
         console.log("Reach 5");
         console.log(letSeriesData);
-         return <RTCard style={{"padding":"0px"}} header={orgName}>
+        return <RTCard style={{ "padding": "0px", "minHeight": "500px" }} header={orgName}>
             <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
     }
