@@ -77,7 +77,7 @@ class TreeView extends React.Component {
                 this.props.setNewOrgToName,
                 this.props.setOrgToEdit);
         }
-        localStorage.removeItem('orgunitList'); 
+        localStorage.removeItem('orgunitList');
     }
 
     render() {
@@ -151,7 +151,7 @@ class TreeView extends React.Component {
             }
         ];
         if (this.props.orgUnits) {
-           
+
             if (this.props.orgUnits.length != 0) {
                 treeStruc = localStorage.getItem("treeStruc");
                 if (treeStruc == null) {
@@ -196,9 +196,6 @@ class TreeView extends React.Component {
                                                 <li className="nav-item" role="presentation">
                                                     <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit</a>
                                                 </li>
-                                                <li className="nav-item" role="presentation">
-                                                    <a className="nav-link" id="contact-tab" data-toggle="tab" href="#messages1" role="tab" aria-controls="contact" aria-selected="false">Delete</a>
-                                                </li>
 
                                             </ul>
                                             <br />
@@ -225,9 +222,7 @@ class TreeView extends React.Component {
                                                         }}
                                                     />
                                                 </div>
-                                                <div id="messages1" className="tab-pane fade">
-                                                    Delete Orgunit
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
