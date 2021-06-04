@@ -34,6 +34,10 @@ class SpiReport extends React.Component {
 
     componentDidMount() {
         //fetch counties
+
+    }
+
+    componentDidMount() {
         (async () => {
             let returnedData = await FetchOrgunits();
 
@@ -58,6 +62,29 @@ class SpiReport extends React.Component {
             this.state.startDate,
             this.state.endDate
         );
+
+        //change echarts layout to allow graph to fit for spider charts only.
+        let div = $("#spiders");
+        let observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.attributeName === "class") {
+                    let attributeValue = $(mutation.target).prop(mutation.attributeName);
+
+                    if (attributeValue.includes("show")) {
+
+                        $(".echarts-for-react").css('min-height', '500px');
+                    } else {
+                        // alert(currMinHeightValue);
+                        $(".echarts-for-react").css('min-height', '');
+                        // $(".echarts-for-react").css('min-height', '');
+                    }
+                }
+            });
+        });
+
+        observer.observe(div[0], {
+            attributes: true
+        });
     }
 
     fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
@@ -313,6 +340,7 @@ class SpiReport extends React.Component {
 
         let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts serverData={this.state.odkData} siteType={this.state.siteType} />
         let overallPerformanceRadar = <OverallPerformanceRadar serverData={this.state.odkData} siteType={this.state.siteType} />
+
 
         return (
             <React.Fragment>
