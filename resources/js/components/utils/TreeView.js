@@ -194,7 +194,7 @@ class TreeView extends React.Component {
                                                     <a className="nav-link active" id="home-tab" data-toggle="tab" href="#home1" role="tab" aria-controls="home" aria-selected="true">Add Sub-Orgunit</a>
                                                 </li>
                                                 <li className="nav-item" role="presentation">
-                                                    <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit</a>
+                                                    <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit Orgunit</a>
                                                 </li>
 
                                             </ul>
