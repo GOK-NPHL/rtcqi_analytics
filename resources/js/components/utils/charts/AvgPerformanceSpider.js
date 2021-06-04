@@ -85,6 +85,7 @@ class AvgPerformanceSpider extends React.Component {
 
         this.setState({
             option: {
+               
                 series: [
                     {
                         name: 'one',
