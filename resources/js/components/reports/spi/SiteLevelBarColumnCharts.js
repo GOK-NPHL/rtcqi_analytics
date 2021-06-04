@@ -3,7 +3,7 @@ import RTCard from '../../utils/RTCard'
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 import { v4 as uuidv4 } from 'uuid';
 
-class BarColumnCharts extends React.Component {
+class SiteLevelBarColumnCharts extends React.Component {
 
     constructor(props) {
         super(props);
@@ -169,4 +169,4 @@ class BarColumnCharts extends React.Component {
 
 }
 
-export default BarColumnCharts;
+export default SiteLevelBarColumnCharts;
