@@ -37,8 +37,6 @@ class OverallStackedHorizontal extends React.Component {
     }
 
     componentDidMount() {
-        console.log("load data 2");
-            console.log(this.props.series);
         this.setState({
             option: {
                 series: this.props.series,

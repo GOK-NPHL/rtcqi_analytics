@@ -59,13 +59,13 @@ class OrgTimeline extends React.Component {
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'baseline')} href="#">
                             Baseline <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
-                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'followup1')} href="#">
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow1')} href="#">
                             Follow-Up 1 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
-                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'followup2')} href="#">
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow2')} href="#">
                             Follow-Up 2 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
-                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'followup3')} href="#">
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow3')} href="#">
                             Follow-Up 3 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
                         {/* <div class="dropdown-divider"></div> */}
