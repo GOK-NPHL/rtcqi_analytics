@@ -17,6 +17,9 @@ class AvgPerformanceSpider extends React.Component {
                 // legend: {
                 //     data:  this.props.legend //['Data C', 'Data D']
                 // },
+                tooltip: {
+                    trigger: 'axis'
+                },
                 radar:
                 {
                     // indicator: [
@@ -30,7 +33,7 @@ class AvgPerformanceSpider extends React.Component {
 
                     // indicator: this.props.indicators,
                     center: ['50%', '55%'],
-                    radius: 120,
+                    radius: 150,
                     name: {
                         textStyle: {
                             color: '#fff',
@@ -86,6 +89,9 @@ class AvgPerformanceSpider extends React.Component {
                     {
                         name: 'one',
                         type: 'radar',
+                        tooltip: {
+                            trigger: 'item'
+                        },
                         data: this.props.series
                     }
                 ],
