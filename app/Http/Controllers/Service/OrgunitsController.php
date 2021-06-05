@@ -37,21 +37,20 @@ class OrgunitsController extends Controller
 
     public function getOrgunits()
     {
-        if (Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {
-            $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
-            $levelsArr = array();
-            foreach ($levels as $level) {
-                $levelsArr[] = $level->level;
-            }
-            $orgUnitsPayload = [
-                'metadata' =>
-                ['levels' => $levelsArr],
-                'payload' => [OdkOrgunit::all()]
-            ];
-            return $orgUnitsPayload;
-        } else {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {
             return response()->json(['Message' => 'Not allowed to view organisation units: '], 500);
         }
+        $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
+        $levelsArr = array();
+        foreach ($levels as $level) {
+            $levelsArr[] = $level->level;
+        }
+        $orgUnitsPayload = [
+            'metadata' =>
+            ['levels' => $levelsArr],
+            'payload' => [OdkOrgunit::all()]
+        ];
+        return $orgUnitsPayload;
     }
 
     public function saveOrgunits(Request $request)
