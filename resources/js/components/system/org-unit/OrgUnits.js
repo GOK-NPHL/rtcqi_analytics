@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg } from '../../utils/Helpers';
+import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, FetchUserAuthorities } from '../../utils/Helpers';
 
 let httpOrgUnits = [];
 let message = '';
@@ -82,8 +82,18 @@ function createOrgunitTable(tableData, setOrgToEdit, setNewOrgToName) {
     return tableRows;
 }
 
+function fetchUserAuthorities() {
+
+    (async () => {
+        let returnedData = await FetchUserAuthorities();
+        console.log("permissions boundary");
+        console.log(returnedData);
+    })();
+}
 
 function Orgunit() {
+
+    fetchUserAuthorities();
     $("#org_success").hide();
     const [showOrgunitLanding, setShowOrgunitLanding] = useState(true);
     const [tableOrgsStruct, setTableOrgsStruct] = useState();
