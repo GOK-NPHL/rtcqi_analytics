@@ -22,7 +22,7 @@ export async function FetchOrgunits() {
         }
 
     } else {
-        return  JSON.parse(cacheOrgUnit);
+        return JSON.parse(cacheOrgUnit);
     }
 
 }
@@ -65,6 +65,19 @@ export async function FetchAuthorities() {
     try {
         const response = await axios.get(`${settings.rtcqiBaseApi}/authorities`);
         const authoritiesList = response.data;
+        return authoritiesList;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+
+}
+
+export async function FetchUserAuthorities() {
+
+    try {
+        let response = await axios.get(`${settings.rtcqiBaseApi}/user_authorities`);
+        let authoritiesList = response.data;
         return authoritiesList;
     } catch (err) {
         // Handle Error Here

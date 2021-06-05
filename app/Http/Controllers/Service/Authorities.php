@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Authority;
+use Illuminate\Support\Facades\Auth;
 
 class Authorities extends Controller
 {
@@ -23,5 +24,18 @@ class Authorities extends Controller
     public function getAuthorities()
     {
         return Authority::all();
+    }
+
+    public function getUserAuthorities()
+    {
+        $user = Auth::user();
+        $roles = Authority::select(
+            "authorities.name "
+        )->join('authority_role', 'authorities.id', '=', 'authority_role.authority_id')
+            ->join('roles', 'roles.id', '=', 'authority_role.role_id')
+            ->join('users', 'role_id', '=', 'roles.id')
+            ->where('users.id', $user->id)
+            ->get();
+        return $roles;
     }
 }

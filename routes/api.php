@@ -30,6 +30,7 @@ Route::put('/add_sub_org', 'Service\OrgunitsController@addSubOrg');
 
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
+Route::get('/user_authorities', 'Service\Authorities@getUserAuthorities');
 Route::post('/save_role', 'Service\RolesController@createRole');
 Route::post('/delete_role', 'Service\RolesController@deleteRole');
 Route::post('/update_role', 'Service\RolesController@updateRole');
@@ -37,11 +38,3 @@ Route::post('/update_role', 'Service\RolesController@updateRole');
 Route::put('/save_user', 'Service\AuthController@register');
 Route::get('/users', 'Service\UsersController@getUsers');
 Route::delete('/delete_user', 'Service\UsersController@deleteUser');
-
-Route::get('/authorities', 'Service\AuthoritiesController@getPermissions');
-
-
-
-
-
-
