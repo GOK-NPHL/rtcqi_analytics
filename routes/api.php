@@ -38,6 +38,8 @@ Route::put('/save_user', 'Service\AuthController@register');
 Route::get('/users', 'Service\UsersController@getUsers');
 Route::delete('/delete_user', 'Service\UsersController@deleteUser');
 
+Route::get('/authorities', 'Service\AuthoritiesController@getPermissions');
+
 
 
 
