@@ -55,6 +55,9 @@ class OrgunitsController extends Controller
 
     public function saveOrgunits(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['add_orgunit'])) {
+            return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
+        }
         try {
             $organisationUnit = $request->orgunits;
             for ($x = 0; $x < count($organisationUnit); $x++) {
@@ -88,6 +91,9 @@ class OrgunitsController extends Controller
 
     public function updateOrg(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['edit_orgunit'])) {
+            return response()->json(['Message' => 'Not allowed to update organisation units: '], 500);
+        }
         try {
             $org = OdkOrgunit::where('org_unit_id', $request->id)->first();
             $org->odk_unit_name = $request->name;
@@ -100,6 +106,9 @@ class OrgunitsController extends Controller
 
     public function deleteOrg(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['delete_orgunit'])) {
+            return response()->json(['Message' => 'Not allowed to delete organisation units: '], 500);
+        }
         try {
             log::info("delete org 1");
             $dependentOrgs = OdkOrgunit::where('parent_id', $request->org['org_unit_id'])
@@ -122,6 +131,9 @@ class OrgunitsController extends Controller
 
     public function addSubOrg(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['add_orgunit'])) {
+            return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
+        }
         try {
             $childOrg = $request->child_org;
             $parentOrg = $request->parent_org;
