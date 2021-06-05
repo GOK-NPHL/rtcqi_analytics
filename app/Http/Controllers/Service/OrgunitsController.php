@@ -8,10 +8,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
 use App\OrgunitLevelMap;
+use App\Services\SystemAuthorities;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-
-
+use Illuminate\Support\Facades\Gate;
 
 class OrgunitsController extends Controller
 {
@@ -37,19 +37,21 @@ class OrgunitsController extends Controller
 
     public function getOrgunits()
     {
-        $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
-        $levelsArr = array();
-        foreach ($levels as $level) {
-            $levelsArr[] = $level->level;
+        if (Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {
+            $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
+            $levelsArr = array();
+            foreach ($levels as $level) {
+                $levelsArr[] = $level->level;
+            }
+            $orgUnitsPayload = [
+                'metadata' =>
+                ['levels' => $levelsArr],
+                'payload' => [OdkOrgunit::all()]
+            ];
+            return $orgUnitsPayload;
+        } else {
+            return response()->json(['Message' => 'Not allowed to view organisation units: '], 500);
         }
-
-        $orgUnitsPayload = [
-            'metadata' =>
-            ['levels' => $levelsArr],
-            'payload' => [OdkOrgunit::all()]
-        ];
-
-        return $orgUnitsPayload;
     }
 
     public function saveOrgunits(Request $request)
