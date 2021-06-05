@@ -29,21 +29,56 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define(SystemAuthorities::$authorities['view_orgunit'], function ($user) {
-            $user = User::select(
-                "users.id as id"
-            )->join('roles', 'roles.id', '=', 'users.role_id')
-                ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
-                ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
-                ->where('authorities.name', SystemAuthorities::$authorities['view_orgunit'])
-                ->get();
-            Log::info("the user got");
-            Log::info($user);
-
-            if (count($user) != 0) {
-                return true;
-            } else {
-                return false;
-            }
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_orgunit']);
         });
+        Gate::define(SystemAuthorities::$authorities['view_pt_report'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_pt_report']);
+        });
+        Gate::define(SystemAuthorities::$authorities['view_log_book_report'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_log_book_report']);
+        });
+        Gate::define(SystemAuthorities::$authorities['edit_user'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['edit_user']);
+        });
+        Gate::define(SystemAuthorities::$authorities['edit_role'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['edit_role']);
+        });
+        Gate::define(SystemAuthorities::$authorities['edit_orgunit'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['edit_orgunit']);
+        });
+        Gate::define(SystemAuthorities::$authorities['delete_user'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['delete_user']);
+        });
+        Gate::define(SystemAuthorities::$authorities['delete_role'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['delete_role']);
+        });
+        Gate::define(SystemAuthorities::$authorities['delete_orgunit'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['delete_orgunit']);
+        });
+        Gate::define(SystemAuthorities::$authorities['add_user'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['add_user']);
+        });
+        Gate::define(SystemAuthorities::$authorities['add_role'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['add_role']);
+        });
+        Gate::define(SystemAuthorities::$authorities['add_orgunit'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['add_orgunit']);
+        });
+    }
+
+    private function runAthurizationQuery($authority)
+    {
+        $user = User::select(
+            "users.id as id"
+        )->join('roles', 'roles.id', '=', 'users.role_id')
+            ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
+            ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
+            ->where('authorities.name', $authority)
+            ->get();
+        if (count($user) != 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
