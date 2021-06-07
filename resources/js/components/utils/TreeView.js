@@ -8,7 +8,7 @@ class TreeView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            orgUnitAction: '',
+            orgUnitAction: 'Add',
             currentSelectedOrg: null,
             newOrgUnitName: '',
             newEditOrgUnitName: ''
@@ -62,6 +62,8 @@ class TreeView extends React.Component {
     }
 
     orgUnitAction() {
+        console.log("editing 1");
+        console.log(this.state.orgUnitAction);
         if (this.state.orgUnitAction == 'Add') {
             (async () => {
                 let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
@@ -71,6 +73,7 @@ class TreeView extends React.Component {
                 $('#alertMessageModal').modal('toggle');
             })();
         } else if (this.state.orgUnitAction == 'Edit') {
+            console.log("editing");
             this.props.updateOrg(
                 this.state.currentSelectedOrg['id'],
                 this.state.newEditOrgUnitName);
@@ -189,10 +192,28 @@ class TreeView extends React.Component {
                                             <ul id="tabs" className="nav nav-tabs">
 
                                                 <li className="nav-item" role="presentation">
-                                                    <a className="nav-link active" id="home-tab" data-toggle="tab" href="#home1" role="tab" aria-controls="home" aria-selected="true">Add Sub-Orgunit</a>
+                                                    <a className="nav-link active" id="home-tab"
+                                                        data-toggle="tab" href="#home1" role="tab" aria-controls="home"
+                                                        aria-selected="true"
+                                                        onClick={() => {
+                                                            this.setState({
+                                                                orgUnitAction: 'Add'
+                                                            });
+                                                        }}
+                                                        >Add Sub-Orgunit
+                                                    </a>
                                                 </li>
                                                 <li className="nav-item" role="presentation">
-                                                    <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile1" role="tab" aria-controls="profile" aria-selected="false">Edit Orgunit</a>
+                                                    <a className="nav-link" id="profile-tab"
+                                                        data-toggle="tab" href="#profile1" role="tab"
+                                                        aria-controls="profile"
+                                                        aria-selected="false"
+                                                        onClick={() => {
+                                                            this.setState({
+                                                                orgUnitAction: 'Edit'
+                                                            });
+                                                        }}
+                                                    >Edit Orgunit</a>
                                                 </li>
 
                                             </ul>
