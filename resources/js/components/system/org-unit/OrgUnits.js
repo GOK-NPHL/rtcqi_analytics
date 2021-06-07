@@ -44,7 +44,7 @@ class Orgunit extends React.Component {
             let returnedData = await UpdateOrg(org, newOrgToName);
             $("#org_success").html(returnedData);
             $("#org_success").show();
-            $("#org_success").fadeTo(2000, 500).slideUp(500, function () {
+            $("#org_success").fadeTo(2000, 500).slideUp(500, ()=> {
                 $("#org_success").alert(500);
                 this.setState({
                     newOrgToName: null
@@ -125,12 +125,6 @@ class Orgunit extends React.Component {
 
     render() {
         $("#org_success").hide();
-        //    const [showOrgunitLandin, setShowOrgunitLanding] = useState(true);
-        //    const [tableOrgsStruc, setTableOrgsStruct] = useState();
-        //   const [orgToEdi, setOrgToEdit] = useState();
-        //const [newOrgToName, setNewOrgToName] = useState();
-        // let [allowedPermissions, setAllowedPermissions] = useState();
-
         
         if (this.state.allowedPermissions.length > 0) {
             
@@ -222,7 +216,7 @@ class Orgunit extends React.Component {
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="button"
                                     onClick={() => {
-                                        this.updateOrg(this.state.orgToEdit.org_unit_id, newOrgToName);
+                                        this.updateOrg(this.state.orgToEdit.org_unit_id, this.state.newOrgToName);
                                         $('#editOrgModal').modal('toggle');
                                     }}
                                     className="btn btn-primary">Save changes</button>
