@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import Register from './Register';
-import { FetchUsers,DeleteUser } from '../../utils/Helpers';
+import { FetchUsers, DeleteUser, FetchUserAuthorities } from '../../utils/Helpers';
 
 class User extends React.Component {
 
@@ -12,7 +12,8 @@ class User extends React.Component {
         this.state = {
             showUserTable: true,
             users: [],
-            selectedUser: null
+            selectedUser: null,
+            allowedPermissions: []
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
@@ -22,9 +23,10 @@ class User extends React.Component {
     componentDidMount() {
         (async () => {
             let users = await FetchUsers();
-            console.log(users);
+            let allowedPermissions = await FetchUserAuthorities();
             this.setState({
                 users: users,
+                allowedPermissions: allowedPermissions
             });
         })();
     }
@@ -90,20 +92,31 @@ class User extends React.Component {
                     <td>{user.first_name} {user.last_name}</td>
                     <td>{user.email}</td>
                     <td>{user.role_name}</td>
-                    <td>
-                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i className="fas fa-user-edit"></i>
-                        </a>
-                        <a
-                            onClick={() => {
-                                this.setState({
-                                    selectedUser: user
-                                });
-                                $('#deleteConfirmModal').modal('toggle');
-                            }} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                            <i className="fas fa-user-times"></i>
-                        </a>
-                    </td>
+                    {
+                        this.state.allowedPermissions.includes('edit_user') ||
+                            this.state.allowedPermissions.includes('delete_user') ?
+                            <td>
+                                {
+                                    this.state.allowedPermissions.includes('edit_user') ?
+                                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                            <i className="fas fa-user-edit"></i>
+                                        </a> : ''
+                                }
+                                {
+                                    this.state.allowedPermissions.includes('delete_user') ?
+                                        <a
+                                            onClick={() => {
+                                                this.setState({
+                                                    selectedUser: user
+                                                });
+                                                $('#deleteConfirmModal').modal('toggle');
+                                            }} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                                            <i className="fas fa-user-times"></i>
+                                        </a> : ''
+                                }
+                            </td> : ''
+                    }
+
                 </tr>
                 );
             });
@@ -119,7 +132,7 @@ class User extends React.Component {
         };
         let pageContent = '';
 
-        if (this.state.showUserTable) {
+        if (this.state.showUserTable && this.state.allowedPermissions.includes('view_user')) {
             pageContent = <div id='user_table' className='row'>
                 <div className='col-sm-12 col-md-12'>
                     <table className="table table-striped">
@@ -129,7 +142,11 @@ class User extends React.Component {
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Role</th>
-                                <th scope="col">Action</th>
+                                {
+                                    this.state.allowedPermissions.includes('edit_user') ||
+                                        this.state.allowedPermissions.includes('delete_user') ?
+                                        <th scope="col">Action</th> : ''
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -139,7 +156,8 @@ class User extends React.Component {
                 </div>
             </div>;
         } else {
-            pageContent = <Register toggleDisplay={this.toggleDisplay} />;
+            if (this.state.allowedPermissions.includes('add_user'))
+                pageContent = <Register toggleDisplay={this.toggleDisplay} />;
         }
 
         let confirmationBox =
@@ -192,14 +210,19 @@ class User extends React.Component {
                 </div>
             </div >
 
+        let createUsers = '';
+        if (this.state.allowedPermissions.includes('add_user')) {
+            createUsers = <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                className="fas fa-user fa-sm text-white-50"></i> Create Users</a>;
+        }
         return (
             <React.Fragment>
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 className="h4 mb-0 text-gray-500">Users Management</h1>
-                    <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                        className="fas fa-user fa-sm text-white-50"></i> Create Users</a>
+                    {createUsers}
+
                 </div>
 
                 {pageContent}
