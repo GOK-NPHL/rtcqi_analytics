@@ -20,5 +20,9 @@ class SystemAuthorities
         'add_user' => 'add_user',
         'add_role' => 'add_role',
         'add_orgunit' => 'add_orgunit',
+        'view_system_settings' => 'view_system_settings',
+        'view_reports' => 'view_reports',
+        'view_dashboard' => 'view_dashboard'
+
     ];
 }
