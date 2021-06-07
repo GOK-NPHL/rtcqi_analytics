@@ -73,9 +73,7 @@ class TreeView extends React.Component {
         } else if (this.state.orgUnitAction == 'Edit') {
             this.props.updateOrg(
                 this.state.currentSelectedOrg['id'],
-                this.state.newEditOrgUnitName,
-                this.props.setNewOrgToName,
-                this.props.setOrgToEdit);
+                this.state.newEditOrgUnitName);
         }
         localStorage.removeItem('orgunitList');
     }

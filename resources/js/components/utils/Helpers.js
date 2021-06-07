@@ -77,8 +77,7 @@ export async function FetchUserAuthorities() {
 
     try {
         let response = await axios.get(`${settings.rtcqiBaseApi}/user_authorities`);
-        let authoritiesList = response.data;
-        return authoritiesList;
+        return response.data;
     } catch (err) {
         // Handle Error Here
         return err.response
