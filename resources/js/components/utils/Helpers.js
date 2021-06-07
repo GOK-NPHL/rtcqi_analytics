@@ -167,9 +167,12 @@ export async function UpdateOrg(org_unit_id, name) {
                 name, name
             }
         });
+        localStorage.removeItem('orgunitList');    
+        localStorage.removeItem('treeStruc'); 
         return response.data.Message;
     } catch (err) {
         // Handle Error Here
+        err.response
         return err.response
     }
 }
