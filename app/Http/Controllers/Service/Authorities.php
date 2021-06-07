@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Authority;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Authorities extends Controller
 {
@@ -37,7 +38,11 @@ class Authorities extends Controller
             ->where('users.id', $user->id)
             ->get();
         if (count($roles) > 0) {
-            return $roles;
+            $permissions = [];
+            foreach ($roles as $role) {
+                $permissions[] = $role->name;
+            }
+            return $permissions;
         } else {
             return [];
         }
