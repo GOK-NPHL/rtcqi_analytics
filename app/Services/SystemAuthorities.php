@@ -25,7 +25,8 @@ class SystemAuthorities
         'view_system_settings' => 'view_system_settings',
         'view_reports' => 'view_reports',
         'view_dashboard' => 'view_dashboard',
-        'data_backup' => 'data_backup'
+        'data_backup' => 'data_backup',
+        'view_spi_report'=>'view_spi_report'
 
     ];
 }
