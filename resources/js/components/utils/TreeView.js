@@ -230,7 +230,7 @@ class TreeView extends React.Component {
                                                     }
                                                     {this.state.allowedPermissions.includes('edit_orgunit') ?
                                                         <li className="nav-item" role="presentation">
-                                                            <a className="nav-link" id="profile-tab"
+                                                            <a className={`nav-link ${!this.state.allowedPermissions.includes('add_orgunit') ? 'active' : ''}`} id="profile-tab"
                                                                 data-toggle="tab" href="#profile1" role="tab"
                                                                 aria-controls="profile"
                                                                 aria-selected="false"
