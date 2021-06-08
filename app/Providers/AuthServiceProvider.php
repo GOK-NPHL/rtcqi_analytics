@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\SystemAuthorities;
 use App\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
@@ -89,12 +90,14 @@ class AuthServiceProvider extends ServiceProvider
 
     private function runAthurizationQuery($authority)
     {
+        $curUser = Auth::user();
         $user = User::select(
             "users.id as id"
         )->join('roles', 'roles.id', '=', 'users.role_id')
             ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
             ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
             ->where('authorities.name', $authority)
+            ->where('users.id', $curUser->id)
             ->get();
         if (count($user) != 0) {
             return true;
