@@ -73,11 +73,13 @@ class RoleCreate extends React.Component {
         if (this.props.editMode) {
             if (this.state.allowedPermissions.length > 0) {
                 if (this.state.allowedPermissions.includes('edit_role')) {
+                    let returnedData = '';
                     (async () => {
-                        let returnedData = await UpdateRole(this.props.roleToEdit.role_id, this.state.roleName, this.state.selected);
-                        this.props.fetchRoles();
-                        this.props.toggleDisplay();
+                        returnedData = await UpdateRole(this.props.roleToEdit.role_id, this.state.roleName, this.state.selected);
+
                     })();
+                    this.props.toggleDisplay();
+                    this.props.fetchRoles();
                 }
             }
 
@@ -96,6 +98,11 @@ class RoleCreate extends React.Component {
     }
 
     render() {
+        console.log("perm 1")
+        console.log(this.state.selected)
+        
+        console.log(this.state.permissionOptions)
+        console.log("perm 2")
         let pageContent = <div id="registration_form" className="card shadow mb-4">
             <div className="card-header py-3">
                 <h6 className="m-0 font-weight-bold text-primary">Role Creation</h6>
