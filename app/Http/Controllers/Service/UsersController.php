@@ -60,6 +60,7 @@ class UsersController extends Controller
         }
         try {
             $user = User::find($request->user['id']);
+            $user->OdkOrgunit()->sync([]);
             $user->delete();
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
