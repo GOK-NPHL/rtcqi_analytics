@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchRoles, DeleteRole } from '../../utils/Helpers';
+import { FetchRoles, DeleteRole, FetchUserAuthorities } from '../../utils/Helpers';
 
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
@@ -144,14 +144,24 @@ class Roles extends React.Component {
                     <td>{value.role_name}</td>
                     <td>{value.editor}</td>
                     <td>{value.updated_at}</td>
-                    <td>
-                        <a onClick={() => this.editRole(value)} href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i className="fas fa-user-edit"></i>
-                        </a>
-                        <a onClick={() => this.deleteRole(value.role_id)} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                            <i className="fas fa-user-times"></i>
-                        </a>
-                    </td>
+                    {
+                        (this.state.allowedPermissions.length > 0) &&
+                            (this.state.allowedPermissions.includes('edit_role') || this.state.allowedPermissions.includes('delete_role')) ?
+                            <td>
+                                {(this.state.allowedPermissions.length > 0) && this.state.allowedPermissions.includes('edit_role') ?
+                                    <a onClick={() => this.editRole(value)} href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                        <i className="fas fa-user-edit"></i>
+                                    </a> : undefined
+                                }
+                                {(this.state.allowedPermissions.length > 0) && this.state.allowedPermissions.includes('delete_role') ?
+                                    <a onClick={() => this.deleteRole(value.role_id)} className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                                        <i className="fas fa-user-times"></i>
+                                    </a> : undefined
+                                }
+
+                            </td> : undefined
+                    }
+
                 </tr>);
             }
         }
@@ -190,7 +200,9 @@ class Roles extends React.Component {
                                         <th scope="col">Name</th>
                                         <th scope="col">Editor</th>
                                         <th scope="col">Last Updated</th>
-                                        <th scope="col">Action</th>
+                                        {(this.state.allowedPermissions.length > 0) &&
+                                            (this.state.allowedPermissions.includes('edit_role') || this.state.allowedPermissions.includes('delete_role')) ?
+                                            <th scope="col">Action</th> : undefined}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -204,15 +216,18 @@ class Roles extends React.Component {
                 }
             }
         } else {
+            pageContent = <RoleCreate
+                fetchRoles={this.fetchRoles}
+                toggleDisplay={this.toggleDisplay}
+                editMode={this.state.editMode}
+                roleToEdit={this.state.roleToEdit}
+                updateEditMode={this.updateEditMode}
+            />;
             if (this.state.allowedPermissions.length > 0) {
-                if (this.state.allowedPermissions.includes('add_role')) {
-                    pageContent = <RoleCreate
-                        fetchRoles={this.fetchRoles}
-                        toggleDisplay={this.toggleDisplay}
-                        editMode={this.state.editMode}
-                        roleToEdit={this.state.roleToEdit}
-                        updateEditMode={this.updateEditMode}
-                    />;
+                if (!this.state.editMode && !this.state.allowedPermissions.includes('add_role')) {
+                    pageContent = '';
+                } else if (this.state.editMode && !this.state.allowedPermissions.includes('edit_role')) {
+                    pageContent = '';
                 }
             }
         }
