@@ -21,7 +21,8 @@ class RoleCreate extends React.Component {
 
     componentDidMount() {
         (async () => {
-            let returnedData = await FetchAuthorities();
+            let returnedData = await FetchAuthorities(); //authorities used for creation of new roles
+            let allowedPermissions = await FetchUserAuthorities(); //authorities logged in ausers has been given on the system.
             let categories = [];
             let permissionOptions = [];
             returnedData.map((obj) => {
@@ -44,12 +45,13 @@ class RoleCreate extends React.Component {
             });
             this.setState({
                 permissionOptions: permissionOptions,
+                allowedPermissions: allowedPermissions
             });
         })();
 
         if (this.props.editMode) {
             console.log(this.props.roleToEdit);
-            this.setState({roleName:this.props.roleToEdit.role_name});
+            this.setState({ roleName: this.props.roleToEdit.role_name });
             let currentAuthorities = this.props.roleToEdit.authorities;
             let selected = [];
             for (const [key, value] of Object.entries(currentAuthorities)) {
@@ -70,17 +72,26 @@ class RoleCreate extends React.Component {
 
     saveRole() {
         if (this.props.editMode) {
-            (async () => {
-                let returnedData = await UpdateRole(this.props.roleToEdit.role_id,this.state.roleName, this.state.selected);
-                this.props.fetchRoles();
-                this.props.toggleDisplay();
-            })();
+            if (this.state.allowedPermissions.length > 0) {
+                if (this.state.allowedPermissions.includes('edit_role')) {
+                    (async () => {
+                        let returnedData = await UpdateRole(this.props.roleToEdit.role_id, this.state.roleName, this.state.selected);
+                        this.props.fetchRoles();
+                        this.props.toggleDisplay();
+                    })();
+                }
+            }
+
         } else {
-            (async () => {
-                let returnedData = await SaveRole(this.state.roleName, this.state.selected);
-                this.props.fetchRoles();
-                this.props.toggleDisplay();
-            })();
+            if (this.state.allowedPermissions.length > 0) {
+                if (this.state.allowedPermissions.includes('add_role')) {
+                    (async () => {
+                        let returnedData = await SaveRole(this.state.roleName, this.state.selected);
+                        this.props.fetchRoles();
+                        this.props.toggleDisplay();
+                    })();
+                }
+            }
         }
         this.props.updateEditMode(false);
     }

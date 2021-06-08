@@ -14,6 +14,7 @@ class Roles extends React.Component {
         this.state = {
             showUserTable: true,
             roles: [],
+            allowedPermissions: []
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
@@ -37,27 +38,48 @@ class Roles extends React.Component {
 
     componentDidMount() {
         //fetch roles
-        this.fetchRoles();
+        (async () => {
+            let allowedPermissions = await FetchUserAuthorities();
+            this.setState({
+                allowedPermissions: allowedPermissions
+            });
+            //check autorization
+            if (allowedPermissions.length > 0) {
+                if (this.state.allowedPermissions.includes('view_role')) {
+                    this.fetchRoles();
+                }
+            }
+        })();
+
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.roles != prevProps.roles) {
-            this.fetchRoles();
+        if (this.state.allowedPermissions.length > 0) {
+            if (this.state.allowedPermissions.includes('view_role')) {
+                if (this.props.roles != prevProps.roles) {
+                    this.fetchRoles();
+                }
+            }
         }
     }
 
     deleteRole(role_id) {
-        (async () => {
-            let returnedData = await DeleteRole(role_id);
-            if (returnedData) {
-                this.setState({
-                    responseMessage: returnedData.data.Message
-                })
-                $('#deleteRoleModal').modal('toggle');
-                this.fetchRoles();
-            }
+        if (this.state.allowedPermissions.length > 0) {
+            if (this.state.allowedPermissions.includes('delete_role')) {
+                (async () => {
+                    let returnedData = await DeleteRole(role_id);
+                    if (returnedData) {
+                        this.setState({
+                            responseMessage: returnedData.data.Message
+                        })
+                        $('#deleteRoleModal').modal('toggle');
+                        this.fetchRoles();
+                    }
 
-        })();
+                })();
+            }
+        }
+
     }
 
     editRole(roleToEdit) {
@@ -157,34 +179,50 @@ class Roles extends React.Component {
             </div >
 
         if (this.state.showUserTable) {
-            pageContent = <div id='user_table' className='row'>
-                <div className='col-sm-12 col-md-12'>
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Editor</th>
-                                <th scope="col">Last Updated</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+            if (this.state.allowedPermissions.length > 0) {
+                if (this.state.allowedPermissions.includes('view_role')) {
+                    pageContent = <div id='user_table' className='row'>
+                        <div className='col-sm-12 col-md-12'>
+                            <table className="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Editor</th>
+                                        <th scope="col">Last Updated</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
 
-                            {tableRows}
+                                    {tableRows}
 
-                        </tbody>
-                    </table>
-                </div>
-            </div>;
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>;
+                }
+            }
         } else {
-            pageContent = <RoleCreate
-                fetchRoles={this.fetchRoles}
-                toggleDisplay={this.toggleDisplay}
-                editMode={this.state.editMode}
-                roleToEdit={this.state.roleToEdit}
-                updateEditMode={this.updateEditMode}
-            />;
+            if (this.state.allowedPermissions.length > 0) {
+                if (this.state.allowedPermissions.includes('add_role')) {
+                    pageContent = <RoleCreate
+                        fetchRoles={this.fetchRoles}
+                        toggleDisplay={this.toggleDisplay}
+                        editMode={this.state.editMode}
+                        roleToEdit={this.state.roleToEdit}
+                        updateEditMode={this.updateEditMode}
+                    />;
+                }
+            }
+        }
+
+        let roleCreateButton = '';
+        if (this.state.allowedPermissions.length > 0) {
+            if (this.state.allowedPermissions.includes('add_role')) {
+                roleCreateButton = <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                    className="fas fa-users fa-sm text-white-50"></i> Create Roles</a>;
+            }
         }
 
         return (
@@ -193,8 +231,7 @@ class Roles extends React.Component {
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 className="h4 mb-0 text-gray-500">Roles Management</h1>
-                    <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                        className="fas fa-users fa-sm text-white-50"></i> Create Roles</a>
+                    {roleCreateButton}
                 </div>
                 {pageContent}
                 {alertBox}
