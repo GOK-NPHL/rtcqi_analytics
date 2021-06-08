@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Role;
+use App\Services\SystemAuthorities;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class RolesController extends Controller
@@ -37,6 +39,9 @@ class RolesController extends Controller
 
     public function getRoles()
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_role'])) {
+            return response()->json(['Message' => 'Not allowed to view roles: '], 500);
+        }
         $roles = Role::select(
             "users.name as editor",
             "roles.name as role_name",
@@ -79,6 +84,9 @@ class RolesController extends Controller
 
     public function createRole(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['add_role'])) {
+            return response()->json(['Message' => 'Not allowed to create roles: '], 500);
+        }
         try {
             $user = Auth::user();
             $role = new Role(['name' => $request->name]);
@@ -94,6 +102,9 @@ class RolesController extends Controller
 
     public function deleteRole(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['delete_role'])) {
+            return response()->json(['Message' => 'Not allowed to delete roles: '], 500);
+        }
         try {
 
             $role = Role::find($request->role_id);
@@ -112,6 +123,9 @@ class RolesController extends Controller
 
     public function updateRole(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['edit_role'])) {
+            return response()->json(['Message' => 'Not allowed to edit roles: '], 500);
+        }
         try {
             $user = Auth::user();
             $role = Role::find($request->role_id);
