@@ -215,11 +215,13 @@ export async function AddSubOrg(org, name) {
 }
 
 export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
+   
     try {
         let orgsId = [];
-        for (const [key, value] in Object.entries(orgunits)) {
+        for (const [key, value] of Object.entries(orgunits)) {
             orgsId.push(key);
         }
+        
         const response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/save_user`,
@@ -311,7 +313,6 @@ export function DevelopOrgStructure(orunitData) {
     ];
 
     let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0)[0];
-    console.log(kenya);
     let orgUnit = {
         id: kenya.org_unit_id,
         name: kenya.odk_unit_name,
