@@ -9,7 +9,9 @@ use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Role;
+use App\Services\SystemAuthorities;
 use Exception;
+use Illuminate\Support\Facades\Gate;
 
 class AuthController extends Controller
 {
@@ -21,7 +23,9 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-
+        if (!Gate::allows(SystemAuthorities::$authorities['add_user'])) {
+            return response()->json(['Message' => 'Not allowed to add users: '], 500);
+        }
         try {
             $validatedData = $request->validate([
                 'name' => 'required',

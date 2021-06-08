@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
+use App\Services\SystemAuthorities;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class UsersController extends Controller
 {
@@ -32,6 +34,9 @@ class UsersController extends Controller
 
     public function getUsers()
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_user'])) {
+            return response()->json(['Message' => 'Not allowed to view users: '], 500);
+        }
         $user = Auth::user();
         $users = User::select(
             "users.name as first_name",
@@ -50,6 +55,9 @@ class UsersController extends Controller
 
     public function deleteUser(Request $request)
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['delete_user'])) {
+            return response()->json(['Message' => 'Not allowed to delete users: '], 500);
+        }
         try {
             $user = User::find($request->user['id']);
             $user->delete();
