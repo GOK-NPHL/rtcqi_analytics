@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SystemAuthorities;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PTReportController extends Controller
 {
@@ -23,6 +25,9 @@ class PTReportController extends Controller
      */
     public function index()
     {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_pt_report'])) {
+            return response()->json(['Message' => 'Not allowed to view pt report: '], 500);
+        }
         return view('reports/pt/index');
     }
 }
