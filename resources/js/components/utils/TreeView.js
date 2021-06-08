@@ -1,7 +1,7 @@
 import React from 'react';
 
 import '../../../css/TreeView.css';
-import { AddSubOrg } from './Helpers';
+import { AddSubOrg, FetchUserAuthorities } from './Helpers';
 
 class TreeView extends React.Component {
 
@@ -11,7 +11,8 @@ class TreeView extends React.Component {
             orgUnitAction: 'Add',
             currentSelectedOrg: null,
             newOrgUnitName: '',
-            newEditOrgUnitName: ''
+            newEditOrgUnitName: '',
+            allowedPermissions: []
         }
         this.getXYCoordinates = this.getXYCoordinates.bind(this);
         this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
@@ -23,6 +24,21 @@ class TreeView extends React.Component {
     //         console.log('pokemons state has changed.')
     //     }
     // }
+    componentDidMount() {
+        (async () => {
+            let allowedPermissions = await FetchUserAuthorities();
+            this.setState({
+                allowedPermissions: allowedPermissions
+            });
+
+            if (!allowedPermissions.includes('add_orgunit')) {
+                this.setState({
+                    orgUnitAction: 'Edit'
+                });
+            }
+
+        })();
+    }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (
@@ -173,93 +189,111 @@ class TreeView extends React.Component {
 
                 {treeStruc}
                 {/* Contenxt menu modal*/}
-                <div className="modal fade" id="orgActionModal" tabIndex="-1" role="dialog" aria-labelledby="orgActionModalTitle" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLongTitle">Org Unit Action</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
+                {/*set context for a start*/}
 
-                                {/* Orgunit menu Action Tabs*/}
-                                <section className="container">
-                                    <div className="row">
-                                        <div className="col-sm-12">
+                {(this.state.allowedPermissions.length > 0) &&
+                    (this.state.allowedPermissions.includes('edit_orgunit') ||
+                        this.state.allowedPermissions.includes('add_orgunit')
+                    ) ?
 
-                                            <ul id="tabs" className="nav nav-tabs">
+                    <div className="modal fade" id="orgActionModal" tabIndex="-1" role="dialog" aria-labelledby="orgActionModalTitle" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="exampleModalLongTitle">Org Unit Action</h5>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
 
-                                                <li className="nav-item" role="presentation">
-                                                    <a className="nav-link active" id="home-tab"
-                                                        data-toggle="tab" href="#home1" role="tab" aria-controls="home"
-                                                        aria-selected="true"
-                                                        onClick={() => {
-                                                            this.setState({
-                                                                orgUnitAction: 'Add'
-                                                            });
-                                                        }}
-                                                        >Add Sub-Orgunit
-                                                    </a>
-                                                </li>
-                                                <li className="nav-item" role="presentation">
-                                                    <a className="nav-link" id="profile-tab"
-                                                        data-toggle="tab" href="#profile1" role="tab"
-                                                        aria-controls="profile"
-                                                        aria-selected="false"
-                                                        onClick={() => {
-                                                            this.setState({
-                                                                orgUnitAction: 'Edit'
-                                                            });
-                                                        }}
-                                                    >Edit Orgunit</a>
-                                                </li>
+                                    {/* Orgunit menu Action Tabs*/}
+                                    <section className="container">
+                                        <div className="row">
+                                            <div className="col-sm-12">
 
-                                            </ul>
-                                            <br />
-                                            <div id="tabsContent" className="tab-content">
-                                                <div id="home1" className="tab-pane active show fade">
-                                                    <h6 className="text-left">Add a sub-orgunit to selected orgunit</h6>
-                                                    <br />
+                                                <ul id="tabs" className="nav nav-tabs">
+                                                    {this.state.allowedPermissions.includes('add_orgunit') ?
+                                                        <li className="nav-item" role="presentation">
+                                                            <a className="nav-link active" id="home-tab"
+                                                                data-toggle="tab" href="#home1" role="tab" aria-controls="home"
+                                                                aria-selected="true"
+                                                                onClick={() => {
+                                                                    this.setState({
+                                                                        orgUnitAction: 'Add'
+                                                                    });
+                                                                }}>
+                                                                Add Sub-Orgunit
+                                                            </a>
+                                                        </li> :
+                                                        ''
+                                                    }
+                                                    {this.state.allowedPermissions.includes('edit_orgunit') ?
+                                                        <li className="nav-item" role="presentation">
+                                                            <a className="nav-link" id="profile-tab"
+                                                                data-toggle="tab" href="#profile1" role="tab"
+                                                                aria-controls="profile"
+                                                                aria-selected="false"
+                                                                onClick={() => {
+                                                                    this.setState({
+                                                                        orgUnitAction: 'Edit'
+                                                                    });
+                                                                }}
+                                                            >Edit Orgunit</a>
+                                                        </li>
+                                                        :
+                                                        ''
+                                                    }
+                                                </ul>
+                                                <br />
+                                                <div id="tabsContent" className="tab-content">
+                                                    <div id="home1"
+                                                        className={`tab-pane fade ${this.state.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`}>
+                                                        <h6 className="text-left">Add a sub-orgunit to selected orgunit</h6>
+                                                        <br />
                                                     Orgunit name <input type="text" onChange={(event) => {
-                                                        this.setState({
-                                                            newOrgUnitName: event.target.value
-                                                        });
-                                                    }} />
-
-                                                </div>
-                                                <div id="profile1" className="tab-pane fade ">
-                                                    <h6 className="text-left">Edit orgunit</h6>
-                                                    <br />
-                                                    Orgunit name <input type="text"
-                                                        defaultValue={this.state.currentSelectedOrg ? this.state.currentSelectedOrg.name : ''}
-                                                        onChange={event => {
                                                             this.setState({
-                                                                newEditOrgUnitName: event.target.value
+                                                                newOrgUnitName: event.target.value
                                                             });
-                                                        }}
-                                                    />
-                                                </div>
+                                                        }} />
 
+                                                    </div>
+                                                    <div id="profile1"
+                                                        className={`tab-pane fade ${!this.state.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`} > {/* if add org permission not defined, edit is define as this pop up shows in either or both defined*/}
+                                                        <h6 className="text-left">Edit selected orgunit</h6>
+                                                        <br />
+                                                    Orgunit name <input type="text"
+                                                            defaultValue={this.state.currentSelectedOrg ? this.state.currentSelectedOrg.name : ''}
+                                                            onChange={event => {
+                                                                this.setState({
+                                                                    newEditOrgUnitName: event.target.value
+                                                                });
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </section>
+                                    </section>
 
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button"
-                                    onClick={() => {
-                                        this.orgUnitAction();
-                                        $('#orgActionModal').modal('toggle');
-                                    }}
-                                    className="btn btn-primary">Save changes</button>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button"
+                                        onClick={() => {
+                                            this.orgUnitAction();
+                                            $('#orgActionModal').modal('toggle');
+                                        }}
+                                        className="btn btn-primary">Save changes</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    : undefined //else if not permssions undefined
+                }
+
+
 
                 {/* Alert message modal*/}
                 <div className="modal fade" id="alertMessageModal" tabIndex="-1" role="dialog" aria-labelledby="alertMessageModalTitle" aria-hidden="true">

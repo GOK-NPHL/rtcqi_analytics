@@ -44,7 +44,7 @@ class Orgunit extends React.Component {
             let returnedData = await UpdateOrg(org, newOrgToName);
             $("#org_success").html(returnedData);
             $("#org_success").show();
-            $("#org_success").fadeTo(2000, 500).slideUp(500, ()=> {
+            $("#org_success").fadeTo(2000, 500).slideUp(500, () => {
                 $("#org_success").alert(500);
                 this.setState({
                     newOrgToName: null
@@ -90,20 +90,30 @@ class Orgunit extends React.Component {
                     <td>{value.updated_at}</td>
                     <td>
 
-                        <a onClick={() => this.editOrg(value)}
-                            href="#"
-                            style={{ "display": "inlineBlock", 'marginRight': '5px' }}
-                            className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i className="fas fa-user-edit"></i>
-                        </a>
-                        <a onClick={() => {
-                            this.deleteOrg(value);
-                            localStorage.removeItem('orgunitList');
-                        }}
-                            style={{ "display": "inlineBlock" }}
-                            className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
-                            <i className="fas fa-user-times"></i>
-                        </a>
+                        {(this.state.allowedPermissions.length > 0) &&
+                            this.state.allowedPermissions.includes('edit_orgunit') ?
+
+                            <a onClick={() => this.editOrg(value)}
+                                href="#"
+                                style={{ "display": "inlineBlock", 'marginRight': '5px' }}
+                                className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                <i className="fas fa-user-edit"></i>
+                            </a>
+                            : undefined}
+
+                        {(this.state.allowedPermissions.length > 0) &&
+                            this.state.allowedPermissions.includes('delete_orgunit') ?
+
+                            <a onClick={() => {
+                                this.deleteOrg(value);
+                                localStorage.removeItem('orgunitList');
+                            }}
+                                style={{ "display": "inlineBlock" }}
+                                className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
+                                <i className="fas fa-user-times"></i>
+                            </a>
+                            : undefined}
+
                     </td>
                 </tr>);
             });
@@ -125,11 +135,11 @@ class Orgunit extends React.Component {
 
     render() {
         $("#org_success").hide();
-        
+
         if (this.state.allowedPermissions.length > 0) {
-            
+
             if (this.state.allowedPermissions.includes('view_orgunit')) {
-                
+
                 (async () => {
                     if (!this.state.httpOrgUnits) {
                         let httpOrgUnits = await FetchOrgunits();
@@ -182,7 +192,10 @@ class Orgunit extends React.Component {
                                     <th scope="col">Org Unit Name</th>
                                     <th scope="col">Org Level</th>
                                     <th scope="col">Last Updated</th>
-                                    <th scope="col">Action</th>
+                                    {(this.state.allowedPermissions.length > 0) &&
+                                        (this.state.allowedPermissions.includes('edit_orgunit') || this.state.allowedPermissions.includes('delete_orgunit')) ?
+                                        <th scope="col">Action</th> : undefined}
+
                                 </tr>
                             </thead>
                             <tbody>
