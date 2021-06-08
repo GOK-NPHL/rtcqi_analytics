@@ -43,7 +43,9 @@ class OrgunitsController extends Controller
                 "odkorgunit.level",
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id"
+                "odkorgunit.org_unit_id",
+                "odkorgunit.id",
+                "odkorgunit.updated_at",
             )->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->get();
 
@@ -55,10 +57,14 @@ class OrgunitsController extends Controller
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
                 "odkorgunit.org_unit_id",
+                "odkorgunit.id",
                 "org5.level",
                 "org5.odk_unit_name",
                 "org5.parent_id",
-                "org5.org_unit_id"
+                "org5.org_unit_id",
+                "org5.id",
+                "odkorgunit.updated_at",
+                "org5.updated_at"
             )->join('odkorgunit as org5', 'org5.parent_id', '=', 'odkorgunit.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->get();
@@ -71,14 +77,20 @@ class OrgunitsController extends Controller
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
                 "odkorgunit.org_unit_id",
+                "odkorgunit.id",
                 "org4.level",
                 "org4.odk_unit_name",
                 "org4.parent_id",
                 "org4.org_unit_id",
+                "org4.id",
                 "org5.level",
                 "org5.odk_unit_name",
                 "org5.parent_id",
-                "org5.org_unit_id"
+                "org5.org_unit_id",
+                "org5.id",
+                "org4.updated_at",
+                "org5.updated_at",
+                "odkorgunit.updated_at",
             )->join('odkorgunit as org4', 'org4.parent_id', '=', ' odkorgunit.org_unit_id')
                 ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
@@ -91,18 +103,26 @@ class OrgunitsController extends Controller
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
                 "odkorgunit.org_unit_id",
+                "odkorgunit.id",
+                "odkorgunit.updated_at",
                 "org4.level",
                 "org4.odk_unit_name",
                 "org4.parent_id",
                 "org4.org_unit_id",
+                "org4.id",
+                "org4.updated_at",
                 "org5.level",
                 "org5.odk_unit_name",
                 "org5.parent_id",
                 "org5.org_unit_id",
+                "org5.id",
+                "org5.updated_at",
                 "org3.level",
                 "org3.odk_unit_name",
                 "org3.parent_id",
                 "org3.org_unit_id",
+                "org3.id",
+                "org3.updated_at"
             )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
                 ->join('odkorgunit as org4', 'org4.parent_id', '=', ' org3.org_unit_id')
                 ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
@@ -116,7 +136,9 @@ class OrgunitsController extends Controller
                 "odkorgunit.level",
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id"
+                "odkorgunit.org_unit_id",
+                "odkorgunit.id",
+                "odkorgunit.updated_at"
             )->get();
 
             return $orgUnitObject;
@@ -153,19 +175,19 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Not allowed to view organisation units: '], 500);
         }
 
-        return $this->getOrgunitsByUser();
+        // return $this->getOrgunitsByUser();
 
         // $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
         // $levelsArr = array();
         // foreach ($levels as $level) {
         //     $levelsArr[] = $level->level;
         // }
-        // $orgUnitsPayload = [
-        //     'metadata' =>
-        //     ['levels' => $levelsArr],
-        //     'payload' => [OdkOrgunit::all()]
-        // ];
-        // return $orgUnitsPayload;
+        $orgUnitsPayload = [
+            'metadata' =>
+            ['levels' => [1, 2, 3, 4, 5]],
+            'payload' => [$this->getOrgunitsByUser()]
+        ];
+        return $orgUnitsPayload;
     }
 
     public function saveOrgunits(Request $request)
@@ -225,19 +247,14 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Not allowed to delete organisation units: '], 500);
         }
         try {
-            log::info("delete org 1");
             $dependentOrgs = OdkOrgunit::where('parent_id', $request->org['org_unit_id'])
                 ->get();
-            log::info("delete org 2");
             if (count($dependentOrgs) != 0) {
-                log::info("delete org 4");
                 return response()->json(['Message' => 'Can\'t delete orgunit as it contains children orgunits'], 500);
             } else {
-                log::info("delete org 4");
-                $org = OdkOrgunit::find($request->org['id']);
+                $org = OdkOrgunit::where('org_unit_id', $request->org['org_unit_id']);
                 $org->delete();
             }
-            log::info("delete org 5");
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
