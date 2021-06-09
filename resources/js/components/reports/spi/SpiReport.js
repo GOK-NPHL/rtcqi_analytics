@@ -56,17 +56,20 @@ class SpiReport extends React.Component {
                 startDate: '',
                 endDate: ''
             });
+            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
+            this.fetchOdkDataServer(defaultOrg,
+                this.state.orgUnitTimeline,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
+            );
+
         })();
-        this.fetchOdkDataServer(this.state.orgUnitDataIds,
-            this.state.orgUnitTimeline,
-            this.state.siteType,
-            this.state.startDate,
-            this.state.endDate
-        );
+
 
         //change echarts layout to allow graph to fit for spider charts only.
         let div = $("#spiders");
-       
+
         let observer = new MutationObserver(function (mutations) {
             mutations.forEach(function (mutation) {
                 if (mutation.attributeName === "class") {
@@ -400,14 +403,14 @@ class SpiReport extends React.Component {
                                     <i className="fas fa-chart-bar"></i> Average Performance Columns</a>
                             </li> */}
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="spidersTab" 
-                                data-toggle="tab" href="#spiders" role="tab" 
-                                aria-controls="contact" aria-selected="false"
-                                onClick={()=>{
-                                    this.setState({
-                                        echartsMinHeight: "500px"
-                                    })
-                                }}
+                                <a className="nav-link" id="spidersTab"
+                                    data-toggle="tab" href="#spiders" role="tab"
+                                    aria-controls="contact" aria-selected="false"
+                                    onClick={() => {
+                                        this.setState({
+                                            echartsMinHeight: "500px"
+                                        })
+                                    }}
                                 >
                                     <i className="fas fa-atom"></i> Average Performance Radar</a>
                             </li>
