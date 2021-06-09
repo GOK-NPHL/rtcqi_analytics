@@ -2,6 +2,7 @@ import React from 'react';
 
 import '../../../css/TreeView.css';
 import { AddSubOrg, FetchUserAuthorities } from './Helpers';
+import { v4 as uuidv4 } from 'uuid';
 
 class TreeView extends React.Component {
 
@@ -105,7 +106,7 @@ class TreeView extends React.Component {
                 let { name, children } = arr[index];
                 if (children.length > 0) {
                     res.push(
-                        <li key={`${index}__${name}`} >
+                        <li key={uuidv4()} >
                             {this.props.addCheckBox ?
                                 <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                 : ''
@@ -119,7 +120,7 @@ class TreeView extends React.Component {
                             }} className="caret">{name}</span>
 
                             {children.map((item) => {
-                                return <ul key={`${index}__${name}_${item.name}`} className={`${item.level > 2 ? "nested" : ""}`}>
+                                return <ul key={uuidv4()} className={`${item.level > 2 ? "nested" : ""}`}>
                                     <li>
                                         {this.props.addCheckBox ?
                                             <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
@@ -140,7 +141,7 @@ class TreeView extends React.Component {
                             })}
                         </li>);
                 } else {
-                    res.push(<li key={index} >
+                    res.push(<li key={uuidv4()} >
                         {this.props.addCheckBox ?
                             <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                             : ''
