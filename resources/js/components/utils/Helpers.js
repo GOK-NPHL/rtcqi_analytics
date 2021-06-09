@@ -299,22 +299,6 @@ function OrgUnitStructureMaker(arr, orgUnitToAdd, processedItems) {
             }
         });
 
-        // if (!itemAdded) {
-        //     if (orgUnitToAdd.level == 2) {
-        //         console.log("found one 2");
-        //         console.log(orgUnitToAdd);
-        //     }
-        //     let orgUnit = {
-        //         id: orgUnitToAdd.org_unit_id,
-        //         name: orgUnitToAdd.odk_unit_name,
-        //         level: orgUnitToAdd.level,
-        //         parentId: orgUnitToAdd.parent_id,
-        //         updatedAt: orgUnitToAdd.updated_at,
-        //         children: [
-        //         ]
-        //     };
-        //     arr.push(orgUnit);
-        // }
     } else {
         let orgUnit = {
             id: orgUnitToAdd.org_unit_id,
@@ -352,7 +336,7 @@ export function DevelopOrgStructure(orunitData) {
                 processedItems.push(orgUnitToAdd.org_unit_id)
             }
         });
-        
+
         try {
             localStorage.setItem("orgunitTableStruc", JSON.stringify(tableOrgs));
         } catch (err) {

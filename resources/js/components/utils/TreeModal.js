@@ -12,6 +12,7 @@ class TreeModal extends React.Component {
     }
 
     componentDidMount() {
+        console.log("mount");
     }
 
     componentDidUpdate(prevProps) {
@@ -23,7 +24,6 @@ class TreeModal extends React.Component {
     }
 
     render() {
-        if(this.props.currentSelectedOrg)
         return (
             
             <React.Fragment>
