@@ -167,8 +167,8 @@ export async function UpdateOrg(org_unit_id, name) {
                 name, name
             }
         });
-        localStorage.removeItem('orgunitList');    
-        localStorage.removeItem('treeStruc'); 
+        localStorage.removeItem('orgunitList');
+        localStorage.removeItem('treeStruc');
         return response.data.Message;
     } catch (err) {
         // Handle Error Here
@@ -215,13 +215,13 @@ export async function AddSubOrg(org, name) {
 }
 
 export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
-   
+
     try {
         let orgsId = [];
         for (const [key, value] of Object.entries(orgunits)) {
             orgsId.push(key);
         }
-        
+
         const response = await axios({
             method: 'put',
             url: `${settings.rtcqiBaseApi}/save_user`,
@@ -271,12 +271,11 @@ export async function DeleteUser(user) {
         return err.response
     }
 }
-
+let itemAdded = false;
 function OrgUnitStructureMaker(arr, orgUnitToAdd) {
-    if (arr != undefined) {
+    if (arr.length != 0) {
 
         arr.map((item) => {
-            // if (item.level != 1) { //skip country org
 
             if (item.id == orgUnitToAdd.parent_id) {
 
@@ -290,59 +289,56 @@ function OrgUnitStructureMaker(arr, orgUnitToAdd) {
                     ]
                 };
                 item.children.push(orgUnit);
+                itemAdded = true;
             } else {
-                arr = OrgUnitStructureMaker(item.children, orgUnitToAdd);
+                if (orgUnitToAdd.level > item.level) {
+                    arr = OrgUnitStructureMaker(item.children, orgUnitToAdd);
+                }
             }
-            // }
         });
+
+        if (!itemAdded) {
+            let orgUnit = {
+                id: orgUnitToAdd.org_unit_id,
+                name: orgUnitToAdd.odk_unit_name,
+                level: orgUnitToAdd.level,
+                parentId: orgUnitToAdd.parent_id,
+                updatedAt: orgUnitToAdd.updated_at,
+                children: [
+                ]
+            };
+            arr.push(orgUnit);
+        }
+    } else {
+        let orgUnit = {
+            id: orgUnitToAdd.org_unit_id,
+            name: orgUnitToAdd.odk_unit_name,
+            level: orgUnitToAdd.level,
+            parentId: orgUnitToAdd.parent_id,
+            updatedAt: orgUnitToAdd.updated_at,
+            children: [
+            ]
+        };
+        arr.push(orgUnit);
     }
 }
 
 export function DevelopOrgStructure(orunitData) {
-
-    let tableOrgs = [
-        // {
-        //     id: 0,
-        //     name: "Kenya",
-        //     level: 1,
-        //     parentId: 0,
-        //     children: [
-
-        //     ]
-        // }
-    ];
-
-    let kenya = orunitData.payload[0].filter(orgUnit => orgUnit.org_unit_id == 0)[0];
-    let orgUnit = {
-        id: kenya.org_unit_id,
-        name: kenya.odk_unit_name,
-        level: kenya.level,
-        parentId: kenya.parent_id,
-        updatedAt: kenya.updated_at,
-        children: [
-        ]
-    };
-    tableOrgs.push(orgUnit);
-    orunitData.metadata.levels.map(hierchayLevel => {
-        let orgUnits = orunitData.payload[0].filter(orgUnit => orgUnit.level == hierchayLevel); //access sorted values by level asc
-        orgUnits.map((orgUnitToAdd) => {
-            if (orgUnitToAdd.level == 2) {
-                let orgUnit = {
-                    id: orgUnitToAdd.org_unit_id,
-                    name: orgUnitToAdd.odk_unit_name,
-                    level: orgUnitToAdd.level,
-                    parentId: orgUnitToAdd.parent_id,
-                    updatedAt: orgUnitToAdd.updated_at,
-                    children: [
-                    ]
-                };
-                tableOrgs[0].children.push(orgUnit);
-            } else if (orgUnitToAdd.level > 2) {
-                OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
-            }
-
+    let cacheOrgUnit = localStorage.getItem("orgunitTableStruc");
+    if (cacheOrgUnit == null) {
+        let tableOrgs = [
+        ];
+        orunitData.payload[0].map((orgUnitToAdd) => {
+            OrgUnitStructureMaker(tableOrgs, orgUnitToAdd);
         });
+        try {
+            localStorage.setItem("orgunitTableStruc", JSON.stringify(tableOrgs));
+        } catch (err) {
 
-    });
-    return tableOrgs;
+        }
+        return tableOrgs;
+    } else {
+        return JSON.parse(cacheOrgUnit);
+    }
+
 }
