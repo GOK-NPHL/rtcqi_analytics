@@ -52,71 +52,93 @@ class OrgunitsController extends Controller
             return $orgUnitObject;
         } else if ($level == 4) {
             //facility
+            $org5 = OdkOrgunit::select(
+                "org5.level",
+                "org5.odk_unit_name",
+                "org5.parent_id",
+                "org5.org_unit_id",
+                "org5.id",
+                "org5.updated_at"
+            )->join('odkorgunit as org5', 'org5.parent_id', '=', 'odkorgunit.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
             $orgUnitObject = OdkOrgunit::select(
                 "odkorgunit.level",
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
                 "odkorgunit.org_unit_id",
                 "odkorgunit.id",
-                "org5.level",
-                "org5.odk_unit_name",
-                "org5.parent_id",
-                "org5.org_unit_id",
-                "org5.id",
                 "odkorgunit.updated_at",
-                "org5.updated_at"
-            )->join('odkorgunit as org5', 'org5.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId)
+            )->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->union($org5)
+                ->orderBy('level', 'ASC')
                 ->get();
 
             return $orgUnitObject;
         } else if ($level == 3) {
             //sub county
+
+            $org4 = OdkOrgunit::select(
+                "org4.level",
+                "org4.odk_unit_name",
+                "org4.parent_id",
+                "org4.org_unit_id",
+                "org4.id",
+                "org4.updated_at",
+            )->join('odkorgunit as org4', 'org4.parent_id', '=', 'odkorgunit.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
+            $org5 = OdkOrgunit::select(
+                "org5.level",
+                "org5.odk_unit_name",
+                "org5.parent_id",
+                "org5.org_unit_id",
+                "org5.id",
+                "org5.updated_at"
+            )->join('odkorgunit as org4', 'org4.parent_id', '=', 'odkorgunit.org_unit_id')
+                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
             $orgUnitObject = OdkOrgunit::select(
                 "odkorgunit.level",
                 "odkorgunit.odk_unit_name",
                 "odkorgunit.parent_id",
                 "odkorgunit.org_unit_id",
                 "odkorgunit.id",
-                "org4.level",
-                "org4.odk_unit_name",
-                "org4.parent_id",
-                "org4.org_unit_id",
-                "org4.id",
-                "org5.level",
-                "org5.odk_unit_name",
-                "org5.parent_id",
-                "org5.org_unit_id",
-                "org5.id",
-                "org4.updated_at",
-                "org5.updated_at",
                 "odkorgunit.updated_at",
-            )->join('odkorgunit as org4', 'org4.parent_id', '=', ' odkorgunit.org_unit_id')
-                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId)
+            )->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->union($org4)
+                ->union($org5)
+                ->orderBy('level', 'ASC')
                 ->get();
+
             return $orgUnitObject;
         } else if ($level == 2) {
             //county
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at",
+            $org4 = OdkOrgunit::select(
                 "org4.level",
                 "org4.odk_unit_name",
                 "org4.parent_id",
                 "org4.org_unit_id",
                 "org4.id",
                 "org4.updated_at",
+            )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
+                ->join('odkorgunit as org4', 'org4.parent_id', '=', 'org3.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
+            $org5 = OdkOrgunit::select(
                 "org5.level",
                 "org5.odk_unit_name",
                 "org5.parent_id",
                 "org5.org_unit_id",
                 "org5.id",
-                "org5.updated_at",
+                "org5.updated_at"
+            )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
+                ->join('odkorgunit as org4', 'org4.parent_id', '=', 'org3.org_unit_id')
+                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
+            $org3 = OdkOrgunit::select(
                 "org3.level",
                 "org3.odk_unit_name",
                 "org3.parent_id",
@@ -124,9 +146,20 @@ class OrgunitsController extends Controller
                 "org3.id",
                 "org3.updated_at"
             )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->join('odkorgunit as org4', 'org4.parent_id', '=', ' org3.org_unit_id')
-                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->where('odkorgunit.org_unit_id', $orgUnitId);
+
+            $orgUnitObject = OdkOrgunit::select(
+                "odkorgunit.level",
+                "odkorgunit.odk_unit_name",
+                "odkorgunit.parent_id",
+                "odkorgunit.org_unit_id",
+                "odkorgunit.id",
+                "odkorgunit.updated_at",
+            )->where('odkorgunit.org_unit_id', $orgUnitId)
+                ->union($org3)
+                ->union($org4)
+                ->union($org5)
+                ->orderBy('level', 'ASC')
                 ->get();
 
             return $orgUnitObject;
