@@ -3,6 +3,8 @@ import React from 'react';
 import '../../../css/TreeView.css';
 import { AddSubOrg, FetchUserAuthorities } from './Helpers';
 import { v4 as uuidv4 } from 'uuid';
+import TreeModal from './TreeModal';
+import Tree from './Tree';
 
 class TreeView extends React.Component {
 
@@ -11,20 +13,18 @@ class TreeView extends React.Component {
         this.state = {
             orgUnitAction: 'Add',
             currentSelectedOrg: null,
-            newOrgUnitName: '',
+            newOrgUnitName: null,
             newEditOrgUnitName: '',
             allowedPermissions: []
         }
         this.getXYCoordinates = this.getXYCoordinates.bind(this);
         this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
-        this.orgUnitAction = this.orgUnitAction.bind(this);
+        this.saveOrgUnitAction = this.saveOrgUnitAction.bind(this);
+        this.setNewOrgUnitName = this.setNewOrgUnitName.bind(this);
+        this.setNewEditOrgUnitName = this.setNewEditOrgUnitName.bind(this);
+        this.setcurrentSelectedOrg = this.setcurrentSelectedOrg.bind(this);
     }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //     if (prevState.pokemons !== this.state.pokemons) {
-    //         console.log('pokemons state has changed.')
-    //     }
-    // }
     componentDidMount() {
         (async () => {
             let allowedPermissions = await FetchUserAuthorities();
@@ -41,19 +41,24 @@ class TreeView extends React.Component {
         })();
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        if (
-            nextProps.orgUnitAction !== nextProps.orgUnitAction ||
-            nextProps.currentSelectedOrg !== nextProps.currentSelectedOrg ||
-            nextProps.alertMessage !== nextProps.alertMessage
-        ) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (
+    //         nextProps.orgUnitAction !== nextProps.orgUnitAction ||
+    //         nextProps.alertMessage !== nextProps.alertMessage ||
+    //         nextState.newOrgUnitName != this.state.newOrgUnitName ||
+    //         nextState.currentSelectedOrg != this.state.currentSelectedOrg ||
+    //         this.state.newOrgUnitName != null ||
+    //         this.state.currentSelectedOrg != null
+    //     ) {
+    //         return false;
+    //     } else {
+    //         return true;
+    //     }
+    // }
 
     organisationUnitOnclick(event) {
+        // event.stopPropagation();
+
         let el = event.target.nextElementSibling;
         while (el) {
             el.classList.toggle("nested");
@@ -78,9 +83,7 @@ class TreeView extends React.Component {
         });
     }
 
-    orgUnitAction() {
-        console.log("editing 1");
-        console.log(this.state.orgUnitAction);
+    saveOrgUnitAction() {
         if (this.state.orgUnitAction == 'Add') {
             (async () => {
                 let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
@@ -90,7 +93,6 @@ class TreeView extends React.Component {
                 $('#alertMessageModal').modal('toggle');
             })();
         } else if (this.state.orgUnitAction == 'Edit') {
-            console.log("editing");
             this.props.updateOrg(
                 this.state.currentSelectedOrg['id'],
                 this.state.newEditOrgUnitName);
@@ -98,203 +100,60 @@ class TreeView extends React.Component {
         localStorage.removeItem('orgunitList');
     }
 
+    setNewOrgUnitName(newOrgUnitName) { //for new sub org unit
+        this.setState({
+            newOrgUnitName: newOrgUnitName
+        });
+    }
+
+    setNewEditOrgUnitName(newEditOrgUnitName) { //for update
+        this.setState({
+            newEditOrgUnitName: newEditOrgUnitName
+        });
+    }
+
+    setcurrentSelectedOrg(currentSelectedOrg) {
+
+        this.setState({
+            currentSelectedOrg: currentSelectedOrg
+        });
+    }
+
     render() {
 
-        let arrayUIparser = (arr) => {
-            const res = [];
-            arr.map((item, index) => {
-                let { name, children } = arr[index];
-                if (children.length > 0) {
-                    res.push(
-                        <li key={uuidv4()} >
-                            {this.props.addCheckBox ?
-                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
-                                : ''
-                            }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
-                                event.preventDefault();
-                                this.setState({
-                                    currentSelectedOrg: item,
-                                    newOrgUnitName: item.name
-                                });
-                                $('#orgActionModal').modal('toggle');
-                            }} className="caret">{name}</span>
-
-                            {children.map((item) => {
-                                return <ul key={uuidv4()} className={`${item.level > 2 ? "nested" : ""}`}>
-                                    <li>
-                                        {this.props.addCheckBox ?
-                                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
-                                            : ''
-                                        }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
-                                            event.preventDefault();
-                                            this.setState({
-                                                currentSelectedOrg: item,
-                                                newOrgUnitName: item.name
-                                            });
-                                            $('#orgActionModal').modal('toggle');
-                                        }} className="caret">{item.name}</span>
-
-                                        {arrayUIparser(item.children)}
-                                    </li>
-                                </ul>
-
-                            })}
-                        </li>);
-                } else {
-                    res.push(<li key={uuidv4()} >
-                        {this.props.addCheckBox ?
-                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
-                            : ''
-                        }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
-                            event.preventDefault();
-                            this.setState({
-                                currentSelectedOrg: item,
-                                newOrgUnitName: item.name
-                            });
-                            $('#orgActionModal').modal('toggle');
-                        }}>{item.name}</span>
-
-                    </li>);
-                }
-            });
-
-            return <ul >{res}</ul>;
-        }
-        let treeStruc = [
-            {
-                id: 0,
-                name: "No Orgunits Defined",
-                level: 0,
-                children: []
-            }
-        ];
-        if (this.props.orgUnits) {
-
-            if (this.props.orgUnits.length != 0) {
-                treeStruc = localStorage.getItem("treeStruc");
-                if (treeStruc == null) {
-                    treeStruc = arrayUIparser(this.props.orgUnits);
-                    //localStorage.setItem("treeStruc", treeStruc);
-                }
-            } else {
-                treeStruc = arrayUIparser(treeStruc);
-            }
-        } else {
-            treeStruc = arrayUIparser(treeStruc);
-        }
         let index = 0;
 
         return (
 
             <React.Fragment>
 
-                {treeStruc}
-                {/* Contenxt menu modal*/}
-                {/*set context for a start*/}
+                {/* {treeStruc} */}
+                <Tree
+                    addCheckBox={this.props.addCheckBox}
+                    clickHandler={this.props.clickHandler}
+                    orgUnits={this.props.orgUnits}
+                    setcurrentSelectedOrg={this.setcurrentSelectedOrg}
+                     setNewEditOrgUnitName={this.setNewEditOrgUnitName}
+                ></Tree>
+
 
                 {(this.state.allowedPermissions.length > 0) &&
                     (this.state.allowedPermissions.includes('edit_orgunit') ||
                         this.state.allowedPermissions.includes('add_orgunit')
                     ) ?
+                    <TreeModal
+                        allowedPermissions={this.state.allowedPermissions}
+                        setNewOrgUnitName={this.setNewOrgUnitName}
+                        currentSelectedOrg={this.state.currentSelectedOrg}
+                        setNewEditOrgUnitName={this.setNewEditOrgUnitName}
+                        newEditOrgUnitName={this.state.newEditOrgUnitName}
+                        saveOrgUnitAction={this.saveOrgUnitAction}
+                        updateOrgActionStatus={this.updateOrgActionStatus}
+                    >
+                    </TreeModal>
 
-                    <div className="modal fade" id="orgActionModal" tabIndex="-1" role="dialog" aria-labelledby="orgActionModalTitle" aria-hidden="true">
-                        <div className="modal-dialog modal-dialog-centered" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title" id="exampleModalLongTitle">Org Unit Action</h5>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-
-                                    {/* Orgunit menu Action Tabs*/}
-                                    <section className="container">
-                                        <div className="row">
-                                            <div className="col-sm-12">
-
-                                                <ul id="tabs" className="nav nav-tabs">
-                                                    {this.state.allowedPermissions.includes('add_orgunit') ?
-                                                        <li className="nav-item" role="presentation">
-                                                            <a className="nav-link active" id="home-tab"
-                                                                data-toggle="tab" href="#home1" role="tab" aria-controls="home"
-                                                                aria-selected="true"
-                                                                onClick={() => {
-                                                                    this.setState({
-                                                                        orgUnitAction: 'Add'
-                                                                    });
-                                                                }}>
-                                                                Add Sub-Orgunit
-                                                            </a>
-                                                        </li> :
-                                                        ''
-                                                    }
-                                                    {this.state.allowedPermissions.includes('edit_orgunit') ?
-                                                        <li className="nav-item" role="presentation">
-                                                            <a className={`nav-link ${!this.state.allowedPermissions.includes('add_orgunit') ? 'active' : ''}`} id="profile-tab"
-                                                                data-toggle="tab" href="#profile1" role="tab"
-                                                                aria-controls="profile"
-                                                                aria-selected="false"
-                                                                onClick={() => {
-                                                                    this.setState({
-                                                                        orgUnitAction: 'Edit'
-                                                                    });
-                                                                }}
-                                                            >Edit Orgunit</a>
-                                                        </li>
-                                                        :
-                                                        ''
-                                                    }
-                                                </ul>
-                                                <br />
-                                                <div id="tabsContent" className="tab-content">
-                                                    <div id="home1"
-                                                        className={`tab-pane fade ${this.state.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`}>
-                                                        <h6 className="text-left">Add a sub-orgunit to selected orgunit</h6>
-                                                        <br />
-                                                    Orgunit name <input type="text" onChange={(event) => {
-                                                            this.setState({
-                                                                newOrgUnitName: event.target.value
-                                                            });
-                                                        }} />
-
-                                                    </div>
-                                                    <div id="profile1"
-                                                        className={`tab-pane fade ${!this.state.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`} > {/* if add org permission not defined, edit is define as this pop up shows in either or both defined*/}
-                                                        <h6 className="text-left">Edit selected orgunit</h6>
-                                                        <br />
-                                                    Orgunit name <input type="text"
-                                                            defaultValue={this.state.currentSelectedOrg ? this.state.currentSelectedOrg.name : ''}
-                                                            onChange={event => {
-                                                                this.setState({
-                                                                    newEditOrgUnitName: event.target.value
-                                                                });
-                                                            }}
-                                                        />
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button"
-                                        onClick={() => {
-                                            this.orgUnitAction();
-                                            $('#orgActionModal').modal('toggle');
-                                        }}
-                                        className="btn btn-primary">Save changes</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     : undefined //else if not permssions undefined
                 }
-
-
 
                 {/* Alert message modal*/}
                 <div className="modal fade" id="alertMessageModal" tabIndex="-1" role="dialog" aria-labelledby="alertMessageModalTitle" aria-hidden="true">
