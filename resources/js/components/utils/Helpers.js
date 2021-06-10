@@ -9,9 +9,7 @@ let cache = {
 
 export async function FetchOrgunits() {
     let cacheOrgUnit = localStorage.getItem("orgunitList");
-
-    if (cacheOrgUnit == null) {
-
+    if (cacheOrgUnit == null || JSON.parse(cacheOrgUnit).payload[0].length == 0) {
         let response;
         try {
             response = await axios.get(`${settings.rtcqiBaseApi}/org_units`);
@@ -22,11 +20,9 @@ export async function FetchOrgunits() {
             console.error(err);
             return response;
         }
-
     } else {
         return JSON.parse(cacheOrgUnit);
     }
-
 }
 
 export async function FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
