@@ -4,12 +4,14 @@ import LineGraph from '../utils/charts/LineGraph';
 import RTCard from '../utils/RTCard';
 import StackedHorizontal from '../utils/charts/StackedHorizontal'
 import TopLabels from './TopLabels'
+import { FetchUserAuthorities } from '../utils/Helpers';
 
 class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            allowedPermissions: [],
             dataset1: {
                 dimensions: ['indicator', 'Baseline(Round 13)', 'Y1_Q4(round 14)', 'Y2_Q1(round 15)', 'Y2_Q2(round 16)'],
 
@@ -93,9 +95,21 @@ class Dashboard extends React.Component {
         }
     }
 
+    componentDidMount() {
+        (async () => {
+            let allowedPermissions = await FetchUserAuthorities();
+            this.setState({
+                allowedPermissions: allowedPermissions
+            });
+        })();
+    }
+
     render() {
-        return (
-            <React.Fragment>
+        let dashBoardContent = '';
+        if (this.state.allowedPermissions.length > 0 &&
+            this.state.allowedPermissions.includes('view_dashboard')) {
+
+            dashBoardContent = <React.Fragment>
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
@@ -105,7 +119,7 @@ class Dashboard extends React.Component {
                 </div>
 
 
-                <TopLabels/>
+                <TopLabels />
 
                 <div className="row">
                     <div className="col-xl-6 col-lg-6">
@@ -116,12 +130,18 @@ class Dashboard extends React.Component {
 
                     <div className="col-xl-6 col-lg-6">
                         <RTCard header='Percent of sites assessed'>
-                            <StackedHorizontal series = {this.state.series2}/>
+                            <StackedHorizontal series={this.state.series2} />
                         </RTCard>
                     </div>
 
                 </div>
 
+            </React.Fragment>
+        }
+
+        return (
+            <React.Fragment>
+                {dashBoardContent}
             </React.Fragment>
         );
     }
