@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Service;
 
+use App\FormSubmissions;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
@@ -13,6 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class OrgunitsController extends Controller
 {
@@ -194,6 +196,10 @@ class OrgunitsController extends Controller
             ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
             ->where('users.id', $user->id)
             ->get();
+
+        if (count($registeredOrgs) == 0) {
+            throw new Exception("User has no org unit attached");
+        }
         foreach ($registeredOrgs as $registeredOrg) {
 
             $orgUnitResultSet = $this->runOrgUnitsLevelQuery($registeredOrg->org_unit_id, $registeredOrg->level);
@@ -208,20 +214,16 @@ class OrgunitsController extends Controller
         if (!Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {
             return response()->json(['Message' => 'Not allowed to view organisation units: '], 500);
         }
-
-        // return $this->getOrgunitsByUser();
-
-        // $levels = OdkOrgunit::select("level")->orderBy('level', 'asc')->groupByRaw('level')->get();
-        // $levelsArr = array();
-        // foreach ($levels as $level) {
-        //     $levelsArr[] = $level->level;
-        // }
-        $orgUnitsPayload = [
-            'metadata' =>
-            ['levels' => [1, 2, 3, 4, 5]],
-            'payload' => [$this->getOrgunitsByUser()]
-        ];
-        return $orgUnitsPayload;
+        try {
+            $orgUnitsPayload = [
+                'metadata' =>
+                ['levels' => [1, 2, 3, 4, 5]],
+                'payload' => [$this->getOrgunitsByUser()]
+            ];
+            return $orgUnitsPayload;
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Error getting org units: ' . $ex->getMessage()], 500);
+        }
     }
 
     public function saveOrgunits(Request $request)
@@ -303,6 +305,7 @@ class OrgunitsController extends Controller
         try {
             OdkOrgunit::query()->truncate();
             DB::statement('TRUNCATE odkorgunit_user');
+            FormSubmissions::query()->truncate();
             return response()->json(['Message' => 'Delete successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete all orgunits failed.  Error code' . $ex->getMessage()], 500);
