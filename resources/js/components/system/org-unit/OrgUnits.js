@@ -165,7 +165,7 @@ class Orgunit extends React.Component {
         let pageContent = '';
         let tableEl = this.createOrgunitTable(this.state.httpOrgUnits);
         let createOrgsButton = '';
-        if (this.state.allowedPermissions.includes('add_orgunit')) {
+        if (this.state.allowedPermissions.includes('upload_new_orgunit_structure')) {
             createOrgsButton = <a href="#" onClick={() => this.setState({ showOrgunitLanding: false })} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>;
         }
