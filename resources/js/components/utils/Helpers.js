@@ -9,7 +9,9 @@ let cache = {
 
 export async function FetchOrgunits() {
     let cacheOrgUnit = localStorage.getItem("orgunitList");
+
     if (cacheOrgUnit == null) {
+
         let response;
         try {
             response = await axios.get(`${settings.rtcqiBaseApi}/org_units`);
@@ -187,6 +189,23 @@ export async function DeleteOrg(org) {
             }
         });
         console.log(response);
+        return response;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+}
+
+export async function DeleteAllOrgs() {
+    try {
+
+        const response = await axios({
+            method: 'delete',
+            url: `${settings.rtcqiBaseApi}/delete_all_orgs`
+        });
+        localStorage.removeItem('orgunitList');
+        localStorage.removeItem('treeStruc');
+        localStorage.removeItem("orgunitTableStruc");
         return response;
     } catch (err) {
         // Handle Error Here
