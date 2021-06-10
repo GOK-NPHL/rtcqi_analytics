@@ -184,8 +184,9 @@ class Orgunit extends React.Component {
 
                 (async () => {
 
-                    if (!this.state.httpOrgUnits) {
+                    if (this.state.httpOrgUnits == null || this.state.httpOrgUnits.payload[0].length == 0) {
                         console.log("logging data");
+
                         let httpOrgUnits = await FetchOrgunits();
                         let tableOrgs = DevelopOrgStructure(httpOrgUnits);
                         this.setState({
@@ -210,8 +211,7 @@ class Orgunit extends React.Component {
         let createOrgsButton = '';
 
         if (this.state.allowedPermissions.includes('upload_new_orgunit_structure')) {
-
-            if (this.state.httpOrgUnits == null || Object.keys(this.state.httpOrgUnits).length == 0) {
+            if (this.state.httpOrgUnits == null || this.state.httpOrgUnits.payload[0].length == 0) {
                 createOrgsButton = <a href="#" onClick={() => this.setState({ showOrgunitLanding: false })} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                     className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>;
             } else {

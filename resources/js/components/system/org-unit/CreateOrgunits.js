@@ -134,7 +134,15 @@ class OrgunitCreate extends React.Component {
                 <button
                     id="saveButton"
                     type="button"
-                    onClick={() => this.setState({ isSaveOrgs: true })}
+                    onClick={
+                        (event) => {
+                            this.setState({ isSaveOrgs: true })
+                            localStorage.removeItem('orgunitList');
+                            localStorage.removeItem('treeStruc');
+                            localStorage.removeItem("orgunitTableStruc");
+                            $("#saveButton").prop('disabled', true);
+                        }
+                    }
                     className="btn btn-primary"> Save & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
                 </button></div>;
         }
