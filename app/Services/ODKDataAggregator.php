@@ -355,7 +355,7 @@ class ODKDataAggregator
         foreach ($records as $record) {
             Log::info("Start record traversal =========>>");
             $shouldProcessRecord = true;
-           
+
             if (isset($this->startDate) && !empty($this->startDate)) {
 
                 $recordDate = strtotime($record['start']);
@@ -364,8 +364,8 @@ class ODKDataAggregator
                 $userStartDate = strtotime($this->startDate);
                 $newUserStartDate = date('Y-m-d', $userStartDate);
                 Log::info("start date =====>> 2");
-                    Log::info($newUserStartDate);
-                    Log::info($userStartDate);
+                Log::info($newUserStartDate);
+                Log::info($userStartDate);
                 if ($newUserStartDate > $newRecordformat) {
                     Log::info("start date =====>>");
                     Log::info($newUserStartDate);
@@ -437,6 +437,9 @@ class ODKDataAggregator
                 ->where('org_id', $orgUnit['org_unit_id'])
                 ->where('form_id', 'like', "spi%") // for spi data
                 ->first();
+            if (!$submissionOrgUnitmap) {
+                Log::error("===>>>> No form submissions data found in Form Submissions table");
+            }
             $projectId = $submissionOrgUnitmap->project_id;
             $formId = $submissionOrgUnitmap->form_id;
             $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
