@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, FetchUserAuthorities } from '../../utils/Helpers';
+import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, DeleteAllOrgs, FetchUserAuthorities } from '../../utils/Helpers';
 
 
 class Orgunit extends React.Component {
@@ -18,7 +18,8 @@ class Orgunit extends React.Component {
             tableOrgsStruct: '',
             orgToEdit: null,
             newOrgToName: '',
-            allowedPermissions: []
+            allowedPermissions: [],
+            dropOrgUnitStructure: false,
 
         };
         this.updateOrg = this.updateOrg.bind(this);
@@ -27,7 +28,7 @@ class Orgunit extends React.Component {
         this.createOrgunitTable = this.createOrgunitTable.bind(this);
         this.setNewOrgToName = this.setNewOrgToName.bind(this);
         this.setShowOrgunitLanding = this.setShowOrgunitLanding.bind(this);
-
+        this.dropCurrentOrgunitStructure = this.dropCurrentOrgunitStructure.bind(this);
     }
 
     componentDidMount() {
@@ -38,6 +39,17 @@ class Orgunit extends React.Component {
             });
         })();
     }
+
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     if (this.state.dropOrgUnitStructure != nextState.dropOrgUnitStructure
+    //         ||
+    //         this.state.dropOrgUnitStructure == nextState.dropOrgUnitStructure
+    //     ) {
+    //         return false;
+    //     } else {
+    //         return true;
+    //     }
+    // }
 
     updateOrg(org, newOrgToName) {
         (async () => {
@@ -133,7 +145,37 @@ class Orgunit extends React.Component {
         });
     }
 
+    dropCurrentOrgunitStructure(action) {
+        if (action == null) {
+            this.setState({
+                message: "By droping current orunits, users will not access reports for any organisation unit",
+                dropOrgUnitStructure: true
+            });
+            $('#messageModal').modal('toggle');
+        } else if (action == 'drop') {
+
+            (async () => {
+                console.log("deleting");
+                let returnedData = await DeleteAllOrgs();
+                // $("#org_success").html(returnedData.data.Message);
+                let message = returnedData.data.Message;
+
+                this.setState({
+                    message: message,
+                    dropOrgUnitStructure: false,
+                    httpOrgUnits: null,
+                    tableOrgs: null
+                });
+                $('#returnedMessage').html(message);
+                //$('#messageModal').modal('toggle');
+
+            })();
+        }
+
+    }
+
     render() {
+
         $("#org_success").hide();
 
         if (this.state.allowedPermissions.length > 0) {
@@ -141,9 +183,10 @@ class Orgunit extends React.Component {
             if (this.state.allowedPermissions.includes('view_orgunit')) {
 
                 (async () => {
+
                     if (!this.state.httpOrgUnits) {
+                        console.log("logging data");
                         let httpOrgUnits = await FetchOrgunits();
-                        console.log(httpOrgUnits);
                         let tableOrgs = DevelopOrgStructure(httpOrgUnits);
                         this.setState({
                             httpOrgUnits: httpOrgUnits,
@@ -165,9 +208,17 @@ class Orgunit extends React.Component {
         let pageContent = '';
         let tableEl = this.createOrgunitTable(this.state.httpOrgUnits);
         let createOrgsButton = '';
+
         if (this.state.allowedPermissions.includes('upload_new_orgunit_structure')) {
-            createOrgsButton = <a href="#" onClick={() => this.setState({ showOrgunitLanding: false })} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>;
+
+            if (this.state.httpOrgUnits == null || Object.keys(this.state.httpOrgUnits).length == 0) {
+                createOrgsButton = <a href="#" onClick={() => this.setState({ showOrgunitLanding: false })} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                    className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>;
+            } else {
+                createOrgsButton = <a href="#" onClick={() => this.dropCurrentOrgunitStructure()} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                    className="fas fa-sitemap fa-sm text-white-50"></i> Drop current orgunit structure</a>;
+            }
+
         }
 
         if (this.state.showOrgunitLanding) {
@@ -252,7 +303,20 @@ class Orgunit extends React.Component {
                                 <p id="returnedMessage">{this.state.message}</p>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                {
+                                    this.state.dropOrgUnitStructure ?
+                                        <>
+                                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="button" id="confirmDrop" onClick={(event) => {
+                                                this.dropCurrentOrgunitStructure('drop');
+                                                $("#confirmDrop").prop('disabled', true);
+                                            }} className="btn btn-warning">Confirm deletion</button>
+                                        </>
+                                        :
+                                        <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                }
+
+
                             </div>
                         </div>
                     </div>

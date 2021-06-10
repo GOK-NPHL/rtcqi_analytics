@@ -412,7 +412,7 @@ class SpiReport extends React.Component {
                                         })
                                     }}
                                 >
-                                    <i className="fas fa-atom"></i> Average Performance Radar</a>
+                                    <i className="fas fa-atom"></i> Average Performance Spider</a>
                             </li>
                         </ul>
                         <div className="tab-content" id="myTabContent">

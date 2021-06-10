@@ -116,6 +116,7 @@ class Tree extends React.Component {
         if (this.props.orgUnits) {
 
             if (this.props.orgUnits.length != 0) {
+                
                 treeStruc = localStorage.getItem("treeStruc");
                 if (treeStruc == null) {
                     treeStruc = arrayUIparser(this.props.orgUnits);
