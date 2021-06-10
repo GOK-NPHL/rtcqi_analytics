@@ -11,6 +11,7 @@ use App\OrgunitLevelMap;
 use App\Services\SystemAuthorities;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class OrgunitsController extends Controller
@@ -291,6 +292,20 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
+        }
+    }
+
+    public function deleteAllOrgs(Request $request)
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['upload_new_orgunit_structure'])) {
+            return response()->json(['Message' => 'Not allowed to add new organisation units: '], 500);
+        }
+        try {
+            OdkOrgunit::query()->truncate();
+            DB::statement('TRUNCATE odkorgunit_user');
+            return response()->json(['Message' => 'Delete successfully'], 200);
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Delete all orgunits failed.  Error code' . $ex->getMessage()], 500);
         }
     }
 

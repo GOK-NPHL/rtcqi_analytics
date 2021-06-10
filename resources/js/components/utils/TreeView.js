@@ -122,7 +122,6 @@ class TreeView extends React.Component {
     render() {
 
         let index = 0;
-
         return (
 
             <React.Fragment>
