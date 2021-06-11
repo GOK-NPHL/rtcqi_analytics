@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     vim \
     net-tools \
     iputils-ping \
-    mariadb-client
+    mariadb-client \
+    openssl\
+    php-common\ php-curl\ php-json\ php-mbstring\ php-mysql\ php-xml\ php-zip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
