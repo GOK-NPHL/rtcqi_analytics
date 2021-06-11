@@ -56,7 +56,8 @@ RUN touch /var/log/cron.log
 
 # Setup cron job
 
-RUN cd /var/www && php artisan migrate && PHP artisan db:seed
+RUN cd /var/www && php artisan migrate
+#&& php artisan migrate && php artisan db:seed
 
 RUN (crontab -l ; echo "* * * * * cd /var/www/ && php artisan fetchodkdata > /var/log/cron.log 2>&1") | crontab
 
