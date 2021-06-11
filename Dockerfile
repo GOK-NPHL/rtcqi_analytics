@@ -18,13 +18,13 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     mariadb-client \
     openssl \
-    php7.4-common \ 
-    php-curl \ 
-    php-json \ 
-    php-mbstring \ 
-    php-mysql \ 
-    php-xml \ 
-    php-zip \ 
+    # php7.4-common \ 
+    # php-curl \ 
+    # php-json \ 
+    # php-mbstring \ 
+    # php-mysql \ 
+    # php-xml \ 
+    # php-zip \ 
     sudo
 
 RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
