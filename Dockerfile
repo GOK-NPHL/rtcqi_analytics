@@ -40,7 +40,6 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 RUN apt-get -y install nodejs
 
-RUN npm install
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -51,5 +50,19 @@ RUN mkdir -p /home/$user/.composer && \
 
 # Set working directory
 WORKDIR /var/www
+
+# Create the log file to be able to run tail
+RUN touch /var/log/cron.log
+
+# Setup cron job
+
+
+RUN php artisan migrate
+RUN PHP artisan db:seed
+
+RUN (crontab -l ; echo "* * * * * cd /var/www/ && php artisan fetchodkdata > /var/log/cron.log 2>&1") | crontab
+
+RUN npm install
+RUN npm run prod
 
 USER $user
