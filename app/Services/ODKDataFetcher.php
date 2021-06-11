@@ -28,7 +28,7 @@ class ODKDataFetcher
     }
 
     public function fetchData()
-    {
+    {   Log::info("start fetching odk files");
         $autUrl = $this->baseOdkUrl . "sessions";
         $response = Http::withOptions([
             'verify' => false, //'debug' => true
