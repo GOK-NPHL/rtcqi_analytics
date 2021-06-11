@@ -26,14 +26,21 @@ RUN apt-get update && apt-get install -y \
     # php-mysql \ 
     # php-xml \ 
     # php-zip \ 
-    sudo && docker-php-ext-install zip
+    sudo \ curl \
+    \ gnupg \ 
+    && docker-php-ext-install zip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN curl -sL https://deb.nodesource.com/setup_11.x  | bash -
+
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
+RUN apt-get -y install nodejs
+
+RUN npm install
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
