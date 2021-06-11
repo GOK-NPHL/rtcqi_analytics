@@ -54,7 +54,7 @@ WORKDIR /var/www
 # Create the log file to be able to run tail
 RUN touch /var/log/cron.log
 
-# Setup cron job
+# Setup cron job.
 
 RUN (crontab -l ; echo "* * * * * cd /var/www/ && php artisan fetchodkdata > /var/log/cron.log 2>&1") | crontab
 
