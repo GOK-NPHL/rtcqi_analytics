@@ -153,7 +153,7 @@ class ODKDataFetcher
                     return false;
                 }
             } catch (Exception $ex) {
-                Log::error(" error =====> " . $ex->getMessage() . " \n");
+                Log::error(" error =====>shouldDownloadSubmission() " . $ex->getMessage() . " \n");
                 return false;
             }
         } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0) {
@@ -222,7 +222,7 @@ class ODKDataFetcher
             }
             return $orgUnitId;
         } catch (Exception $ex) {
-            Log::error(" error =====> " . $ex->getMessage() . " \n");
+            Log::error(" error =====>getOrgunitIdOfsubmmission() " . $ex->getMessage() . " \n");
             throw new Exception($ex->getMessage() . " " . $formId);
         }
     }
