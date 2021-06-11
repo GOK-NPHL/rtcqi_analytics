@@ -26,8 +26,7 @@ RUN apt-get update && apt-get install -y \
     # php-mysql \ 
     # php-xml \ 
     # php-zip \ 
-    sudo \ curl \
-    \ gnupg \ 
+    sudo \
     && docker-php-ext-install zip
 
 # Clear cache
