@@ -27,8 +27,6 @@ RUN apt-get update && apt-get install -y \
     # php-zip \ 
     sudo
 
-RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
