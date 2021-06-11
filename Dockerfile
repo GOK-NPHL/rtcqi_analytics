@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     mariadb-client \
     openssl \
+     php-zip \
     # php7.4-common \ 
     # php-curl \ 
     # php-json \ 
