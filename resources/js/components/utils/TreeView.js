@@ -97,7 +97,7 @@ class TreeView extends React.Component {
                 this.state.currentSelectedOrg['id'],
                 this.state.newEditOrgUnitName);
         }
-        localStorage.removeItem('orgunitList');
+        // localStorage.removeItem('orgunitList');
     }
 
     setNewOrgUnitName(newOrgUnitName) { //for new sub org unit
