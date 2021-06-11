@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\Authority;
 use App\Role;
+
 
 class Roles extends Seeder
 {
