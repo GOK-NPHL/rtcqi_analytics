@@ -59,6 +59,5 @@ RUN touch /var/log/cron.log
 RUN (crontab -l ; echo "* * * * * cd /var/www/ && php artisan fetchodkdata > /var/log/cron.log 2>&1") | crontab
 
 RUN npm install
-RUN npm run prod
 
 USER $user
