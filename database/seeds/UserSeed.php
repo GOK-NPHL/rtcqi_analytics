@@ -20,6 +20,5 @@ class UserSeed extends Seeder
         $authObj = new User();
         User::query()->truncate();
         $authObj->insert($data);
-        // $authObj->save();
     }
 }
