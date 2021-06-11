@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
+import Pagination from "react-js-pagination";
 import DataTable from "react-data-table-component";
 import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, DeleteAllOrgs, FetchUserAuthorities } from '../../utils/Helpers';
 
@@ -20,7 +21,9 @@ class Orgunit extends React.Component {
             newOrgToName: '',
             allowedPermissions: [],
             dropOrgUnitStructure: false,
-
+            startTableData: 0,
+            endeTableData: 10,
+            activePage: 1
         };
         this.updateOrg = this.updateOrg.bind(this);
         this.editOrg = this.editOrg.bind(this);
@@ -39,17 +42,6 @@ class Orgunit extends React.Component {
             });
         })();
     }
-
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (this.state.dropOrgUnitStructure != nextState.dropOrgUnitStructure
-    //         ||
-    //         this.state.dropOrgUnitStructure == nextState.dropOrgUnitStructure
-    //     ) {
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
-    // }
 
     updateOrg(org, newOrgToName) {
         (async () => {
@@ -155,7 +147,6 @@ class Orgunit extends React.Component {
         } else if (action == 'drop') {
 
             (async () => {
-                console.log("deleting");
                 let returnedData = await DeleteAllOrgs();
                 // $("#org_success").html(returnedData.data.Message);
                 let message = returnedData.data.Message;
@@ -173,6 +164,16 @@ class Orgunit extends React.Component {
         }
 
     }
+    
+    handlePageChange(pageNumber) {
+        console.log(`active page is ${pageNumber}`);
+        let pgNumber = pageNumber * 10 + 1;
+        this.setState({
+            startTableData: pgNumber - 11,
+            endeTableData: pgNumber - 1,
+            activePage: pageNumber
+        });
+    }
 
     render() {
 
@@ -185,7 +186,6 @@ class Orgunit extends React.Component {
                 (async () => {
 
                     if (this.state.httpOrgUnits == null || this.state.httpOrgUnits.payload[0].length == 0) {
-                        console.log("logging data");
 
                         let httpOrgUnits = await FetchOrgunits();
                         let tableOrgs = DevelopOrgStructure(httpOrgUnits);
@@ -236,7 +236,10 @@ class Orgunit extends React.Component {
                         <TreeView orgUnits={this.state.tableOrgs} updateOrg={this.updateOrg} />
                     </div>
                     <div className="col-sm-8">
-                        <table className="table table-striped" >
+                        <table
+                            className="table table-striped"
+                            data-show-refresh={true}
+                        >
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -251,10 +254,19 @@ class Orgunit extends React.Component {
                             </thead>
                             <tbody>
 
-                                {tableEl}
+                                {tableEl.slice(this.state.startTableData, this.state.endeTableData)}
 
                             </tbody>
                         </table>
+                        <Pagination
+                            itemClass="page-item"
+                            linkClass="page-link"
+                            activePage={this.state.activePage}
+                            itemsCountPerPage={10}
+                            totalItemsCount={tableEl.length}
+                            pageRangeDisplayed={5}
+                            onChange={this.handlePageChange.bind(this)}
+                        />
                     </div>
                 </div>
 
