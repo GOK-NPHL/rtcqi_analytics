@@ -20,7 +20,7 @@ services:
     container_name: rtcqianalytics-db
     restart: unless-stopped
     ports:
-     - "3306:3306"
+     - "3334:3306"
     build:
       context: ./
       dockerfile: docker-compose/mysql/Dockerfile
