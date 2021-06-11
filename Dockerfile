@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     mariadb-client \
     openssl \
-     php-zip \
+    libzip-dev \
     # php7.4-common \ 
     # php-curl \ 
     # php-json \ 
@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     # php-mysql \ 
     # php-xml \ 
     # php-zip \ 
-    sudo
+    sudo && docker-php-ext-install zip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
