@@ -429,7 +429,7 @@ class ODKDataAggregator
                 $formId = $mapping->form_id;
                 $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
                 $perCountyRecords = $this->getSingleFileRecords($fileName);
-                if($perCountyRecords!=0){
+                if($perCountyRecords){
                     $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
                 }
             }
