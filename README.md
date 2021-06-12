@@ -46,6 +46,10 @@ This project is powered by the laravel framework.
   cd rtcqi_analytics/
   ```
 
+Edit the the .evn file and update with needed parameters like your ODK username and password, database connection, and set the SESSION_DOMAIN to the relevant server domain.
+
+Check the defaults on the docker files for the db and nginx ports.
+
 * build project
   ```sh
   docker-compose build
@@ -55,6 +59,59 @@ This project is powered by the laravel framework.
   ```sh
   docker-compose up -d
   ```
+
+If you get the error
+
+``` 
+Version in "./docker-compose.yml" is unsupported
+```
+
+Uninstall your docker & docker compose installation and update to the latest.
+
+eg on Ubuntu:
+
+```
+sudo apt unistall docker-compose
+```
+
+Once the containers are up and running, you can check status by running docker container list, you need to finalize set up.
+
+Run below to get into the app continer session:
+
+```
+sudo docker-compose exec  app bash
+```
+
+you could add -u 0 get into the sudo session in the container.
+
+Next install required dependencies for the application as below:
+
+```
+npm install  && composer install
+```
+
+Once that is done, we set up the database with initial data.
+
+```
+php artisan migrate
+
+and
+
+php artisan db:seed
+```
+
+We then set up a cron entry for period download of ODK submission files.
+add below entry to /etc/crontab file.
+
+```
+* * * * *       root    cd /var/www/ && /usr/local/bin/php artisan fetchodkdata > /var/log/cron.log 2>&1
+```
+
+finally, we compile our fron end resources for prodcution:
+
+```
+npm run prod
+```
 
 #### Defaults.
 
