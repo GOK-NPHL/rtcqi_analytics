@@ -429,7 +429,11 @@ class ODKDataAggregator
                 $formId = $mapping->form_id;
                 $fileName = $this->getFileToProcessgetFileToProcess($projectId, $formId);
                 $perCountyRecords = $this->getSingleFileRecords($fileName);
-                $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
+                try {
+                    $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
+                } catch (Exception $ex) {
+                    Log::error($ex->getMessage());
+                }
             }
             return $combinedRecords;
         } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
