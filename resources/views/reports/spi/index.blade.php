@@ -1,7 +1,7 @@
 @extends('layouts.rtcqi')
 
 @section('content')
-<div class="container overflow-auto">
+<div class="container-fluid overflow-auto">
     <input type="hidden" id="data-chart1" data-chart1="{{ asset('images/spi/spi1.png') }}"> 
     <input type="hidden" id="data-chart2" data-chart2="{{ asset('images/spi/spi2.png') }}"> 
     <input type="hidden" id="data-chart3" data-chart3="{{ asset('images/spi/spi3.png') }}"> 

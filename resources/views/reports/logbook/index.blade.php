@@ -1,7 +1,7 @@
 @extends('layouts.rtcqi')
 
 @section('content')
-<div class="container">
+<div class="container-fluid">
     <input type="hidden" id="data-chart1" data-chart1="{{ asset('images/log/log1.png') }}"> 
     <input type="hidden" id="data-chart2" data-chart2="{{ asset('images/log/log2.png') }}"> 
     <input type="hidden" id="data-chart3" data-chart3="{{ asset('images/log/log3.png') }}"> 

@@ -23,7 +23,7 @@
 <body>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-blue shadow-sm">
-            <div class="container">
+            <div class="container-fluid">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="{{URL('/images/coat.png')}}" width="30" height="30" alt="">
                     {{ config('app.name', 'RTCQI Analytics') }}
