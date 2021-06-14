@@ -279,8 +279,8 @@ use Illuminate\Support\Facades\Gate;
 
 
                                 <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                // localStorage.removeItem('orgunitList');    
-                                                // localStorage.removeItem('treeStruc'); 
+                                                localStorage.removeItem('orgunitList');    
+                                                localStorage.removeItem('treeStruc'); 
                                                 document.getElementById('logout-form').submit();">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     {{ __('Logout') }}

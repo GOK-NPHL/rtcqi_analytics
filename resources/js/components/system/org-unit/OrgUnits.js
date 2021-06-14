@@ -110,7 +110,7 @@ class Orgunit extends React.Component {
 
                             <a onClick={() => {
                                 this.deleteOrg(value);
-                                // localStorage.removeItem('orgunitList');
+                                localStorage.removeItem('orgunitList');
                             }}
                                 style={{ "display": "inlineBlock" }}
                                 className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">

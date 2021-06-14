@@ -165,8 +165,8 @@ export async function UpdateOrg(org_unit_id, name) {
                 name, name
             }
         });
-        // localStorage.removeItem('orgunitList');
-        // localStorage.removeItem('treeStruc');
+        localStorage.removeItem('orgunitList');
+        localStorage.removeItem('treeStruc');
         return response.data.Message;
     } catch (err) {
         // Handle Error Here
@@ -199,9 +199,9 @@ export async function DeleteAllOrgs() {
             method: 'delete',
             url: `${settings.rtcqiBaseApi}/delete_all_orgs`
         });
-        // localStorage.removeItem('orgunitList');
-        // localStorage.removeItem('treeStruc');
-        // localStorage.removeItem("orgunitTableStruc");
+        localStorage.removeItem('orgunitList');
+        localStorage.removeItem('treeStruc');
+        localStorage.removeItem("orgunitTableStruc");
         return response;
     } catch (err) {
         // Handle Error Here
