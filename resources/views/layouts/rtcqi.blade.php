@@ -315,6 +315,7 @@ use Illuminate\Support\Facades\Gate;
                         <span>RT-CQI Analytics &copy; NPHL, <script>
                                 document.write(new Date().getFullYear());
                             </script></span>
+                            | <a href="http://helpdesk.nphl.go.ke/">RTCQI HELD DESK</a>
                     </div>
                 </div>
             </footer>
