@@ -284,30 +284,20 @@ export async function FetchUserProfile() {
 
 }
 
-export async function updateUser(first_name, last_name, email, password, orgunits, role) {
-
+export async function updateUserProfile(first_name, last_name, email, password) {
     try {
-        let orgsId = [];
-        for (const [key, value] of Object.entries(orgunits)) {
-            orgsId.push(key);
-        }
-
         const response = await axios({
-            method: 'put',
-            url: `${settings.rtcqiBaseApi}/save_user`,
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/update_user_profile`,
             data: {
                 name: first_name,
                 last_name: last_name,
                 email: email,
-                password: password,
-                orgunits: orgsId,
-                role: role
+                password: password
             }
         });
         return response;
     } catch (err) {
-        // Handle Error Here
-        console.log(err);
         return err.response
     }
 }
