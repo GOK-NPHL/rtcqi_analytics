@@ -15,7 +15,8 @@ class Profile extends React.Component {
             email: '',
             password: '',
             role_name: '',
-            orgunits: []
+            orgunits: [],
+            showPassword: false
         };
 
         this.updateProfile = this.updateProfile.bind(this);
@@ -39,6 +40,18 @@ class Profile extends React.Component {
             });
             console.log(profile);
         })();
+    }
+
+    toggleShowPassword() {
+        if (this.state.password.length == 0) {
+            this.setState({
+                showPassword: false
+            });
+        } else {
+            this.setState({
+                showPassword: !this.state.showPassword
+            });
+        }
     }
 
     updateProfile() {
@@ -129,7 +142,8 @@ class Profile extends React.Component {
                                     </div>
 
                                     <div className="col-md-12" style={{ "marginTop": "5px" }}><label className="labels">Password</label>
-                                        <input type="password" className="form-control" onChange={() => this.passwordOnChange(event)} placeholder="********" />
+                                        <input type={this.state.showPassword ? "text" : "password"} className="form-control" onChange={() => this.passwordOnChange(event)} placeholder="********" />
+                                        <input onClick={() => this.toggleShowPassword()} type="checkBox" /> Show password 
                                     </div>
 
                                 </div>
