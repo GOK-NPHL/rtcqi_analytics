@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UsersController extends Controller
@@ -79,13 +80,42 @@ class UsersController extends Controller
     {
 
         $user = Auth::user();
+        Log::info($user->role);
         $registeredOrgs = OdkOrgunit::select(
-            "odkorgunit.odk_unit_name"
+            "odkorgunit.odk_unit_name",
         )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
             ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
             ->where('users.id', $user->id)
             ->get();
 
-        return ["first_name" => $user->name, "last_name" => $user->last_name, "email" => $user->email, "orgunits" => $registeredOrgs];
+        return [
+            "first_name" => $user->name,
+            "last_name" => $user->last_name,
+            "email" => $user->email,
+            "orgunits" => $registeredOrgs,
+            "role_name" => $user->role->name
+        ];
+    }
+
+
+    public function updateUserProfile(Request $request)
+    {
+
+        try {
+
+            $authUser = Auth::user();
+            $user = User::find($authUser->id);
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->last_name = $request->last_name;
+
+            if ($request->password != null) {
+                $user->password = Hash::make($request->password);
+            }
+            $user->save();
+            return response()->json(['Message' => 'Updated successfully'], 200);
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Could not update profile: '  . $ex->getMessage()], 500);
+        }
     }
 }
