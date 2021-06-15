@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
+use App\OdkOrgunit;
 use App\Services\SystemAuthorities;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends Controller
 {
@@ -66,5 +68,24 @@ class UsersController extends Controller
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
         }
+    }
+
+    public function userProfile()
+    {
+        return view('interface/users/profile');
+    }
+
+    public function getUserProfile()
+    {
+
+        $user = Auth::user();
+        $registeredOrgs = OdkOrgunit::select(
+            "odkorgunit.odk_unit_name"
+        )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
+            ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
+            ->where('users.id', $user->id)
+            ->get();
+
+        return ["first_name" => $user->name, "last_name" => $user->last_name, "email" => $user->email, "orgunits" => $registeredOrgs];
     }
 }

@@ -271,6 +271,47 @@ export async function FetchUsers() {
 
 }
 
+export async function FetchUserProfile() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/get_user_profile`);
+        const userProfile = response.data;
+        return userProfile;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+
+}
+
+export async function updateUser(first_name, last_name, email, password, orgunits, role) {
+
+    try {
+        let orgsId = [];
+        for (const [key, value] of Object.entries(orgunits)) {
+            orgsId.push(key);
+        }
+
+        const response = await axios({
+            method: 'put',
+            url: `${settings.rtcqiBaseApi}/save_user`,
+            data: {
+                name: first_name,
+                last_name: last_name,
+                email: email,
+                password: password,
+                orgunits: orgsId,
+                role: role
+            }
+        });
+        return response;
+    } catch (err) {
+        // Handle Error Here
+        console.log(err);
+        return err.response
+    }
+}
+
 export async function DeleteUser(user) {
     try {
         const response = await axios({
