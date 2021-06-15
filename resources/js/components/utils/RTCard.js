@@ -21,6 +21,11 @@ class RTCard extends React.Component {
 
 
     render() {
+        let style =this.props.style;
+        if(this.props.minHeight){
+            style={"minHeight": this.props.minHeight}
+        }
+
         return (
 
             <React.Fragment>
@@ -45,7 +50,7 @@ class RTCard extends React.Component {
                         </div>
                     </div>
                     {/* Card Body */}
-                    <div style={this.props.style} className="card-body">
+                    <div id="cardBody" style={style} className="card-body">
                         <div className="chart-area">
                             {this.props.children}
                         </div>

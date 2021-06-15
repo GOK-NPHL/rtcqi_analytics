@@ -4,13 +4,21 @@ import LineGraph from '../utils/charts/LineGraph';
 import RTCard from '../utils/RTCard';
 import StackedHorizontal from '../utils/charts/StackedHorizontal'
 import TopLabels from './TopLabels'
-import { FetchUserAuthorities } from '../utils/Helpers';
+import { FetchUserAuthorities, FetchOrgunits, FetchOdkData } from '../utils/Helpers';
+import SiteLevelBarColumnCharts from '../reports/spi/SiteLevelBarColumnCharts';
+import OverallPerformanceRadar from '../reports/spi/OverallPerformanceRadar';
 
 class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            orgUnits: [],
+            orgUnitDataIds: [0],
+            orgUnitTimeline: [],
+            siteType: [],
+            echartsMinHeight: '',
+
             allowedPermissions: [],
             dataset1: {
                 dimensions: ['indicator', 'Baseline(Round 13)', 'Y1_Q4(round 14)', 'Y2_Q1(round 15)', 'Y2_Q2(round 16)'],
@@ -93,15 +101,50 @@ class Dashboard extends React.Component {
             ]
 
         }
+        this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
     }
 
     componentDidMount() {
+
         (async () => {
             let allowedPermissions = await FetchUserAuthorities();
+            let returnedData = await FetchOrgunits();
+
             this.setState({
+                unfilteredOrgUnits: returnedData,
+                orgUnits: returnedData.payload[0],
+                odkData: {},
+                orgLevel: 1,
+                orgId: 1,
                 allowedPermissions: allowedPermissions
             });
+
+            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
+            this.fetchOdkDataServer(defaultOrg,
+                this.state.orgUnitTimeline,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
+            );
         })();
+
+    }
+
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
+        if (orgUnitIds) {
+            if (orgUnitIds.length != 0) {
+                (async () => {
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate);
+                    if (returnedData.status == 200) {
+                        this.setState({
+                            odkData: returnedData.data,
+                        });
+                    }
+
+                })();
+            }
+        }
+
     }
 
     render() {
@@ -122,20 +165,9 @@ class Dashboard extends React.Component {
                 <TopLabels />
 
                 <div className="row">
-                    <div className="col-xl-6 col-lg-6">
-                        <RTCard header='Providers Statstics'>
-                            <LineGraph dataset={this.state.dataset1} series={this.state.series1} />
-                        </RTCard>
-                    </div>
-
-                    <div className="col-xl-6 col-lg-6">
-                        <RTCard header='Percent of sites assessed'>
-                            <StackedHorizontal series={this.state.series2} />
-                        </RTCard>
-                    </div>
-
+                    <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
+                    <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
                 </div>
-
             </React.Fragment>
         }
 

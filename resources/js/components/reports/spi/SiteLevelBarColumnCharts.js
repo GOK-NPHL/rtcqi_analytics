@@ -86,7 +86,8 @@ class SiteLevelBarColumnCharts extends React.Component {
         //prepare percentage of sites assessed graph data
 
         // return this.createOverallSiteGraphsDisplays(overallSiteGraphsData, counter);
-        return <RTCard header={orgName}>
+
+        return <RTCard header={orgName} minHeight={this.props.minHeight}> 
             <StackedHorizontal category={category} series={letSeriesData} />
         </RTCard>
     }
@@ -162,7 +163,7 @@ class SiteLevelBarColumnCharts extends React.Component {
 
         return (
             <React.Fragment>
-                {overLay}
+                {this.props.singleItem ? columns: overLay}
             </React.Fragment>
         );
     }

@@ -176,7 +176,7 @@ class OverallPerformanceRadar extends React.Component {
 
         return (
             <React.Fragment>
-                {overLay}
+                {this.props.singleItem ? columns: overLay}
             </React.Fragment>
         );
     }
