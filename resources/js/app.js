@@ -28,6 +28,7 @@ require('./components/reports/summaries/SummariesReport');
 require('./components/system/org-unit/OrgUnits');
 require('./components/system/role/Roles');
 require('./components/system/users/Users');
+require('./components/system/users/Profile');
 require('./components/system/auth/axios_login');
 require('xlsx');
 require("uuid/v4");

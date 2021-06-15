@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { updateUser, FetchUserProfile } from '../../utils/Helpers';
-
+import { updateUserProfile, FetchUserProfile } from '../../utils/Helpers';
+import { v4 as uuidv4 } from 'uuid';
 
 class Profile extends React.Component {
 
@@ -14,6 +14,7 @@ class Profile extends React.Component {
             lastName: '',
             email: '',
             password: '',
+            role_name: '',
             orgunits: []
         };
 
@@ -33,7 +34,8 @@ class Profile extends React.Component {
                 name: profile.first_name,
                 lastName: profile.last_name,
                 email: profile.email,
-                orgunits: profile.orgunits
+                orgunits: profile.orgunits,
+                role_name: profile.role_name
             });
             console.log(profile);
         })();
@@ -41,24 +43,34 @@ class Profile extends React.Component {
 
     updateProfile() {
 
-        (async () => {
+        if (this.state.name == null
+            || this.state.email == null
+            || this.state.name.length == 0
+            || this.state.email.length == 0) {
+            this.setState({
+                message: "Please fill in required fields"
+            });
+            $('#updateUserModal').modal('toggle');
+        } else {
 
-            let response = await updateUser(
-                this.state.first_name,
-                this.state.last_name,
-                this.state.email,
-                this.state.password,
-                this.state.selectedOrgs,
-                this.state.role
-            );
-            if (response) {
-                this.setState({
-                    message: response.data.Message
-                });
-                $('#saveUserModal').modal('toggle');
-            }
+            (async () => {
 
-        })();
+                let response = await updateUserProfile(
+                    this.state.name,
+                    this.state.lastName,
+                    this.state.email,
+                    this.state.password
+                );
+                if (response) {
+                    this.setState({
+                        message: response.data.Message
+                    });
+                    $('#updateUserModal').modal('toggle');
+                }
+
+            })();
+        }
+
     }
 
     firstNameOnChange(event) {
@@ -74,20 +86,11 @@ class Profile extends React.Component {
         this.setState({ password: event.target.value });
     };
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (
-    //         this.state.name != nextState.name ||
-    //         this.state.lastName != nextState.lastName ||
-    //         this.state.email != nextState.email ||
-    //         this.state.password != nextState.password
-    //     ) {
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
-    // }
-
     render() {
+        let orunits = [];
+        this.state.orgunits.map(orgUnit => {
+            orunits.push(<span style={{ "color": "#085c1f" }} key={uuidv4()}><i className="far fa-star"></i> {orgUnit['odk_unit_name']}</span>);
+        });
 
         return (
             <React.Fragment>
@@ -109,7 +112,7 @@ class Profile extends React.Component {
                                 </div>
                                 <div className="row mt-2">
                                     <div className="col-md-6"><label className="labels">Name <span style={{ "color": "red" }}>*</span></label>
-                                        <input type="text" className="form-control"
+                                        <input required type="text" className="form-control"
                                             onChange={() => this.firstNameOnChange(event)}
                                             value={this.state.name ? this.state.name : ''} /></div>
                                     <div className="col-md-6"><label className="labels">Last Name</label>
@@ -122,7 +125,7 @@ class Profile extends React.Component {
                                 <div className="row mt-3">
 
                                     <div className="col-md-12"><label className="labels">Email <span style={{ "color": "red" }}>*</span></label>
-                                        <input type="email" className="form-control" onChange={() => this.emailOnChange(event)} value={this.state.email} />
+                                        <input required type="email" className="form-control" onChange={() => this.emailOnChange(event)} value={this.state.email} />
                                     </div>
 
                                     <div className="col-md-12" style={{ "marginTop": "5px" }}><label className="labels">Password</label>
@@ -131,17 +134,19 @@ class Profile extends React.Component {
 
                                 </div>
 
-                                <div className="mt-5 text-center"><button className="btn btn-primary profile-button" type="button">Update Profile</button></div>
+                                <div className="mt-5 text-center">
+                                    <button onClick={() => this.updateProfile()} className="btn btn-primary profile-button" type="button">Update Profile</button>
+                                </div>
                             </div>
                         </div>
 
                         <div className="col-md-4 p-3 py-5">
                             <div className="row">
                                 <div className="col-sm-6">
-                                    <span><i className="far fa-star"></i> <i className="far fa-star"></i> Role</span>
+                                    <span style={{ "color": "#085c1f" }} ><i className="far fa-star"></i> <i className="far fa-star"></i> Role</span>
                                 </div>
                                 <div className="col-sm-6">
-                                    Role Name
+                                    {this.state.role_name}
                                 </div>
                             </div>
                             <hr />
@@ -151,15 +156,31 @@ class Profile extends React.Component {
                                 </div>
 
                                 <div className="col-sm-6">
-                                    <span><i className="far fa-star"></i> <i className="far fa-star"></i> Role</span>
-                                </div>
-                                <div className="col-sm-6">
-                                    Role Name
+                                    {orunits}
                                 </div>
                             </div>
                         </div>
 
+                    </div>
 
+                    {/* alert modal */}
+                    <div className="modal fade" id="updateUserModal" tabIndex="-1" role="dialog" aria-labelledby="updateUserModalTitle" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>{this.state.message}</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" onClick={() => this.props.toggleDisplay()} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </React.Fragment>
