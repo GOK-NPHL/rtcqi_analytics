@@ -128,7 +128,7 @@ class TreeView extends React.Component {
 
                 {/* {treeStruc} */}
                 <Tree
-                    assignedOrgUnits={this.props.assignedOrgUnits}
+                    assignedOrgUnits={this.props.assignedOrgUnits? this.props.assignedOrgUnits: []}
                     addCheckBox={this.props.addCheckBox}
                     clickHandler={this.props.clickHandler}
                     orgUnits={this.props.orgUnits}
