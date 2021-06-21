@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchRoles, Saveuser, DevelopOrgStructure, FetchOrgunits } from '../../utils/Helpers';
+import { FetchRoles, Saveuser, DevelopOrgStructure, FetchOrgunits, FetchUserDetails } from '../../utils/Helpers';
 import TreeView from '../../utils/TreeView';
 import DualListBox from 'react-dual-listbox';
 
@@ -19,7 +19,8 @@ class Register extends React.Component {
             first_name: '',
             last_name: '',
             email: '',
-            password: ''
+            password: '',
+            assignedOrgUnits: []
 
         };
 
@@ -32,13 +33,34 @@ class Register extends React.Component {
         (async () => {
             let roles = await FetchRoles();
             let httpOrgUnits = await FetchOrgunits();
+            let assignedOrgUnits = []
             if (this.props.userActionState == 'edit') {
-                alert("edit");
+
+                let userDetails = await FetchUserDetails(this.props.selectedUser.id);
+                console.log(userDetails);
+                let userAssignedOrgs = {};
+
+                userDetails['org_units'].map((orgunit) => {
+
+                    userAssignedOrgs[orgunit.org_unit_id] = orgunit;
+                    assignedOrgUnits.push(orgunit.org_unit_id);
+
+                });
+
+                this.setState({
+                    first_name: userDetails['demographics']['first_name'],
+                    last_name: userDetails['demographics']['last_name'] ? userDetails['demographics']['last_name'] : '',
+                    email: userDetails['demographics']['email'],
+                    roleId: userDetails['demographics']['role_id'],
+                    selectedOrgs: userAssignedOrgs
+                });
             }
+
             httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
             this.setState({
                 orgUnits: httpOrgUnits,
-                roles: roles
+                roles: roles,
+                assignedOrgUnits: assignedOrgUnits
             });
         })();
     }
@@ -55,7 +77,7 @@ class Register extends React.Component {
                 this.state.selectedOrgs,
                 this.state.role
             );
-            
+
             if (response) {
 
                 this.setState({
@@ -68,28 +90,12 @@ class Register extends React.Component {
         })();
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-
-        if (
-            nextState.first_name != this.state.first_name ||
-            nextState.last_name != this.state.last_name ||
-            nextState.email != this.state.email ||
-            nextState.password != this.state.password ||
-           // nextState.selectedOrgs != this.state.selectedOrgs ||
-            nextState.role != this.state.role
-        ) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     roleOnChange(event) {
         this.setState({ role: event.target.value });
     };
 
     selectOrgUnitHandler(orgunit) {
-
+        console.log(orgunit);
         let selectedOrgs = { ...this.state.selectedOrgs };
         if (orgunit.id in selectedOrgs) {
             delete selectedOrgs[orgunit.id];
@@ -106,7 +112,18 @@ class Register extends React.Component {
         let roles = [];
         let selectedOrgs = [];
         for (const [key, value] of Object.entries(this.state.roles)) {
-            roles.push(<option key={key} value={key}>{value.role_name}</option>);
+
+            if (this.props.userActionState == 'edit') {
+                if (this.state.roleId == value.role_id) {
+                    roles.push(<option selected key={key} value={key}>{value.role_name}</option>);
+                } else {
+                    roles.push(<option key={key} value={key}>{value.role_name}</option>);
+                }
+
+            } else {
+                roles.push(<option key={key} value={key}>{value.role_name}</option>);
+            }
+
         }
         let count = 1;
         for (const [key, value] of Object.entries(this.state.selectedOrgs)) {
@@ -134,6 +151,7 @@ class Register extends React.Component {
                                                         first_name: event.target.value
                                                     });
                                                 }}
+                                                value={this.state.first_name}
                                                 className="form-control"
                                                 id="validationTooltip01" required />
                                             <div className="valid-tooltip">user first name</div>
@@ -146,6 +164,7 @@ class Register extends React.Component {
                                                         last_name: event.target.value
                                                     });
                                                 }}
+                                                value={this.state.last_name}
                                                 type="text"
                                                 className="form-control"
                                                 id="validationTooltip02" required />
@@ -161,6 +180,7 @@ class Register extends React.Component {
                                                         email: event.target.value
                                                     });
                                                 }}
+                                                value={this.state.email}
                                                 type="text"
                                                 className="form-control"
                                                 id="validationTooltip03" required />
@@ -195,7 +215,7 @@ class Register extends React.Component {
                                         <div className="col-md-6 mb-6">
                                             <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
                                                 <p> Select Organisation Unit </p>
-                                                <TreeView addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
+                                                <TreeView assignedOrgUnits={this.state.assignedOrgUnits} addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
                                             </div>
                                         </div>
                                         <div id="selectedOrgs" className="col-md-6 mb-6">
@@ -231,11 +251,11 @@ class Register extends React.Component {
                                 <p id="modal-message">{this.state.message}</p>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" 
-                                onClick={
-                                    () => this.props.toggleDisplay()
-                                } 
-                                className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button"
+                                    onClick={
+                                        () => this.props.toggleDisplay()
+                                    }
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
