@@ -396,7 +396,15 @@ class SpiReport extends React.Component {
                                     <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
                             </li>
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="SiteColumnsTab" data-toggle="tab" href="#sitecolumns" role="tab" aria-controls="profile" aria-selected="false">
+                                <a className="nav-link" id="SiteColumnsTab" data-toggle="tab"
+                                    href="#sitecolumns" role="tab" aria-controls="profile"
+                                    aria-selected="false"
+                                    onClick={() => {
+                                        this.setState({
+                                            echartsMinHeight: ""
+                                        })
+                                    }}
+                                >
                                     <i className="fas fa-chart-bar"></i> Site Level Columns</a>
                             </li>
                             {/* <li className="nav-item" role="presentation">
