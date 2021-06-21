@@ -257,6 +257,17 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
     }
 }
 
+export async function FetchUserDetails(userId) {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/users_details?id=${userId}`);
+        const userDetails = response.data;
+        return userDetails;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+}
 
 export async function FetchUsers() {
 
@@ -268,7 +279,6 @@ export async function FetchUsers() {
         // Handle Error Here
         return err.response
     }
-
 }
 
 export async function FetchUserProfile() {
