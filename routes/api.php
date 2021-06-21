@@ -41,3 +41,4 @@ Route::get('/users', 'Service\UsersController@getUsers');
 Route::get('/get_user_profile', 'Service\UsersController@getUserProfile');
 Route::post('/update_user_profile', 'Service\UsersController@updateUserProfile');
 Route::delete('/delete_user', 'Service\UsersController@deleteUser');
+Route::get('/users_details', 'Service\UsersController@getUsersDetails');
