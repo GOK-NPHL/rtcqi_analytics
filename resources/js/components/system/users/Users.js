@@ -13,7 +13,8 @@ class User extends React.Component {
             showUserTable: true,
             users: [],
             selectedUser: null,
-            allowedPermissions: []
+            allowedPermissions: [],
+            userActionState: 'userList'
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
@@ -98,7 +99,17 @@ class User extends React.Component {
                             <td>
                                 {
                                     this.state.allowedPermissions.includes('edit_user') ?
-                                        <a href="#" style={{ 'marginRight': '5px' }} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                        <a
+                                            onClick={
+                                                () => {
+                                                    this.toggleDisplay();
+                                                    this.setState({
+                                                        userActionState: 'edit'
+                                                    });
+                                                }
+                                            }
+                                            style={{ 'marginRight': '5px' }}
+                                            className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                                             <i className="fas fa-user-edit"></i>
                                         </a> : ''
                                 }
@@ -157,7 +168,7 @@ class User extends React.Component {
             </div>;
         } else {
             if (this.state.allowedPermissions.includes('add_user'))
-                pageContent = <Register toggleDisplay={this.toggleDisplay} />;
+                pageContent = <Register userActionState={this.state.userActionState} toggleDisplay={this.toggleDisplay} />;
         }
 
         let confirmationBox =
@@ -211,10 +222,33 @@ class User extends React.Component {
             </div >
 
         let createUsers = '';
-        if (this.state.allowedPermissions.includes('add_user')) {
-            createUsers = <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                className="fas fa-user fa-sm text-white-50"></i> Create Users</a>;
+        if (this.state.allowedPermissions.includes('add_user') && this.state.userActionState == 'userList') {
+            createUsers = <a href="#"
+                onClick={
+                    () => {
+                        this.toggleDisplay();
+                        this.setState({
+                            userActionState: 'create'
+                        });
+                    }
+                }
+                className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i className="fas fa-user fa-sm text-white-50"></i> Create Users</a>;
+        } else if (this.state.userActionState != 'userList') {
+            createUsers = <a href="#"
+                onClick={
+                    () => {
+                        this.toggleDisplay();
+                        this.setState({
+                            userActionState: 'userList'
+                        });
+                    }
+                }
+                className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-arrow-left"></i> Back</a>;
         }
+
+
         return (
             <React.Fragment>
 
