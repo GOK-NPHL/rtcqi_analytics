@@ -112,7 +112,8 @@ class User extends React.Component {
                                                 () => {
                                                     this.toggleDisplay();
                                                     this.setState({
-                                                        userActionState: 'edit'
+                                                        userActionState: 'edit',
+                                                        selectedUser: user
                                                     });
                                                 }
                                             }
@@ -176,7 +177,7 @@ class User extends React.Component {
             </div>;
         } else {
             if (this.state.allowedPermissions.includes('add_user'))
-                pageContent = <Register userActionState={this.state.userActionState} toggleDisplay={this.toggleDisplay} />;
+                pageContent = <Register selectedUser={this.state.selectedUser} userActionState={this.state.userActionState} toggleDisplay={this.toggleDisplay} />;
         }
 
         let confirmationBox =
@@ -253,7 +254,7 @@ class User extends React.Component {
                     }
                 }
                 className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-arrow-left"></i> Back</a>;
+                <i className="fas fa-arrow-left"></i> Back</a>;
         }
 
 
