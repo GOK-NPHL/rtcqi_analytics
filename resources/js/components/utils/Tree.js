@@ -42,16 +42,21 @@ class Tree extends React.Component {
     }
 
     render() {
+        console.log("render")
         let arrayUIparser = (arr) => {
             const res = [];
             arr.map((item, index) => {
+
                 let { name, children } = item;//arr[index];
                 if (children.length > 0) {
                     res.push(
                         <li key={uuidv4()} >
                             {/* Add parent org unit as a li */}
                             {this.props.addCheckBox ?
-                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                                this.props.assignedOrgUnits.includes(item.id) ?
+                                    <input defaultChecked={true} style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                                    :
+                                    <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                 : ''
                             }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
                                 event.preventDefault();
@@ -66,7 +71,10 @@ class Tree extends React.Component {
                                 >
                                     <li>
                                         {this.props.addCheckBox ?
-                                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                                            this.props.assignedOrgUnits.includes(item.id) ?
+                                                <input defaultChecked={true} style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                                                :
+                                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                             : ''
                                         }<span onClick={() => this.organisationUnitOnclick(event)}
 
@@ -88,7 +96,10 @@ class Tree extends React.Component {
                 } else {
                     res.push(<li key={uuidv4()} >
                         {this.props.addCheckBox ?
-                            <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                            this.props.assignedOrgUnits.includes(item.id) ?
+                                <input defaultChecked={true} style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
+                                :
+                                <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                             : ''
                         }<span onClick={() => this.organisationUnitOnclick(event)}
                             onContextMenu={(event) => {
@@ -116,7 +127,7 @@ class Tree extends React.Component {
         if (this.props.orgUnits) {
 
             if (this.props.orgUnits.length != 0) {
-                
+
                 treeStruc = localStorage.getItem("treeStruc");
                 if (treeStruc == null) {
                     treeStruc = arrayUIparser(this.props.orgUnits);
