@@ -56,6 +56,43 @@ class UsersController extends Controller
         return  $users;
     }
 
+    public function getUsersDetails(Request $request)
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_user'])) {
+            return response()->json(['Message' => 'Not allowed to view user: '], 500);
+        }
+        $userId = $request->id;
+        Log::info("the id " . $userId);
+
+        $registeredOrgs = OdkOrgunit::select(
+            "odkorgunit.id",
+            "odkorgunit.org_unit_id",
+            "odkorgunit.odk_unit_name as name",
+            "odkorgunit.parent_id as parentId"
+        )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
+            ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
+            ->where('users.id', $userId)
+            ->get();
+
+        $users = User::select(
+            "users.name as first_name",
+            "users.id as id",
+            "users.last_name as last_name",
+            "users.email as email",
+            "roles.name as role_name",
+            "roles.id as role_id"
+        )->join('roles', 'roles.id', '=', 'users.role_id')
+            ->where('users.id', $userId)
+            ->first();
+
+        $roleIds = array();
+        $payload = array();
+        $payload['demographics'] = $users;
+        $payload['org_units'] = $registeredOrgs;
+
+        return $payload;
+    }
+
     public function deleteUser(Request $request)
     {
         if (!Gate::allows(SystemAuthorities::$authorities['delete_user'])) {
