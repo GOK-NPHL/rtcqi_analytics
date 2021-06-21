@@ -38,7 +38,6 @@ class Register extends React.Component {
             if (this.props.userActionState == 'edit') {
 
                 let userDetails = await FetchUserDetails(this.props.selectedUser.id);
-                console.log(userDetails);
                 let userAssignedOrgs = {};
 
                 userDetails['org_units'].map((orgunit) => {
@@ -47,7 +46,6 @@ class Register extends React.Component {
                     assignedOrgUnits.push(orgunit.org_unit_id);
 
                 });
-                console.log(userDetails);
                 this.setState({
                     first_name: userDetails['demographics']['first_name'],
                     last_name: userDetails['demographics']['last_name'] ? userDetails['demographics']['last_name'] : '',
@@ -111,7 +109,7 @@ class Register extends React.Component {
                 this.state.first_name.length == 0 ||
                 this.state.email.length == 0 ||
                 this.state.password.length == 0 ||
-                this.state.assignedOrgUnits.length == 0 ||
+                this.state.role.length == 0 ||
                 Object.keys(this.state.selectedOrgs).length == 0
             ) {
                 this.setState({
@@ -148,7 +146,6 @@ class Register extends React.Component {
     };
 
     selectOrgUnitHandler(orgunit) {
-        console.log(orgunit);
         let selectedOrgs = { ...this.state.selectedOrgs };
         if (orgunit.id in selectedOrgs) {
             delete selectedOrgs[orgunit.id];
