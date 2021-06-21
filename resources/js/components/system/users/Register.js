@@ -89,9 +89,9 @@ class Register extends React.Component {
             ).then(response => {
                 let message = response.data.Message
 
-                this.setState({
-                    message: message
-                });
+                // this.setState({
+                //     message: message
+                // });
 
                 $('#saveUserModal').modal('toggle');
             });
