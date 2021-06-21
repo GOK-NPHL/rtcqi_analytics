@@ -15,7 +15,12 @@ class Register extends React.Component {
             roles: {},
             selectedOrgs: {},
             permissionOptions: [],
-            message: ''
+            message: '',
+            first_name: '',
+            last_name: '',
+            email: '',
+            password: ''
+
         };
 
         this.saveUser = this.saveUser.bind(this);
@@ -27,6 +32,9 @@ class Register extends React.Component {
         (async () => {
             let roles = await FetchRoles();
             let httpOrgUnits = await FetchOrgunits();
+            if (this.props.userActionState == 'edit') {
+                alert("edit");
+            }
             httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
             this.setState({
                 orgUnits: httpOrgUnits,
@@ -47,15 +55,33 @@ class Register extends React.Component {
                 this.state.selectedOrgs,
                 this.state.role
             );
-            console.log(response);
+            
             if (response) {
+
                 this.setState({
                     message: response.data.Message
                 });
+
                 $('#saveUserModal').modal('toggle');
             }
 
         })();
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+
+        if (
+            nextState.first_name != this.state.first_name ||
+            nextState.last_name != this.state.last_name ||
+            nextState.email != this.state.email ||
+            nextState.password != this.state.password ||
+           // nextState.selectedOrgs != this.state.selectedOrgs ||
+            nextState.role != this.state.role
+        ) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     roleOnChange(event) {
@@ -64,7 +90,7 @@ class Register extends React.Component {
 
     selectOrgUnitHandler(orgunit) {
 
-        let selectedOrgs = this.state.selectedOrgs;
+        let selectedOrgs = { ...this.state.selectedOrgs };
         if (orgunit.id in selectedOrgs) {
             delete selectedOrgs[orgunit.id];
         } else {
@@ -87,7 +113,6 @@ class Register extends React.Component {
             selectedOrgs.push(<p key={key} data-id={key}>{count}. {value.name}</p>);
             count += 1;
         }
-
         return (
             <React.Fragment>
 
@@ -182,7 +207,7 @@ class Register extends React.Component {
                                     </div>
 
                                     <button
-                                        onClick={this.saveUser}
+                                        onClick={() => this.saveUser()}
                                         style={{ "marginTop": "10px" }}
                                         className="btn btn-primary"
                                         type="submit">Save User</button>
@@ -203,7 +228,7 @@ class Register extends React.Component {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <p>{this.state.message}</p>
+                                <p id="modal-message">{this.state.message}</p>
                             </div>
                             <div className="modal-footer">
                                 <button type="button" onClick={() => this.props.toggleDisplay()} className="btn btn-secondary" data-dismiss="modal">Close</button>
