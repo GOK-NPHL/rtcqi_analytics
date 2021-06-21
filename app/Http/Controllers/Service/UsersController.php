@@ -194,7 +194,10 @@ class UsersController extends Controller
 
             $user->role()->associate($role);
             $user->save();
+            Log::info("User updating");
+            Log::info("updating orgs");
             $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
+            Log::info("updating orgs done");
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
             return ['Error' => '500', 'Message' => 'Could not Updated user ' . $ex->getMessage()];
