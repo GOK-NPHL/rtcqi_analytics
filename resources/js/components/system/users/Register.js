@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FetchRoles, Saveuser, DevelopOrgStructure, FetchOrgunits, FetchUserDetails } from '../../utils/Helpers';
+import { FetchRoles, Saveuser, DevelopOrgStructure, FetchOrgunits, FetchUserDetails, Updateuser } from '../../utils/Helpers';
 import TreeView from '../../utils/TreeView';
 import DualListBox from 'react-dual-listbox';
 
@@ -20,11 +20,12 @@ class Register extends React.Component {
             last_name: '',
             email: '',
             password: '',
-            assignedOrgUnits: []
-
+            assignedOrgUnits: [],
+            closeRegisterPage: true
         };
 
         this.saveUser = this.saveUser.bind(this);
+        this.updateCurrentUser = this.updateCurrentUser.bind(this);
         this.roleOnChange = this.roleOnChange.bind(this);
         this.selectOrgUnitHandler = this.selectOrgUnitHandler.bind(this);
     }
@@ -46,11 +47,12 @@ class Register extends React.Component {
                     assignedOrgUnits.push(orgunit.org_unit_id);
 
                 });
-
+                console.log(userDetails);
                 this.setState({
                     first_name: userDetails['demographics']['first_name'],
                     last_name: userDetails['demographics']['last_name'] ? userDetails['demographics']['last_name'] : '',
                     email: userDetails['demographics']['email'],
+                    role: userDetails['demographics']['role_id'],
                     roleId: userDetails['demographics']['role_id'],
                     selectedOrgs: userAssignedOrgs
                 });
@@ -65,26 +67,77 @@ class Register extends React.Component {
         })();
     }
 
+    updateCurrentUser() {
+
+        if (this.state.first_name.length == 0 ||
+            this.state.email.length == 0 ||
+            this.state.assignedOrgUnits.length == 0 ||
+            Object.keys(this.state.selectedOrgs).length == 0) {
+            this.setState({
+                message: "Kindly fill in the required data marked in *",
+                closeRegisterPage: false
+            });
+            $('#saveUserModal').modal('toggle');
+        } else {
+
+            (async () => {
+                let response = await Updateuser(
+                    this.state.first_name,
+                    this.state.last_name,
+                    this.state.email,
+                    this.state.password,
+                    this.state.selectedOrgs,
+                    this.state.role,
+                    this.props.selectedUser.id
+                );
+
+                if (response) {
+
+                    this.setState({
+                        message: response.data.Message
+                    });
+
+                    $('#saveUserModal').modal('toggle');
+                }
+            })();
+        }
+    }
+
     saveUser() {
 
         (async () => {
 
-            let response = await Saveuser(
-                this.state.first_name,
-                this.state.last_name,
-                this.state.email,
-                this.state.password,
-                this.state.selectedOrgs,
-                this.state.role
-            );
-
-            if (response) {
-
+            if (
+                this.state.first_name.length == 0 ||
+                this.state.email.length == 0 ||
+                this.state.password.length == 0 ||
+                this.state.assignedOrgUnits.length == 0 ||
+                Object.keys(this.state.selectedOrgs).length == 0
+            ) {
                 this.setState({
-                    message: response.data.Message
+                    message: "Kindly fill in the required data marked in *",
+                    closeRegisterPage: false
                 });
-
                 $('#saveUserModal').modal('toggle');
+            } else {
+                let response = await Saveuser(
+                    this.state.first_name,
+                    this.state.last_name,
+                    this.state.email,
+                    this.state.password,
+                    this.state.selectedOrgs,
+                    this.state.role
+                );
+
+                if (response) {
+
+                    this.setState({
+                        message: response.data.Message
+                    });
+
+                    $('#saveUserModal').modal('toggle');
+                }
+
             }
 
         })();
@@ -144,7 +197,7 @@ class Register extends React.Component {
                                 <form className="needs-validation" noValidate>
                                     <div className="form-row">
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip01">First name</label>
+                                            <label htmlFor="validationTooltip01">First name *</label>
                                             <input type="text"
                                                 onChange={(event) => {
                                                     this.setState({
@@ -173,7 +226,7 @@ class Register extends React.Component {
                                     </div>
                                     <div className="form-row">
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip03">Email</label>
+                                            <label htmlFor="validationTooltip03">Email *</label>
                                             <input
                                                 onChange={(event) => {
                                                     this.setState({
@@ -187,7 +240,7 @@ class Register extends React.Component {
                                             <div className="invalid-tooltip">Please provide a valid Email. </div>
                                         </div>
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip05">Role</label>
+                                            <label htmlFor="validationTooltip05">Role *</label>
                                             <select onChange={() => this.roleOnChange(event)} className="form-control" id="exampleFormControlSelect1">
                                                 <option defaultValue>--Select user role--</option>
                                                 {roles}
@@ -197,7 +250,7 @@ class Register extends React.Component {
 
                                     <div className="form-row">
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip04">Password</label>
+                                            <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit'?' *':''}</label>
                                             <input type="text"
                                                 onChange={(event) => {
                                                     this.setState({
@@ -227,10 +280,10 @@ class Register extends React.Component {
                                     </div>
 
                                     <button
-                                        onClick={() => this.saveUser()}
+                                        onClick={this.props.userActionState != 'edit' ? () => this.saveUser() : () => this.updateCurrentUser()}
                                         style={{ "marginTop": "10px" }}
                                         className="btn btn-primary"
-                                        type="submit">Save User</button>
+                                        type="submit"> {this.props.userActionState == 'edit' ? 'Update User' : 'Save User'}</button>
                                 </form>
                             </div>
                         </div>
@@ -253,7 +306,7 @@ class Register extends React.Component {
                             <div className="modal-footer">
                                 <button type="button"
                                     onClick={
-                                        () => this.props.toggleDisplay()
+                                        this.state.closeRegisterPage ? () => this.props.toggleDisplay() : ''
                                     }
                                     className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
