@@ -98,6 +98,7 @@ class Register extends React.Component {
 
                     $('#saveUserModal').modal('toggle');
                 } catch (e) {
+                    console.log("update section");
                     console.log(e);
                 }
             })();
