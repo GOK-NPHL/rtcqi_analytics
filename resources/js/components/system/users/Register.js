@@ -79,24 +79,27 @@ class Register extends React.Component {
         } else {
 
             (async () => {
-                let response = await Updateuser(
-                    this.state.first_name,
-                    this.state.last_name,
-                    this.state.email,
-                    this.state.password,
-                    this.state.selectedOrgs,
-                    this.state.role,
-                    this.props.selectedUser.id
-                );
+                try {
+                    let response = await Updateuser(
+                        this.state.first_name,
+                        this.state.last_name,
+                        this.state.email,
+                        this.state.password,
+                        this.state.selectedOrgs,
+                        this.state.role,
+                        this.props.selectedUser.id
+                    );
 
-                let message = await response.data.Message
+                    let message = await response.data.Message
 
-                this.setState({
-                    message: message
-                });
+                    this.setState({
+                        message: message
+                    });
 
-                $('#saveUserModal').modal('toggle');
-
+                    $('#saveUserModal').modal('toggle');
+                } catch (e) {
+                    console.log(e);
+                }
             })();
         }
     }
