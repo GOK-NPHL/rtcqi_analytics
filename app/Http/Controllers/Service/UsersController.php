@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\OdkOrgunit;
+use App\Role;
 use App\Services\SystemAuthorities;
 use App\User;
 use Exception;
@@ -153,6 +154,50 @@ class UsersController extends Controller
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Could not update profile: '  . $ex->getMessage()], 500);
+        }
+    }
+
+    public function updateUser(Request $request)
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['edit_user'])) {
+            return response()->json(['Message' => 'Not allowed to add users: '], 500);
+        }
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required',
+                'email'    => 'required',
+                'role' => 'required',
+         
+            ]);
+            $name = $request->name;
+            $email    = $request->email;
+            $password = $request->password;
+            $role_id = $request->role;
+            $lastName = $request->last_name;
+            if (empty($lastName)) {
+                $lastName = '';
+            }
+
+            //delete associations
+            $user = User::find($request->user_id);
+            $user->OdkOrgunit()->sync([]);
+            $user->role()->dissociate();
+
+            $role =  Role::find($role_id);
+
+            $user->name = $name;
+            $user->email = $email;
+            $user->last_name = $lastName;
+            if (!empty($user->password)) {
+                $user->password = Hash::make($password);
+            }
+
+            $user->role()->associate($role);
+            $user->save();
+            $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
+            return response()->json(['Message' => 'Updated successfully'], 200);
+        } catch (Exception $ex) {
+            return ['Error' => '500', 'Message' => 'Could not Updated user ' . $ex->getMessage()];
         }
     }
 }
