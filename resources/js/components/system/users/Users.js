@@ -52,9 +52,17 @@ class User extends React.Component {
 
     toggleDisplay() {
         let booll = this.state.showUserTable;
-        this.setState({
-            showUserTable: !booll
-        });
+        if(!booll){ //show user table
+            this.setState({
+                showUserTable: !booll,
+                userActionState: 'userList'
+            });
+        }else{
+            this.setState({
+                showUserTable: !booll
+            });
+        }
+        
     }
 
     // shouldComponentUpdate(nextProps, nextState) {

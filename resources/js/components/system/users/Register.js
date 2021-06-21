@@ -231,7 +231,11 @@ class Register extends React.Component {
                                 <p id="modal-message">{this.state.message}</p>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" onClick={() => this.props.toggleDisplay()} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" 
+                                onClick={
+                                    () => this.props.toggleDisplay()
+                                } 
+                                className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
