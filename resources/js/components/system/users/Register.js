@@ -89,14 +89,14 @@ class Register extends React.Component {
                     this.props.selectedUser.id
                 );
 
-                if (response) {
+                let message = await response.data.Message
 
-                    this.setState({
-                        message: response.data.Message
-                    });
+                this.setState({
+                    message: message
+                });
 
-                    $('#saveUserModal').modal('toggle');
-                }
+                $('#saveUserModal').modal('toggle');
+
             })();
         }
     }
@@ -247,7 +247,7 @@ class Register extends React.Component {
 
                                     <div className="form-row">
                                         <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit'?' *':''}</label>
+                                            <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit' ? ' *' : ''}</label>
                                             <input type="text"
                                                 onChange={(event) => {
                                                     this.setState({
