@@ -153,6 +153,23 @@ export async function SaveOrgUnits(orgUnits, orgunitMetadata) {
         return err.response
     }
 }
+export async function updateUploadOrgUnits(orgUnits, orgunitMetadata) {
+    let response;
+    try {
+        response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/update_upload_orgunits`,
+            data: {
+                orgunits: orgUnits,
+                orgunit_metadata: orgunitMetadata,
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
+
 
 
 export async function UpdateOrg(org_unit_id, name) {

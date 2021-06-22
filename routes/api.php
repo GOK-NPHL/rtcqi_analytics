@@ -28,6 +28,7 @@ Route::put('/update_org', 'Service\OrgunitsController@updateOrg');
 Route::delete('/delete_org', 'Service\OrgunitsController@deleteOrg');
 Route::delete('/delete_all_orgs', 'Service\OrgunitsController@deleteAllOrgs');
 Route::put('/add_sub_org', 'Service\OrgunitsController@addSubOrg');
+Route::post('/update_upload_orgunits', 'Service\OrgunitsController@updateUploadOrgunits');
 
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
