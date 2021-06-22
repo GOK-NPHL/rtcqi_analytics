@@ -99,7 +99,6 @@ class Dashboard extends React.Component {
                     data: [10, 45, 56, 76, 32]
                 }
             ]
-
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
     }
@@ -109,17 +108,27 @@ class Dashboard extends React.Component {
         (async () => {
             let allowedPermissions = await FetchUserAuthorities();
             let returnedData = await FetchOrgunits();
+            let orgs = [];
+            try {
+                orgs = returnedData.payload[0];
+            } catch (err) {
 
+            }
             this.setState({
                 unfilteredOrgUnits: returnedData,
-                orgUnits: returnedData.payload[0],
+                orgUnits: orgs,
                 odkData: {},
                 orgLevel: 1,
                 orgId: 1,
                 allowedPermissions: allowedPermissions
             });
 
-            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
+            let defaultOrg = -1;
+            try {
+                defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs;
+            } catch (err) {
+            }
+
             this.fetchOdkDataServer(defaultOrg,
                 this.state.orgUnitTimeline,
                 this.state.siteType,
@@ -170,10 +179,13 @@ class Dashboard extends React.Component {
                 </div>
             </React.Fragment>
         }
-
+        console.log("ff")
+        console.log();
         return (
+            
             <React.Fragment>
                 {dashBoardContent}
+                {this.state.unfilteredOrgUnits?'':<p style={{"color": "red"}}>You have no orgunits attached</p>}
             </React.Fragment>
         );
     }
