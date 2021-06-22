@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\OdkOrgunit;
 use App\OrgunitLevelMap;
 use App\Services\SystemAuthorities;
+use App\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -313,14 +314,19 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Not allowed to delete organisation units: '], 500);
         }
         try {
-            $dependentOrgs = OdkOrgunit::where('parent_id', $request->org['org_unit_id'])
-                ->get();
-            if (count($dependentOrgs) != 0) {
-                return response()->json(['Message' => 'Can\'t delete orgunit as it contains children orgunits'], 500);
-            } else {
-                $org = OdkOrgunit::where('org_unit_id', $request->org['org_unit_id']);
-                $org->delete();
+
+            $orgUnitToDelete = OdkOrgunit::where('org_unit_id', $request->org['org_unit_id'])->first();
+            $childrenOrgUnits = $this->runOrgUnitsLevelQuery($orgUnitToDelete->org_unit_id, $orgUnitToDelete->level);
+            $orgsToDeleteId = [];
+            foreach ($childrenOrgUnits as $childOrgUnit) {
+                $orgsToDeleteId[] = $childOrgUnit->org_unit_id;
             }
+            OdkOrgunit::whereIn('org_unit_id', $orgsToDeleteId)->delete();
+            $user = Auth::user();
+            if ($orgUnitToDelete->org_unit_id == '0') {
+                DB::insert('insert into odkorgunit_user (odk_orgunit_id, user_id) values (0,' . $user->id . ')');
+            }
+
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
