@@ -182,12 +182,15 @@ class OrgunitStructureCreate extends React.Component {
     }
 
     render() {
-
         let orgs = this.createOrgTree();
         let orgUnitStructure = orgs[0];
         let tableOrgs = orgs[1];
-        if (this.props.isSaveOrgs) {
+        if (this.props.isSaveOrgs && !this.props.isUpdateOrgunits) {
             this.props.saveOrgUnits(tableOrgs);
+
+        } else if (this.props.isSaveOrgs && this.props.isUpdateOrgunits) {
+            this.props.updateUploadOrgs(tableOrgs);
+            console.log(tableOrgs)
         }
         const columns = [
             {

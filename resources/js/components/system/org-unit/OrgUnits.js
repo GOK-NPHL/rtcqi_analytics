@@ -23,7 +23,8 @@ class Orgunit extends React.Component {
             dropOrgUnitStructure: false,
             startTableData: 0,
             endeTableData: 10,
-            activePage: 1
+            activePage: 1,
+            isUpdateOrgunits: false,
         };
         this.updateOrg = this.updateOrg.bind(this);
         this.editOrg = this.editOrg.bind(this);
@@ -32,6 +33,7 @@ class Orgunit extends React.Component {
         this.setNewOrgToName = this.setNewOrgToName.bind(this);
         this.setShowOrgunitLanding = this.setShowOrgunitLanding.bind(this);
         this.dropCurrentOrgunitStructure = this.dropCurrentOrgunitStructure.bind(this);
+        this.triggerOrgUnitsFetch = this.triggerOrgUnitsFetch.bind(this);
     }
 
     componentDidMount() {
@@ -164,7 +166,13 @@ class Orgunit extends React.Component {
         }
 
     }
-    
+
+    triggerOrgUnitsFetch(){
+        this.setState({
+            httpOrgUnits: null
+        })
+    }
+
     handlePageChange(pageNumber) {
         console.log(`active page is ${pageNumber}`);
         let pgNumber = pageNumber * 10 + 1;
@@ -213,10 +221,21 @@ class Orgunit extends React.Component {
         if (this.state.allowedPermissions.includes('upload_new_orgunit_structure')) {
             if (this.state.httpOrgUnits == null || this.state.httpOrgUnits.payload[0].length == 0) {
                 createOrgsButton = <a href="#" onClick={() => this.setState({ showOrgunitLanding: false })} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    className="fas fa-sitemap fa-sm text-white-50"></i> Create Organisation Unit</a>;
+                    className="fas fa-sitemap fa-sm text-white-50"></i> Upload Organisation Unit</a>;
             } else {
-                createOrgsButton = <a href="#" onClick={() => this.dropCurrentOrgunitStructure()} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    className="fas fa-sitemap fa-sm text-white-50"></i> Drop current orgunit structure</a>;
+                createOrgsButton = <>
+                    <div class="d-flex p-3 text-white">
+                        <a href="#" onClick={() => this.setState({
+                            showOrgunitLanding: false,
+                            isUpdateOrgunits: true
+                        })} className="d-none d-sm-inline-block btn btn-sm btn-primary mr-4 shadow-sm"><i
+                            className="fas fa-sitemap fa-sm text-white-50"></i> Upload new update orgunits</a>
+                        <a href="#" onClick={() => this.dropCurrentOrgunitStructure()} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                            className="fas fa-sitemap fa-sm text-white-50"></i> Delete all orgunit</a>
+                    </div>
+
+
+                </>;
             }
 
         }
@@ -337,7 +356,7 @@ class Orgunit extends React.Component {
             </React.Fragment>
 
         } else {
-            pageContent = <OrgunitCreate
+            pageContent = <OrgunitCreate triggerOrgUnitsFetch={this.triggerOrgUnitsFetch} isUpdateOrgunits={this.state.isUpdateOrgunits}
                 setShowOrgunitLanding={this.setShowOrgunitLanding}
             />;
         }
