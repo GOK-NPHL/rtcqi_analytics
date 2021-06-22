@@ -322,6 +322,7 @@ class OrgunitsController extends Controller
                 $orgsToDeleteId[] = $childOrgUnit->org_unit_id;
             }
             OdkOrgunit::whereIn('org_unit_id', $orgsToDeleteId)->delete();
+            FormSubmissions::where('org_id', $request->org['org_unit_id'])->delete();
             $user = Auth::user();
             if ($orgUnitToDelete->org_unit_id == '0') {
                 DB::insert('insert into odkorgunit_user (odk_orgunit_id, user_id) values (0,' . $user->id . ')');
