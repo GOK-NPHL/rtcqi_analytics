@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { SaveOrgUnits } from '../../utils/Helpers';
+import { SaveOrgUnits, updateUploadOrgUnits } from '../../utils/Helpers';
 import DualListBox from 'react-dual-listbox';
 import XLSX from "xlsx";
 import SheetSelect from './SheetSelect';
@@ -25,6 +25,7 @@ class OrgunitCreate extends React.Component {
         this.setOrgunitExcelFileHierachy = this.setOrgunitExcelFileHierachy.bind(this);
         this.incrementDecrementOrgUnitStep = this.incrementDecrementOrgUnitStep.bind(this);
         this.saveOrgUnits = this.saveOrgUnits.bind(this);
+        this.updateUploadOrgs = this.updateUploadOrgs.bind(this);
     }
 
     componentDidMount() {
@@ -90,11 +91,39 @@ class OrgunitCreate extends React.Component {
             console.log(response);
             if (response['status'] == 200) {
                 this.props.setShowOrgunitLanding(true);
+                this.props.triggerOrgUnitsFetch();
             }
 
         })();
 
     }
+
+
+    updateUploadOrgs(orgUnits) {
+
+        let orgunitMetadata = [];
+        console.log(this.state.orgunitFileHierachy);
+        for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
+            let orgMeta = {
+                'sheet': this.state.sheetWithOrgs,
+                'column': column,
+                'level': level,
+            };
+            orgunitMetadata.push(orgMeta);
+        }
+
+        (async () => {
+            let response = await updateUploadOrgUnits(orgUnits, orgunitMetadata);
+            console.log(response);
+            if (response['status'] == 200) {
+                this.props.setShowOrgunitLanding(true);
+                this.props.triggerOrgUnitsFetch();
+            }
+
+        })();
+
+    }
+
 
     render() {
 
@@ -122,29 +151,48 @@ class OrgunitCreate extends React.Component {
             orgunitStructureElement = <React.Fragment>
                 <hr />
                 <OrgunitStructureCreate
+                    isUpdateOrgunits={this.props.isUpdateOrgunits}
                     orgunitExcelFileHierachy={this.state.orgunitFileHierachy}
                     workbook={this.state.workbook}
                     sheetWithOrgs={this.state.sheetWithOrgs}
                     saveOrgUnits={this.saveOrgUnits}
+                    updateUploadOrgs={this.updateUploadOrgs}
                     isSaveOrgs={this.state.isSaveOrgs}
                 />
             </React.Fragment>;
 
-            nextSaveButton = <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >
-                <button
-                    id="saveButton"
-                    type="button"
-                    onClick={
-                        (event) => {
-                            this.setState({ isSaveOrgs: true })
-                            localStorage.removeItem('orgunitList');
-                            localStorage.removeItem('treeStruc');
-                            localStorage.removeItem("orgunitTableStruc");
-                            $("#saveButton").prop('disabled', true);
+            nextSaveButton = !this.props.isUpdateOrgunits ?
+                <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >
+                    <button
+                        id="saveButton"
+                        type="button"
+                        onClick={
+                            (event) => {
+                                this.setState({ isSaveOrgs: true })
+                                localStorage.removeItem('orgunitList');
+                                localStorage.removeItem('treeStruc');
+                                localStorage.removeItem("orgunitTableStruc");
+                                $("#saveButton").prop('disabled', true);
+                            }
                         }
-                    }
-                    className="btn btn-primary"> Save & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
-                </button></div>;
+                        className="btn btn-primary"> Save & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                    </button></div>
+                :
+                <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >
+                    <button
+                        id="updateButton"
+                        type="button"
+                        onClick={
+                            (event) => {
+                                this.setState({ isSaveOrgs: true })
+                                localStorage.removeItem('orgunitList');
+                                localStorage.removeItem('treeStruc');
+                                localStorage.removeItem("orgunitTableStruc");
+                                $("#updateButton").prop('disabled', true);
+                            }
+                        }
+                        className="btn btn-primary"> Update & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                    </button></div>
         }
 
         let nextBar = <div className="row">
@@ -159,7 +207,7 @@ class OrgunitCreate extends React.Component {
         let createOrgsLanding = <>
             <br />
             <div className="row">
-                <div className="col-sm-12"><p style={{ "fontWeight": "700" }}>Upload Excel file with ODK central organusation units cascade</p></div>
+                <div className="col-sm-12"><p style={{ "fontWeight": "700" }}>Upload Excel file with ODK central organisation units cascade</p></div>
                 <br />
                 <div className="col-sm-4">
                     <div className="input-group mb-3">
@@ -180,7 +228,7 @@ class OrgunitCreate extends React.Component {
         if (this.state.pageNo != 1) {
             createOrgsLanding = <></>
         }
-
+        console.log(this.state.pageNo);
         return (
             <React.Fragment>
                 {nextBar}
