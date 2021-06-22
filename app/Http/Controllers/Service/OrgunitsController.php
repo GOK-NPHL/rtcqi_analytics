@@ -262,6 +262,36 @@ class OrgunitsController extends Controller
         }
     }
 
+    public function updateUploadOrgunits(Request $request)
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['add_orgunit'])) {
+            return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
+        }
+        try {
+            $kenya = OdkOrgunit::where("org_unit_id", "0")->first();
+            $organisationUnit = $request->orgunits;
+            for ($x = 0; $x < count($organisationUnit); $x++) {
+                if ($organisationUnit[$x]['id'] != '0') {
+
+                    OdkOrgunit::create([
+                        'org_unit_id' => $organisationUnit[$x]['id'],
+                        'odk_unit_name' => $organisationUnit[$x]['name'],
+                        'level' => $organisationUnit[$x]['level'],
+                        'parent_id' => $organisationUnit[$x]['parentId'],
+
+                    ]);
+
+                    if ($organisationUnit[$x]['name'] == 'Kamukunji') Log::info("Saved Kamukunji");
+                }
+            }
+
+            return response()->json(['Message' => 'Created successfully'], 200);
+        } catch (Exception $ex) {
+            Log::error($ex);
+            return response()->json(['Message' => 'Could not save organisation units: ' . $ex->getMessage()], 500);
+        }
+    }
+
     public function updateOrg(Request $request)
     {
         if (!Gate::allows(SystemAuthorities::$authorities['edit_orgunit'])) {
@@ -303,9 +333,11 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Not allowed to add new organisation units: '], 500);
         }
         try {
+            $user = Auth::user();
             OdkOrgunit::query()->truncate();
             DB::statement('TRUNCATE odkorgunit_user');
             FormSubmissions::query()->truncate();
+            DB::insert('insert into odkorgunit_user (odk_orgunit_id, user_id) values (0,' . $user->id . ')'); //initialize current user access to orgs
             return response()->json(['Message' => 'Delete successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete all orgunits failed.  Error code' . $ex->getMessage()], 500);
