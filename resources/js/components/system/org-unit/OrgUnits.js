@@ -34,6 +34,7 @@ class Orgunit extends React.Component {
         this.setShowOrgunitLanding = this.setShowOrgunitLanding.bind(this);
         this.dropCurrentOrgunitStructure = this.dropCurrentOrgunitStructure.bind(this);
         this.triggerOrgUnitsFetch = this.triggerOrgUnitsFetch.bind(this);
+        this.deleteSelectedOrgUnit = this.deleteSelectedOrgUnit.bind(this);
     }
 
     componentDidMount() {
@@ -67,13 +68,23 @@ class Orgunit extends React.Component {
     }
 
     deleteOrg(org) {
+        this.setState({
+            dropOrgUnit: true,
+            message: "Deleting organisation units will detach users from assigned org units, proceed?",
+            orgToDelete: org
+        });
+        $('#messageModal').modal('toggle');
+    }
+
+    deleteSelectedOrgUnit() {
         (async () => {
-            let returnedData = await DeleteOrg(org);
-            // $("#org_success").html(returnedData.data.Message);
+            let returnedData = await DeleteOrg(this.state.orgToDelete);
+            localStorage.removeItem('orgunitList');
+            localStorage.removeItem("treeStruc");
+            localStorage.removeItem("orgunitTableStruc");
             let message = returnedData.data.Message;
-            this.setState({ message: message });
-            $('#returnedMessage').html(message);
-            $('#messageModal').modal('toggle');
+            this.setState({ message: message, dropOrgUnit: false, httpOrgUnits: null });
+            $('#messageModal').modal('show');
 
         })();
     }
@@ -112,7 +123,7 @@ class Orgunit extends React.Component {
 
                             <a onClick={() => {
                                 this.deleteOrg(value);
-                                localStorage.removeItem('orgunitList');
+
                             }}
                                 style={{ "display": "inlineBlock" }}
                                 className="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm">
@@ -167,7 +178,7 @@ class Orgunit extends React.Component {
 
     }
 
-    triggerOrgUnitsFetch(){
+    triggerOrgUnitsFetch() {
         this.setState({
             httpOrgUnits: null
         })
@@ -196,11 +207,14 @@ class Orgunit extends React.Component {
                     if (this.state.httpOrgUnits == null || this.state.httpOrgUnits.payload[0].length == 0) {
 
                         let httpOrgUnits = await FetchOrgunits();
-                        let tableOrgs = DevelopOrgStructure(httpOrgUnits);
-                        this.setState({
-                            httpOrgUnits: httpOrgUnits,
-                            tableOrgs: tableOrgs
-                        });
+                        if (httpOrgUnits) {
+                            let tableOrgs = DevelopOrgStructure(httpOrgUnits);
+                            this.setState({
+                                httpOrgUnits: httpOrgUnits,
+                                tableOrgs: tableOrgs
+                            });
+                        }
+
                     }
                 })();
             }
@@ -335,11 +349,14 @@ class Orgunit extends React.Component {
                             </div>
                             <div className="modal-footer">
                                 {
-                                    this.state.dropOrgUnitStructure ?
+                                    this.state.dropOrgUnitStructure || this.state.dropOrgUnit ?
                                         <>
                                             <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                             <button type="button" id="confirmDrop" onClick={(event) => {
-                                                this.dropCurrentOrgunitStructure('drop');
+                                                this.state.dropOrgUnit ?
+                                                    this.deleteSelectedOrgUnit()
+                                                    :
+                                                    this.dropCurrentOrgunitStructure('drop')
                                                 $("#confirmDrop").prop('disabled', true);
                                             }} className="btn btn-warning">Confirm deletion</button>
                                         </>
