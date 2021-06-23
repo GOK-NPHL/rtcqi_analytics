@@ -56,7 +56,9 @@
                                 <button type="submit" onclick="
                                      localStorage.removeItem('orgunitList');    
                                                 localStorage.removeItem('treeStruc');
-                                                localStorage.removeItem('orgunitTableStruc');" class="btn btn-primary">
+                                                localStorage.removeItem('orgunitTableStruc');
+                                                localStorage.removeItem('page');"
+                                                class="btn btn-primary">
                                     {{ __('Login') }}
                                 </button>
 
