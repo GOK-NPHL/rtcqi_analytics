@@ -13,6 +13,8 @@ class Orgunit extends React.Component {
         super(props);
         this.state = {
             httpOrgUnits: null,
+            allTableElements: [],
+            tableEl: [],
             message: '',
             tableOrgs: '',
             showOrgunitLanding: true,
@@ -209,9 +211,12 @@ class Orgunit extends React.Component {
                         let httpOrgUnits = await FetchOrgunits();
                         if (httpOrgUnits) {
                             let tableOrgs = DevelopOrgStructure(httpOrgUnits);
+                            let tableEl = this.createOrgunitTable(httpOrgUnits);
                             this.setState({
                                 httpOrgUnits: httpOrgUnits,
-                                tableOrgs: tableOrgs
+                                tableOrgs: tableOrgs,
+                                tableEl: tableEl,
+                                allTableElements: tableEl
                             });
                         }
 
@@ -229,7 +234,8 @@ class Orgunit extends React.Component {
         };
 
         let pageContent = '';
-        let tableEl = this.createOrgunitTable(this.state.httpOrgUnits);
+
+
         let createOrgsButton = '';
 
         if (this.state.allowedPermissions.includes('upload_new_orgunit_structure')) {
@@ -269,6 +275,22 @@ class Orgunit extends React.Component {
                         <TreeView orgUnits={this.state.tableOrgs} updateOrg={this.updateOrg} />
                     </div>
                     <div className="col-sm-8">
+
+                        <div class="form-group mb-2">
+                            <input type="text"
+                                onChange={(event) => {
+                                    let tableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().startsWith(event.target.value.trim().toLowerCase()));
+                                    this.setState({
+                                        tableEl: tableEl,
+                                        activePage: 1,
+                                        startTableData: 0,
+                                        endeTableData: 10,
+                                    })
+
+                                }}
+                                class="form-control" placeholder="search orgunit"></input>
+                        </div>
+
                         <table
                             className="table table-striped"
                             data-show-refresh={true}
@@ -287,7 +309,7 @@ class Orgunit extends React.Component {
                             </thead>
                             <tbody>
 
-                                {tableEl.slice(this.state.startTableData, this.state.endeTableData)}
+                                {this.state.tableEl.slice(this.state.startTableData, this.state.endeTableData)}
 
                             </tbody>
                         </table>
@@ -296,7 +318,7 @@ class Orgunit extends React.Component {
                             linkClass="page-link"
                             activePage={this.state.activePage}
                             itemsCountPerPage={10}
-                            totalItemsCount={tableEl.length}
+                            totalItemsCount={this.state.tableEl.length}
                             pageRangeDisplayed={5}
                             onChange={this.handlePageChange.bind(this)}
                         />
