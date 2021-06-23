@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import DropdownTreeSelect from 'react-dropdown-tree-select';
 import Register from './Register';
+import Pagination from "react-js-pagination";
 import { FetchUsers, DeleteUser, FetchUserAuthorities } from '../../utils/Helpers';
 
 class User extends React.Component {
@@ -12,9 +13,14 @@ class User extends React.Component {
         this.state = {
             showUserTable: true,
             users: [],
+            currUsersTableEl: [],
+            allTableElements: [],
             selectedUser: null,
             allowedPermissions: [],
-            userActionState: 'userList'
+            userActionState: 'userList',
+            startTableData: 0,
+            endeTableData: 10,
+            activePage: 1,
         }
         this.onChange = this.onChange.bind(this);
         this.toggleDisplay = this.toggleDisplay.bind(this);
@@ -52,17 +58,17 @@ class User extends React.Component {
 
     toggleDisplay() {
         let booll = this.state.showUserTable;
-        if(!booll){ //show user table
+        if (!booll) { //show user table
             this.setState({
                 showUserTable: !booll,
                 userActionState: 'userList'
             });
-        }else{
+        } else {
             this.setState({
                 showUserTable: !booll
             });
         }
-        
+
     }
 
     // shouldComponentUpdate(nextProps, nextState) {
@@ -82,6 +88,16 @@ class User extends React.Component {
             $('#deleteUserModal').modal('toggle');
             this.getUsers();
         })();
+    }
+
+    handlePageChange(pageNumber) {
+        console.log(`active page is ${pageNumber}`);
+        let pgNumber = pageNumber * 10 + 1;
+        this.setState({
+            startTableData: pgNumber - 11,
+            endeTableData: pgNumber - 1,
+            activePage: pageNumber
+        });
     }
 
     render() {
@@ -140,7 +156,16 @@ class User extends React.Component {
                 </tr>
                 );
             });
+            if (this.state.allTableElements.length == 0) {
+                this.setState({
+                    allTableElements: users,
+                    currUsersTableEl: users
+                })
+            }
+            
+
         }
+
 
         // this.assignObjectPaths(data);
 
@@ -155,6 +180,22 @@ class User extends React.Component {
         if (this.state.showUserTable && this.state.allowedPermissions.includes('view_user')) {
             pageContent = <div id='user_table' className='row'>
                 <div className='col-sm-12 col-md-12'>
+                    <div class="form-group mb-2">
+                        {/* <input type="text"
+                            onChange={(event) => {
+                                console.log(this.state.allTableElements);
+                                let users = [];//this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().startsWith(event.target.value.trim().toLowerCase()));
+                                this.setState({
+                                    users: users,
+                                    activePage: 1,
+                                    startTableData: 0,
+                                    endeTableData: 10,
+                                })
+
+                            }}
+                            class="form-control" placeholder="search orgunit"></input> */}
+                    </div>
+
                     <table className="table table-striped">
                         <thead>
                             <tr>
@@ -170,8 +211,17 @@ class User extends React.Component {
                             </tr>
                         </thead>
                         <tbody>
-                            {users}
+                            {this.state.currUsersTableEl.slice(this.state.startTableData, this.state.endeTableData)}
                         </tbody>
+                        <Pagination
+                            itemClass="page-item"
+                            linkClass="page-link"
+                            activePage={this.state.activePage}
+                            itemsCountPerPage={10}
+                            totalItemsCount={this.state.currUsersTableEl.length}
+                            pageRangeDisplayed={5}
+                            onChange={this.handlePageChange.bind(this)}
+                        />
                     </table>
                 </div>
             </div>;
