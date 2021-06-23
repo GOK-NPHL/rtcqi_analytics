@@ -249,7 +249,7 @@ class Orgunit extends React.Component {
                             showOrgunitLanding: false,
                             isUpdateOrgunits: true
                         })} className="d-none d-sm-inline-block btn btn-sm btn-primary mr-4 shadow-sm"><i
-                            className="fas fa-sitemap fa-sm text-white-50"></i> Upload new update orgunits</a>
+                            className="fas fa-sitemap fa-sm text-white-50"></i> Upload County sub-orgunits</a>
                         <a href="#" onClick={() => this.dropCurrentOrgunitStructure()} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                             className="fas fa-sitemap fa-sm text-white-50"></i> Delete all orgunit</a>
                     </div>
