@@ -53,10 +53,12 @@ use Illuminate\Support\Facades\Gate;
                 <hr class="sidebar-divider my-0">
 
                 <!-- Nav Item - Dashboard -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('home') }}">
+                <li class="nav-item menu-head">
+                    <a class="nav-link" href="{{ route('home') }}" onclick="localStorage.setItem('page', 'Dashboard');">
                         <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>Dashboard</span></a>
+                        <span>Dashboard</span>
+
+                    </a>
                 </li>
 
             <?php } ?>
@@ -66,6 +68,7 @@ use Illuminate\Support\Facades\Gate;
 
             if (Gate::allows('view_reports')) { ?>
                 <!-- Divider -->
+
                 <hr class="sidebar-divider">
 
                 <!-- Heading -->
@@ -74,31 +77,35 @@ use Illuminate\Support\Facades\Gate;
                 </div>
 
                 <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item">
+                <li class="nav-item menu-head reports-head">
+                    <!-- change -->
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
                         <i class="fas fa-fw fa-folder"></i>
                         <span>Reports</span>
                     </a>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <!-- change -->
+                    <div id="collapseTwo" class="collapse menu-body reports-body" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Reports:</h6>
                             <?php if (Gate::allows('view_pt_report')) { ?>
-                                <a class="collapse-item" href="{{ route('ptIndex') }}">Pt</a>
+                                <a onclick="localStorage.setItem('page', 'Pt');" class="collapse-item" href="{{ route('ptIndex') }}">Pt</a>
                             <?php } ?>
                             <?php if (Gate::allows('view_log_book_report')) { ?>
-                                <a class="collapse-item" href="{{ route('logbookIndex') }}">Log book</a>
+                                <!-- change -->
+                                <a class="collapse-item" onclick="localStorage.setItem('page', 'Log book');" href="{{ route('logbookIndex') }}">Log book</a>
                             <?php } ?>
                             <?php if (Gate::allows('view_spi_report')) { ?>
-                                <a class="collapse-item" href="{{ route('spiIndex') }}">SPI-RT</a>
+                                <a onclick="localStorage.setItem('page', 'SPI-RT');" class="collapse-item" href="{{ route('spiIndex') }}">SPI-RT</a>
                             <?php } ?>
                             <!-- <a class="collapse-item" href="{{ route('meIndex') }}">M&E</a>
                             <a class="collapse-item" href="{{ route('summariesIndex') }}">Summaries</a> -->
+
                         </div>
                     </div>
                 </li>
             <?php } ?>
 
-             <!--System admin section  -->
+            <!--System admin section  -->
             <?php
 
             if (Gate::allows('view_system_settings')) { ?>
@@ -112,27 +119,27 @@ use Illuminate\Support\Facades\Gate;
 
                 <!-- Nav Item - Pages Collapse Menu -->
 
-                <li class="nav-item">
+                <li class="nav-item menu-head system-head">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
                         <i class="fas fa-fw fa-cog"></i>
                         <span>System Settings</span>
                     </a>
-                    <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                    <div id="collapsePages" class="collapse menu-body system-body" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">System settings</h6>
                             <?php if (Gate::allows('view_user')) { ?>
-                                <a class="collapse-item" href="{{ route('usersIndex') }}">Users</a>
+                                <a onclick="localStorage.setItem('page', 'Users');" class="collapse-item" href="{{ route('usersIndex') }}">Users</a>
                             <?php } ?>
                             <?php if (Gate::allows('view_role')) { ?>
-                                <a class="collapse-item" href="{{ route('rolesIndex') }}">Roles</a>
+                                <a onclick="localStorage.setItem('page', 'Roles');" class="collapse-item" href="{{ route('rolesIndex') }}">Roles</a>
                             <?php } ?>
                             <?php if (Gate::allows('view_orgunit')) { ?>
-                                <a class="collapse-item" href="{{ route('orgunitsIndex') }}">Organization units</a>
+                                <a onclick="localStorage.setItem('page', 'Organization units');" class="collapse-item" href="{{ route('orgunitsIndex') }}">Organization units</a>
                             <?php } ?>
                             <?php if (Gate::allows('data_backup')) { ?>
                                 <div class="collapse-divider"></div>
                                 <h6 class="collapse-header">Administration</h6>
-                                <a class="collapse-item" href="#">Data backup</a>
+                                <a onclick="localStorage.setItem('page', 'Data backup');" class="collapse-item" href="#">Data backup</a>
                             <?php } ?>
                         </div>
                     </div>
@@ -315,7 +322,7 @@ use Illuminate\Support\Facades\Gate;
                         <span>RT-CQI Analytics &copy; NPHL, <script>
                                 document.write(new Date().getFullYear());
                             </script></span>
-                            | <a href="http://helpdesk.nphl.go.ke/">RTCQI HELP DESK</a>
+                        | <a href="http://helpdesk.nphl.go.ke/">RTCQI HELP DESK</a>
                     </div>
                 </div>
             </footer>
@@ -329,6 +336,36 @@ use Illuminate\Support\Facades\Gate;
 
 
     <!-- Custom scripts for all pages-->
+    <script>
+        let page = localStorage.getItem('page', 'Log book');
+        //localStorage.removeItem('page');
+        document.getElementsByClassName("menu-head")[0].classList.remove("active");
+        document.getElementsByClassName("menu-body")[0].classList.remove("show");
+
+        if (page == 'Log book' || page == 'Pt' || page == 'SPI-RT') {
+            let head = document.getElementsByClassName("reports-head");
+            head[0].classList.add("active");
+            let body = document.getElementsByClassName("reports-body");
+            body[0].classList.add("show");
+        } else {
+            let head = document.getElementsByClassName("reports-head");
+            head[0].classList.remove("active");
+            let body = document.getElementsByClassName("reports-body");
+            body[0].classList.remove("show");
+        }
+
+        if (page == 'Users' || page == 'Roles' || page == 'Organization units') {
+            let head = document.getElementsByClassName("system-head");
+            head[0].classList.add("active");
+            let body = document.getElementsByClassName("system-body");
+            body[0].classList.add("show");
+        } else {
+            let head = document.getElementsByClassName("system-head");
+            head[0].classList.remove("active");
+            let body = document.getElementsByClassName("system-body");
+            body[0].classList.remove("show");
+        }
+    </script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}" defer></script>
 
 </body>
