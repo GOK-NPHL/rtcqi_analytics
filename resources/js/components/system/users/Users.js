@@ -162,7 +162,7 @@ class User extends React.Component {
                     currUsersTableEl: users
                 })
             }
-            
+
 
         }
 
@@ -181,19 +181,18 @@ class User extends React.Component {
             pageContent = <div id='user_table' className='row'>
                 <div className='col-sm-12 col-md-12'>
                     <div class="form-group mb-2">
-                        {/* <input type="text"
+                        <input type="text"
                             onChange={(event) => {
-                                console.log(this.state.allTableElements);
-                                let users = [];//this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().startsWith(event.target.value.trim().toLowerCase()));
+                                let currUsersTableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'][0].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()));
                                 this.setState({
-                                    users: users,
+                                    currUsersTableEl: currUsersTableEl,
                                     activePage: 1,
                                     startTableData: 0,
                                     endeTableData: 10,
                                 })
 
                             }}
-                            class="form-control" placeholder="search orgunit"></input> */}
+                            class="form-control" placeholder="search user"></input>
                     </div>
 
                     <table className="table table-striped">
@@ -213,16 +212,18 @@ class User extends React.Component {
                         <tbody>
                             {this.state.currUsersTableEl.slice(this.state.startTableData, this.state.endeTableData)}
                         </tbody>
-                        <Pagination
-                            itemClass="page-item"
-                            linkClass="page-link"
-                            activePage={this.state.activePage}
-                            itemsCountPerPage={10}
-                            totalItemsCount={this.state.currUsersTableEl.length}
-                            pageRangeDisplayed={5}
-                            onChange={this.handlePageChange.bind(this)}
-                        />
+
                     </table>
+                    <br />
+                    <Pagination
+                        itemClass="page-item"
+                        linkClass="page-link"
+                        activePage={this.state.activePage}
+                        itemsCountPerPage={10}
+                        totalItemsCount={this.state.currUsersTableEl.length}
+                        pageRangeDisplayed={5}
+                        onChange={this.handlePageChange.bind(this)}
+                    />
                 </div>
             </div>;
         } else {
