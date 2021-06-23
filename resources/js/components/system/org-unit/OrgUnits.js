@@ -279,7 +279,7 @@ class Orgunit extends React.Component {
                         <div class="form-group mb-2">
                             <input type="text"
                                 onChange={(event) => {
-                                    let tableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().startsWith(event.target.value.trim().toLowerCase()));
+                                    let tableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()));
                                     this.setState({
                                         tableEl: tableEl,
                                         activePage: 1,
