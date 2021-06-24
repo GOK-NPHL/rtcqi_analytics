@@ -53,8 +53,8 @@ use Illuminate\Support\Facades\Gate;
                 <hr class="sidebar-divider my-0">
 
                 <!-- Nav Item - Dashboard -->
-                <li class="nav-item menu-head">
-                    <a class="nav-link" href="{{ route('home') }}" onclick="localStorage.setItem('page', 'Dashboard');">
+                <li class="nav-item menu-head dashboard-link">
+                    <a class="nav-link " href="{{ route('home') }}" onclick="localStorage.setItem('page', 'Dashboard');">
                         <i class="fas fa-fw fa-tachometer-alt"></i>
                         <span>Dashboard</span>
 
@@ -338,7 +338,7 @@ use Illuminate\Support\Facades\Gate;
     <!-- Custom scripts for all pages-->
     <script>
         let page = localStorage.getItem('page', 'Log book');
-        
+
         document.getElementsByClassName("menu-head")[0].classList.remove("active");
         document.getElementsByClassName("menu-body")[0].classList.remove("show");
 
@@ -364,6 +364,16 @@ use Illuminate\Support\Facades\Gate;
             head[0].classList.remove("active");
             let body = document.getElementsByClassName("system-body");
             body[0].classList.remove("show");
+        }
+
+        if (page == 'Dashboard' || page == null) {
+            let dashboard = document.getElementsByClassName("dashboard-link");
+            dashboard[0].classList.add("active");
+
+        } else {
+            let dashboard = document.getElementsByClassName("dashboard-link");
+            dashboard[0].classList.remove("active");
+
         }
     </script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}" defer></script>
