@@ -111,7 +111,7 @@ class RoleCreate extends React.Component {
 
                 <div className="card mb-4 py-3 border-left-secondary">
                     <div className="card-body">
-                        <form action="#" className="needs-validation" noValidate>
+                        
                             <div className="form-row">
                                 <div className="col-md-12 mb-3">
                                     <label htmlFor="role_name">Role name</label>
@@ -129,8 +129,8 @@ class RoleCreate extends React.Component {
                                     />
                                 </div>
                             </div>
-                            <button onClick={this.saveRole} className="btn btn-primary" type="submit">Save Role</button>
-                        </form>
+                            <button onClick={this.saveRole} className="btn btn-primary">Save Role</button>
+                        
                     </div>
                 </div>
 
