@@ -84,7 +84,7 @@ class Orgunit extends React.Component {
             localStorage.removeItem('orgunitList');
             localStorage.removeItem("treeStruc");
             localStorage.removeItem("orgunitTableStruc");
-            let message = returnedData.data.Message;
+            let message = returnedData.data.Message+". Your brower might freeze as the tree is refreshed";
             this.setState({ message: message, dropOrgUnit: false, httpOrgUnits: null });
             $('#messageModal').modal('show');
 

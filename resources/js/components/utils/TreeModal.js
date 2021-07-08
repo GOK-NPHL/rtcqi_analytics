@@ -25,7 +25,7 @@ class TreeModal extends React.Component {
 
     render() {
         return (
-            
+
             <React.Fragment>
                 <div className="modal fade" id="orgActionModal" tabIndex="-1" role="dialog" aria-labelledby="orgActionModalTitle" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered" role="document">
@@ -53,7 +53,7 @@ class TreeModal extends React.Component {
                                                                 this.props.updateOrgActionStatus('Add');
                                                             }}>
                                                             Add Sub-Orgunit
-                                                            </a>
+                                                        </a>
                                                     </li> :
                                                     ''
                                                 }
@@ -71,6 +71,20 @@ class TreeModal extends React.Component {
                                                     :
                                                     ''
                                                 }
+                                                {this.props.allowedPermissions.includes('delete_orgunit') ?
+                                                    <li className="nav-item" role="presentation">
+                                                        <a className={`nav-link ${!this.props.allowedPermissions.includes('delete_orgunit') ? 'active' : ''}`} id="delete_org-tab"
+                                                            data-toggle="tab" href="#delete_org" role="tab"
+                                                            aria-controls="delete_org"
+                                                            aria-selected="false"
+                                                            onClick={() => {
+                                                                this.props.updateOrgActionStatus('Delete');
+                                                            }}
+                                                        >Delete</a>
+                                                    </li>
+                                                    :
+                                                    ''
+                                                }
                                             </ul>
                                             <br />
                                             <div id="tabsContent" className="tab-content">
@@ -84,7 +98,7 @@ class TreeModal extends React.Component {
 
                                                 </div>
                                                 <div id="profile1"
-                                                    className={`tab-pane fade ${!this.props.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`} > {/* if add org permission not defined, edit is define as this pop up shows in either or both defined*/}
+                                                    className={`tab-pane fade ${!this.props.allowedPermissions.includes('add_orgunit') ? 'active  show' : ''}`} > {/* if add org permission not defined, edit is defined as this pop up shows in either or both defined*/}
                                                     <h6 className="text-left">Edit selected orgunit</h6>
                                                     <br />
                                                     Orgunit name <input type="text"
@@ -93,6 +107,17 @@ class TreeModal extends React.Component {
                                                             this.props.setNewEditOrgUnitName(event.target.value);
                                                         }}
                                                     />
+                                                </div>
+                                                <div id="delete_org"
+                                                    className=
+                                                    {`tab-pane fade ${!this.props.allowedPermissions.includes('edit_orgunit')
+                                                        &&
+                                                        !this.props.allowedPermissions.includes('add_orgunit')
+                                                        ? 'active  show' : ''}`} >
+                                                    {/* if delete org permission not defined, edit is define as this pop up shows in either or both defined*/}
+                                                    
+                                                    <strong>CliCk Save to delete selected org unit</strong>
+                                                    <p>Deleting organisation units will detach users from assigned org units, proceed?</p>
                                                 </div>
 
                                             </div>
@@ -108,7 +133,7 @@ class TreeModal extends React.Component {
                                         this.props.saveOrgUnitAction();
                                         $('#orgActionModal').modal('toggle');
                                     }}
-                                    className="btn btn-primary">Save changes</button>
+                                    className="btn btn-primary">Save</button>
                             </div>
                         </div>
                     </div>

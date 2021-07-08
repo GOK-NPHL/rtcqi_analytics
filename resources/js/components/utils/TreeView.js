@@ -1,7 +1,7 @@
 import React from 'react';
 
 import '../../../css/TreeView.css';
-import { AddSubOrg, FetchUserAuthorities } from './Helpers';
+import { AddSubOrg, FetchUserAuthorities, DeleteOrg } from './Helpers';
 import { v4 as uuidv4 } from 'uuid';
 import TreeModal from './TreeModal';
 import Tree from './Tree';
@@ -96,6 +96,21 @@ class TreeView extends React.Component {
             this.props.updateOrg(
                 this.state.currentSelectedOrg['id'],
                 this.state.newEditOrgUnitName);
+        } else if (this.state.orgUnitAction == 'Delete') {
+
+            (async () => {
+                console.log(this.state.currentSelectedOrg);
+                let orgUnitToDelete =this.state.currentSelectedOrg;
+                orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id']
+                let returnedData = await DeleteOrg(orgUnitToDelete);
+                localStorage.removeItem('orgunitList');
+                localStorage.removeItem("treeStruc");
+                localStorage.removeItem("orgunitTableStruc");
+                let message = returnedData.data.Message + ". Your brower might freeze as the tree is refreshed";
+                this.setState({ alertMessage: message });
+                $('#alertMessageModal').modal('toggle');
+
+            })();
         }
         // localStorage.removeItem('orgunitList');
     }
@@ -128,7 +143,7 @@ class TreeView extends React.Component {
 
                 {/* {treeStruc} */}
                 <Tree
-                    assignedOrgUnits={this.props.assignedOrgUnits? this.props.assignedOrgUnits: []}
+                    assignedOrgUnits={this.props.assignedOrgUnits ? this.props.assignedOrgUnits : []}
                     addCheckBox={this.props.addCheckBox}
                     clickHandler={this.props.clickHandler}
                     orgUnits={this.props.orgUnits}
