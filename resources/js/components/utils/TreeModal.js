@@ -116,7 +116,7 @@ class TreeModal extends React.Component {
                                                         ? 'active  show' : ''}`} >
                                                     {/* if delete org permission not defined, edit is define as this pop up shows in either or both defined*/}
                                                     
-                                                    <strong>CliCk Save to delete selected org unit</strong>
+                                                    <strong>CliCk Save to delete {this.props.currentSelectedOrg ? this.props.currentSelectedOrg.name : 'error'}</strong>
                                                     <p>Deleting organisation units will detach users from assigned org units, proceed?</p>
                                                 </div>
 
