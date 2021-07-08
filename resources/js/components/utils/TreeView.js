@@ -103,6 +103,9 @@ class TreeView extends React.Component {
                 let orgUnitToDelete =this.state.currentSelectedOrg;
                 orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id']
                 let returnedData = await DeleteOrg(orgUnitToDelete);
+                localStorage.removeItem('orgunitList');
+                localStorage.removeItem("treeStruc");
+                localStorage.removeItem("orgunitTableStruc");
                 let message = returnedData.data.Message + ". Your brower might freeze as the tree is refreshed";
                 this.setState({ alertMessage: message });
                 $('#alertMessageModal').modal('toggle');
