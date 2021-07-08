@@ -66,11 +66,15 @@ class Register extends React.Component {
     }
 
     updateCurrentUser() {
-
         if (this.state.first_name.length == 0 ||
             this.state.email.length == 0 ||
-            this.state.assignedOrgUnits.length == 0 ||
+            this.state.selectedOrgs.length == 0 ||
             Object.keys(this.state.selectedOrgs).length == 0) {
+
+                console.log(this.state.first_name.length == 0 ,
+                    this.state.email.length == 0 ,
+                    this.state.selectedOrgs.length == 0,
+                    Object.keys(this.state.selectedOrgs).length == 0);
             this.setState({
                 message: "Kindly fill in the required data marked in *",
                 closeRegisterPage: false
@@ -144,6 +148,7 @@ class Register extends React.Component {
     };
 
     selectOrgUnitHandler(orgunit) {
+       
         let selectedOrgs = { ...this.state.selectedOrgs };
         if (orgunit.id in selectedOrgs) {
             delete selectedOrgs[orgunit.id];
