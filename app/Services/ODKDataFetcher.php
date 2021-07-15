@@ -180,11 +180,20 @@ class ODKDataFetcher
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
         //delete previous downloade data
+        Log::info("delete any previous downloads");
         try {
             Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
         }
+
+        try {
+            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
+        } catch (Exception $e) {
+            echo 'Message: ' . $e->getMessage();
+        }
+
+        Log::info("downloading new submissions");
 
         Http::withOptions([
             'verify' => false, //'debug' => true,
@@ -192,6 +201,14 @@ class ODKDataFetcher
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
+
+        Http::withOptions([
+            'verify' => false, //'debug' => true,
+            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $response['token'],
+        ])->get($formSubmissionsUrl.".zip?attachments=false");
+
     }
 
     private function getOrgunitIdOfsubmmission($response, $projectId, $formId)
