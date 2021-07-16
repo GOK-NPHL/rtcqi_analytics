@@ -57,9 +57,52 @@ class ODkHTSDataAggregator
                 $payload[] = $payld;
             }
         } else {
-            [$recordsReadData, $payload] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+            [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+            $payload = array();
+            $payload[] = $payld;
         }
 
+        $payload = $this->aggregateAgreementRates($payload);
+
+        return $payload;
+    }
+
+    private function aggregateAgreementRates($payload)
+    {
+
+        foreach ($payload as $payldkey => $payld) {
+            foreach ($payld as $countykey => $county) {
+
+                foreach ($county['overall_agreement_rate'] as $monthlySiteskey => $monthlySites) {
+
+                    $scores = array();
+                    $scores['>98'] = 0;
+                    $scores['95-98'] = 0;
+                    $scores['<95'] = 0;
+                    $scores['total_sites'] = 0;
+                    $monthlySites['totals'] = $scores;
+                    foreach ($monthlySites as $site) {
+                        try {
+                            $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                            $monthlySites['totals']['total_sites'] += 1;
+                            $agreementRate = $agreement * 100;
+                            if ($agreementRate > 98) {
+                                $monthlySites['totals']['>98'] += 1;
+                            } else if ($agreementRate >= 95 && $agreementRate <= 98) {
+                                $monthlySites['totals']['95-98'] += 1;
+                            } else if ($agreementRate < 95) {
+                                $monthlySites['totals']['<95'] += 1;
+                            }
+                        } catch (Exception $ex) {
+                        }
+                    }
+                    $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
+                    $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
+                }
+                $payld[$countykey] = $county;
+            }
+            $payload[$payldkey] = $payld;
+        }
         return $payload;
     }
 
@@ -105,10 +148,14 @@ class ODkHTSDataAggregator
 
         $yr = date("Y", $dateValue);
         $mon = date("m", $dateValue);
+        $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
 
-        $monthScoreMap[$yr . '-' . $mon]['t1_reactive'] += $record['Section-section0-testreactive'];
-        $monthScoreMap[$yr . '-' . $mon]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
-        $monthScoreMap[$yr . '-' . $mon]['t2_reactive'] += $record['Section-section1-testreactive1'];
+        if (!array_key_exists('t1_reactive', $monthScoreMap[$yr . '-' . $mon])) {
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array('t1_reactive' => 0, 't1_non_reactive' => 0, 't2_reactive' => 0);
+        }
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
 
         $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
 
@@ -189,9 +236,6 @@ class ODkHTSDataAggregator
         $monthScoreMap = []; //summation
         $rowsPerMonthAndScoreCounter = [];
 
-        Log::info($this->startDate);
-        Log::info($this->endDate);
-
         $startDate = date_create($this->startDate)->modify('first day of this month');
 
         $endDate = date_create($this->endDate)->modify('first day of next month');
@@ -201,15 +245,14 @@ class ODkHTSDataAggregator
         $period   = new DatePeriod($startDate, $interval, $endDate);
 
         foreach ($period as $dt) {
-            $monthScoreMap[$dt->format("Y-m")]['t1_reactive'] = 0;
-            $monthScoreMap[$dt->format("Y-m")]['t1_non_reactive'] = 0;
-            $monthScoreMap[$dt->format("Y-m")]['t2_reactive'] = 0;
+            $monthScoreMap[$dt->format("Y-m")] = array();
+            $monthScoreMap[$dt->format("Y-m")] = array();
+            $monthScoreMap[$dt->format("Y-m")] = array();
 
             $rowsPerMonthAndScoreCounter[$dt->format("Y-m")] = 0;
         }
 
         foreach ($records as $record) {
-            Log::info("Start record traversal =========>>");
             $shouldProcessRecord = true;
 
             $recordDate = strtotime($record['registerstartdate']);
@@ -237,8 +280,6 @@ class ODkHTSDataAggregator
                 [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section] =
                     $this->processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section);
             }
-
-            Log::info("end record traversal ========>>");
         }
 
         $results = array();
@@ -320,13 +361,10 @@ class ODkHTSDataAggregator
             foreach ($recordsRepeat as $record) {
                 $combinedRecords[] = array_merge($keyArray[$record['PARENT_KEY']], $record);
             }
-            Log::info("==========>>");
-            Log::info(count($combinedRecords));
-            
+
             return $combinedRecords;
         } catch (Exception $ex) {
             Log::error("could not open " . $file . ' ' . $formId);
-            //Log::error($ex);
             return [];
         }
     }
@@ -351,9 +389,6 @@ class ODkHTSDataAggregator
 
         return $monthScoreMap;
     }
-
-
-
 
     private function getFileToProcess($projectId, $formId)
     {
