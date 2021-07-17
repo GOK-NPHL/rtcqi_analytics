@@ -20,12 +20,19 @@ class OverallStackedHorizontal extends React.Component {
                 },
                 grid: {
                     left: '3%',
-                    right: '4%',
-                    bottom: '3%',
+                    // right: '4%',
+                    // bottom: '3%',
                     containLabel: true
                 },
                 xAxis: {
                     type: 'value'
+                },
+                toolbox: {
+                    right: 20,
+                    top: 0,
+                    feature: {
+                        saveAsImage: {}
+                    }
                 },
                 yAxis: {
                     type: 'category',
