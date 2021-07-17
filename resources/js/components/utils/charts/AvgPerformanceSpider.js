@@ -20,6 +20,13 @@ class AvgPerformanceSpider extends React.Component {
                 tooltip: {
                     trigger: 'axis'
                 },
+                toolbox: {
+                    right: 20,
+                    top: 0,
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
                 radar:
                 {
                     // indicator: [
