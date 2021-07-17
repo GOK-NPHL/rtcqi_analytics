@@ -72,33 +72,36 @@ class ODkHTSDataAggregator
 
         foreach ($payload as $payldkey => $payld) {
             foreach ($payld as $countykey => $county) {
-
-                foreach ($county['overall_agreement_rate'] as $monthlySiteskey => $monthlySites) {
-
-                    $scores = array();
-                    $scores['>98'] = 0;
-                    $scores['95-98'] = 0;
-                    $scores['<95'] = 0;
-                    $scores['total_sites'] = 0;
-                    $monthlySites['totals'] = $scores;
-                    foreach ($monthlySites as $site) {
-                        try {
-                            $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
-                            $monthlySites['totals']['total_sites'] += 1;
-                            $agreementRate = $agreement * 100;
-                            if ($agreementRate > 98) {
-                                $monthlySites['totals']['>98'] += 1;
-                            } else if ($agreementRate >= 95 && $agreementRate <= 98) {
-                                $monthlySites['totals']['95-98'] += 1;
-                            } else if ($agreementRate < 95) {
-                                $monthlySites['totals']['<95'] += 1;
+                try {
+                    foreach ($county['overall_agreement_rate'] as $monthlySiteskey => $monthlySites) {
+                        $scores = array();
+                        $scores['>98'] = 0;
+                        $scores['95-98'] = 0;
+                        $scores['<95'] = 0;
+                        $scores['total_sites'] = 0;
+                        $monthlySites['totals'] = $scores;
+                        foreach ($monthlySites as $site) {
+                            try {
+                                $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                                $monthlySites['totals']['total_sites'] += 1;
+                                $agreementRate = $agreement * 100;
+                                if ($agreementRate > 98) {
+                                    $monthlySites['totals']['>98'] += 1;
+                                } else if ($agreementRate >= 95 && $agreementRate <= 98) {
+                                    $monthlySites['totals']['95-98'] += 1;
+                                } else if ($agreementRate < 95) {
+                                    $monthlySites['totals']['<95'] += 1;
+                                }
+                            } catch (Exception $ex) {
                             }
-                        } catch (Exception $ex) {
                         }
+                        $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
+                        $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
                     }
-                    $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
-                    $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
+                } catch (Exception $ex) {
+                    Log::error($ex);
                 }
+
                 $payld[$countykey] = $county;
             }
             $payload[$payldkey] = $payld;
@@ -172,7 +175,7 @@ class ODkHTSDataAggregator
 
             $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
             $monthScoreMap = $valueAccumulations[0];
-            $rowCounters = $valueAccumulations[1];
+            $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
             //$score =  $this->callFunctionBysecition($section, $record);
         } else {
             Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
@@ -194,7 +197,7 @@ class ODkHTSDataAggregator
 
                                         $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
                                         $monthScoreMap = $valueAccumulations[0];
-                                        $rowCounters = $valueAccumulations[1];
+                                        $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
                                         // $score =  $this->callFunctionBysecition($section, $record) ;
                                     }
                                 } else {
@@ -202,7 +205,7 @@ class ODkHTSDataAggregator
 
                                     $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
                                     $monthScoreMap = $valueAccumulations[0];
-                                    $rowCounters = $valueAccumulations[1];
+                                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
                                     // $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                 }
                             }
@@ -211,7 +214,7 @@ class ODkHTSDataAggregator
 
                             $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
                             $monthScoreMap = $valueAccumulations[0];
-                            $rowCounters = $valueAccumulations[1];
+                            $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
                             //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                         }
                     }
@@ -220,13 +223,13 @@ class ODkHTSDataAggregator
 
                     $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
                     $monthScoreMap = $valueAccumulations[0];
-                    $rowCounters = $valueAccumulations[1];
+                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
                     //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                 }
             }
         }
 
-        return [$record, $monthScoreMap, $orgUnit, $rowCounters, $rowCounter, $section];
+        return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
     }
 
     private function getSummationValues($records, $orgUnit, $section)
