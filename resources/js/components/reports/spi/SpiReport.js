@@ -345,7 +345,7 @@ class SpiReport extends React.Component {
             </table>
         </div>;
 
-        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts serverData={this.state.odkData} siteType={this.state.siteType} />
+        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
         let overallPerformanceRadar = <OverallPerformanceRadar minHeight={this.state.echartsMinHeight} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
 
 

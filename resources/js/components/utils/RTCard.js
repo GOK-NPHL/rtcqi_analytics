@@ -39,14 +39,14 @@ class RTCard extends React.Component {
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                             </a>
-                            <div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                            {/* <div className="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                 aria-labelledby="dropdownMenuLink">
                                 <div className="dropdown-header">Download:</div>
                                 <a className="dropdown-item" href="#">Export SVG</a>
                                 <a className="dropdown-item" href="#">Export PNG</a>
                                 <div className="dropdown-divider"></div>
                                 <a className="dropdown-item" href="#">Export PDF</a>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     {/* Card Body */}

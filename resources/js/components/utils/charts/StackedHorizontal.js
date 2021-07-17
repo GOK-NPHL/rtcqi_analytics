@@ -20,13 +20,21 @@ class StackedHorizontal extends React.Component {
                 },
                 grid: {
                     left: '3%',
-                    right: '4%',
-                    bottom: '3%',
+                    // right: '4%',
+                    // bottom: '3%',
                     containLabel: true
                 },
                 xAxis: {
                     type: 'value'
                 },
+                toolbox: {
+                    right: 20,
+                    top: 0,
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                height: this.props.minHeight-((30/100)*this.props.minHeight),
                 yAxis: {
                     type: 'category',
                     data: ['baseline(Y1_Q4)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)', 'follow-up(Y2_Q1)']
@@ -38,7 +46,7 @@ class StackedHorizontal extends React.Component {
 
     componentDidMount() {
         console.log("load data 2");
-            console.log(this.props.series);
+            console.log(this.props.minHeight);
         this.setState({
             option: {
                 series: this.props.series,

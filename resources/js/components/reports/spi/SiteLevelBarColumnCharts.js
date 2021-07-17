@@ -89,7 +89,7 @@ class SiteLevelBarColumnCharts extends React.Component {
         // return this.createOverallSiteGraphsDisplays(overallSiteGraphsData, counter);
 
         return <RTCard header={orgName} minHeight={this.props.minHeight}> 
-            <StackedHorizontal category={category} series={letSeriesData} />
+            <StackedHorizontal minHeight={this.props.minHeight} category={category} series={letSeriesData} />
         </RTCard>
     }
 
