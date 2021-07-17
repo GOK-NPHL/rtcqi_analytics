@@ -88,7 +88,7 @@ use Illuminate\Support\Facades\Gate;
                         <div class="bg-white py-2 collapse-inner rounded">
                             <h6 class="collapse-header">Reports:</h6>
                             <?php if (Gate::allows('view_pt_report')) { ?>
-                                <a onclick="localStorage.setItem('page', 'Pt');" class="collapse-item" href="{{ route('ptIndex') }}">Pt</a>
+                                <!-- <a onclick="localStorage.setItem('page', 'Pt');" class="collapse-item" href="{{ route('ptIndex') }}">Pt</a> -->
                             <?php } ?>
                             <?php if (Gate::allows('view_log_book_report')) { ?>
                                 <!-- change -->
