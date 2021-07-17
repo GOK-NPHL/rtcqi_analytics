@@ -196,10 +196,14 @@ class LogbookReport extends React.Component {
         }
 
         if (this.state.odkData) {
-            let displayData = this.state.odkData[0];
-            for (let [key, payload] of Object.entries(displayData)) {
-                [tableData] = this.addTableRows(tableData, payload);
-            }
+
+            this.state.odkData.map(displayData => {
+                for (let [key, payload] of Object.entries(displayData)) {
+                    console.log(displayData);
+                    [tableData] = this.addTableRows(tableData, payload);
+                }
+            })
+
         }
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
@@ -217,7 +221,7 @@ class LogbookReport extends React.Component {
 
         </div>;
 
-         let agreementRateColumnCharts = <AgreementRateColumnCharts  minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
 
         return (
 
