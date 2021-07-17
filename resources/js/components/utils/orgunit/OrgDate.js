@@ -60,8 +60,8 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="startDate" className="col-sm-3 col-form-label col-form-label-sm">Start date</label>
-                                <div className="col-sm-9">
+                                <label htmlFor="startDate" className="col-sm-4 col-form-label col-form-label-sm">Start date</label>
+                                <div className="col-sm-8">
                                     <input onChange={() => this.onStartDateChange(event)} type="date"
                                         className="form-control form-control form-control-sm"
                                         id="startDate"
@@ -75,8 +75,8 @@ class OrgDate extends React.Component {
                         <form>
                             <div className="form-group row">
                                 <label htmlFor="endDate"
-                                    className="col-sm-3 col-form-label col-form-label-sm">End date</label>
-                                <div className="col-sm-9">
+                                    className="col-sm-4 col-form-label col-form-label-sm">End date</label>
+                                <div className="col-sm-8">
                                     <input onChange={() => this.onEndDateChange(event)} type="date"
                                         className="form-control form-control form-control-sm"
                                         id="endDate"
