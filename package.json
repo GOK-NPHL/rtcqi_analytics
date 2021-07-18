@@ -31,6 +31,7 @@
         "echarts": "^5.1.0",
         "echarts-for-react": "^3.0.1",
         "jquery.easing": "^1.4.1",
+        "react-csv": "^2.0.3",
         "react-data-table-component": "^6.11.7",
         "react-datepicker": "^3.8.0",
         "react-dropdown-tree-select": "^2.5.1",

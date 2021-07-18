@@ -11,6 +11,7 @@ import OrgTimeline from '../../utils/orgunit/OrgTimeline';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import SiteLevelBarColumnCharts from './SiteLevelBarColumnCharts';
 import OverallPerformanceRadar from './OverallPerformanceRadar';
+import { CSVLink, CSVDownload } from "react-csv";
 
 class SpiReport extends React.Component {
 
@@ -174,7 +175,7 @@ class SpiReport extends React.Component {
         return [timeLines, orgunitName];
     }
 
-    addTableRows(tableData, overaRowllSiteLevels, dataToParse) {
+    addTableRows(tableData, overaRowllSiteLevels, dataToParse, tableDataExport, tableOverallDataExport) {
         for (let [orgUnitId, orgUnitSpiData] of Object.entries(dataToParse)) {
 
             let [timeLines, orgunitName] = this.getTimelineAndOrgunits(orgUnitSpiData);
@@ -185,13 +186,18 @@ class SpiReport extends React.Component {
                     </td>
                 </tr>);
 
+            tableDataExport.push([orgunitName, "", "", ""]);
+
             timeLines.map((timeline) => {
                 let row = [];
+                let exportRow = [];
                 row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
+                exportRow.push(timeline);
 
                 if (this.state.siteType != null) {
                     if (this.state.siteType.length != 0) {
                         row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                        exportRow.push(orgUnitSpiData['OrgUniType']);
                     }
                 }
 
@@ -199,9 +205,10 @@ class SpiReport extends React.Component {
                     if (indicator != 'orgName' && indicator != "OverallSitesLevel") {
 
                         row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
+                        exportRow.push(data[timeline]);
                     }
                 }
-
+                tableDataExport.push(exportRow);
                 tableData.push(<tr key={uuidv4()}>{row}</tr>);
             });
 
@@ -212,14 +219,18 @@ class SpiReport extends React.Component {
                         <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
                     </td>
                 </tr>);
+            tableOverallDataExport.push([orgUnitSpiData['orgName'].toUpperCase(), "", "", ""]);
 
             timeLines.map((timeline) => {
                 let row = [];
+                let tableOverallDataExportRow = [];
                 row.push(<td key={uuidv4()}>{timeline} (N={orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})</td>);
+                tableOverallDataExportRow.push(timeline);
 
                 if (this.state.siteType != null) {
                     if (this.state.siteType.length != 0) {
                         row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                        tableOverallDataExportRow.push(orgUnitSpiData['OrgUniType']);
                     }
                 }
                 for (let [key, val] of Object.entries(orgUnitSpiData)) {
@@ -236,15 +247,23 @@ class SpiReport extends React.Component {
                         row.push(<td key={uuidv4()}>{level2}</td>);
                         row.push(<td key={uuidv4()}>{level3}</td>);
                         row.push(<td key={uuidv4()}>{level4}</td>);
+
+                        tableOverallDataExportRow.push(level0);
+                        tableOverallDataExportRow.push(level1);
+                        tableOverallDataExportRow.push(level2);
+                        tableOverallDataExportRow.push(level3);
+                        tableOverallDataExportRow.push(level4);
                     }
 
                 }
+                tableOverallDataExport.push(tableOverallDataExportRow);
                 overaRowllSiteLevels.push(<tr key={uuidv4()}>{row}</tr>);
             });
 
         }
-        return [tableData, overaRowllSiteLevels];
+        return [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport];
     }
+
     render() {
 
         const imgStyle = {
@@ -258,6 +277,8 @@ class SpiReport extends React.Component {
         // var overallSiteLevels = [];
         let overaRowllSiteLevels = [];
         let tableData = [];
+        let tableDataExport = [];
+        let tableOverallDataExport = [];
         let tableHeaders = <tr>
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
@@ -271,7 +292,9 @@ class SpiReport extends React.Component {
             <th scope="col">External Quality Assessment</th>
             <th scope="col">Overall Performance</th>
         </tr>;
-
+        tableDataExport.push(['___', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
+            'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
+        ]);
         let overallSitesHeaders = <tr>
             <th scope="col">___</th>
             <th scope="col">Level 0 (&lt;40%)</th>
@@ -280,6 +303,9 @@ class SpiReport extends React.Component {
             <th scope="col">Level 3 (80-89%)</th>
             <th scope="col">Level 4 (&gt;90%)</th>
         </tr>;
+        tableOverallDataExport.push(['___', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)',
+            'Level 3 (80-89%)', 'Level 4 (>90%)'
+        ]);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -297,7 +323,10 @@ class SpiReport extends React.Component {
                     <th scope="col">External Quality Assessment</th>
                     <th scope="col">Overall Performance</th>
                 </tr>;
-
+                tableDataExport = [];
+                tableDataExport.push(['___', 'Programme', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
+                    'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
+                ]);
                 overallSitesHeaders = <tr>
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
@@ -306,8 +335,11 @@ class SpiReport extends React.Component {
                     <th scope="col">Level 2 (60-79%)</th>
                     <th scope="col">Level 3 (80-89%)</th>
                     <th scope="col">Level 4 (&gt;90%)</th>
-
                 </tr>
+                tableOverallDataExport = [];
+                tableOverallDataExport.push(['___', 'Programme', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)',
+                    'Level 3 (80-89%)', 'Level 4 (>90%)'
+                ]);
             }
         }
 
@@ -315,15 +347,24 @@ class SpiReport extends React.Component {
             //if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) { //return data comes in different form. list od data
                 this.state.odkData.map((displayData) => {
-                    [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, displayData);
+                    [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = this.addTableRows(tableData, overaRowllSiteLevels, displayData, tableDataExport, tableOverallDataExport);
                 });
             } else {
-                [tableData, overaRowllSiteLevels] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData);
+                [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData, tableDataExport, tableOverallDataExport);
             }
         }
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
-            <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
+            <div className="row">
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
+
+                </div>
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <span><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                </div>
+            </div>
+
             <table className="table table-responsive">
                 <thead className="thead-dark">
                     {tableHeaders}
@@ -334,7 +375,17 @@ class SpiReport extends React.Component {
             </table>
 
             <br />
-            <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+
+            <div className="row">
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+
+                </div>
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                </div>
+            </div>
+
             <table className="table table-responsive">
                 <thead className="thead-dark">
                     {overallSitesHeaders}
@@ -345,7 +396,7 @@ class SpiReport extends React.Component {
             </table>
         </div>;
 
-        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts singleItem={false} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
         let overallPerformanceRadar = <OverallPerformanceRadar minHeight={this.state.echartsMinHeight} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
 
 

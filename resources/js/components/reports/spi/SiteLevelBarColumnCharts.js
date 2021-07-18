@@ -52,9 +52,9 @@ class SiteLevelBarColumnCharts extends React.Component {
         let letSeriesData = [];
 
         for (let [timeline, timeLineObjectValue] of Object.entries(overallSitesObject)) {
-    
+
             if (!category.includes(timeline)) {
-                category.push(timeline +' (N='+ overallSitesObject[timeline]['counter']+ ') ');
+                category.push(timeline + ' (N=' + overallSitesObject[timeline]['counter'] + ') ');
             }
 
             for (let [levelName, levelValue] of Object.entries(timeLineObjectValue)) {
@@ -88,14 +88,13 @@ class SiteLevelBarColumnCharts extends React.Component {
 
         // return this.createOverallSiteGraphsDisplays(overallSiteGraphsData, counter);
 
-        return <RTCard header={orgName} minHeight={this.props.minHeight}> 
+        return <RTCard header={orgName} minHeight={this.props.minHeight}>
             <StackedHorizontal minHeight={this.props.minHeight} category={category} series={letSeriesData} />
         </RTCard>
     }
 
 
     addGraphsToArray(counter, row, columns, overLay, singChart) {
-        console.log("adding to chart")
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -123,8 +122,6 @@ class SiteLevelBarColumnCharts extends React.Component {
 
 
             if (this.props.siteType != null && this.props.siteType.length != 0) {
-                console.log("first 1");
-                console.log(this.props.serverData);
                 if (Array.isArray(this.props.serverData[0])) {
                     this.props.serverData.map((dataObjectParent) => {
                         //data returned comes in two different formtat. Should be written to standardize
@@ -147,8 +144,7 @@ class SiteLevelBarColumnCharts extends React.Component {
                 }
 
             } else {
-                console.log("last 1");
-                console.log(this.props.serverData);
+               
                 for (let [key, dataObject] of Object.entries(this.props.serverData)) {
                     let singChart = this.prepareOverallLevelSiteData(dataObject);
                     [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
@@ -156,15 +152,15 @@ class SiteLevelBarColumnCharts extends React.Component {
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display
                 }
+          
             }
 
         } else {
-            console.log("empty");
         }
 
         return (
             <React.Fragment>
-                {this.props.singleItem ? columns: overLay}
+                {this.props.singleItem ? columns : overLay}
             </React.Fragment>
         );
     }
