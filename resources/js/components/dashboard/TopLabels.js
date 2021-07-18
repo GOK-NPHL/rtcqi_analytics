@@ -3,10 +3,14 @@ import StatsLabel from '../utils/stats/StatsLabel';
 
 class TopLabels extends React.Component {
 
-
     constructor(props) {
         super(props);
         this.state = {
+            externalQualityAssessment: 0,
+            overallPerformance: 0,
+            personellTrainingAndCertification: 0,
+            physicalFacility: 0,
+            timeLine: 'Follow2'
         }
     }
 
@@ -14,12 +18,23 @@ class TopLabels extends React.Component {
 
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
+
+        if (
+            prevProps.serverData.length != this.props.serverData.length
+        ) {
+            this.setState({
+                externalQualityAssessment: this.props.serverData[0]['ExternalQualityAssessment']['follow2'],
+                overallPerformance: this.props.serverData[0]['OverallPerformance']['follow2'],
+                personellTrainingAndCertification: this.props.serverData[0]['PersonellTrainingAndCertification']['follow2'],
+                physicalFacility: this.props.serverData[0]['PhysicalFacility']['follow2']
+            });
+        }
 
     }
 
-
     render() {
+
         return (
 
             <div className="row">
@@ -28,8 +43,8 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-primary'}
                         borderStyling={'border-left-primary'}
-                        text={'Providers Enrolled'}
-                        value={'85.5'}
+                        text={'External Quality Assessment' +` ${this.state.timeLine}`}
+                        value={this.state.externalQualityAssessment}
                         faIcon={'fa-hands'}
                     ></StatsLabel>
                 </div>
@@ -38,8 +53,8 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-success'}
                         borderStyling={'border-left-success'}
-                        text={'Sites using standardized HTC register'}
-                        value={'69'}
+                        text={'Overall Performance' +` ${this.state.timeLine}`}
+                        value={this.state.overallPerformance}
                         faIcon={'fa-book'}
                     ></StatsLabel>
                 </div>
@@ -48,25 +63,23 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-info'}
                         borderStyling={'border-left-info'}
-                        text={'Personnel Training & Certification'}
-                        value={'91.4'}
+                        text={'Personell Training And Certification' +` ${this.state.timeLine}`}
+                        value={this.state.personellTrainingAndCertification}
                         faIcon={'fa-certificate'}
                     ></StatsLabel>
                 </div>
-
 
                 <div className="col-xl-3 col-md-6 mb-4">
                     <StatsLabel
                         textStyling={' text-warning'}
                         borderStyling={'border-left-warning'}
-                        text={'Policy/MOH support'}
-                        value={'34.6'}
+                        text={'Physical Facility' +` ${this.state.timeLine}`}
+                        value={this.state.physicalFacility}
                         faIcon={'fa-hands-helping'}
                     ></StatsLabel>
                 </div>
 
             </div>
-
         );
     }
 }

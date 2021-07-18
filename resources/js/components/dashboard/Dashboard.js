@@ -18,7 +18,7 @@ class Dashboard extends React.Component {
             orgUnitTimeline: [],
             siteType: [],
             echartsMinHeight: '',
-
+            odkData: [],
             allowedPermissions: [],
             dataset1: {
                 dimensions: ['indicator', 'Baseline(Round 13)', 'Y1_Q4(round 14)', 'Y2_Q1(round 15)', 'Y2_Q2(round 16)'],
@@ -117,7 +117,7 @@ class Dashboard extends React.Component {
             this.setState({
                 unfilteredOrgUnits: returnedData,
                 orgUnits: orgs,
-                odkData: {},
+                odkData: [],
                 orgLevel: 1,
                 orgId: 1,
                 allowedPermissions: allowedPermissions
@@ -157,6 +157,7 @@ class Dashboard extends React.Component {
     }
 
     render() {
+        
         let dashBoardContent = '';
         if (this.state.allowedPermissions.length > 0 &&
             this.state.allowedPermissions.includes('view_dashboard')) {
@@ -171,7 +172,7 @@ class Dashboard extends React.Component {
                 </div>
 
 
-                <TopLabels />
+                <TopLabels serverData={this.state.odkData}/>
 
                 <div className="row">
                     <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
@@ -179,13 +180,12 @@ class Dashboard extends React.Component {
                 </div>
             </React.Fragment>
         }
-        console.log("ff")
-        console.log();
+
         return (
-            
+
             <React.Fragment>
                 {dashBoardContent}
-                {this.state.unfilteredOrgUnits?'':<p style={{"color": "red"}}>You have no orgunits attached</p>}
+                {this.state.unfilteredOrgUnits ? '' : <p style={{ "color": "red" }}>You have no orgunits attached</p>}
             </React.Fragment>
         );
     }
