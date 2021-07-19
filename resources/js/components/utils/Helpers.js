@@ -112,6 +112,7 @@ export async function SaveRole(roleName, authoritiesSelected) {
                 authoritiesSelected: authoritiesSelected
             }
         });
+        return response;
         console.log("saved role");
     } catch (err) {
         // Handle Error Here
@@ -150,6 +151,7 @@ export async function UpdateRole(role_id, roleName, authoritiesSelected) {
                 authoritiesSelected: authoritiesSelected
             }
         });
+        return response;
     } catch (err) {
         // Handle Error Here
         return err.response

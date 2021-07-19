@@ -76,10 +76,17 @@ class RoleCreate extends React.Component {
                     let returnedData = '';
                     (async () => {
                         returnedData = await UpdateRole(this.props.roleToEdit.role_id, this.state.roleName, this.state.selected);
-
+                        console.log(returnedData);
+                        if (returnedData) {
+                            this.setState({
+                                responseMessage: returnedData.data.Message
+                            })
+                            $('#saveRoleModal').modal('toggle');
+                            this.props.toggleDisplay();
+                            this.props.fetchRoles();
+                        }
                     })();
-                    this.props.toggleDisplay();
-                    this.props.fetchRoles();
+
                 }
             }
 
@@ -88,8 +95,16 @@ class RoleCreate extends React.Component {
                 if (this.state.allowedPermissions.includes('add_role')) {
                     (async () => {
                         let returnedData = await SaveRole(this.state.roleName, this.state.selected);
-                        this.props.fetchRoles();
-                        this.props.toggleDisplay();
+                        console.log(returnedData);
+                        if (returnedData) {
+                            this.setState({
+                                responseMessage: returnedData.data.Message
+                            })
+                            $('#saveRoleModal').modal('toggle');
+                            this.props.toggleDisplay();
+                            this.props.fetchRoles();
+                        }
+
                     })();
                 }
             }
@@ -100,7 +115,7 @@ class RoleCreate extends React.Component {
     render() {
         console.log("perm 1")
         console.log(this.state.selected)
-        
+
         console.log(this.state.permissionOptions)
         console.log("perm 2")
         let pageContent = <div id="registration_form" className="card shadow mb-4">
@@ -111,26 +126,26 @@ class RoleCreate extends React.Component {
 
                 <div className="card mb-4 py-3 border-left-secondary">
                     <div className="card-body">
-                        
-                            <div className="form-row">
-                                <div className="col-md-12 mb-3">
-                                    <label htmlFor="role_name">Role name</label>
-                                    <input type="text" onChange={event => this.setState({ roleName: event.target.value })}
-                                        value={this.state.roleName} className="form-control" id="role_name" required />
-                                    <div className="valid-tooltip">Role name</div>
-                                </div>
-                                <div className="col-md-12 mb-3">
-                                    <label htmlFor="permissions">Assign permissions</label>
-                                    <DualListBox
-                                        canFilter
-                                        options={this.state.permissionOptions}
-                                        selected={this.state.selected}
-                                        onChange={this.authoritiesOnChange}
-                                    />
-                                </div>
+
+                        <div className="form-row">
+                            <div className="col-md-12 mb-3">
+                                <label htmlFor="role_name">Role name</label>
+                                <input type="text" onChange={event => this.setState({ roleName: event.target.value })}
+                                    value={this.state.roleName} className="form-control" id="role_name" required />
+                                <div className="valid-tooltip">Role name</div>
                             </div>
-                            <button onClick={()=> this.saveRole()} className="btn btn-primary">Save Role</button>
-                        
+                            <div className="col-md-12 mb-3">
+                                <label htmlFor="permissions">Assign permissions</label>
+                                <DualListBox
+                                    canFilter
+                                    options={this.state.permissionOptions}
+                                    selected={this.state.selected}
+                                    onChange={this.authoritiesOnChange}
+                                />
+                            </div>
+                        </div>
+                        <button onClick={() => this.saveRole()} className="btn btn-primary">Save Role</button>
+
                     </div>
                 </div>
 
@@ -148,6 +163,26 @@ class RoleCreate extends React.Component {
         return (
             <React.Fragment>
                 {pageContent}
+                < div className="modal fade" id="saveRoleModal" tabIndex="-1" role="dialog" aria-labelledby="saveRoleModalTitle" aria-hidden="true" >
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="saveRoleModalTitle">Notice!</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {
+                                    this.state.responseMessage ? this.state.responseMessage : ''
+                                }
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div >
             </React.Fragment>
         );
     }
