@@ -22,6 +22,8 @@ class TopLabels extends React.Component {
         if (
             prevProps.serverData != this.props.serverData
         ) {
+            console.log("run data ====>>>")
+            console.log(this.props.serverData)
             this.props.serverData.map((dataObjectParent) => {
 
                 this.setState({
