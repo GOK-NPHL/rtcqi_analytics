@@ -31,6 +31,7 @@ class TopLabels extends React.Component {
                 personellTrainingAndCertification: this.props.serverData[0]['PersonellTrainingAndCertification']['follow2'],
                 physicalFacility: this.props.serverData[0]['PhysicalFacility']['follow2']
             });
+            console.log("hunt bug 2-");
         }
 
     }

@@ -143,6 +143,7 @@ class AgreementRateColumnCharts extends React.Component {
                     let singChart = this.prepareOverallLevelSiteData(dataObject);
                     [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
                 }
+                console.log("hunt bug 3-");
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display
                 }

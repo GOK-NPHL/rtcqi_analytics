@@ -144,6 +144,7 @@ class SiteLevelBarColumnCharts extends React.Component {
                         overLay.push(row); //push remaining graphs in display
                     }
                 }
+                console.log("hunt bug 1-");
 
             } else {
                

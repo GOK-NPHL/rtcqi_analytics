@@ -157,6 +157,7 @@ class OverallPerformanceRadar extends React.Component {
                         overLay.push(row); //push remaining graphs in display
                     }
                 }
+                console.log("first 1-");
 
             } else {
                 console.log("last 1");
