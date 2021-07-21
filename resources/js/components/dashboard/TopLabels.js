@@ -23,6 +23,8 @@ class TopLabels extends React.Component {
         if (
             prevProps.serverData.length != this.props.serverData.length
         ) {
+            console.log("hunt bug 2");
+                console.log(this.props.serverData);
             this.setState({
                 externalQualityAssessment: this.props.serverData[0]['ExternalQualityAssessment']['follow2'],
                 overallPerformance: this.props.serverData[0]['OverallPerformance']['follow2'],
