@@ -19,19 +19,19 @@ class TopLabels extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-
         if (
-            prevProps.serverData.length != this.props.serverData.length
+            prevProps.serverData != this.props.serverData
         ) {
-            console.log("hunt bug 2");
-                console.log(this.props.serverData);
-            this.setState({
-                externalQualityAssessment: this.props.serverData[0]['ExternalQualityAssessment']['follow2'],
-                overallPerformance: this.props.serverData[0]['OverallPerformance']['follow2'],
-                personellTrainingAndCertification: this.props.serverData[0]['PersonellTrainingAndCertification']['follow2'],
-                physicalFacility: this.props.serverData[0]['PhysicalFacility']['follow2']
+            this.props.serverData.map((dataObjectParent) => {
+
+                this.setState({
+                    externalQualityAssessment: dataObjectParent['ExternalQualityAssessment']['follow2'],
+                    overallPerformance: dataObjectParent['OverallPerformance']['follow2'],
+                    personellTrainingAndCertification: dataObjectParent['PersonellTrainingAndCertification']['follow2'],
+                    physicalFacility: dataObjectParent['PhysicalFacility']['follow2']
+                });
+
             });
-            console.log("hunt bug 2-");
         }
 
     }
@@ -46,7 +46,7 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-primary'}
                         borderStyling={'border-left-primary'}
-                        text={'External Quality Assessment' +` ${this.state.timeLine}`}
+                        text={'External Quality Assessment' + ` ${this.state.timeLine}`}
                         value={this.state.externalQualityAssessment}
                         faIcon={'fa-hands'}
                     ></StatsLabel>
@@ -56,7 +56,7 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-success'}
                         borderStyling={'border-left-success'}
-                        text={'Overall Performance' +` ${this.state.timeLine}`}
+                        text={'Overall Performance' + ` ${this.state.timeLine}`}
                         value={this.state.overallPerformance}
                         faIcon={'fa-book'}
                     ></StatsLabel>
@@ -66,7 +66,7 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={'text-info'}
                         borderStyling={'border-left-info'}
-                        text={'Personell Training And Certification' +` ${this.state.timeLine}`}
+                        text={'Personell Training And Certification' + ` ${this.state.timeLine}`}
                         value={this.state.personellTrainingAndCertification}
                         faIcon={'fa-certificate'}
                     ></StatsLabel>
@@ -76,7 +76,7 @@ class TopLabels extends React.Component {
                     <StatsLabel
                         textStyling={' text-warning'}
                         borderStyling={'border-left-warning'}
-                        text={'Physical Facility' +` ${this.state.timeLine}`}
+                        text={'Physical Facility' + ` ${this.state.timeLine}`}
                         value={this.state.physicalFacility}
                         faIcon={'fa-hands-helping'}
                     ></StatsLabel>

@@ -172,7 +172,7 @@ class Dashboard extends React.Component {
                 </div>
 
 
-                {/* <TopLabels serverData={this.state.odkData}/> */}
+                <TopLabels serverData={this.state.odkData}/>
 
                 <div className="row">
                     <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
