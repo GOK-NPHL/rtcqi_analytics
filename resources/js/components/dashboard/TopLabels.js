@@ -25,12 +25,12 @@ class TopLabels extends React.Component {
         ) {
             console.log("hunt bug 2");
                 console.log(this.props.serverData);
-            // this.setState({
-            //     externalQualityAssessment: this.props.serverData[0]['ExternalQualityAssessment']['follow2'],
-            //     overallPerformance: this.props.serverData[0]['OverallPerformance']['follow2'],
-            //     personellTrainingAndCertification: this.props.serverData[0]['PersonellTrainingAndCertification']['follow2'],
-            //     physicalFacility: this.props.serverData[0]['PhysicalFacility']['follow2']
-            // });
+            this.setState({
+                externalQualityAssessment: this.props.serverData[0]['ExternalQualityAssessment']['follow2'],
+                overallPerformance: this.props.serverData[0]['OverallPerformance']['follow2'],
+                personellTrainingAndCertification: this.props.serverData[0]['PersonellTrainingAndCertification']['follow2'],
+                physicalFacility: this.props.serverData[0]['PhysicalFacility']['follow2']
+            });
             console.log("hunt bug 2-");
         }
 
