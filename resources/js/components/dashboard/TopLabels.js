@@ -22,40 +22,38 @@ class TopLabels extends React.Component {
         if (
             prevProps.serverData != this.props.serverData
         ) {
-           
+
             console.log("data to parse =====>");
             console.log(this.props.serverData);
 
             if (Array.isArray(this.props.serverData)) {
+                console.log("data processing =====>");
+                console.log(this.props.serverData);
                 this.props.serverData.map((dataObjectParent) => {
-                    
+
                     this.setState({
-                        externalQualityAssessment: dataObjectParent[0]['ExternalQualityAssessment']['follow2'],
-                        overallPerformance: dataObjectParent[0]['OverallPerformance']['follow2'],
-                        personellTrainingAndCertification: dataObjectParent[0]['PersonellTrainingAndCertification']['follow2'],
-                        physicalFacility: dataObjectParent[0]['PhysicalFacility']['follow2']
+                        externalQualityAssessment: dataObjectParent['ExternalQualityAssessment']['follow2'],
+                        overallPerformance: dataObjectParent['OverallPerformance']['follow2'],
+                        personellTrainingAndCertification: dataObjectParent['PersonellTrainingAndCertification']['follow2'],
+                        physicalFacility: dataObjectParent['PhysicalFacility']['follow2']
                     });
 
                 });
-              
+
             } else {
-                this.props.serverData.map((dataObjectParent) => {
-                    for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                    
-                        this.setState({
-                            externalQualityAssessment: orgUnitDataObject['ExternalQualityAssessment']['follow2'],
-                            overallPerformance: orgUnitDataObject['OverallPerformance']['follow2'],
-                            personellTrainingAndCertification: orgUnitDataObject['PersonellTrainingAndCertification']['follow2'],
-                            physicalFacility: orgUnitDataObject['PhysicalFacility']['follow2']
-                        });
-                    }
-                });
-                if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
+                for (let [orgId, orgUnitDataObject] of Object.entries(this.props.serverData)) {
+
+                    this.setState({
+                        externalQualityAssessment: orgUnitDataObject['ExternalQualityAssessment']['follow2'],
+                        overallPerformance: orgUnitDataObject['OverallPerformance']['follow2'],
+                        personellTrainingAndCertification: orgUnitDataObject['PersonellTrainingAndCertification']['follow2'],
+                        physicalFacility: orgUnitDataObject['PhysicalFacility']['follow2']
+                    });
                 }
+
             }
 
-          
+
         }
 
     }
