@@ -35,3 +35,4 @@ nbproject/
 .history/
 
 storage/*.csv
+package-lock.json
