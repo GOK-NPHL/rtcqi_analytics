@@ -274,6 +274,12 @@ class SpiReport extends React.Component {
         doc.save('Average_performance.pdf')
     }
 
+    exportOverallSiteLevelsPDFData() {
+        const doc = new jsPDF();
+        doc.autoTable({ html: '#overallSiteLevelPerformance' });
+        doc.save('Overall_Site_Levels.pdf')
+    }
+    
     render() {
 
         const imgStyle = {
@@ -394,12 +400,15 @@ class SpiReport extends React.Component {
                     <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
 
                 </div>
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                </div>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <a style={{"color": "blue"}} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
                 </div>
             </div>
 
-            <table className="table table-responsive">
+            <table id="overallSiteLevelPerformance" className="table table-responsive">
                 <thead className="thead-dark">
                     {overallSitesHeaders}
                 </thead>
