@@ -12,6 +12,8 @@ import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import SiteLevelBarColumnCharts from './SiteLevelBarColumnCharts';
 import OverallPerformanceRadar from './OverallPerformanceRadar';
 import { CSVLink, CSVDownload } from "react-csv";
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 class SpiReport extends React.Component {
 
@@ -32,6 +34,8 @@ class SpiReport extends React.Component {
         this.getTimelineAndOrgunits = this.getTimelineAndOrgunits.bind(this);
         this.addTableRows = this.addTableRows.bind(this);
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
+        this.exportAveragePerformancePDFData = this.exportAveragePerformancePDFData.bind(this);
+        
     }
 
     componentDidMount() {
@@ -264,6 +268,12 @@ class SpiReport extends React.Component {
         return [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport];
     }
 
+    exportAveragePerformancePDFData() {
+        const doc = new jsPDF();
+        doc.autoTable({ html: '#averagePerformance' });
+        doc.save('Average_performance.pdf')
+    }
+
     render() {
 
         const imgStyle = {
@@ -357,15 +367,18 @@ class SpiReport extends React.Component {
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
                 <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
+                    <p style={{ fontWeight: "900"}}>Average Performance  per QA element</p>
 
                 </div>
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <span><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <span style={{"color": "blue"}}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                </div>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <a style={{"color": "blue"}} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
                 </div>
             </div>
 
-            <table className="table table-responsive">
+            <table id="averagePerformance" className="table table-responsive">
                 <thead className="thead-dark">
                     {tableHeaders}
                 </thead>

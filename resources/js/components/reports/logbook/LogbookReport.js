@@ -12,6 +12,8 @@ import AgreementRateColumnCharts from './AgreementRateColumnCharts';
 
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import { CSVLink, CSVDownload } from "react-csv";
+
 
 class LogbookReport extends React.Component {
 
@@ -124,7 +126,7 @@ class LogbookReport extends React.Component {
         }
     }
 
-    addTableRows(tableData, dataToParse) {
+    addTableRows(tableData, dataToParse, tableDataExport) {
 
         tableData.push(
             <tr key={uuidv4()}>
@@ -132,20 +134,23 @@ class LogbookReport extends React.Component {
                     <strong>{dataToParse.orgName.toUpperCase()}</strong>
                 </td>
             </tr>);
-
+        tableDataExport.push([dataToParse.orgName.toUpperCase()]);
         const monthNames = ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
         for (let [period, totals] of Object.entries(dataToParse.overall_agreement_rate)) {
 
             let row = [];
+            let exportData = [];
             const d = new Date(period);
 
             row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={totals['totals']['total_sites']})</td>);
-
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + totals['totals']['total_sites'] + ")"
+            exportData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
                     row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    exportData.push(dataToParse['OrgUniType']);
                 }
             }
             let percent1 = ((Number(totals['totals']["<95"]) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
@@ -157,13 +162,17 @@ class LogbookReport extends React.Component {
             if (isNaN(percent3)) percent3 = 0;
 
             row.push(<td key={uuidv4()} scope="row">{percent1}</td>);
+            exportData.push(percent1);
             row.push(<td key={uuidv4()} scope="row">{percent2}</td>);
+            exportData.push(percent2);
             row.push(<td key={uuidv4()} scope="row">{percent3}</td>);
-            tableData.push(<tr key={uuidv4()}>{row}</tr>);
+            exportData.push(percent3);
 
+            tableData.push(<tr key={uuidv4()}>{row}</tr>);
+            tableDataExport.push(exportData);
         }
 
-        return [tableData];
+        return [tableData, tableDataExport];
     }
 
     exportAgreementsRatesPDFData() {
@@ -194,6 +203,10 @@ class LogbookReport extends React.Component {
 
         </tr>;
 
+        let tableDataExport = [];
+
+        tableDataExport.push(['___', '<95%', '95%-98%', '>98%'
+        ]);
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
                 tableHeaders = <tr>
@@ -205,7 +218,11 @@ class LogbookReport extends React.Component {
                     <th scope="col">&#62;98%</th>
 
                 </tr>;
+                tableDataExport = [];
+                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%'
+                ]);
             }
+
         }
 
         if (this.state.odkData) {
@@ -213,7 +230,7 @@ class LogbookReport extends React.Component {
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
                     console.log(displayData);
-                    [tableData] = this.addTableRows(tableData, payload);
+                    [tableData, tableDataExport] = this.addTableRows(tableData, payload, tableDataExport);
                 }
             })
 
@@ -224,9 +241,13 @@ class LogbookReport extends React.Component {
                 <div className="col-sm-6  col-xm-6 col-md-6">
                     <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
                 </div>
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <span onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
                 </div>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                </div>
+
             </div>
 
             <table id="agreementRates" className="table table-responsive">
