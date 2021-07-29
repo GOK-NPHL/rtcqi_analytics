@@ -10,6 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import AgreementRateColumnCharts from './AgreementRateColumnCharts';
 
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+
 class LogbookReport extends React.Component {
 
     constructor(props) {
@@ -26,6 +29,8 @@ class LogbookReport extends React.Component {
         this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
         this.addTableRows = this.addTableRows.bind(this);
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
+        this.exportAgreementsRatesPDFData = this.exportAgreementsRatesPDFData.bind(this);
+
     }
 
     componentDidMount() {
@@ -161,6 +166,14 @@ class LogbookReport extends React.Component {
         return [tableData];
     }
 
+    exportAgreementsRatesPDFData() {
+        console.log("exporting");
+        const doc = new jsPDF();
+        doc.autoTable({ html: '#agreementRates' });
+        doc.save('agreement_rates.pdf')
+        console.log("exporting end")
+    }
+
     render() {
 
         const imgStyle = {
@@ -207,8 +220,16 @@ class LogbookReport extends React.Component {
         }
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
-            <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-            <table className="table table-responsive">
+            <div className="row">
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                </div>
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <span onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                </div>
+            </div>
+
+            <table id="agreementRates" className="table table-responsive">
                 <thead className="thead-dark">
                     {tableHeaders}
                 </thead>
