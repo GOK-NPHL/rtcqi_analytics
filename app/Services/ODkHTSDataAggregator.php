@@ -41,7 +41,7 @@ class ODkHTSDataAggregator
 
         $currentDate = new DateTime('now');
 
-        $this->startDate = empty($startDate) ?  $currentDate->modify('-6 months')->format("Y-m-d") : $startDate;
+        $this->startDate = empty($startDate) ?  $currentDate->modify('-3 months')->format("Y-m-d") : $startDate;
         $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
 
         $recordsReadData = [];
@@ -70,6 +70,7 @@ class ODkHTSDataAggregator
     private function aggregateAgreementRates($payload)
     {
 
+        $county['overall_concordance_totals'] = [];
         foreach ($payload as $payldkey => $payld) {
             foreach ($payld as $countykey => $county) {
                 try {
@@ -80,11 +81,21 @@ class ODkHTSDataAggregator
                         $scores['<95'] = 0;
                         $scores['total_sites'] = 0;
                         $monthlySites['totals'] = $scores;
+                        $monthlySites['concordance-totals'] = 0;
+
+                        $monthlySites['concordance_t1_reactive'] = 0;
+                        $monthlySites['concordance_t2_reactive'] = 0;
+
                         foreach ($monthlySites as $site) {
                             try {
+
                                 $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
                                 $monthlySites['totals']['total_sites'] += 1;
                                 $agreementRate = $agreement * 100;
+
+                                $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
+                                $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
+
                                 if ($agreementRate > 98) {
                                     $monthlySites['totals']['>98'] += 1;
                                 } else if ($agreementRate >= 95 && $agreementRate <= 98) {
@@ -95,8 +106,17 @@ class ODkHTSDataAggregator
                             } catch (Exception $ex) {
                             }
                         }
+                        $totalConcordance = 0;
+                        try {
+                            $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
+                            $totalConcordance=number_format((float)$totalConcordance, 1, '.', '');
+                        } catch (Exception $ex) {
+                        }
+
                         $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
                         $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
+
+                        $county['overall_concordance_totals'][$monthlySiteskey] = $totalConcordance;
                     }
                 } catch (Exception $ex) {
                     Log::error($ex);
@@ -153,7 +173,8 @@ class ODkHTSDataAggregator
         $mon = date("m", $dateValue);
         $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
 
-        if (!array_key_exists('t1_reactive', $monthScoreMap[$yr . '-' . $mon])) {
+        if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
+            Log::info("initialized");
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array('t1_reactive' => 0, 't1_non_reactive' => 0, 't2_reactive' => 0);
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];

@@ -126,7 +126,7 @@ class LogbookReport extends React.Component {
         }
     }
 
-    addTableRows(tableData, dataToParse, tableDataExport) {
+    addTableRows(tableData, dataToParse, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport) {
 
         tableData.push(
             <tr key={uuidv4()}>
@@ -135,6 +135,15 @@ class LogbookReport extends React.Component {
                 </td>
             </tr>);
         tableDataExport.push([dataToParse.orgName.toUpperCase()]);
+
+        positiveConcordanceTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={2} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        positiveConcordanceTableDataExport.push([dataToParse.orgName.toUpperCase()]);
+
         const monthNames = ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
@@ -172,15 +181,46 @@ class LogbookReport extends React.Component {
             tableDataExport.push(exportData);
         }
 
-        return [tableData, tableDataExport];
+        // positive concordance data loop
+        for (let [period, totals] of Object.entries(dataToParse.overall_concordance_totals)) {
+
+            let positiveConcordanceRow = [];
+            let positiveConcordanceExportData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            positiveConcordanceRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            positiveConcordanceExportData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    positiveConcordanceRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    positiveConcordanceExportData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            positiveConcordanceRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            positiveConcordanceExportData.push(totals);
+
+            positiveConcordanceTableData.push(<tr key={uuidv4()}>{positiveConcordanceRow}</tr>);
+
+            positiveConcordanceTableDataExport.push(positiveConcordanceExportData);
+        }
+        // end positive concordance data loop
+
+
+        return [tableData, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport];
     }
 
     exportAgreementsRatesPDFData() {
-        console.log("exporting");
         const doc = new jsPDF();
         doc.autoTable({ html: '#agreementRates' });
         doc.save('agreement_rates.pdf')
-        console.log("exporting end")
+    }
+
+    exportPositiveConcordancePDFData() {
+        const doc = new jsPDF();
+        doc.autoTable({ html: '#positiveConcordanceRates' });
+        doc.save('positive_concordance_rates.pdf')
     }
 
     render() {
@@ -192,7 +232,7 @@ class LogbookReport extends React.Component {
         const rowStle = {
             marginBottom: "10px"
         };
-
+        // Site agreement Rates
         let tableData = [];
         let tableHeaders = <tr>
             {/* <th scope="col">#</th> */}
@@ -224,13 +264,45 @@ class LogbookReport extends React.Component {
             }
 
         }
+        // End Site agreement Rates
+
+
+        // Positive concordance rate
+        let positiveConcordanceTableData = [];
+        let positiveConcordanceTableHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Positive concordance rate</th>
+
+        </tr>;
+
+        let positiveConcordanceTableDataExport = [];
+
+        positiveConcordanceTableDataExport.push(['___', 'Positive concordance rate']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                positiveConcordanceTableHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Positive concordance rate</th>
+
+                </tr>;
+                positiveConcordanceTableDataExport = [];
+                positiveConcordanceTableDataExport.push(['___', 'Programme', 'Positive concordance rate']);
+            }
+
+        }
+        // End Site agreement Rates
+
 
         if (this.state.odkData) {
 
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
                     console.log(displayData);
-                    [tableData, tableDataExport] = this.addTableRows(tableData, payload, tableDataExport);
+                    [tableData, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport] = this.addTableRows(tableData, payload, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport);
                 }
             })
 
@@ -260,6 +332,30 @@ class LogbookReport extends React.Component {
             </table>
 
             <br />
+
+            {/* Begin Positive concordance rate  */}
+            <div className="row">
+                <div className="col-sm-6  col-xm-6 col-md-6">
+                    <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
+
+                </div>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
+                </div>
+                <div className="col-sm-3  col-xm-3 col-md-3">
+                    <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                </div>
+            </div>
+
+            <table id="positiveConcordanceRates" className="table table-responsive">
+                <thead className="thead-dark">
+                    {positiveConcordanceTableHeaders}
+                </thead>
+                <tbody>
+                    {positiveConcordanceTableData}
+                </tbody>
+            </table>
+            {/* End Positive concordance rate  */}
 
         </div>;
 
