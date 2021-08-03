@@ -51,7 +51,7 @@ class StackedHorizontal extends React.Component {
                     
                 }],
                 height: this.props.minHeight-((30/100)*this.props.minHeight),
-                color: ['#ff2d00', '#ffc100', '#fff000', '#73e502', '#5ba216', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
+                color: this.props.color ? this.props.color:['#ff2d00', '#ffc100', '#fff000', '#73e502', '#5ba216', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
             }
         }
     }
