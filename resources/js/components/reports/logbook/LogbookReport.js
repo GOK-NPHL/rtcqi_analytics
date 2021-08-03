@@ -9,6 +9,7 @@ import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import AgreementRateColumnCharts from './AgreementRateColumnCharts';
+import PositiveConcordanceRateColumnCharts from './PositiveConcordanceRateColumnCharts';
 
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
@@ -360,7 +361,7 @@ class LogbookReport extends React.Component {
         </div>;
 
         let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
-
+        let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
         return (
 
             <React.Fragment>
@@ -419,6 +420,19 @@ class LogbookReport extends React.Component {
                                     <i className="fas fa-chart-bar"></i> Agreement rates bar</a>
                             </li>
 
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="positiveConcordanceColumnsTab" data-toggle="tab"
+                                    href="#positiveConcordance" role="tab" aria-controls="profile"
+                                    aria-selected="false"
+                                    // onClick={() => {
+                                    //     this.setState({
+                                    //         echartsMinHeight: ""
+                                    //     })
+                                    // }}
+                                >
+                                    <i className="fas fa-chart-bar"></i> Positive Concordance rates bar</a>
+                            </li>
+
                         </ul>
                         <div className="tab-content" id="myTabContent">
                             <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
@@ -432,6 +446,12 @@ class LogbookReport extends React.Component {
                                 {agreementRateColumnCharts}
                             </div>
 
+                            <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="profile-tab">
+                                <br />
+                                <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
+                                {positiveConcordanceRateColumnCharts}
+                            </div>
+                            
                         </div>
 
                     </div>
