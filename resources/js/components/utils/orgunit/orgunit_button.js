@@ -16,13 +16,18 @@ class OrgUnitButton extends React.Component {
     componentDidMount() {
 
         window.addEventListener('mouseup', function (event) {
-            let pol=Array.prototype.slice.call(document.getElementById('spi_orgunits').getElementsByTagName("*"));
-            if ((!pol.includes(event.target) && !pol.includes(event.target.parentNode)) && event.target!=document.getElementById('close_orgunits')) {
-                // pol.style.display = 'none';
-                // $("#org_unit_button").toggle();
-                $("#spi_orgunits").hide();
-                $("#org_unit_button").show();
+            try {
+                let pol = Array.prototype.slice.call(document.getElementById('spi_orgunits').getElementsByTagName("*"));
+                if ((!pol.includes(event.target) && !pol.includes(event.target.parentNode)) && event.target != document.getElementById('close_orgunits')) {
+                    // pol.style.display = 'none';
+                    // $("#org_unit_button").toggle();
+                    $("#spi_orgunits").hide();
+                    $("#org_unit_button").show();
+                }
+            }catch(err){
+                console.log(err);
             }
+           
         });
         (async () => {
             let httpOrgUnits = await FetchOrgunits();
