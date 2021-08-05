@@ -453,8 +453,8 @@ class SpiReport extends React.Component {
                         <button
                             onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
-                            className="btn btn-sm btn-info">
-                            <i className="fa fa-search" aria-hidden="true"></i>
+                            className="btn btn-sm btn-primary font-weight-bold">Filter
+                            {/* <i className="fa fa-search" aria-hidden="true"></i> */}
                         </button>
                     </div>
 
