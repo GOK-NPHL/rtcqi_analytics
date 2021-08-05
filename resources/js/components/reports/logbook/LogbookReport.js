@@ -311,53 +311,55 @@ class LogbookReport extends React.Component {
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                <div className="col-sm-6  col-xm-12 col-md-6">
+                    <div className="row">
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                        </div>
+
+                        <table id="agreementRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {tableHeaders}
+                            </thead>
+                            <tbody>
+                                {tableData}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
+                <div className="col-sm-6  col-xm-12 col-md-6">
+                    <div className="row">
+                        {/* Begin Positive concordance rate  */}
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                        </div>
+
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {positiveConcordanceTableHeaders}
+                            </thead>
+                            <tbody>
+                                {positiveConcordanceTableData}
+                            </tbody>
+                        </table>
+                        {/* End Positive concordance rate  */}
+                    </div>
+                </div>
             </div>
-
-            <table id="agreementRates" className="table table-responsive">
-                <thead className="thead-dark">
-                    {tableHeaders}
-                </thead>
-                <tbody>
-                    {tableData}
-                </tbody>
-            </table>
-
-            <br />
-
-            {/* Begin Positive concordance rate  */}
-            <div className="row">
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
-
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                </div>
-            </div>
-
-            <table id="positiveConcordanceRates" className="table table-responsive">
-                <thead className="thead-dark">
-                    {positiveConcordanceTableHeaders}
-                </thead>
-                <tbody>
-                    {positiveConcordanceTableData}
-                </tbody>
-            </table>
-            {/* End Positive concordance rate  */}
-
         </div>;
 
         let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
@@ -424,11 +426,11 @@ class LogbookReport extends React.Component {
                                 <a className="nav-link" id="positiveConcordanceColumnsTab" data-toggle="tab"
                                     href="#positiveConcordance" role="tab" aria-controls="profile"
                                     aria-selected="false"
-                                    // onClick={() => {
-                                    //     this.setState({
-                                    //         echartsMinHeight: ""
-                                    //     })
-                                    // }}
+                                // onClick={() => {
+                                //     this.setState({
+                                //         echartsMinHeight: ""
+                                //     })
+                                // }}
                                 >
                                     <i className="fas fa-chart-bar"></i> Positive Concordance rates bar</a>
                             </li>
@@ -451,7 +453,7 @@ class LogbookReport extends React.Component {
                                 <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
                                 {positiveConcordanceRateColumnCharts}
                             </div>
-                            
+
                         </div>
 
                     </div>
