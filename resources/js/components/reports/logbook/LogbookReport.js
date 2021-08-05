@@ -139,7 +139,7 @@ class LogbookReport extends React.Component {
 
         positiveConcordanceTableData.push(
             <tr key={uuidv4()}>
-                <td colSpan={2} scope="row">
+                <td colSpan={3} scope="row">
                     <strong>{dataToParse.orgName.toUpperCase()}</strong>
                 </td>
             </tr>);
@@ -311,7 +311,7 @@ class LogbookReport extends React.Component {
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 pr-md-5 pr-lg-5">
                     <div className="row">
                         <div className="col-sm-6  col-xm-6 col-md-6">
                             <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
