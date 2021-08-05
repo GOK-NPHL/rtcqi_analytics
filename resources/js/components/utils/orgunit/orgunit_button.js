@@ -74,7 +74,8 @@ class OrgUnitButton extends React.Component {
                     }}
                     type="button"
                     className="btn btn-sm btn-outline-primary">
-                    Organisation unit<i className="fa fa-filter"></i>
+                    Organisation unit <i class="fas fa-caret-down"></i>
+                    {/* <i className="fa fa-filter"></i> */}
                 </button>
 
                 <div className="card hide_org_filter"
