@@ -311,7 +311,7 @@ class LogbookReport extends React.Component {
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
-                <div className="col-sm-6  col-xm-12 col-md-6">
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
                     <div className="row">
                         <div className="col-sm-6  col-xm-6 col-md-6">
                             <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
@@ -334,7 +334,7 @@ class LogbookReport extends React.Component {
                     </div>
                 </div>
 
-                <div className="col-sm-6  col-xm-12 col-md-6">
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
                     <div className="row">
                         {/* Begin Positive concordance rate  */}
                         <div className="col-sm-6  col-xm-6 col-md-6">
