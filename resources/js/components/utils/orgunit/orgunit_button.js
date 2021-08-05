@@ -14,6 +14,16 @@ class OrgUnitButton extends React.Component {
     }
 
     componentDidMount() {
+
+        window.addEventListener('mouseup', function (event) {
+            let pol=Array.prototype.slice.call(document.getElementById('spi_orgunits').getElementsByTagName("*"));
+            if ((!pol.includes(event.target) && !pol.includes(event.target.parentNode)) && event.target!=document.getElementById('close_orgunits')) {
+                // pol.style.display = 'none';
+                // $("#org_unit_button").toggle();
+                $("#spi_orgunits").hide();
+                $("#org_unit_button").show();
+            }
+        });
         (async () => {
             let httpOrgUnits = await FetchOrgunits();
             httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
@@ -62,7 +72,7 @@ class OrgUnitButton extends React.Component {
                     Organisation unit<i className="fa fa-filter"></i>
                 </button>
 
-                <div className="card"
+                <div className="card hide_org_filter"
                     id="spi_orgunits"
                     style={{
                         "display": "none",
@@ -70,9 +80,9 @@ class OrgUnitButton extends React.Component {
                         "zIndex": "999",
                         "backgroundColor": "white"
                     }}>
-                    <div className="card-body" style={{ "minHeight": "100px", "minWidth":"260px" }} >
-                        <div>
-                            <div
+                    <div className="card-body hide_org_filter" style={{ "minHeight": "100px", "minWidth": "260px" }} >
+                        <div className="hide_org_filter">
+                            <div className="hide_org_filter"
                                 style={{
                                     "overflow": "scroll",
                                     "maxHeight": "320px", //"minHeight": "220px",
@@ -85,6 +95,7 @@ class OrgUnitButton extends React.Component {
                             <br />
                             <div>
                                 <button
+                                    id="close_orgunits"
                                     onClick={() => {
                                         $("#org_unit_button").toggle();
                                         $("#spi_orgunits").toggle();
