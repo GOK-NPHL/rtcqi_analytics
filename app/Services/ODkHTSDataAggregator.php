@@ -79,6 +79,7 @@ class ODkHTSDataAggregator
                         $scores['>98'] = 0;
                         $scores['95-98'] = 0;
                         $scores['<95'] = 0;
+                        $completnesScores = ['completness' => 0];
                         $scores['total_sites'] = 0;
                         $monthlySites['totals'] = $scores;
                         $monthlySites['concordance-totals'] = 0;
@@ -86,7 +87,7 @@ class ODkHTSDataAggregator
                         $monthlySites['concordance_t1_reactive'] = 0;
                         $monthlySites['concordance_t2_reactive'] = 0;
 
-                        foreach ($monthlySites as $site) {
+                        foreach ($monthlySites as $site) { //sites per month
                             try {
 
                                 $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
@@ -95,6 +96,12 @@ class ODkHTSDataAggregator
 
                                 $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
                                 $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
+
+                                // check if this site has data completenss.
+                                if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
+                                    //$monthlySites['totals']['completness'] += 1;
+                                    $completnesScores['completness'] += 1;
+                                }
 
                                 if ($agreementRate > 98) {
                                     $monthlySites['totals']['>98'] += 1;
@@ -109,7 +116,7 @@ class ODkHTSDataAggregator
                         $totalConcordance = 0;
                         try {
                             $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
-                            $totalConcordance=number_format((float)$totalConcordance, 1, '.', '');
+                            $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
                         } catch (Exception $ex) {
                         }
 
@@ -117,6 +124,7 @@ class ODkHTSDataAggregator
                         $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
 
                         $county['overall_concordance_totals'][$monthlySiteskey] = $totalConcordance;
+                        $county['completeness'][$monthlySiteskey] = $completnesScores['completness'];
                     }
                 } catch (Exception $ex) {
                     Log::error($ex);
@@ -129,6 +137,7 @@ class ODkHTSDataAggregator
         return $payload;
     }
 
+    //get scores for each organisation unit from rquest parameters
     private function getDataLoopOrgs($orgUnitIds, $recordsReadData)
     {
         $payload = array();
@@ -154,7 +163,7 @@ class ODkHTSDataAggregator
                 $results = array();
                 $results["orgName"] = $orgUnitName;
 
-                $results["overall_agreement_rate"] = $this->getOverallAgreementsRate($orgUnit, $records);
+                $results["overall_agreement_rate"] = $this->getOverallAgreementsRate($orgUnit, $records); //get per site sums/scores
 
                 $payload[$orgUnitIds[$x]] = $results;
             } catch (Exception $ex) {
@@ -180,6 +189,21 @@ class ODkHTSDataAggregator
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
+
+        //check data completeness for this site
+        if (
+            trim(strtolower($record['Section-tezt'])) == 'provided' &&
+            trim(strtolower($record['Section-lots1'])) == 'provided' &&
+            trim(strtolower($record['Section-note1'])) == 'provided' &&
+            trim(strtolower($record['Section-tezt1'])) == 'provided' &&
+            trim(strtolower($record['Section-lots2'])) == 'provided' &&
+            trim(strtolower($record['Section-note2'])) == 'provided'
+        ) {
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['completeness'] = 1;
+        } else {
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['incompleteness'] = 1;
+        }
+
 
         $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
 
@@ -253,6 +277,8 @@ class ODkHTSDataAggregator
         return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
     }
 
+    //$orgUnit assotiave array with the orunit level to process matching hts csv file columns as keys
+    //$section is not used in this processing, ignore it
     private function getSummationValues($records, $orgUnit, $section)
     {
         $rowCounter = 0; //total rows passed through
@@ -277,7 +303,7 @@ class ODkHTSDataAggregator
         }
 
         foreach ($records as $record) {
-            $shouldProcessRecord = true;
+            $shouldProcessRecord = true; //filter out period of data not to be processed in the data loop
 
             $recordDate = strtotime($record['registerstartdate']);
             $newRecordformat = date('Y-m-d', $recordDate);
@@ -301,7 +327,7 @@ class ODkHTSDataAggregator
             }
 
             if ($shouldProcessRecord) {
-                [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section] =
+                [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section] = //$section not in use, assume it
                     $this->processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section);
             }
         }
