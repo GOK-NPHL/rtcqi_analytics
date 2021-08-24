@@ -61,7 +61,7 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
-        Log::info("totals ======>>");
+        // Log::info("totals ======>>");
         // Log::info($payload);
         $payload = $this->aggregateAgreementRates($payload);
 
@@ -82,6 +82,11 @@ class ODkHTSDataAggregator
                         $scores['<95'] = 0;
                         $completnesScores = ['completness' => 0];
                         $consistencyScores = ['consistent' => 0];
+                        $invalidRateScores = ['invalid_results_rate' => 0];
+
+                        $invalidScores['invalids'] = 0;
+                        $invalidScores['totalTests'] = 0;
+
                         $scores['total_sites'] = 0;
                         $monthlySites['totals'] = $scores;
                         $monthlySites['concordance-totals'] = 0;
@@ -104,13 +109,16 @@ class ODkHTSDataAggregator
                                     //$monthlySites['totals']['completness'] += 1;
                                     $completnesScores['completness'] += 1;
                                 }
-                                Log::info("totals ======>>");
-                                Log::info($site['t1_non_reactive'] );
-                                Log::info( $site['t1_non_reactive_totals']);
+                                // Log::info("totals ======>>");
+                                // Log::info($site['t1_totals_tests']);
+                                // Log::info($site['t1_invalids']);
                                 //check for data consistncy
-                                if($site['t1_non_reactive'] == $site['t1_non_reactive_totals']){
+                                if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
                                     $consistencyScores['consistent'] += 1;
                                 }
+
+                                $invalidScores['totalTests'] += $site['t1_totals_tests'];
+                                $invalidScores['invalids'] += $site['t1_invalids'];
 
                                 if ($agreementRate > 98) {
                                     $monthlySites['totals']['>98'] += 1;
@@ -134,7 +142,15 @@ class ODkHTSDataAggregator
                         $county['overall_concordance_totals'][$monthlySiteskey] = $totalConcordance;
                         $county['completeness'][$monthlySiteskey] = $completnesScores['completness'];
                         $county['consistency'][$monthlySiteskey] = $consistencyScores['consistent'];
-                        
+
+                        //invalid rates
+                        $invlidRate = 0;
+                        try {
+                            $invlidRate = ($invalidScores['invalids'] * 100) /  $invalidScores['totalTests'];
+                            $invlidRate = number_format((float)$invlidRate, 1, '.', '');
+                        } catch (Exception $ex) {
+                        }
+                        $county['invalid_rates'][$monthlySiteskey] =number_format((float)$invlidRate, 1, '.', '');
                     }
                 } catch (Exception $ex) {
                     Log::error($ex);
@@ -198,12 +214,19 @@ class ODkHTSDataAggregator
                 't1_reactive' => 0,
                 't1_non_reactive' => 0,
                 't2_reactive' => 0,
-                't1_non_reactive_totals' => 0
+                't1_non_reactive_totals' => 0,
+                't1_invalids' => 0,
+                't1_totals_tests' => 0
+
             );
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_invalids'] += $record['Section-section0-totalinvalid'];
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += ($record['Section-section0-testreactive'] +
+            $record['Section-section0-nonreactive'] +
+            $record['Section-section0-totalinvalid']);
         try {
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_totals'] += $record['Section-Section3-totals1-tnegative1'];
         } catch (Exception $ex) {
