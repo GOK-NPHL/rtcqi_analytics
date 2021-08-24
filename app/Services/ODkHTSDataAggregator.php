@@ -61,7 +61,8 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
-
+        Log::info("totals ======>>");
+        // Log::info($payload);
         $payload = $this->aggregateAgreementRates($payload);
 
         return $payload;
@@ -80,6 +81,7 @@ class ODkHTSDataAggregator
                         $scores['95-98'] = 0;
                         $scores['<95'] = 0;
                         $completnesScores = ['completness' => 0];
+                        $consistencyScores = ['consistent' => 0];
                         $scores['total_sites'] = 0;
                         $monthlySites['totals'] = $scores;
                         $monthlySites['concordance-totals'] = 0;
@@ -102,6 +104,13 @@ class ODkHTSDataAggregator
                                     //$monthlySites['totals']['completness'] += 1;
                                     $completnesScores['completness'] += 1;
                                 }
+                                Log::info("totals ======>>");
+                                Log::info($site['t1_non_reactive'] );
+                                Log::info( $site['t1_non_reactive_totals']);
+                                //check for data consistncy
+                                if($site['t1_non_reactive'] == $site['t1_non_reactive_totals']){
+                                    $consistencyScores['consistent'] += 1;
+                                }
 
                                 if ($agreementRate > 98) {
                                     $monthlySites['totals']['>98'] += 1;
@@ -122,9 +131,10 @@ class ODkHTSDataAggregator
 
                         $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
                         $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
-
                         $county['overall_concordance_totals'][$monthlySiteskey] = $totalConcordance;
                         $county['completeness'][$monthlySiteskey] = $completnesScores['completness'];
+                        $county['consistency'][$monthlySiteskey] = $consistencyScores['consistent'];
+                        
                     }
                 } catch (Exception $ex) {
                     Log::error($ex);
@@ -184,13 +194,23 @@ class ODkHTSDataAggregator
 
         if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
             Log::info("initialized");
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array('t1_reactive' => 0, 't1_non_reactive' => 0, 't2_reactive' => 0);
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
+                't1_reactive' => 0,
+                't1_non_reactive' => 0,
+                't2_reactive' => 0,
+                't1_non_reactive_totals' => 0
+            );
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
+        try {
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_totals'] += $record['Section-Section3-totals1-tnegative1'];
+        } catch (Exception $ex) {
+        }
 
-        //check data completeness for this site
+
+        //check data completeness for this site Section-Section3-totals1-tnegative1
         if (
             trim(strtolower($record['Section-tezt'])) == 'provided' &&
             trim(strtolower($record['Section-lots1'])) == 'provided' &&
