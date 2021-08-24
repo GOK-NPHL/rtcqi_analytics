@@ -88,7 +88,9 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
         overallSiteGraphsData[orgName] = [category, seriesData];
 
         return <RTCard header={orgName} minHeight={this.props.minHeight}>
-            <StackedVertical color={['#004dc9', '#ffc100']}
+            <StackedVertical 
+            yAxisGap={35}
+            yAxisName="concordance" formatter=""  color={['#004dc9', '#ffc100']}
              minHeight={this.props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
         </RTCard>
     }

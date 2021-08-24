@@ -35,6 +35,13 @@ class StackedHorizontal extends React.Component {
                     data: []
                 },
                 yAxis: {
+                    // type: 'value',
+                    axisLabel: {
+                        formatter: '{value}' + this.props.formatter
+                    },
+                    name: this.props.yAxisName,
+                    nameLocation: 'middle',
+                    nameGap: this.props.yAxisGap,
                     type: 'value'
                 },
                 toolbox: {
@@ -46,12 +53,12 @@ class StackedHorizontal extends React.Component {
                 },
                 dataZoom: [{
                     type: 'inside',
-                   
+
                 }, {
-                    
+
                 }],
-                height: this.props.minHeight-((30/100)*this.props.minHeight),
-                color: this.props.color ? this.props.color:['#ff2d00', '#ffc100', '#fff000', '#73e502', '#5ba216', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
+                height: this.props.minHeight - ((30 / 100) * this.props.minHeight),
+                color: this.props.color ? this.props.color : ['#ff2d00', '#ffc100', '#fff000', '#73e502', '#5ba216', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'],
             }
         }
     }

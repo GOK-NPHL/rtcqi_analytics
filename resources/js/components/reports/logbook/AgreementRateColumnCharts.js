@@ -95,7 +95,9 @@ class AgreementRateColumnCharts extends React.Component {
         overallSiteGraphsData[orgName] = [category, seriesData];
 
         return <RTCard header={orgName} minHeight={this.props.minHeight}>
-            <StackedVertical  minHeight={this.props.minHeight} legend={['<95%', '95%-98%', '>98%']} category={category} series={seriesData} />
+            <StackedVertical 
+            yAxisGap={43}
+            yAxisName="% agreement rates" formatter="%"  minHeight={this.props.minHeight} legend={['<95%', '95%-98%', '>98%']} category={category} series={seriesData} />
         </RTCard>
     }
 
