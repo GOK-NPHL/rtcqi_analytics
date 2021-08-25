@@ -131,7 +131,12 @@ class LogbookReport extends React.Component {
         positiveConcordanceTableData, positiveConcordanceTableDataExport,
         completenessTableData, completenessExportData,
         consistencyTableData, consistencyExportData,
-        invalidRateTableData, invalidRateExportData) {
+        invalidRateTableData, invalidRateExportData,
+        supervisorySignatureTableData, supervisorySignatureExportData,
+        algorithmFollowedTableData, algorithmFollowedExportData,
+        htsTypeTableData, htsTypeExportData
+
+    ) {
 
         const monthNames = ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
@@ -181,6 +186,33 @@ class LogbookReport extends React.Component {
                 </td>
             </tr>);
         invalidRateExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // Supervisory Signature rates
+        supervisorySignatureTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        supervisorySignatureExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // Algorithm followed rates
+        algorithmFollowedTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        algorithmFollowedExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // hts Type rates
+        htsTypeTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        htsTypeExportData.push([dataToParse.orgName.toUpperCase()]);
 
         // overall agreement data loop
         for (let [period, totals] of Object.entries(dataToParse.overall_agreement_rate)) {
@@ -260,9 +292,10 @@ class LogbookReport extends React.Component {
                     completenessExportTableData.push(dataToParse['OrgUniType']);
                 }
             }
-
-            completenessRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
-            completenessExportTableData.push(totals);
+            let rate = (totals/no)*100;
+            if(!rate) rate = 0;
+            completenessRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
+            completenessExportTableData.push(rate);
 
             completenessTableData.push(<tr key={uuidv4()}>{completenessRow}</tr>);
 
@@ -326,13 +359,107 @@ class LogbookReport extends React.Component {
 
         // end invalid rate data loop
 
+        // supervisory_signature data loop
+        for (let [period, totals] of Object.entries(dataToParse.supervisory_signature)) {
+            let supervisorySignatureRow = [];
+            let supervisorySignatureExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            supervisorySignatureExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    supervisorySignatureExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.signed}</td>);
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.partially}</td>);
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.not_signed}</td>);
+
+            supervisorySignatureExportTableData.push(totals.signed);
+            supervisorySignatureExportTableData.push(totals.partially);
+            supervisorySignatureExportTableData.push(totals.not_signed);
+
+            supervisorySignatureTableData.push(<tr key={uuidv4()}>{supervisorySignatureRow}</tr>);
+
+            supervisorySignatureExportData.push(supervisorySignatureExportTableData);
+        }
+
+        // end supervisory_signature rate data loop
+
+
+        // algorithm_followed data loop
+        for (let [period, totals] of Object.entries(dataToParse.algorithm_followed)) {
+            let algorithmFollowedRow = [];
+            let algorithmFollowedExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            algorithmFollowedExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    algorithmFollowedExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.followed}</td>);
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.partially}</td>);
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.not_followed}</td>);
+
+            algorithmFollowedExportTableData.push(totals.followed);
+            algorithmFollowedExportTableData.push(totals.partially);
+            algorithmFollowedExportTableData.push(totals.not_followed);
+
+            algorithmFollowedTableData.push(<tr key={uuidv4()}>{algorithmFollowedRow}</tr>);
+
+            algorithmFollowedExportData.push(algorithmFollowedExportTableData);
+        }
+        // end algorithm_followed rate data loop
+
+        // hts_type data loop
+        for (let [period, totals] of Object.entries(dataToParse.hts_type)) {
+
+            let htsTypeRow = [];
+            let htsTypeExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            htsTypeExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    htsTypeRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    htsTypeExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{totals.ehts}</td>);
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{totals.hardcopy}</td>);
+
+            htsTypeExportTableData.push(totals.ehts);
+            htsTypeExportTableData.push(totals.hardcopy);
+
+            htsTypeTableData.push(<tr key={uuidv4()}>{htsTypeRow}</tr>);
+
+            htsTypeExportData.push(htsTypeExportTableData);
+        }
+        // end hts_type rate data loop
+
 
         return [
             tableData, tableDataExport,
             positiveConcordanceTableData, positiveConcordanceTableDataExport,
             completenessTableData, completenessExportData,
             consistencyTableData, consistencyExportData,
-            invalidRateTableData, invalidRateExportData
+            invalidRateTableData, invalidRateExportData,
+            supervisorySignatureTableData, supervisorySignatureExportData,
+            algorithmFollowedTableData, algorithmFollowedExportData,
+            htsTypeTableData, htsTypeExportData
         ];
     }
 
@@ -508,6 +635,99 @@ class LogbookReport extends React.Component {
         }
         // end invalid rate
 
+        //  Supervisory Signature rate
+        let supervisorySignatureTableData = [];
+        let supervisorySignatureTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">signed</th>
+            <th scope="col">partially</th>
+            <th scope="col">not signed</th>
+
+        </tr>;
+
+        let supervisorySignatureExportData = [];
+
+        supervisorySignatureExportData.push(['___', 'signed', 'partially', 'not signed']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                supervisorySignatureTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">signed</th>
+                    <th scope="col">partially</th>
+                    <th scope="col">not signed</th>
+
+                </tr>;
+                supervisorySignatureExportData = [];
+                supervisorySignatureExportData.push(['___', 'Programme', 'signed', 'partially', 'not signed']);
+            }
+        }
+        // end Supervisory Signature rate
+
+
+        //  Algorithm followed rate
+        let algorithmFollowedTableData = [];
+        let algorithmFollowedTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">followed</th>
+            <th scope="col">partially</th>
+            <th scope="col">not followed</th>
+
+        </tr>;
+
+        let algorithmFollowedExportData = [];
+
+        algorithmFollowedExportData.push(['___', 'followed', 'partially', 'not followed']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                algorithmFollowedTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">followed</th>
+                    <th scope="col">partially</th>
+                    <th scope="col">not followed</th>
+                </tr>;
+                algorithmFollowedExportData = [];
+                algorithmFollowedExportData.push(['___', 'Programme', 'followed', 'partially', 'not followed']);
+            }
+        }
+        // end Algorithm followed rate
+
+        //  hts Type rate
+        let htsTypeTableData = [];
+        let htsTypeTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">ehts</th>
+            <th scope="col">hardcopy</th>
+
+        </tr>;
+
+        let htsTypeExportData = [];
+
+        htsTypeExportData.push(['___', 'ehts', 'hardcopy']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                htsTypeTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">ehts</th>
+                    <th scope="col">hardcopy</th>
+                </tr>;
+                htsTypeExportData = [];
+                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy']);
+            }
+        }
+        // end hts Type  rate
+
         //process data tables with values and prepare export objects with data
         if (this.state.odkData) {
 
@@ -520,7 +740,10 @@ class LogbookReport extends React.Component {
                         positiveConcordanceTableData, positiveConcordanceTableDataExport,
                         completenessTableData, completenessExportData,
                         consistencyTableData, consistencyExportData,
-                        invalidRateTableData, invalidRateExportData
+                        invalidRateTableData, invalidRateExportData,
+                        supervisorySignatureTableData, supervisorySignatureExportData,
+                        algorithmFollowedTableData, algorithmFollowedExportData,
+                        htsTypeTableData, htsTypeExportData
                     ]
                         = this.addTableRows(tableData,
                             payload,
@@ -528,7 +751,10 @@ class LogbookReport extends React.Component {
                             positiveConcordanceTableData, positiveConcordanceTableDataExport,
                             completenessTableData, completenessExportData,
                             consistencyTableData, consistencyExportData,
-                            invalidRateTableData, invalidRateExportData
+                            invalidRateTableData, invalidRateExportData,
+                            supervisorySignatureTableData, supervisorySignatureExportData,
+                            algorithmFollowedTableData, algorithmFollowedExportData,
+                            htsTypeTableData, htsTypeExportData
                         );
                 }
             })
@@ -662,6 +888,81 @@ class LogbookReport extends React.Component {
                     </div>
                 </div>
                 {/* End Invalid  rate  */}
+
+
+                {/* Begin  Supervisory Signature rate  */}
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Supervisory Signature rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={supervisorySignatureExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {supervisorySignatureTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {supervisorySignatureTableData}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {/* End Supervisory Signature  rate  */}
+
+            </div>
+
+
+            <div className="row">
+
+                {/* Begin  algorithm followed rate  */}
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {algorithmFollowedTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {algorithmFollowedTableData}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {/* End algorithm followed  rate  */}
+
+                {/* Begin hts type rate  */}
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {htsTypeTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {htsTypeTableData}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {/* End hts type  rate  */}
 
             </div>
 
