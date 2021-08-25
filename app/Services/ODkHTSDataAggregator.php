@@ -34,10 +34,8 @@ class ODkHTSDataAggregator
         $this->reportSections["agreement_rate"] = 1;
     }
 
-
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
-
 
         $currentDate = new DateTime('now');
 
@@ -61,10 +59,10 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
+
+        $payload = $this->aggregateAgreementRates($payload);
         // Log::info("totals ======>>");
         // Log::info($payload);
-        $payload = $this->aggregateAgreementRates($payload);
-
         return $payload;
     }
 
@@ -93,6 +91,10 @@ class ODkHTSDataAggregator
                         $algorithmFollowedSites['not_followed'] = 0;
                         $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
 
+                        $htsRegister = array();
+                        $htsRegister['ehts'] = 0;
+                        $htsRegister['hardcopy'] = 0;
+                        $monthlySites['hts_type'] =   $htsRegister;
 
                         $completnesScores = ['completness' => 0];
                         $consistencyScores = ['consistent' => 0];
@@ -122,9 +124,7 @@ class ODkHTSDataAggregator
                                 if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
                                     $completnesScores['completness'] += 1;
                                 }
-                                // Log::info("totals ======>>");
-                                // Log::info($site['t1_totals_tests']);
-                                // Log::info($site['t1_invalids']);
+                               
                                 //check for data consistncy
                                 if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
                                     $consistencyScores['consistent'] += 1;
@@ -165,6 +165,16 @@ class ODkHTSDataAggregator
                                 }
                                 //end
 
+                                //if site uses ehts or hardcopy
+                                try { 
+                                    if ($site['register'] == 'eHTS') {
+                                        $monthlySites['hts_type']['ehts'] += 1;
+                                    } else if ($site['register'] == 'Hardcopy') {
+                                        $monthlySites['hts_type']['hardcopy'] += 1;
+                                    }
+                                } catch (Exception $ex) {
+                                    //  Log::error($ex);
+                                }
                             } catch (Exception $ex) {
                                 //  Log::error($ex);
                             }
@@ -183,6 +193,8 @@ class ODkHTSDataAggregator
                         $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
                         $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
                         $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
+                        $orgUnitArray['hts_type'][$monthlyDate] = $monthlySites['hts_type'];
+
                         //invalid rates
                         $invlidRate = 0;
                         try {
