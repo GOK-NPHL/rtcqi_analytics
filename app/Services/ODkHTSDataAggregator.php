@@ -71,15 +71,22 @@ class ODkHTSDataAggregator
     private function aggregateAgreementRates($payload)
     {
 
-        $county['overall_concordance_totals'] = [];
+        $orgUnitArray['overall_concordance_totals'] = [];
         foreach ($payload as $payldkey => $payld) {
-            foreach ($payld as $countykey => $county) {
+            foreach ($payld as $orgUnitKey => $orgUnitArray) { //per organisation unit
                 try {
-                    foreach ($county['overall_agreement_rate'] as $monthlySiteskey => $monthlySites) {
+                    foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) {
                         $scores = array();
                         $scores['>98'] = 0;
                         $scores['95-98'] = 0;
                         $scores['<95'] = 0;
+
+                        $signedSites = array();
+                        $signedSites['signed'] = 0;
+                        $signedSites['partially'] = 0;
+                        $signedSites['not_signed'] = 0;
+                        $monthlySites['supervisory_signature'] =  $signedSites;
+
                         $completnesScores = ['completness' => 0];
                         $consistencyScores = ['consistent' => 0];
                         $invalidRateScores = ['invalid_results_rate' => 0];
@@ -94,7 +101,7 @@ class ODkHTSDataAggregator
                         $monthlySites['concordance_t1_reactive'] = 0;
                         $monthlySites['concordance_t2_reactive'] = 0;
 
-                        foreach ($monthlySites as $site) { //sites per month
+                        foreach ($monthlySites as $site) { //sites per month -- sites in a month
                             try {
 
                                 $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
@@ -106,7 +113,6 @@ class ODkHTSDataAggregator
 
                                 // check if this site has data completenss.
                                 if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
-                                    //$monthlySites['totals']['completness'] += 1;
                                     $completnesScores['completness'] += 1;
                                 }
                                 // Log::info("totals ======>>");
@@ -127,7 +133,20 @@ class ODkHTSDataAggregator
                                 } else if ($agreementRate < 95) {
                                     $monthlySites['totals']['<95'] += 1;
                                 }
+
+                                //supervisory signatures aggregation
+
+                                if (in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
+                                    $monthlySites['supervisory_signature']['partially'] += 1;
+                                }
+                                if (in_array(1, $site['supervisory_signature']) && !in_array(0, $site['supervisory_signature'])) {
+                                    $monthlySites['supervisory_signature']['signed'] += 1;
+                                }
+                                if (!in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
+                                    $monthlySites['supervisory_signature']['not_signed'] += 1;
+                                }
                             } catch (Exception $ex) {
+                              //  Log::error($ex);
                             }
                         }
                         $totalConcordance = 0;
@@ -137,11 +156,12 @@ class ODkHTSDataAggregator
                         } catch (Exception $ex) {
                         }
 
-                        $county['overall_agreement_rate'][$monthlySiteskey] = []; // do not include per site scores in payload
-                        $county['overall_agreement_rate'][$monthlySiteskey]['totals'] = $monthlySites['totals'];
-                        $county['overall_concordance_totals'][$monthlySiteskey] = $totalConcordance;
-                        $county['completeness'][$monthlySiteskey] = $completnesScores['completness'];
-                        $county['consistency'][$monthlySiteskey] = $consistencyScores['consistent'];
+                        $orgUnitArray['overall_agreement_rate'][$monthlyDate] = []; // do not include per site scores in payload
+                        $orgUnitArray['overall_agreement_rate'][$monthlyDate]['totals'] = $monthlySites['totals'];
+                        $orgUnitArray['overall_concordance_totals'][$monthlyDate] = $totalConcordance;
+                        $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
+                        $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
+                        $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
 
                         //invalid rates
                         $invlidRate = 0;
@@ -150,13 +170,13 @@ class ODkHTSDataAggregator
                             $invlidRate = number_format((float)$invlidRate, 1, '.', '');
                         } catch (Exception $ex) {
                         }
-                        $county['invalid_rates'][$monthlySiteskey] =number_format((float)$invlidRate, 1, '.', '');
+                        $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 1, '.', '');
                     }
                 } catch (Exception $ex) {
                     Log::error($ex);
                 }
 
-                $payld[$countykey] = $county;
+                $payld[$orgUnitKey] = $orgUnitArray;
             }
             $payload[$payldkey] = $payld;
         }
@@ -216,8 +236,8 @@ class ODkHTSDataAggregator
                 't2_reactive' => 0,
                 't1_non_reactive_totals' => 0,
                 't1_invalids' => 0,
-                't1_totals_tests' => 0
-
+                't1_totals_tests' => 0,
+                'supervisory_signature' => array()
             );
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
@@ -247,6 +267,14 @@ class ODkHTSDataAggregator
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['incompleteness'] = 1;
         }
 
+        //check if supervisor signed or not signed
+        if (
+            trim(strtolower($record['Section-Section4-surpervisor'])) == 1
+        ) {
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
+        } else {
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 0);
+        }
 
         $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
 
