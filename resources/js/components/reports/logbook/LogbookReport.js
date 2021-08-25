@@ -292,8 +292,9 @@ class LogbookReport extends React.Component {
                     completenessExportTableData.push(dataToParse['OrgUniType']);
                 }
             }
-            let rate = (totals/no)*100;
-            if(!rate) rate = 0;
+            let rate = (totals / no) * 100;
+            if (!rate) rate = 0;
+            rate = Math.round(rate * 10) / 10; //round off to one decimal place
             completenessRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
             completenessExportTableData.push(rate);
 
@@ -321,9 +322,12 @@ class LogbookReport extends React.Component {
                     consistencyExportTableData.push(dataToParse['OrgUniType']);
                 }
             }
+            let rate = (totals / no) * 100;
+            if (!rate) rate = 0;
+            rate = Math.round(rate * 10) / 10; //round off to one decimal place
 
-            consistencyRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
-            consistencyExportTableData.push(totals);
+            consistencyRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
+            consistencyExportTableData.push(rate);
 
             consistencyTableData.push(<tr key={uuidv4()}>{consistencyRow}</tr>);
 
@@ -374,14 +378,25 @@ class LogbookReport extends React.Component {
                     supervisorySignatureExportTableData.push(dataToParse['OrgUniType']);
                 }
             }
+            let signed = (totals.signed / no) * 100;
+            if (!signed) signed = 0;
+            signed = Math.round(signed * 10) / 10; //round off to one decimal place
 
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.signed}</td>);
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.partially}</td>);
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{totals.not_signed}</td>);
+            let partially = (totals.partially / no) * 100;
+            if (!partially) partially = 0;
+            partially = Math.round(partially * 10) / 10; //round off to one decimal place
 
-            supervisorySignatureExportTableData.push(totals.signed);
-            supervisorySignatureExportTableData.push(totals.partially);
-            supervisorySignatureExportTableData.push(totals.not_signed);
+            let notSigned = (totals.not_signed / no) * 100;
+            if (!notSigned) notSigned = 0;
+            notSigned = Math.round(notSigned * 10) / 10; //round off to one decimal place
+
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{signed}</td>);
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{partially}</td>);
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{notSigned}</td>);
+
+            supervisorySignatureExportTableData.push(signed);
+            supervisorySignatureExportTableData.push(partially);
+            supervisorySignatureExportTableData.push(notSigned);
 
             supervisorySignatureTableData.push(<tr key={uuidv4()}>{supervisorySignatureRow}</tr>);
 
@@ -407,13 +422,25 @@ class LogbookReport extends React.Component {
                 }
             }
 
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.followed}</td>);
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.partially}</td>);
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{totals.not_followed}</td>);
+            let followed = (totals.followed / no) * 100;
+            if (!followed) followed = 0;
+            followed = Math.round(followed * 10) / 10; //round off to one decimal place
 
-            algorithmFollowedExportTableData.push(totals.followed);
-            algorithmFollowedExportTableData.push(totals.partially);
-            algorithmFollowedExportTableData.push(totals.not_followed);
+            let partially = (totals.partially / no) * 100;
+            if (!partially) partially = 0;
+            partially = Math.round(partially * 10) / 10; //round off to one decimal place
+
+            let notFollowed = (totals.not_followed / no) * 100;
+            if (!notFollowed) notFollowed = 0;
+            notFollowed = Math.round(notFollowed * 10) / 10; //round off to one decimal place
+
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{followed}</td>);
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{partially}</td>);
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{notFollowed}</td>);
+
+            algorithmFollowedExportTableData.push(followed);
+            algorithmFollowedExportTableData.push(partially);
+            algorithmFollowedExportTableData.push(notFollowed);
 
             algorithmFollowedTableData.push(<tr key={uuidv4()}>{algorithmFollowedRow}</tr>);
 
@@ -438,11 +465,19 @@ class LogbookReport extends React.Component {
                 }
             }
 
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{totals.ehts}</td>);
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{totals.hardcopy}</td>);
+            let ehts = (totals.ehts / no) * 100;
+            if (!ehts) ehts = 0;
+            ehts = Math.round(ehts * 10) / 10; //round off to one decimal place
 
-            htsTypeExportTableData.push(totals.ehts);
-            htsTypeExportTableData.push(totals.hardcopy);
+            let hardcopy = (totals.hardcopy / no) * 100;
+            if (!hardcopy) hardcopy = 0;
+            hardcopy = Math.round(hardcopy * 10) / 10; //round off to one decimal place
+
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
+
+            htsTypeExportTableData.push(ehts);
+            htsTypeExportTableData.push(hardcopy);
 
             htsTypeTableData.push(<tr key={uuidv4()}>{htsTypeRow}</tr>);
 
@@ -946,7 +981,7 @@ class LogbookReport extends React.Component {
                     <div className="row">
 
                         <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+                            <p style={{ fontWeight: "900" }}>Sites using eHTS register</p>
 
                         </div>
                         <div className="col-sm-3  col-xm-3 col-md-3">
