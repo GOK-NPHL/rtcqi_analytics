@@ -55,11 +55,11 @@ class OverallPerformanceRadar extends React.Component {
             { text: 'Testing\nPhase', max: 100 },
             { text: 'Post-testing\nPhase', max: 100 },
             { text: 'External\nQuality\nAssessment', max: 100 },
-            { text: 'Overall\nPerformance', max: 100 }
+            // { text: 'Overall\nPerformance', max: 100 }
         ];
         let legend = [];
         let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
-            "PersonellTrainingAndCertification", "OverallPerformance"];
+            "PersonellTrainingAndCertification"]; //, "OverallPerformance"];
 
         let timelineData = {};
         dataKeys.map((key) => {
