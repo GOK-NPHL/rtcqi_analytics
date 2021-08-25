@@ -87,6 +87,13 @@ class ODkHTSDataAggregator
                         $signedSites['not_signed'] = 0;
                         $monthlySites['supervisory_signature'] =  $signedSites;
 
+                        $algorithmFollowedSites = array();
+                        $algorithmFollowedSites['followed'] = 0;
+                        $algorithmFollowedSites['partially'] = 0;
+                        $algorithmFollowedSites['not_followed'] = 0;
+                        $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
+
+
                         $completnesScores = ['completness' => 0];
                         $consistencyScores = ['consistent' => 0];
                         $invalidRateScores = ['invalid_results_rate' => 0];
@@ -145,8 +152,21 @@ class ODkHTSDataAggregator
                                 if (!in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
                                     $monthlySites['supervisory_signature']['not_signed'] += 1;
                                 }
+
+                                //algortihm followed counts
+                                if (in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
+                                    $monthlySites['algorithm_followed']['partially'] += 1;
+                                }
+                                if (in_array(1, $site['algorithm_followed']) && !in_array(0, $site['algorithm_followed'])) {
+                                    $monthlySites['algorithm_followed']['followed'] += 1;
+                                }
+                                if (!in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
+                                    $monthlySites['algorithm_followed']['not_followed'] += 1;
+                                }
+                                //end
+
                             } catch (Exception $ex) {
-                              //  Log::error($ex);
+                                //  Log::error($ex);
                             }
                         }
                         $totalConcordance = 0;
@@ -162,7 +182,7 @@ class ODkHTSDataAggregator
                         $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
                         $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
                         $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
-
+                        $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
                         //invalid rates
                         $invlidRate = 0;
                         try {
@@ -237,7 +257,8 @@ class ODkHTSDataAggregator
                 't1_non_reactive_totals' => 0,
                 't1_invalids' => 0,
                 't1_totals_tests' => 0,
-                'supervisory_signature' => array()
+                'supervisory_signature' => array(),
+                'algorithm_followed' => array()
             );
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
@@ -275,6 +296,17 @@ class ODkHTSDataAggregator
         } else {
             array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 0);
         }
+        //end
+
+        //check if supervisor signed or not signed
+        if (
+            trim(strtolower($record['Section-Section4-algorithm'])) == 1
+        ) {
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
+        } else {
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 0);
+        }
+        //end
 
         $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
 
@@ -504,10 +536,6 @@ class ODkHTSDataAggregator
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["agreement_rate"]);
         $monthScoreMap = $summationValues['monthScoreMap'];
         $rowsPerMonthAndScoreCounter = $summationValues['rowsPerMonthAndScoreCounter'];
-        // $score = $this->getPercentileValueForSections($score, $rowCounter, 3);
-        // $score = ($score / ($rowCounter * 3)) * 100; //get denominator   
-        // $score = number_format((float)$score, 1, '.', ',');
-
         return $monthScoreMap;
     }
 
