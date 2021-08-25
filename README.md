@@ -113,6 +113,13 @@ finally, we compile our fron end resources for prodcution:
 npm run prod
 ```
 
+To run on development environment, its recommended you run to allow hot loading:
+
+```
+npm run watch
+```
+
+
 #### Defaults.
 
 Database, web server and PHP settings are done from the docker files.
