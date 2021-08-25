@@ -127,8 +127,17 @@ class LogbookReport extends React.Component {
         }
     }
 
-    addTableRows(tableData, dataToParse, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport) {
+    addTableRows(tableData, dataToParse, tableDataExport,
+        positiveConcordanceTableData, positiveConcordanceTableDataExport,
+        completenessTableData, completenessExportData,
+        consistencyTableData, consistencyExportData,
+        invalidRateTableData, invalidRateExportData) {
 
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        // overall agreement
         tableData.push(
             <tr key={uuidv4()}>
                 <td colSpan={4} scope="row">
@@ -137,6 +146,7 @@ class LogbookReport extends React.Component {
             </tr>);
         tableDataExport.push([dataToParse.orgName.toUpperCase()]);
 
+        // positive Concordance
         positiveConcordanceTableData.push(
             <tr key={uuidv4()}>
                 <td colSpan={3} scope="row">
@@ -145,9 +155,34 @@ class LogbookReport extends React.Component {
             </tr>);
         positiveConcordanceTableDataExport.push([dataToParse.orgName.toUpperCase()]);
 
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
+        // completeness
+        completenessTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        completenessExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // consistency
+        consistencyTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        consistencyExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // Invalid Rate
+        invalidRateTableData.push(
+            <tr key={uuidv4()}>
+                <td colSpan={3} scope="row">
+                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                </td>
+            </tr>);
+        invalidRateExportData.push([dataToParse.orgName.toUpperCase()]);
+
+        // overall agreement data loop
         for (let [period, totals] of Object.entries(dataToParse.overall_agreement_rate)) {
 
             let row = [];
@@ -181,6 +216,7 @@ class LogbookReport extends React.Component {
             tableData.push(<tr key={uuidv4()}>{row}</tr>);
             tableDataExport.push(exportData);
         }
+        // end overall agreement data loop
 
         // positive concordance data loop
         for (let [period, totals] of Object.entries(dataToParse.overall_concordance_totals)) {
@@ -208,8 +244,96 @@ class LogbookReport extends React.Component {
         }
         // end positive concordance data loop
 
+        // completeness data
+        for (let [period, totals] of Object.entries(dataToParse.completeness)) {
 
-        return [tableData, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport];
+            let completenessRow = [];
+            let completenessExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            completenessRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            completenessExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    completenessRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    completenessExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            completenessRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            completenessExportTableData.push(totals);
+
+            completenessTableData.push(<tr key={uuidv4()}>{completenessRow}</tr>);
+
+            completenessExportData.push(completenessExportTableData);
+        }
+
+        // end completeness data loop
+
+
+        // consistency data
+        for (let [period, totals] of Object.entries(dataToParse.consistency)) {
+
+            let consistencyRow = [];
+            let consistencyExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            consistencyExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    consistencyRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    consistencyExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            consistencyRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            consistencyExportTableData.push(totals);
+
+            consistencyTableData.push(<tr key={uuidv4()}>{consistencyRow}</tr>);
+
+            consistencyExportData.push(consistencyExportTableData);
+        }
+
+        // end consistency data loop
+
+        // invalid rate data loop
+        for (let [period, totals] of Object.entries(dataToParse.invalid_rates)) {
+
+            let invalidRateRow = [];
+            let invalidRateExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            invalidRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            invalidRateExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    invalidRateRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    invalidRateExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            invalidRateRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            invalidRateExportTableData.push(totals);
+
+            invalidRateTableData.push(<tr key={uuidv4()}>{invalidRateRow}</tr>);
+
+            invalidRateExportData.push(invalidRateExportTableData);
+        }
+
+        // end invalid rate data loop
+
+
+        return [
+            tableData, tableDataExport,
+            positiveConcordanceTableData, positiveConcordanceTableDataExport,
+            completenessTableData, completenessExportData,
+            consistencyTableData, consistencyExportData,
+            invalidRateTableData, invalidRateExportData
+        ];
     }
 
     exportAgreementsRatesPDFData() {
@@ -295,20 +419,124 @@ class LogbookReport extends React.Component {
             }
 
         }
-        // End Site agreement Rates
+        // end Positive concordance rate
 
 
+        // completeness rate
+        let completenessTableData = [];
+        let completenessTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Completeness rate</th>
+
+        </tr>;
+
+        let completenessExportData = [];
+
+        completenessExportData.push(['___', 'Completeness rate']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                completenessTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Completeness rate</th>
+
+                </tr>;
+                completenessExportData = [];
+                completenessExportData.push(['___', 'Programme', 'Completeness rate']);
+            }
+        }
+        // end completeness rate
+
+
+        // consistency rate
+        let consistencyTableData = [];
+        let consistencyTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Consistency rate</th>
+
+        </tr>;
+
+        let consistencyExportData = [];
+
+        consistencyExportData.push(['___', 'Consistency rate']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                consistencyTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Consistency rate</th>
+
+                </tr>;
+                consistencyExportData = [];
+                consistencyExportData.push(['___', 'Programme', 'Consistency rate']);
+            }
+        }
+        // end consistency rate
+
+
+        // invalid rate
+        let invalidRateTableData = [];
+        let invalidRateTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Invalid rate</th>
+
+        </tr>;
+
+        let invalidRateExportData = [];
+
+        invalidRateExportData.push(['___', 'Invalid rate']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                invalidRateTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Invalid rate</th>
+
+                </tr>;
+                invalidRateExportData = [];
+                invalidRateExportData.push(['___', 'Programme', 'Invalid rate']);
+            }
+        }
+        // end invalid rate
+
+        //process data tables with values and prepare export objects with data
         if (this.state.odkData) {
 
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
-                    console.log(displayData);
-                    [tableData, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport] = this.addTableRows(tableData, payload, tableDataExport, positiveConcordanceTableData, positiveConcordanceTableDataExport);
+                    // console.log(displayData);
+                    [
+                        tableData,
+                        tableDataExport,
+                        positiveConcordanceTableData, positiveConcordanceTableDataExport,
+                        completenessTableData, completenessExportData,
+                        consistencyTableData, consistencyExportData,
+                        invalidRateTableData, invalidRateExportData
+                    ]
+                        = this.addTableRows(tableData,
+                            payload,
+                            tableDataExport,
+                            positiveConcordanceTableData, positiveConcordanceTableDataExport,
+                            completenessTableData, completenessExportData,
+                            consistencyTableData, consistencyExportData,
+                            invalidRateTableData, invalidRateExportData
+                        );
                 }
             })
 
         }
+        //End process data tables with values and prepare export objects with data
 
+        // Data Tables for all the indicators
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
                 <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 pr-md-5 pr-lg-5">
@@ -360,7 +588,85 @@ class LogbookReport extends React.Component {
                     </div>
                 </div>
             </div>
+
+            <div className="row">
+
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+                        {/* Begin completeness rate  */}
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Completeness rate</p>
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {completenessTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {completenessTableData}
+                            </tbody>
+                        </table>
+                        {/* End completeness  rate  */}
+                    </div>
+                </div>
+
+                {/* Begin  Consistency rate  */}
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Consistency rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {consistencyTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {consistencyTableData}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {/* End Consistency  rate  */}
+
+            </div>
+
+
+            <div className="row">
+
+                {/* Begin  Invalid rate  */}
+                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                    <div className="row">
+
+                        <div className="col-sm-6  col-xm-6 col-md-6">
+                            <p style={{ fontWeight: "900" }}>Invalid rate</p>
+
+                        </div>
+                        <div className="col-sm-3  col-xm-3 col-md-3">
+                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
+                        </div>
+                        <table id="positiveConcordanceRates" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {invalidRateTableDataHeaders}
+                            </thead>
+                            <tbody>
+                                {invalidRateTableData}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {/* End Invalid  rate  */}
+
+            </div>
+
         </div>;
+        // End  Data Tables for all the indicators
 
         let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
         let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
