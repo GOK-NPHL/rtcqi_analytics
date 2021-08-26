@@ -59,10 +59,10 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
-
-        $payload = $this->aggregateAgreementRates($payload);
         // Log::info("totals ======>>");
         // Log::info($payload);
+        $payload = $this->aggregateAgreementRates($payload);
+
         return $payload;
     }
 
@@ -73,7 +73,7 @@ class ODkHTSDataAggregator
         foreach ($payload as $payldkey => $payld) {
             foreach ($payld as $orgUnitKey => $orgUnitArray) { //per organisation unit
                 try {
-                    foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) {
+                    foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) { //summations for each org per month
                         $scores = array();
                         $scores['>98'] = 0;
                         $scores['95-98'] = 0;
@@ -94,6 +94,7 @@ class ODkHTSDataAggregator
                         $htsRegister = array();
                         $htsRegister['ehts'] = 0;
                         $htsRegister['hardcopy'] = 0;
+                        $htsRegister['unknown'] = 0;
                         $monthlySites['hts_type'] =   $htsRegister;
 
                         $completnesScores = ['completness' => 0];
@@ -124,7 +125,7 @@ class ODkHTSDataAggregator
                                 if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
                                     $completnesScores['completness'] += 1;
                                 }
-                               
+
                                 //check for data consistncy
                                 if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
                                     $consistencyScores['consistent'] += 1;
@@ -164,17 +165,10 @@ class ODkHTSDataAggregator
                                     $monthlySites['algorithm_followed']['not_followed'] += 1;
                                 }
                                 //end
-
                                 //if site uses ehts or hardcopy
-                                try { 
-                                    if ($site['register'] == 'eHTS') {
-                                        $monthlySites['hts_type']['ehts'] += 1;
-                                    } else if ($site['register'] == 'Hardcopy') {
-                                        $monthlySites['hts_type']['hardcopy'] += 1;
-                                    }
-                                } catch (Exception $ex) {
-                                    //  Log::error($ex);
-                                }
+                                $monthlySites['hts_type']['ehts'] += $site['register']['ehts'];
+                                $monthlySites['hts_type']['hardcopy'] += $site['register']['hardcopy'];
+                                $monthlySites['hts_type']['unknown'] += $site['register']['unknown'];
                             } catch (Exception $ex) {
                                 //  Log::error($ex);
                             }
@@ -261,7 +255,7 @@ class ODkHTSDataAggregator
         $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
 
         if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
-            Log::info("initialized");
+            // Log::info($record);
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
                 't1_reactive' => 0,
                 't1_non_reactive' => 0,
@@ -270,7 +264,13 @@ class ODkHTSDataAggregator
                 't1_invalids' => 0,
                 't1_totals_tests' => 0,
                 'supervisory_signature' => array(),
-                'algorithm_followed' => array()
+                'algorithm_followed' => array(),
+                'register' => array(
+                    'ehts' => 0,
+                    'hardcopy' => 0,
+                    'unknown' => 0
+                ),
+
             );
         }
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
@@ -285,6 +285,18 @@ class ODkHTSDataAggregator
         } catch (Exception $ex) {
         }
 
+        //check if this site uses eHTS of Hardcopy
+        try {
+            if ($record['register'] == 'eHTS') {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['ehts'] = 1;
+            } else if ($record['register'] == 'Hardcopy') {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
+            } else {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['unknown'] = 1;
+            }
+        } catch (Exception $ex) {
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['unknown'] = 1;
+        }
 
         //check data completeness for this site Section-Section3-totals1-tnegative1
         if (

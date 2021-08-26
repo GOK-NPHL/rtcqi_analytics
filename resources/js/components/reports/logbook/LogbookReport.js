@@ -473,11 +473,18 @@ class LogbookReport extends React.Component {
             if (!hardcopy) hardcopy = 0;
             hardcopy = Math.round(hardcopy * 10) / 10; //round off to one decimal place
 
+            let unknown = (totals.unknown / no) * 100;
+            if (!unknown) unknown = 0;
+            unknown = Math.round(unknown * 10) / 10; //round off to one decimal place
+
             htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
             htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{unknown}</td>);
+            
 
             htsTypeExportTableData.push(ehts);
             htsTypeExportTableData.push(hardcopy);
+            htsTypeExportTableData.push(unknown);
 
             htsTypeTableData.push(<tr key={uuidv4()}>{htsTypeRow}</tr>);
 
