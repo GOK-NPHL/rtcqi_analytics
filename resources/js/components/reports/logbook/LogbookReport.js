@@ -748,12 +748,12 @@ class LogbookReport extends React.Component {
             <th scope="col">___</th>
             <th scope="col">ehts</th>
             <th scope="col">hardcopy</th>
-
+            <th scope="col">unknown</th>
         </tr>;
 
         let htsTypeExportData = [];
 
-        htsTypeExportData.push(['___', 'ehts', 'hardcopy']);
+        htsTypeExportData.push(['___', 'ehts', 'hardcopy','unknown']);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -763,9 +763,11 @@ class LogbookReport extends React.Component {
                     <th scope="col">Programme</th>
                     <th scope="col">ehts</th>
                     <th scope="col">hardcopy</th>
+                    <th scope="col">unknown</th>
+                    
                 </tr>;
                 htsTypeExportData = [];
-                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy']);
+                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy','unknown']);
             }
         }
         // end hts Type  rate
