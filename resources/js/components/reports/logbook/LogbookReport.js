@@ -36,7 +36,7 @@ class LogbookReport extends React.Component {
                 'Algorithm Followed rate',
                 'Sites using eHTS register',
             ],
-            indicatorIndexToDisplay: 0
+            indicatorIndexToDisplay: 0,
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
@@ -46,7 +46,7 @@ class LogbookReport extends React.Component {
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
         this.exportAgreementsRatesPDFData = this.exportAgreementsRatesPDFData.bind(this);
         this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
-
+        this.resetFilters = this.resetFilters.bind(this);
     }
 
     componentDidMount() {
@@ -130,7 +130,31 @@ class LogbookReport extends React.Component {
         this.setState({ indicatorIndexToDisplay: indicatorIndex });
     }
 
+    resetFilters() {
+
+        let defaultOrg = [this.state.unfilteredOrgUnits.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
+        this.setState({
+            indicatorIndexToDisplay: 0,
+            odkData: {},
+            orgUnits: [],
+            orgUnitDataIds: [0],
+            siteType: [],
+            echartsMinHeight: '',
+            orgUnitDataIds: [0],
+            startDate: '',
+            endDate: ''
+        });
+
+        this.fetchOdkDataServer(defaultOrg,
+            [],
+            '',
+            ''
+        );
+
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
+
         if (
             this.state.orgUnitDataIds != nextState.orgUnitDataIds ||
             this.state.siteType != nextState.siteType ||
@@ -142,6 +166,7 @@ class LogbookReport extends React.Component {
         } else {
             return true;
         }
+
     }
 
     addTableRows(tableData, dataToParse, tableDataExport,
@@ -535,6 +560,7 @@ class LogbookReport extends React.Component {
     }
 
     render() {
+
         console.log(this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]);
         console.log(this.state.indicatorIndexToDisplay);
         const imgStyle = {
@@ -858,12 +884,12 @@ class LogbookReport extends React.Component {
                                     </table>
                                 </div>
                             </div>
-                             {/* chart */}
-                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                            {/* chart */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
                                 <p style={{ fontWeight: "900" }}>Site agreement Rate Chart</p>
                                 {agreementRateColumnCharts}
                             </div>
-                            {/* end site agreement rates */} 
+                            {/* end site agreement rates */}
                         </React.Fragment> : ''}
                 {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
@@ -1128,7 +1154,9 @@ class LogbookReport extends React.Component {
                             className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
                         </button>
                         <button
-                            // onClick={() => this.onFilterButtonClickEvent()}
+                            onClick={() => {
+                                this.resetFilters();
+                            }}
                             type="button"
                             style={{ "display": "inlineBlock" }}
                             className="btn btn-sm btn-secondary font-weight-bold">Reset
