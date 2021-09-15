@@ -131,26 +131,7 @@ class LogbookReport extends React.Component {
     }
 
     resetFilters() {
-
-        let defaultOrg = [this.state.unfilteredOrgUnits.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
-        this.setState({
-            indicatorIndexToDisplay: 0,
-            odkData: {},
-            orgUnits: [],
-            orgUnitDataIds: [0],
-            siteType: [],
-            echartsMinHeight: '',
-            orgUnitDataIds: [0],
-            startDate: '',
-            endDate: ''
-        });
-
-        this.fetchOdkDataServer(defaultOrg,
-            [],
-            '',
-            ''
-        );
-
+        location.reload();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
