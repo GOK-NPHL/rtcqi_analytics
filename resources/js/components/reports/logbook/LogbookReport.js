@@ -1108,26 +1108,26 @@ class LogbookReport extends React.Component {
 
                 {/* Filter bar */}
                 <div className="row">
-                    <div className="col-md-2">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
                             orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
                             filterDisplayedIndicator={this.filterDisplayedIndicator}
                         ></OrgUnitIndicator>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
                         <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <button
                             onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
