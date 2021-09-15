@@ -9,11 +9,14 @@ class OrgDate extends React.Component {
         super(props);
         this.state = {
             startDate: null,
-            endData: null
+            endData: null,
+            dateType: "text"
         };
         this.onStartDateChange = this.onStartDateChange.bind(this);
         this.onEndDateChange = this.onEndDateChange.bind(this);
-
+        this.onEndDateChange = this.onEndDateChange.bind(this);
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlur = this.onBlur.bind(this);
     }
 
     onStartDateChange(event) {
@@ -37,6 +40,19 @@ class OrgDate extends React.Component {
         );
     }
 
+    onFocus() {
+        this.setState({
+            dateType: 'date'
+        });
+    }
+
+    onBlur() {
+        this.setState({
+            dateType: 'text'
+        });
+    }
+
+
     render() {
         const marginLeft = {
             // marginLeft: "16px",
@@ -59,14 +75,15 @@ class OrgDate extends React.Component {
 
                     <div className="col-sm-6">
                         <form>
-                            <div className="form-group row">
-                                <label htmlFor="startDate" className="col-sm-4 col-form-label col-form-label-sm">Start date</label>
-                                <div className="col-sm-8">
-                                    <input onChange={() => this.onStartDateChange(event)} type="date"
-                                        className="form-control form-control form-control-sm"
-                                        id="startDate"
-                                        placeholder="start date" />
-                                </div>
+                            <div className="form-group row  pr-1">
+                                <input
+                                    id="startDate"
+                                    onChange={() => this.onStartDateChange(event)}
+                                    type={this.state.dateType} placeholder="Start date"
+                                    className="form-control form-control form-control-sm"
+                                    onFocus={this.onFocus}
+                                    onBlur={this.onBlur}
+                                />
                             </div>
                         </form>
                     </div>
@@ -74,14 +91,15 @@ class OrgDate extends React.Component {
                     <div className="col-sm-6">
                         <form>
                             <div className="form-group row">
-                                <label htmlFor="endDate"
-                                    className="col-sm-4 col-form-label col-form-label-sm">End date</label>
-                                <div className="col-sm-8">
-                                    <input onChange={() => this.onEndDateChange(event)} type="date"
-                                        className="form-control form-control form-control-sm"
-                                        id="endDate"
-                                        placeholder="end date" />
-                                </div>
+
+                                <input
+                                    id="endDate"
+                                    onChange={() => this.onEndDateChange(event)}
+                                    type={this.state.dateType} placeholder="End date"
+                                    className="form-control form-control form-control-sm"
+                                    onFocus={this.onFocus}
+                                    onBlur={this.onBlur}
+                                />
                             </div>
                         </form>
                     </div>

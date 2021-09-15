@@ -1037,7 +1037,7 @@ class LogbookReport extends React.Component {
                         <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
-                    <div className="col-md-7">
+                    <div className="col-md-4">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
