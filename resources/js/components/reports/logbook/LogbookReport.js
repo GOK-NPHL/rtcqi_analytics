@@ -14,6 +14,7 @@ import PositiveConcordanceRateColumnCharts from './PositiveConcordanceRateColumn
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { CSVLink, CSVDownload } from "react-csv";
+import OrgUnitIndicator from '../../utils/orgunit/OrgUnitIndicator';
 
 
 class LogbookReport extends React.Component {
@@ -25,6 +26,17 @@ class LogbookReport extends React.Component {
             orgUnitDataIds: [0],
             siteType: [],
             echartsMinHeight: '',
+            orgUnitIndicators: [
+                'Site agreement Rates',
+                'Positive concordance rate',
+                'Completeness rate',
+                'Consistency rate',
+                'Invalid rate',
+                'Supervisory Signature rate',
+                'Algorithm Followed rate',
+                'Sites using eHTS register',
+            ],
+            indicatorIndexToDisplay: 0
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
@@ -33,6 +45,7 @@ class LogbookReport extends React.Component {
         this.addTableRows = this.addTableRows.bind(this);
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
         this.exportAgreementsRatesPDFData = this.exportAgreementsRatesPDFData.bind(this);
+        this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
 
     }
 
@@ -111,6 +124,10 @@ class LogbookReport extends React.Component {
             this.state.startDate,
             this.state.endDate
         );
+    }
+
+    filterDisplayedIndicator(indicatorIndex) {
+        this.setState({ indicatorIndexToDisplay: indicatorIndex });
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -480,7 +497,7 @@ class LogbookReport extends React.Component {
             htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
             htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
             htsTypeRow.push(<td key={uuidv4()} scope="row">{unknown}</td>);
-            
+
 
             htsTypeExportTableData.push(ehts);
             htsTypeExportTableData.push(hardcopy);
@@ -518,7 +535,8 @@ class LogbookReport extends React.Component {
     }
 
     render() {
-
+        console.log(this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]);
+        console.log(this.state.indicatorIndexToDisplay);
         const imgStyle = {
             width: "100%"
         };
@@ -753,7 +771,7 @@ class LogbookReport extends React.Component {
 
         let htsTypeExportData = [];
 
-        htsTypeExportData.push(['___', 'ehts', 'hardcopy','unknown']);
+        htsTypeExportData.push(['___', 'ehts', 'hardcopy', 'unknown']);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -764,10 +782,10 @@ class LogbookReport extends React.Component {
                     <th scope="col">ehts</th>
                     <th scope="col">hardcopy</th>
                     <th scope="col">unknown</th>
-                    
+
                 </tr>;
                 htsTypeExportData = [];
-                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy','unknown']);
+                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy', 'unknown']);
             }
         }
         // end hts Type  rate
@@ -809,207 +827,245 @@ class LogbookReport extends React.Component {
         // Data Tables for all the indicators
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 pr-md-5 pr-lg-5">
-                    <div className="row">
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                        </div>
 
-                        <table id="agreementRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {tableHeaders}
-                            </thead>
-                            <tbody>
-                                {tableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
+                        <React.Fragment>
+                            {/* Site agreement rates */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 pr-md-5 pr-lg-5">
+                                <div className="row">
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                    </div>
 
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
-                    <div className="row">
-                        {/* Begin Positive concordance rate  */}
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
+                                    <table id="agreementRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {tableHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {tableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* end site agreement rates */}
+                        </React.Fragment> : ''}
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
+                        <React.Fragment>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                <div className="row">
+                                    {/* Begin Positive concordance rate  */}
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
 
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                        </div>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                    </div>
 
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {positiveConcordanceTableHeaders}
-                            </thead>
-                            <tbody>
-                                {positiveConcordanceTableData}
-                            </tbody>
-                        </table>
-                        {/* End Positive concordance rate  */}
-                    </div>
-                </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {positiveConcordanceTableHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {positiveConcordanceTableData}
+                                        </tbody>
+                                    </table>
+                                    {/* End Positive concordance rate  */}
+                                </div>
+                            </div>
+                        </React.Fragment> : ''
+                }
             </div>
 
             <div className="row">
 
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
-                        {/* Begin completeness rate  */}
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Completeness rate</p>
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {completenessTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {completenessTableData}
-                            </tbody>
-                        </table>
-                        {/* End completeness  rate  */}
-                    </div>
-                </div>
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Completeness rate' ?
+                        <React.Fragment>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+                                    {/* Begin completeness rate  */}
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Completeness rate</p>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {completenessTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {completenessTableData}
+                                        </tbody>
+                                    </table>
+                                    {/* End completeness  rate  */}
+                                </div>
+                            </div>
+                        </React.Fragment> : ''
+                }
 
-                {/* Begin  Consistency rate  */}
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Consistency rate' ?
+                        <React.Fragment>
+                            {/* Begin  Consistency rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
 
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Consistency rate</p>
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Consistency rate</p>
 
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {consistencyTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {consistencyTableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* End Consistency  rate  */}
-
-            </div>
-
-
-            <div className="row">
-
-                {/* Begin  Invalid rate  */}
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
-
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Invalid rate</p>
-
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {invalidRateTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {invalidRateTableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* End Invalid  rate  */}
-
-
-                {/* Begin  Supervisory Signature rate  */}
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
-
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Supervisory Signature rate</p>
-
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={supervisorySignatureExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {supervisorySignatureTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {supervisorySignatureTableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* End Supervisory Signature  rate  */}
-
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {consistencyTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {consistencyTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End Consistency  rate  */}
+                        </React.Fragment> : ''
+                }
             </div>
 
 
             <div className="row">
 
-                {/* Begin  algorithm followed rate  */}
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Invalid rate' ?
+                        <React.Fragment>
+                            {/* Begin  Invalid rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
 
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Invalid rate</p>
 
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {algorithmFollowedTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {algorithmFollowedTableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* End algorithm followed  rate  */}
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {invalidRateTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {invalidRateTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End Invalid  rate  */}
+                        </React.Fragment> : ''
+                }
 
-                {/* Begin hts type rate  */}
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                    <div className="row">
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Supervisory Signature rate' ?
+                        <React.Fragment>
+                            {/* Begin  Supervisory Signature rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
 
-                        <div className="col-sm-6  col-xm-6 col-md-6">
-                            <p style={{ fontWeight: "900" }}>Sites using eHTS register</p>
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Supervisory Signature rate</p>
 
-                        </div>
-                        <div className="col-sm-3  col-xm-3 col-md-3">
-                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
-                        </div>
-                        <table id="positiveConcordanceRates" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {htsTypeTableDataHeaders}
-                            </thead>
-                            <tbody>
-                                {htsTypeTableData}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {/* End hts type  rate  */}
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={supervisorySignatureExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {supervisorySignatureTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {supervisorySignatureTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End Supervisory Signature  rate  */}
+                        </React.Fragment> : ''
+                }
 
             </div>
 
+            <div className="row">
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Algorithm Followed rate' ?
+                        <React.Fragment>
+                            {/* Begin  algorithm followed rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {algorithmFollowedTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {algorithmFollowedTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End algorithm followed  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Sites using eHTS register' ?
+                        <React.Fragment>
+                            {/* Begin hts type rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Sites using eHTS register</p>
+
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {htsTypeTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {htsTypeTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End hts type  rate  */}
+                        </React.Fragment> : ''
+                }
+
+
+            </div>
         </div>;
         // End  Data Tables for all the indicators
 
@@ -1022,12 +1078,22 @@ class LogbookReport extends React.Component {
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">Logbook REPORT</h1>
+                    <h1 className="h4 mb-0 text-gray-500">Logbook REPORT: {
+                        this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
+                    }</h1>
+
                     {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
                 </div>
 
+                {/* Filter bar */}
                 <div className="row">
+                    <div className="col-md-2">
+                        <OrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
+                            orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
+                            filterDisplayedIndicator={this.filterDisplayedIndicator}
+                        ></OrgUnitIndicator>
+                    </div>
 
                     <div className="col-md-2">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
@@ -1041,19 +1107,29 @@ class LogbookReport extends React.Component {
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
-                    <div className="col-md-1">
+                    <div className="col-md-2">
                         <button
                             onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
-                            className="btn btn-sm btn-primary font-weight-bold">Filter
-                            {/* <i className="fa fa-search" aria-hidden="true"></i> */}
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
+                        </button>
+                        <button
+                            // onClick={() => this.onFilterButtonClickEvent()}
+                            type="button"
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-secondary font-weight-bold">Reset
                         </button>
                     </div>
 
+
                 </div>
+                {/* end filter bar */}
+
                 <br />
                 <div style={rowStle} className="row">
 
+                    {/* tab headers */}
                     <div className="col-sm-12  col-xm-12 col-md-12">
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             <li className="nav-item" role="presentation">
@@ -1087,23 +1163,43 @@ class LogbookReport extends React.Component {
                             </li>
 
                         </ul>
+                        {/* end tab headers */}
+
                         <div className="tab-content" id="myTabContent">
+
+
+                            {/* Site agreement rates */}
                             <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
                                 <br />
                                 {tablesTab}
                             </div>
 
-                            <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
-                                <br />
-                                <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                {agreementRateColumnCharts}
-                            </div>
+                            {
+                                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
+                                    <React.Fragment>
+                                        <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="sitecolumns-tab">
+                                            <br />
+                                            <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                                            {agreementRateColumnCharts}
+                                        </div>
+                                        {/* end site agreement rates */}
+                                    </React.Fragment> :
+                                    ''
+                            }
 
-                            <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="profile-tab">
-                                <br />
-                                <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
-                                {positiveConcordanceRateColumnCharts}
-                            </div>
+                            {
+                                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
+                                    <React.Fragment>
+                                        {/* positive concordance */}
+                                        <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="positiveConcordance-tab">
+                                            <br />
+                                            <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
+                                            {positiveConcordanceRateColumnCharts}
+                                        </div>
+                                        {/* end positive concordance */}
+                                    </React.Fragment> :
+                                    ''
+                            }
 
                         </div>
 

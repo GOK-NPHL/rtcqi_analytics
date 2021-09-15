@@ -180,7 +180,7 @@ class User extends React.Component {
         if (this.state.showUserTable && this.state.allowedPermissions.includes('view_user')) {
             pageContent = <div id='user_table' className='row'>
                 <div className='col-sm-12 col-md-12'>
-                    <div class="form-group mb-2">
+                    <div className="form-group mb-2">
                         <input type="text"
                             onChange={(event) => {
                                 let currUsersTableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'][0].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()));
@@ -192,7 +192,7 @@ class User extends React.Component {
                                 })
 
                             }}
-                            class="form-control" placeholder="search user"></input>
+                            className="form-control" placeholder="search user"></input>
                     </div>
 
                     <table className="table table-striped">

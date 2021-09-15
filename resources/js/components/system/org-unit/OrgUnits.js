@@ -244,7 +244,7 @@ class Orgunit extends React.Component {
                     className="fas fa-sitemap fa-sm text-white-50"></i> Upload Organisation Unit</a>;
             } else {
                 createOrgsButton = <>
-                    <div class="d-flex p-3 text-white">
+                    <div className="d-flex p-3 text-white">
                         <a href="#" onClick={() => this.setState({
                             showOrgunitLanding: false,
                             isUpdateOrgunits: true
@@ -276,7 +276,7 @@ class Orgunit extends React.Component {
                     </div>
                     <div className="col-sm-8">
 
-                        <div class="form-group mb-2">
+                        <div className="form-group mb-2">
                             <input type="text"
                                 onChange={(event) => {
                                     let tableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()));
@@ -288,7 +288,7 @@ class Orgunit extends React.Component {
                                     })
 
                                 }}
-                                class="form-control" placeholder="search orgunit"></input>
+                                className="form-control" placeholder="search orgunit"></input>
                         </div>
 
                         <table
