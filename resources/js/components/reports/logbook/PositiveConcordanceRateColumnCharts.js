@@ -103,7 +103,7 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
                 {columns}
             </div>;
         }
-        columns.push(<div key={uuidv4()} className="col-sm-6 col-xm-12">
+        columns.push(<div key={uuidv4()} className="col-sm-12 col-xm-12">
             {singChart}
         </div>);
         counter += 1;

@@ -824,6 +824,10 @@ class LogbookReport extends React.Component {
         }
         //End process data tables with values and prepare export objects with data
 
+        let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+
+
         // Data Tables for all the indicators
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
@@ -854,7 +858,12 @@ class LogbookReport extends React.Component {
                                     </table>
                                 </div>
                             </div>
-                            {/* end site agreement rates */}
+                             {/* chart */}
+                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                <p style={{ fontWeight: "900" }}>Site agreement Rate Chart</p>
+                                {agreementRateColumnCharts}
+                            </div>
+                            {/* end site agreement rates */} 
                         </React.Fragment> : ''}
                 {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
@@ -883,6 +892,11 @@ class LogbookReport extends React.Component {
                                     </table>
                                     {/* End Positive concordance rate  */}
                                 </div>
+                            </div>
+                            {/* chart */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
+                                {positiveConcordanceRateColumnCharts}
                             </div>
                         </React.Fragment> : ''
                 }
@@ -1069,8 +1083,7 @@ class LogbookReport extends React.Component {
         </div>;
         // End  Data Tables for all the indicators
 
-        let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
-        let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+
         return (
 
             <React.Fragment>
@@ -1134,9 +1147,12 @@ class LogbookReport extends React.Component {
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
-                                    <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
+                                    {/* <i className="fa fa-table" aria-hidden="true"></i>  */}
+                                    <i className="fas fa-chart-bar"></i> Data View</a>
                             </li>
-                            <li className="nav-item" role="presentation">
+
+
+                            {/* <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="SiteColumnsTab" data-toggle="tab"
                                     href="#sitecolumns" role="tab" aria-controls="profile"
                                     aria-selected="false"
@@ -1153,14 +1169,9 @@ class LogbookReport extends React.Component {
                                 <a className="nav-link" id="positiveConcordanceColumnsTab" data-toggle="tab"
                                     href="#positiveConcordance" role="tab" aria-controls="profile"
                                     aria-selected="false"
-                                // onClick={() => {
-                                //     this.setState({
-                                //         echartsMinHeight: ""
-                                //     })
-                                // }}
                                 >
                                     <i className="fas fa-chart-bar"></i> Positive Concordance rates bar</a>
-                            </li>
+                            </li> */}
 
                         </ul>
                         {/* end tab headers */}
@@ -1175,30 +1186,30 @@ class LogbookReport extends React.Component {
                             </div>
 
                             {
-                                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
-                                    <React.Fragment>
-                                        <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="sitecolumns-tab">
-                                            <br />
-                                            <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                            {agreementRateColumnCharts}
-                                        </div>
-                                        {/* end site agreement rates */}
-                                    </React.Fragment> :
-                                    ''
+                                // this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
+                                //     <React.Fragment>
+                                //         <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="sitecolumns-tab">
+                                //             <br />
+                                //             <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                                //             {agreementRateColumnCharts}
+                                //         </div>
+                                //         {/* end site agreement rates */}
+                                //     </React.Fragment> :
+                                //     ''
                             }
 
                             {
-                                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
-                                    <React.Fragment>
-                                        {/* positive concordance */}
-                                        <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="positiveConcordance-tab">
-                                            <br />
-                                            <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
-                                            {positiveConcordanceRateColumnCharts}
-                                        </div>
-                                        {/* end positive concordance */}
-                                    </React.Fragment> :
-                                    ''
+                                // this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
+                                //     <React.Fragment>
+                                //         {/* positive concordance */}
+                                //         <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="positiveConcordance-tab">
+                                //             <br />
+                                //             <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
+                                //             {positiveConcordanceRateColumnCharts}
+                                //         </div>
+                                //         {/* end positive concordance */}
+                                //     </React.Fragment> :
+                                //     ''
                             }
 
                         </div>
