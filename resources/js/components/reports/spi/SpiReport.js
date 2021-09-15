@@ -35,7 +35,7 @@ class SpiReport extends React.Component {
         this.addTableRows = this.addTableRows.bind(this);
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
         this.exportAveragePerformancePDFData = this.exportAveragePerformancePDFData.bind(this);
-        
+
     }
 
     componentDidMount() {
@@ -147,6 +147,10 @@ class SpiReport extends React.Component {
             this.state.startDate,
             this.state.endDate
         );
+    }
+
+    resetFilters() {
+        location.reload();
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -279,7 +283,7 @@ class SpiReport extends React.Component {
         doc.autoTable({ html: '#overallSiteLevelPerformance' });
         doc.save('Overall_Site_Levels.pdf')
     }
-    
+
     render() {
 
         const imgStyle = {
@@ -373,14 +377,14 @@ class SpiReport extends React.Component {
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
             <div className="row">
                 <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900"}}>Average Performance  per QA element</p>
+                    <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
 
                 </div>
                 <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{"color": "blue"}}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
                 </div>
                 <div className="col-sm-3  col-xm-3 col-md-3">
-                    <a style={{"color": "blue"}} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
+                    <a style={{ "color": "blue" }} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
                 </div>
             </div>
 
@@ -401,10 +405,10 @@ class SpiReport extends React.Component {
 
                 </div>
                 <div className="col-sm-3  col-xm-3 col-md-3">
-                <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                    <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
                 </div>
                 <div className="col-sm-3  col-xm-3 col-md-3">
-                    <a style={{"color": "blue"}} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
+                    <a style={{ "color": "blue" }} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
                 </div>
             </div>
 
@@ -445,16 +449,25 @@ class SpiReport extends React.Component {
                         <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
-                    <div className="col-md-5">
+                    <div className="col-md-4">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
-                    <div className="col-md-1">
+                    <div className="col-md-2">
                         <button
                             onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
-                            className="btn btn-sm btn-primary font-weight-bold">Filter
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
                             {/* <i className="fa fa-search" aria-hidden="true"></i> */}
+                        </button>
+                        <button
+                            onClick={() => {
+                                this.resetFilters();
+                            }}
+                            type="button"
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-secondary font-weight-bold">Reset
                         </button>
                     </div>
 
