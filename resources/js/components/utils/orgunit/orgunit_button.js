@@ -98,7 +98,7 @@ class OrgUnitButton extends React.Component {
                                 <p> Select Organisation Unit </p>
                                 <TreeView addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
                             </div>
-                            {/* <br />
+                            <br />
                             <div>
                                 <button
                                     id="close_orgunits"
@@ -108,7 +108,7 @@ class OrgUnitButton extends React.Component {
                                     }}
                                     type="button"
                                     className="btn btn-primary">Close</button>
-                            </div> */}
+                            </div>
                         </div>
                     </div>
                 </div>
