@@ -52,7 +52,7 @@ class AuthController extends Controller
             $user->save();
             $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
             // user_allowed_roles
-            for ($x = 0; $x < count($request->selected_viewable_roles); $x++) {;
+            for ($x = 0; $x < count($request->selected_viewable_roles); $x++) {
                 $userAllowedRole = new UserAllowedRole([
                     'user_id' => $user->id,
                     'role_id' => $request->selected_viewable_roles[$x],

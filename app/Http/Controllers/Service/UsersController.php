@@ -7,6 +7,7 @@ use App\OdkOrgunit;
 use App\Role;
 use App\Services\SystemAuthorities;
 use App\User;
+use App\UserAllowedRole;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -103,6 +104,7 @@ class UsersController extends Controller
             $user = User::find($request->user['id']);
             $user->OdkOrgunit()->sync([]);
             $user->delete();
+            UserAllowedRole::whereIn('user_id', $user->id)->delete();
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
@@ -167,7 +169,7 @@ class UsersController extends Controller
                 'name' => 'required',
                 'email'    => 'required',
                 'role' => 'required',
-         
+
             ]);
             $name = $request->name;
             $email    = $request->email;
@@ -194,10 +196,18 @@ class UsersController extends Controller
 
             $user->role()->associate($role);
             $user->save();
-            Log::info("User updating");
-            Log::info("updating orgs");
             $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
-            Log::info("updating orgs done");
+
+            // user_allowed_roles
+            UserAllowedRole::whereIn('user_id', $user->id)->delete();
+            for ($x = 0; $x < count($request->selected_viewable_roles); $x++) {
+                $userAllowedRole = new UserAllowedRole([
+                    'user_id' => $user->id,
+                    'role_id' => $request->selected_viewable_roles[$x],
+                ]);
+                $userAllowedRole->save();
+            }
+
             return response()->json(['Message' => 'Updated successfully'], 200);
         } catch (Exception $ex) {
             return ['Error' => '500', 'Message' => 'Could not Updated user ' . $ex->getMessage()];
