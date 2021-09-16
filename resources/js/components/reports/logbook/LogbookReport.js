@@ -541,9 +541,6 @@ class LogbookReport extends React.Component {
     }
 
     render() {
-
-        console.log(this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]);
-        console.log(this.state.indicatorIndexToDisplay);
         const imgStyle = {
             width: "100%"
         };

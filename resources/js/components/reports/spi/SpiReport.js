@@ -25,6 +25,11 @@ class SpiReport extends React.Component {
             orgUnitTimeline: [],
             siteType: [],
             echartsMinHeight: '',
+            orgUnitIndicators: [
+                'Average Performance per QA element',
+                'Overall Site Levels during Assessment',
+            ],
+            indicatorIndexToDisplay: 0
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
@@ -375,51 +380,60 @@ class SpiReport extends React.Component {
         }
 
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
-            <div className="row">
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
 
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <a style={{ "color": "blue" }} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
-                </div>
-            </div>
+            {
+                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Average Performance per QA element' ?
+                    <React.Fragment>
+                        <div className="row">
+                            <div className="col-sm-6  col-xm-6 col-md-6">
+                                <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
 
-            <table id="averagePerformance" className="table table-responsive">
-                <thead className="thead-dark">
-                    {tableHeaders}
-                </thead>
-                <tbody>
-                    {tableData}
-                </tbody>
-            </table>
+                            </div>
+                            <div className="col-sm-3  col-xm-3 col-md-3">
+                                <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                            </div>
+                            <div className="col-sm-3  col-xm-3 col-md-3">
+                                <a style={{ "color": "blue" }} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
+                            </div>
+                        </div>
 
-            <br />
+                        <table id="averagePerformance" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {tableHeaders}
+                            </thead>
+                            <tbody>
+                                {tableData}
+                            </tbody>
+                        </table>
+                    </React.Fragment> : ''
+            }
 
-            <div className="row">
-                <div className="col-sm-6  col-xm-6 col-md-6">
-                    <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+            {
+                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Site Levels during Assessment' ?
+                    <React.Fragment>
+                        <div className="row">
+                            <div className="col-sm-6  col-xm-6 col-md-6">
+                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
 
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
-                </div>
-                <div className="col-sm-3  col-xm-3 col-md-3">
-                    <a style={{ "color": "blue" }} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
-                </div>
-            </div>
+                            </div>
+                            <div className="col-sm-3  col-xm-3 col-md-3">
+                                <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                            </div>
+                            <div className="col-sm-3  col-xm-3 col-md-3">
+                                <a style={{ "color": "blue" }} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
+                            </div>
+                        </div>
 
-            <table id="overallSiteLevelPerformance" className="table table-responsive">
-                <thead className="thead-dark">
-                    {overallSitesHeaders}
-                </thead>
-                <tbody>
-                    {overaRowllSiteLevels}
-                </tbody>
-            </table>
+                        <table id="overallSiteLevelPerformance" className="table table-responsive">
+                            <thead className="thead-dark">
+                                {overallSitesHeaders}
+                            </thead>
+                            <tbody>
+                                {overaRowllSiteLevels}
+                            </tbody>
+                        </table>
+                    </React.Fragment> : ''
+            }
         </div>;
 
         let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts singleItem={false} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
