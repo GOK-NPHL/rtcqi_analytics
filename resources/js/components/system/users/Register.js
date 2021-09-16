@@ -11,6 +11,7 @@ class Register extends React.Component {
         super(props);
         this.state = {
             selectedViewableRoles: [],
+            previousSelectedViewableRoles: [],
             role: '',
             roles: {},
             selectedOrgs: {},
@@ -48,6 +49,12 @@ class Register extends React.Component {
                     assignedOrgUnits.push(orgunit.org_unit_id);
 
                 });
+
+                let canViewAssignRolesList = false;
+                if (userDetails['demographics']['role_id']) {
+                    canViewAssignRolesList = true;
+                }
+
                 this.setState({
                     first_name: userDetails['demographics']['first_name'],
                     last_name: userDetails['demographics']['last_name'] ? userDetails['demographics']['last_name'] : '',
@@ -55,7 +62,9 @@ class Register extends React.Component {
                     role: userDetails['demographics']['role_id'],
                     roleId: userDetails['demographics']['role_id'],
                     selectedViewableRoles: userDetails['allowed_roles'],
-                    selectedOrgs: userAssignedOrgs
+                    previousSelectedViewableRoles: userDetails['allowed_roles'],
+                    selectedOrgs: userAssignedOrgs,
+                    canViewAssignRolesList: canViewAssignRolesList
                 });
             }
 
@@ -160,7 +169,7 @@ class Register extends React.Component {
         // console.log(event.target.value);
         let roleId = event.target.value;
         let canViewAssignRolesList = false;
-        console.log();
+
         try {
             if (this.state.roles[roleId].authorities.role.includes(12)) {
                 canViewAssignRolesList = true
@@ -168,10 +177,17 @@ class Register extends React.Component {
         } catch (err) {
 
         }
+        let SelectedViewableRoles = [];
+        if (canViewAssignRolesList == false) {
+            SelectedViewableRoles = [];
+        } else {
+            SelectedViewableRoles = this.state.previousSelectedViewableRoles
+        }
 
         // viewAssignRolesList
         this.setState({
             role: roleId,
+            selectedViewableRoles: SelectedViewableRoles,
             canViewAssignRolesList: canViewAssignRolesList
         });
     };

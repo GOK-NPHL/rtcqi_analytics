@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Service\Utils as ServiceUtils;
 use App\OdkOrgunit;
 use App\Role;
 use App\Services\SystemAuthorities;
@@ -11,6 +12,7 @@ use App\UserAllowedRole;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -43,15 +45,40 @@ class UsersController extends Controller
             return response()->json(['Message' => 'Not allowed to view users: '], 500);
         }
         $user = Auth::user();
+        $utils = new ServiceUtils();
+        $orgUnits = $utils->getOrgunitsByUser();
+        $orgUnitList = [];
+
+        foreach ($orgUnits as  $orgId) {
+            $orgUnitList[] = $orgId['org_unit_id'];
+        }
+
+
         $users = User::select(
             "users.name as first_name",
             "users.id as id",
             "users.last_name as last_name",
             "users.email as email",
             "roles.name as role_name",
-        )->join('roles', 'roles.id', '=', 'users.role_id')
-            ->where('users.id', '<>', $user->id)
-            ->get();
+        )->join('roles', 'roles.id', '=', 'users.role_id');
+
+        // ->whereIn(DB::raw('CAST(users.id AS CHAR)'), $orgUnitList)
+
+        if (Gate::allows(SystemAuthorities::$authorities['view_users_missing_organisation_units'])) {
+            Log::info("view_users_missing_organisation_units Action allowed ======>");
+            $users = $users->join('odkorgunit_user', 'odkorgunit_user.user_id', '=', 'users.id')
+                ->where('users.id', '<>', $user->id)
+                ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList)
+                ->orWhereNotIn('odkorgunit_user.odk_orgunit_id', function ($query) {
+                    $query->select('org_unit_id')->from('odkorgunit');
+                });
+        } else {
+            Log::info("view_users_missing_organisation_units Action not allowed ======>");
+            $users = $users->join('odkorgunit_user', 'odkorgunit_user.user_id', '=', 'users.id')
+                ->where('users.id', '<>', $user->id)
+                ->whereNotIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
+        }
+        $users = $users->get();
 
         $roleIds = array();
         $payload = array();

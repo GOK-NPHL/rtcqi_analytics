@@ -27,7 +27,8 @@ class SystemAuthorities
         'view_dashboard' => 'view_dashboard',
         'data_backup' => 'data_backup',
         'view_spi_report'=>'view_spi_report',
-        'upload_new_orgunit_structure'=>'upload_new_orgunit_structure'
+        'upload_new_orgunit_structure'=>'upload_new_orgunit_structure',
+        'view_users_missing_organisation_units'=>'view_users_missing_organisation_units'
 
     ];
 }

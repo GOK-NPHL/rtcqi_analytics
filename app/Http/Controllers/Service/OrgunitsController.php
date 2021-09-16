@@ -6,12 +6,15 @@ use App\FormSubmissions;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Service\Utils as ServiceUtils;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
 use App\OrgunitLevelMap;
+use App\Services\ODKUtils;
 use App\Services\SystemAuthorities;
 use App\User;
 use Exception;
+use Hamcrest\Util;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -39,175 +42,9 @@ class OrgunitsController extends Controller
         return view('interface/orgunits/index');
     }
 
-    private function runOrgUnitsLevelQuery($orgUnitId, $level)
-    {
-        if ($level == 5) {
-            //site
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at",
-            )->where('odkorgunit.org_unit_id', $orgUnitId)
-                ->get();
 
-            return $orgUnitObject;
-        } else if ($level == 4) {
-            //facility
-            $org5 = OdkOrgunit::select(
-                "org5.level",
-                "org5.odk_unit_name",
-                "org5.parent_id",
-                "org5.org_unit_id",
-                "org5.id",
-                "org5.updated_at"
-            )->join('odkorgunit as org5', 'org5.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
 
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at",
-            )->where('odkorgunit.org_unit_id', $orgUnitId)
-                ->union($org5)
-                ->orderBy('level', 'ASC')
-                ->get();
-
-            return $orgUnitObject;
-        } else if ($level == 3) {
-            //sub county
-
-            $org4 = OdkOrgunit::select(
-                "org4.level",
-                "org4.odk_unit_name",
-                "org4.parent_id",
-                "org4.org_unit_id",
-                "org4.id",
-                "org4.updated_at",
-            )->join('odkorgunit as org4', 'org4.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
-
-            $org5 = OdkOrgunit::select(
-                "org5.level",
-                "org5.odk_unit_name",
-                "org5.parent_id",
-                "org5.org_unit_id",
-                "org5.id",
-                "org5.updated_at"
-            )->join('odkorgunit as org4', 'org4.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
-
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at",
-            )->where('odkorgunit.org_unit_id', $orgUnitId)
-                ->union($org4)
-                ->union($org5)
-                ->orderBy('level', 'ASC')
-                ->get();
-
-            return $orgUnitObject;
-        } else if ($level == 2) {
-            //county
-            $org4 = OdkOrgunit::select(
-                "org4.level",
-                "org4.odk_unit_name",
-                "org4.parent_id",
-                "org4.org_unit_id",
-                "org4.id",
-                "org4.updated_at",
-            )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->join('odkorgunit as org4', 'org4.parent_id', '=', 'org3.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
-
-            $org5 = OdkOrgunit::select(
-                "org5.level",
-                "org5.odk_unit_name",
-                "org5.parent_id",
-                "org5.org_unit_id",
-                "org5.id",
-                "org5.updated_at"
-            )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->join('odkorgunit as org4', 'org4.parent_id', '=', 'org3.org_unit_id')
-                ->join('odkorgunit as org5', 'org5.parent_id', '=', 'org4.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
-
-            $org3 = OdkOrgunit::select(
-                "org3.level",
-                "org3.odk_unit_name",
-                "org3.parent_id",
-                "org3.org_unit_id",
-                "org3.id",
-                "org3.updated_at"
-            )->join('odkorgunit as org3', 'org3.parent_id', '=', 'odkorgunit.org_unit_id')
-                ->where('odkorgunit.org_unit_id', $orgUnitId);
-
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at",
-            )->where('odkorgunit.org_unit_id', $orgUnitId)
-                ->union($org3)
-                ->union($org4)
-                ->union($org5)
-                ->orderBy('level', 'ASC')
-                ->get();
-
-            return $orgUnitObject;
-        } else if ($level == 1) {
-            //national
-            $orgUnitObject = OdkOrgunit::select(
-                "odkorgunit.level",
-                "odkorgunit.odk_unit_name",
-                "odkorgunit.parent_id",
-                "odkorgunit.org_unit_id",
-                "odkorgunit.id",
-                "odkorgunit.updated_at"
-            )->get();
-
-            return $orgUnitObject;
-        }
-    }
-
-    private function getOrgunitsByUser()
-    {
-        // get all org units & their levels registered.
-        // for each orgunit registered, get its childeren upto lowest level.
-        $combinedRecords = [];
-        //$combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
-        $user = Auth::user();
-
-        $registeredOrgs = OdkOrgunit::select(
-            "odkorgunit.level",
-            "odkorgunit.org_unit_id"
-        )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
-            ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
-            ->where('users.id', $user->id)
-            ->get();
-
-        if (count($registeredOrgs) == 0) {
-            throw new Exception("User has no org unit attached");
-        }
-        foreach ($registeredOrgs as $registeredOrg) {
-
-            $orgUnitResultSet = $this->runOrgUnitsLevelQuery($registeredOrg->org_unit_id, $registeredOrg->level);
-            $combinedRecords = array_merge($combinedRecords, iterator_to_array($orgUnitResultSet, true));
-        }
-        return  $combinedRecords;
-    }
+   
 
 
     public function getOrgunits()
@@ -216,10 +53,11 @@ class OrgunitsController extends Controller
             return response()->json(['Message' => 'Not allowed to view organisation units: '], 500);
         }
         try {
+            $utils = new Utils();
             $orgUnitsPayload = [
                 'metadata' =>
                 ['levels' => [1, 2, 3, 4, 5]],
-                'payload' => [$this->getOrgunitsByUser()]
+                'payload' => [$utils->getOrgunitsByUser()]
             ];
             return $orgUnitsPayload;
         } catch (Exception $ex) {
@@ -246,7 +84,6 @@ class OrgunitsController extends Controller
             }
 
             $orgunitMetadata = $request->orgunit_metadata;
-            Log::info($orgunitMetadata);
             for ($x = 0; $x < count($orgunitMetadata); $x++) {
                 $orgunitMetadataTable = new OrgunitLevelMap([
                     'sheet' => $orgunitMetadata[$x]['sheet'],
@@ -316,7 +153,8 @@ class OrgunitsController extends Controller
         try {
 
             $orgUnitToDelete = OdkOrgunit::where('org_unit_id', $request->org['org_unit_id'])->first();
-            $childrenOrgUnits = $this->runOrgUnitsLevelQuery($orgUnitToDelete->org_unit_id, $orgUnitToDelete->level);
+            $utils = new ServiceUtils();
+            $childrenOrgUnits = $utils->getAssociatedOrganizationUnits($orgUnitToDelete->org_unit_id, $orgUnitToDelete->level);
             $orgsToDeleteId = [];
             foreach ($childrenOrgUnits as $childOrgUnit) {
                 $orgsToDeleteId[] = $childOrgUnit->org_unit_id;
