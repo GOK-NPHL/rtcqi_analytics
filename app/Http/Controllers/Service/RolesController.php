@@ -62,15 +62,16 @@ class RolesController extends Controller
             ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id');
 
         if (count($allowedViewableRoles) != 0) {
-            // $roles = $roles->whereIn($allowedViewableRoles);
+            $roles = $roles->whereIn('roles.id',  $allowedViewableRoles->pluck('role_id'));
         }
-        Log::info($allowedViewableRoles);
 
         $roles = $roles->get();
+
         $roleIds = array();
         $payload = array();
 
         foreach ($roles as $role) {
+
             if (in_array($role->role_id, $roleIds)) {
                 $auths = $payload[$role->role_id]["authorities"];
                 if (array_key_exists($role->authority_group, $auths)) {
@@ -142,12 +143,8 @@ class RolesController extends Controller
         try {
             $user = Auth::user();
             $role = Role::find($request->role_id);
-            Log::debug("role name db " . $role->name);
-            Log::debug("role name req " . $request->name);
             $role->name = $request->name;
             $role->save();
-            Log:
-            info("role name updated");
             $role->editor()->associate($user);
             $role->save();
             $role->authorities()->sync($request->authoritiesSelected);
