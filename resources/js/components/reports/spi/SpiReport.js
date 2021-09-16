@@ -53,22 +53,23 @@ class SpiReport extends React.Component {
     componentDidMount() {
         (async () => {
             let returnedData = await FetchOrgunits();
-
+           
             let subCountyList = [];
             // returnedData.forEach((val) => {
             // });
+            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
             this.setState({
                 unfilteredOrgUnits: returnedData,
                 orgUnits: returnedData.payload[0],
                 odkData: {},
                 orgLevel: 1,
                 orgId: 1,
-                orgUnitDataIds: [0],
+                orgUnitDataIds: [defaultOrg[0]],
                 orgUnitTimeline: [],
                 startDate: '',
                 endDate: ''
             });
-            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
+            
             this.fetchOdkDataServer(defaultOrg,
                 this.state.orgUnitTimeline,
                 this.state.siteType,
