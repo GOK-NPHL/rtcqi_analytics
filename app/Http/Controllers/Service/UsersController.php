@@ -76,7 +76,7 @@ class UsersController extends Controller
             Log::info("view_users_missing_organisation_units Action not allowed ======>");
             $users = $users->join('odkorgunit_user', 'odkorgunit_user.user_id', '=', 'users.id')
                 ->where('users.id', '<>', $user->id)
-                ->whereNotIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
+                ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
         }
         $users = $users->get();
 
