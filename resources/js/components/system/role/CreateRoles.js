@@ -53,6 +53,8 @@ class RoleCreate extends React.Component {
         if (this.props.editMode) {
             this.setState({ roleName: this.props.roleToEdit.role_name });
             let currentAuthorities = this.props.roleToEdit.authorities;
+            console.log("currentAuthorities");
+            console.log(currentAuthorities);
             let selected = [];
             for (const [key, value] of Object.entries(currentAuthorities)) {
                 for (let i = 0; i < value.length; i++) {
@@ -113,11 +115,7 @@ class RoleCreate extends React.Component {
     }
 
     render() {
-        console.log("perm 1")
-        console.log(this.state.selected)
-
-        console.log(this.state.permissionOptions)
-        console.log("perm 2")
+        
         let pageContent = <div id="registration_form" className="card shadow mb-4">
             <div className="card-header py-3">
                 <h6 className="m-0 font-weight-bold text-primary">Role Creation</h6>

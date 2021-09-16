@@ -10,24 +10,26 @@ class Register extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected: [],
+            selectedRoles: [],
             role: '',
             roles: {},
             selectedOrgs: {},
-            permissionOptions: [],
+            rolesOptions: [],
             message: '',
             first_name: '',
             last_name: '',
             email: '',
             password: '',
             assignedOrgUnits: [],
-            closeRegisterPage: true
+            closeRegisterPage: true,
+            canViewAssignRolesList: false
         };
 
         this.saveUser = this.saveUser.bind(this);
         this.updateCurrentUser = this.updateCurrentUser.bind(this);
         this.roleOnChange = this.roleOnChange.bind(this);
         this.selectOrgUnitHandler = this.selectOrgUnitHandler.bind(this);
+        this.viewableRolesOnChange = this.viewableRolesOnChange.bind(this);
     }
 
     componentDidMount() {
@@ -57,13 +59,25 @@ class Register extends React.Component {
             }
 
             httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
+
+            let rolesOptions = [];
+
+            for (const [key, value] of Object.entries(roles)) {
+                rolesOptions.push({ value: value.role_id, label: value.role_name });
+            }
+
             this.setState({
                 orgUnits: httpOrgUnits,
                 roles: roles,
-                assignedOrgUnits: assignedOrgUnits
+                assignedOrgUnits: assignedOrgUnits,
+                rolesOptions: rolesOptions
             });
         })();
     }
+
+    viewableRolesOnChange(selected) {
+        this.setState({ selectedRoles: selected });
+    };
 
     updateCurrentUser() {
         if (this.state.first_name.length == 0 ||
@@ -71,10 +85,6 @@ class Register extends React.Component {
             this.state.selectedOrgs.length == 0 ||
             Object.keys(this.state.selectedOrgs).length == 0) {
 
-                console.log(this.state.first_name.length == 0 ,
-                    this.state.email.length == 0 ,
-                    this.state.selectedOrgs.length == 0,
-                    Object.keys(this.state.selectedOrgs).length == 0);
             this.setState({
                 message: "Kindly fill in the required data marked in *",
                 closeRegisterPage: false
@@ -144,11 +154,27 @@ class Register extends React.Component {
     }
 
     roleOnChange(event) {
-        this.setState({ role: event.target.value });
+        // console.log(event.target.value);
+        let roleId = event.target.value;
+        let canViewAssignRolesList = false;
+        console.log();
+        try {
+            if (this.state.roles[roleId].authorities.role.includes(12)) {
+                canViewAssignRolesList = true
+            }
+        } catch (err) {
+
+        }
+
+        // viewAssignRolesList
+        this.setState({
+            role: roleId,
+            canViewAssignRolesList: canViewAssignRolesList
+        });
     };
 
     selectOrgUnitHandler(orgunit) {
-       
+
         let selectedOrgs = { ...this.state.selectedOrgs };
         if (orgunit.id in selectedOrgs) {
             delete selectedOrgs[orgunit.id];
@@ -194,97 +220,113 @@ class Register extends React.Component {
 
                         <div className="card mb-4 py-3 border-left-secondary">
                             <div className="card-body">
-                                
-                                    <div className="form-row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip01">First name *</label>
-                                            <input type="text"
-                                                onChange={(event) => {
-                                                    this.setState({
-                                                        first_name: event.target.value
-                                                    });
-                                                }}
-                                                value={this.state.first_name}
-                                                className="form-control"
-                                                id="validationTooltip01" required />
-                                            <div className="valid-tooltip">user first name</div>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip02">Last name</label>
-                                            <input
-                                                onChange={(event) => {
-                                                    this.setState({
-                                                        last_name: event.target.value
-                                                    });
-                                                }}
-                                                value={this.state.last_name}
-                                                type="text"
-                                                className="form-control"
-                                                id="validationTooltip02" required />
-                                            <div className="valid-tooltip">user last name</div>
-                                        </div>
-                                    </div>
-                                    <div className="form-row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip03">Email *</label>
-                                            <input
-                                                onChange={(event) => {
-                                                    this.setState({
-                                                        email: event.target.value
-                                                    });
-                                                }}
-                                                value={this.state.email}
-                                                type="text"
-                                                className="form-control"
-                                                id="validationTooltip03" required />
-                                            <div className="invalid-tooltip">Please provide a valid Email. </div>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip05">Role *</label>
-                                            <select onChange={() => this.roleOnChange(event)} className="form-control" id="exampleFormControlSelect1">
-                                                <option defaultValue>--Select user role--</option>
-                                                {roles}
-                                            </select>
-                                        </div>
-                                    </div>
 
-                                    <div className="form-row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit' ? ' *' : ''}</label>
-                                            <input type="text"
-                                                onChange={(event) => {
-                                                    this.setState({
-                                                        password: event.target.value
-                                                    });
-                                                }}
-                                                className="form-control"
-                                                id="validationTooltip04"
-                                                required />
-                                            <div className="invalid-tooltip">Please provide a valid Email. </div>
-                                        </div>
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip01">First name *</label>
+                                        <input type="text"
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    first_name: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.first_name}
+                                            className="form-control"
+                                            id="validationTooltip01" required />
+                                        <div className="valid-tooltip">user first name</div>
                                     </div>
-                                    <br />
-                                    <div className="form-row">
-                                        <div className="col-md-6 mb-6">
-                                            <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
-                                                <p> Select Organisation Unit </p>
-                                                <TreeView assignedOrgUnits={this.state.assignedOrgUnits} addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
-                                            </div>
-                                        </div>
-                                        <div id="selectedOrgs" className="col-md-6 mb-6">
-                                            <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
-                                                <p> Selected Organisation Units </p>
-                                                {selectedOrgs}
-                                            </div>
-                                        </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip02">Last name</label>
+                                        <input
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    last_name: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.last_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="validationTooltip02" required />
+                                        <div className="valid-tooltip">user last name</div>
                                     </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip03">Email *</label>
+                                        <input
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    email: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.email}
+                                            type="text"
+                                            className="form-control"
+                                            id="validationTooltip03" required />
+                                        <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip05">Role *</label>
+                                        <select onChange={() => this.roleOnChange(event)} className="form-control" id="exampleFormControlSelect1">
+                                            <option defaultValue>--Select user role--</option>
+                                            {roles}
+                                        </select>
+                                    </div>
+                                </div>
 
-                                    <button
-                                        onClick={this.props.userActionState != 'edit' ? () => this.saveUser() : () => this.updateCurrentUser()}
-                                        style={{ "marginTop": "10px" }}
-                                        className="btn btn-primary"
-                                        > {this.props.userActionState == 'edit' ? 'Update User' : 'Save User'}</button>
-                                
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit' ? ' *' : ''}</label>
+                                        <input type="text"
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    password: event.target.value
+                                                });
+                                            }}
+                                            className="form-control"
+                                            id="validationTooltip04"
+                                            required />
+                                        <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                    </div>
+                                </div>
+                                {
+                                    this.state.canViewAssignRolesList ?
+                                        <React.Fragment>
+                                            <br />
+                                            <div className="col-md-12 mb-12">
+                                                <label htmlFor="permissions">Assign roles this user will view (if blank, they'll access all)</label>
+                                                <DualListBox
+                                                    canFilter
+                                                    options={this.state.rolesOptions}
+                                                    selected={this.state.selectedRoles}
+                                                    onChange={this.viewableRolesOnChange}
+                                                />
+                                            </div>
+                                        </React.Fragment> : ''
+                                }
+
+                                <br />
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-6">
+                                        <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                            <p> Select Organisation Unit </p>
+                                            <TreeView assignedOrgUnits={this.state.assignedOrgUnits} addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
+                                        </div>
+                                    </div>
+                                    <div id="selectedOrgs" className="col-md-6 mb-6">
+                                        <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                            <p> Selected Organisation Units </p>
+                                            {selectedOrgs}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={this.props.userActionState != 'edit' ? () => this.saveUser() : () => this.updateCurrentUser()}
+                                    style={{ "marginTop": "10px" }}
+                                    className="btn btn-primary"
+                                > {this.props.userActionState == 'edit' ? 'Update User' : 'Save User'}</button>
+
                             </div>
                         </div>
 
