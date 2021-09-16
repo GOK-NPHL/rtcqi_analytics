@@ -14,6 +14,7 @@ import OverallPerformanceRadar from './OverallPerformanceRadar';
 import { CSVLink, CSVDownload } from "react-csv";
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import SpiOrgUnitIndicator from '../../utils/orgunit/SpiOrgUnitIndicator';
 
 class SpiReport extends React.Component {
 
@@ -40,6 +41,7 @@ class SpiReport extends React.Component {
         this.addTableRows = this.addTableRows.bind(this);
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
         this.exportAveragePerformancePDFData = this.exportAveragePerformancePDFData.bind(this);
+        this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
 
     }
 
@@ -135,6 +137,10 @@ class SpiReport extends React.Component {
         this.setState({
             siteType: siteType
         });
+    }
+
+    filterDisplayedIndicator(indicatorIndex) {
+        this.setState({ indicatorIndexToDisplay: indicatorIndex });
     }
 
     orgDateChangeHandler(startDate, endDate) {
@@ -455,22 +461,29 @@ class SpiReport extends React.Component {
 
                 <div className="row">
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                        <SpiOrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
+                            orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
+                            filterDisplayedIndicator={this.filterDisplayedIndicator}
+                        ></SpiOrgUnitIndicator>
+                    </div>
+
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
                         <OrgTimeline onOrgTimelineChange={this.onOrgTimelineChange}></OrgTimeline>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
                         <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <button
                             onClick={() => this.onFilterButtonClickEvent()}
                             type="button"
