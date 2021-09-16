@@ -99,7 +99,8 @@ class Register extends React.Component {
                 this.state.password,
                 this.state.selectedOrgs,
                 this.state.role,
-                this.props.selectedUser.id
+                this.props.selectedUser.id,
+                this.state.selectedViewableRoles
             ).then(response => {
                 let message = response.data.Message
 

@@ -296,7 +296,7 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
     }
 }
 
-export async function Updateuser(first_name, last_name, email, password, orgunits, role, userId) {
+export async function Updateuser(first_name, last_name, email, password, orgunits, role, userId, selectedViewableRoles) {
 
     try {
         let orgsId = [];
@@ -311,7 +311,8 @@ export async function Updateuser(first_name, last_name, email, password, orgunit
             password: password,
             orgunits: orgsId,
             role: role,
-            user_id: userId
+            user_id: userId,
+            selected_viewable_roles: selectedViewableRoles
         };
         const response = await axios.put(`${settings.rtcqiBaseApi}/update_user`, data, {});
         return response;
