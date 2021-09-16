@@ -117,8 +117,8 @@ class OrgunitStructureCreate extends React.Component {
                     var cellref = XLSX.utils.encode_cell({ c: C, r: R }); // construct A1 reference for cell
                     if (!sheet[cellref]) continue; // if cell doesn't exist, move on
                     var cell = sheet[cellref];
-                    let cellValue = cell.v.toLowerCase();
-                    cellValue = cellValue.charAt(0).toUpperCase() + cellValue.slice(1);
+                    let cellValue = cell.v;
+                    // cellValue = cellValue.charAt(0).toUpperCase() + cellValue.slice(1);
                     rowValues[C] = cellValue.trim();
                 }
 
