@@ -29,6 +29,10 @@ class AuthController extends Controller
             return response()->json(['Message' => 'Not allowed to add users: '], 500);
         }
         try {
+            $userEmail = User::where("email", $request->email)->first();
+            if ($userEmail) {
+                return ['Error' => '500', 'Message' => 'Provided email already exists, contact admin to verify '];
+            }
             $validatedData = $request->validate([
                 'name' => 'required',
                 'email'    => 'unique:users|required',
