@@ -10,7 +10,7 @@ class Register extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedRoles: [],
+            selectedViewableRoles: [],
             role: '',
             roles: {},
             selectedOrgs: {},
@@ -76,7 +76,7 @@ class Register extends React.Component {
     }
 
     viewableRolesOnChange(selected) {
-        this.setState({ selectedRoles: selected });
+        this.setState({ selectedViewableRoles: selected });
     };
 
     updateCurrentUser() {
@@ -136,7 +136,8 @@ class Register extends React.Component {
                     this.state.email,
                     this.state.password,
                     this.state.selectedOrgs,
-                    this.state.role
+                    this.state.role,
+                    this.state.selectedViewableRoles
                 );
 
                 if (response) {
@@ -298,7 +299,7 @@ class Register extends React.Component {
                                                 <DualListBox
                                                     canFilter
                                                     options={this.state.rolesOptions}
-                                                    selected={this.state.selectedRoles}
+                                                    selected={this.state.selectedViewableRoles}
                                                     onChange={this.viewableRolesOnChange}
                                                 />
                                             </div>
@@ -309,13 +310,13 @@ class Register extends React.Component {
                                 <div className="form-row">
                                     <div className="col-md-6 mb-6">
                                         <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
-                                            <p> Select Organisation Unit </p>
+                                            <p> Select Organisation Unit *</p>
                                             <TreeView assignedOrgUnits={this.state.assignedOrgUnits} addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
                                         </div>
                                     </div>
                                     <div id="selectedOrgs" className="col-md-6 mb-6">
                                         <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
-                                            <p> Selected Organisation Units </p>
+                                            <p> Selected Organisation Units *</p>
                                             {selectedOrgs}
                                         </div>
                                     </div>

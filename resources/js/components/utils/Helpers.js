@@ -267,7 +267,7 @@ export async function AddSubOrg(org, name) {
     }
 }
 
-export async function Saveuser(first_name, last_name, email, password, orgunits, role) {
+export async function Saveuser(first_name, last_name, email, password, orgunits, role, selectedViewableRoles) {
 
     try {
         let orgsId = [];
@@ -284,7 +284,8 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
                 email: email,
                 password: password,
                 orgunits: orgsId,
-                role: role
+                role: role,
+                selected_viewable_roles: selectedViewableRoles
             }
         });
         return response;
