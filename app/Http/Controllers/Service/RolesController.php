@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Role;
 use App\Services\SystemAuthorities;
+use App\UserAllowedRole;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -42,6 +43,12 @@ class RolesController extends Controller
         if (!Gate::allows(SystemAuthorities::$authorities['view_role'])) {
             return response()->json(['Message' => 'Not allowed to view roles: '], 500);
         }
+        $auth = Auth::user();
+        $allowedViewableRoles = UserAllowedRole::select(
+            "role_id",
+        )->where('user_id',  $auth->id)
+            ->get();
+
         $roles = Role::select(
             "users.name as editor",
             "roles.name as role_name",
@@ -52,8 +59,14 @@ class RolesController extends Controller
             "authorities.group as authority_group"
         )->join('users', 'editor_id', '=', 'users.id')
             ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
-            ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id')
-            ->get();
+            ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id');
+
+        if (count($allowedViewableRoles) != 0) {
+            // $roles = $roles->whereIn($allowedViewableRoles);
+        }
+        Log::info($allowedViewableRoles);
+
+        $roles = $roles->get();
         $roleIds = array();
         $payload = array();
 

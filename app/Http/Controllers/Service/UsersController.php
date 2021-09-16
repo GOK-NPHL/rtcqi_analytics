@@ -104,7 +104,7 @@ class UsersController extends Controller
             $user = User::find($request->user['id']);
             $user->OdkOrgunit()->sync([]);
             $user->delete();
-            UserAllowedRole::whereIn('user_id', $user->id)->delete();
+            UserAllowedRole::where('user_id', $user->id)->delete();
             return response()->json(['Message' => 'Deleted successfully'], 200);
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Delete failed.  Error code' . $ex->getMessage()], 500);
@@ -199,7 +199,7 @@ class UsersController extends Controller
             $user->OdkOrgunit()->sync($request->orgunits, false); //false --> dont delete old entries 
 
             // user_allowed_roles
-            UserAllowedRole::whereIn('user_id', $user->id)->delete();
+            UserAllowedRole::where('user_id', $user->id)->delete();
             for ($x = 0; $x < count($request->selected_viewable_roles); $x++) {
                 $userAllowedRole = new UserAllowedRole([
                     'user_id' => $user->id,
