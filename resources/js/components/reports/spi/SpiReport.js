@@ -80,28 +80,30 @@ class SpiReport extends React.Component {
 
 
         //change echarts layout to allow graph to fit for spider charts only.
-        let div = $("#spiders");
 
-        let observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                if (mutation.attributeName === "class") {
-                    let attributeValue = $(mutation.target).prop(mutation.attributeName);
+        // let div = $("#spiders");
 
-                    if (attributeValue.includes("show")) {
+        // let observer = new MutationObserver(function (mutations) {
+        //     mutations.forEach(function (mutation) {
+        //         if (mutation.attributeName === "class") {
+        //             let attributeValue = $(mutation.target).prop(mutation.attributeName);
 
-                        $(".echarts-for-react").css('min-height', '500px');
-                    } else {
-                        // alert(currMinHeightValue);
-                        $(".echarts-for-react").css('min-height', '');
-                        // $(".echarts-for-react").css('min-height', '');
-                    }
-                }
-            });
-        });
+        //             if (attributeValue.includes("show")) {
 
-        observer.observe(div[0], {
-            attributes: true
-        });
+        //                 $(".echarts-for-react").css('min-height', '500px');
+        //             } else {
+        //                 // alert(currMinHeightValue);
+        //                 $(".echarts-for-react").css('min-height', '');
+        //                 // $(".echarts-for-react").css('min-height', '');
+        //             }
+        //         }
+        //     });
+        // });
+
+        // observer.observe(div[0], {
+        //     attributes: true
+        // });
+
     }
 
     fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
@@ -509,9 +511,11 @@ class SpiReport extends React.Component {
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
-                                    <i className="fa fa-table" aria-hidden="true"></i> Tables</a>
+                                    {/* <i className="fa fa-table" aria-hidden="true"></i>  */}
+                                    <i className="fas fa-chart-bar"></i>  Data View </a>
                             </li>
-                            <li className="nav-item" role="presentation">
+
+                            {/* <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="SiteColumnsTab" data-toggle="tab"
                                     href="#sitecolumns" role="tab" aria-controls="profile"
                                     aria-selected="false"
@@ -523,10 +527,7 @@ class SpiReport extends React.Component {
                                 >
                                     <i className="fas fa-chart-bar"></i> Site Level Columns</a>
                             </li>
-                            {/* <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="averagecolumnsTab" data-toggle="tab" href="#averagecolumns" role="tab" aria-controls="profile" aria-selected="false">
-                                    <i className="fas fa-chart-bar"></i> Average Performance Columns</a>
-                            </li> */}
+                            
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="spidersTab"
                                     data-toggle="tab" href="#spiders" role="tab"
@@ -538,27 +539,48 @@ class SpiReport extends React.Component {
                                     }}
                                 >
                                     <i className="fas fa-atom"></i> Average Performance Spider</a>
-                            </li>
+                            </li> */}
+
                         </ul>
                         <div className="tab-content" id="myTabContent">
                             <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
                                 <br />
                                 {tablesTab}
+                                {
+                                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Average Performance per QA element' ?
+                                        <React.Fragment>
+                                            <div >
+                                                <br />
+                                                <p style={{ fontWeight: "900" }}>Average Performance per QA element spider chart(s)</p>
+                                                {overallPerformanceRadar}
+                                            </div>
+                                        </React.Fragment> : ''
+                                }
+                                {
+                                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Site Levels during Assessment' ?
+                                        <React.Fragment>
+                                            <div >
+                                                <br />
+                                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment charts(s)</p>
+                                                {siteLevelBarColumnCharts}
+                                            </div>
+                                        </React.Fragment> : ''
+                                }
                             </div>
 
-                            <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
+                            {/* <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
                                 <br />
                                 <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
                                 {siteLevelBarColumnCharts}
-                            </div>
-                            <div className="tab-pane fade" id="averagecolumns" role="averagecolumns" aria-labelledby="profile-tab">
+                            </div> */}
+                            {/* <div className="tab-pane fade" id="averagecolumns" role="averagecolumns" aria-labelledby="profile-tab">
                                 <br />
                             </div>
                             <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">
                                 <br />
                                 <p style={{ fontWeight: "900" }}>Average Performance per QA element</p>
                                 {overallPerformanceRadar}
-                            </div>
+                            </div> */}
                         </div>
 
                     </div>
