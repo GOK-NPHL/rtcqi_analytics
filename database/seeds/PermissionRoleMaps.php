@@ -33,7 +33,8 @@ class PermissionRoleMaps extends Seeder
             array('role_id' => 1, 'authority_id' => 18,  'created_at' => new \dateTime, 'updated_at' => new \dateTime, 'role_id' => 1),
             array('role_id' => 1, 'authority_id' => 19,  'created_at' => new \dateTime, 'updated_at' => new \dateTime, 'role_id' => 1),
             array('role_id' => 1, 'authority_id' => 20,  'created_at' => new \dateTime, 'updated_at' => new \dateTime, 'role_id' => 1),
-
+            array('role_id' => 1, 'authority_id' => 21,  'created_at' => new \dateTime, 'updated_at' => new \dateTime, 'role_id' => 1),
+            array('role_id' => 1, 'authority_id' => 22,  'created_at' => new \dateTime, 'updated_at' => new \dateTime, 'role_id' => 1),
         );
 
         $authObj = new PermissionRoleMap();

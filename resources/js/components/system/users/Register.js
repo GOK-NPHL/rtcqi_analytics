@@ -313,7 +313,7 @@ class Register extends React.Component {
                                         <React.Fragment>
                                             <br />
                                             <div className="col-md-12 mb-12">
-                                                <label htmlFor="permissions">Assign roles this user will view (if blank, they'll access all)</label>
+                                                <label htmlFor="permissions">Assign roles this user will view</label>
                                                 <DualListBox
                                                     canFilter
                                                     options={this.state.rolesOptions}

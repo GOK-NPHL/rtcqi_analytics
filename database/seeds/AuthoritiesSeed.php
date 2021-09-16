@@ -34,7 +34,8 @@ class AuthoritiesSeed extends Seeder
             array('name' => 'data_backup', 'group' => 'system', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'upload_new_orgunit_structure', 'group' => 'system', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'view_users_missing_organisation_units', 'group' => 'user', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
-
+            array('name' => 'view_roles_not_assigned', 'group' => 'role', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
+            
         );
         $authObj = new Authority();
         Authority::query()->truncate();

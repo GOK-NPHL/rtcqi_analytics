@@ -61,11 +61,14 @@ class RolesController extends Controller
             ->join('authority_role', 'roles.id', '=', 'authority_role.role_id')
             ->join('authorities', 'authorities.id', '=', 'authority_role.authority_id');
 
-        if (count($allowedViewableRoles) != 0) {
+        if (Gate::allows(SystemAuthorities::$authorities['view_roles_not_assigned'])) { // can view all roles
+            $roles = $roles->get();
+        } else  if (count($allowedViewableRoles) != 0) { // view only assigned roles
             $roles = $roles->whereIn('roles.id',  $allowedViewableRoles->pluck('role_id'));
+            $roles = $roles->get();
+        } else {
+            $roles = [];
         }
-
-        $roles = $roles->get();
 
         $roleIds = array();
         $payload = array();

@@ -12,7 +12,7 @@ class SystemAuthorities
         'view_orgunit' => 'view_orgunit',
         'view_log_book_report' => 'view_log_book_report',
         'edit_user' => 'edit_user',
-        'view_user'=>'view_user',
+        'view_user' => 'view_user',
         'view_role' => 'view_role',
         'edit_role' => 'edit_role',
         'edit_orgunit' => 'edit_orgunit',
@@ -26,9 +26,9 @@ class SystemAuthorities
         'view_reports' => 'view_reports',
         'view_dashboard' => 'view_dashboard',
         'data_backup' => 'data_backup',
-        'view_spi_report'=>'view_spi_report',
-        'upload_new_orgunit_structure'=>'upload_new_orgunit_structure',
-        'view_users_missing_organisation_units'=>'view_users_missing_organisation_units'
-
+        'view_spi_report' => 'view_spi_report',
+        'upload_new_orgunit_structure' => 'upload_new_orgunit_structure',
+        'view_users_missing_organisation_units' => 'view_users_missing_organisation_units',
+        'view_roles_not_assigned' => 'view_roles_not_assigned'
     ];
 }
