@@ -54,6 +54,7 @@ class Register extends React.Component {
                     email: userDetails['demographics']['email'],
                     role: userDetails['demographics']['role_id'],
                     roleId: userDetails['demographics']['role_id'],
+                    selectedViewableRoles: userDetails['allowed_roles'],
                     selectedOrgs: userAssignedOrgs
                 });
             }
@@ -292,7 +293,7 @@ class Register extends React.Component {
                                     </div>
                                 </div>
                                 {
-                                    this.state.canViewAssignRolesList ?
+                                    this.state.canViewAssignRolesList || this.state.selectedViewableRoles.length != 0 ?
                                         <React.Fragment>
                                             <br />
                                             <div className="col-md-12 mb-12">

@@ -87,10 +87,17 @@ class UsersController extends Controller
             ->where('users.id', $userId)
             ->first();
 
+        $allowedRoles = UserAllowedRole::select(
+            "role_id"
+        )->where('user_id', $userId)
+            ->get();
+        $allowedRoles =   $allowedRoles->pluck('role_id');
+
         $roleIds = array();
         $payload = array();
         $payload['demographics'] = $users;
         $payload['org_units'] = $registeredOrgs;
+        $payload['allowed_roles'] = $allowedRoles;
 
         return $payload;
     }
@@ -190,8 +197,9 @@ class UsersController extends Controller
             $user->name = $name;
             $user->email = $email;
             $user->last_name = $lastName;
-            if (!empty($user->password)) {
-                $user->password = Hash::make($password);
+
+            if (!empty(trim($password))) {
+                $user->password = Hash::make(trim($password));
             }
 
             $user->role()->associate($role);
