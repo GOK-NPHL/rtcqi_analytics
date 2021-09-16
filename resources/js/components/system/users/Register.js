@@ -51,7 +51,7 @@ class Register extends React.Component {
                 });
 
                 let canViewAssignRolesList = false;
-                if (userDetails['demographics']['role_id']) {
+                if (userDetails['demographics']['role_id']== 12) {
                     canViewAssignRolesList = true;
                 }
 
