@@ -48,11 +48,20 @@ class UsersController extends Controller
         $utils = new ServiceUtils();
         $orgUnits = $utils->getOrgunitsByUser();
         $orgUnitList = [];
+        $highestOrgUnitLevelForThisUser = 5; //this allows us to limit users from seeing users they are in the same level, only users with
+        //national id (0) can see users in the same level.
+        $highestOrgUnitLevelIds = [];
+        foreach ($orgUnits as  $orgUnit) {
+            $orgUnitList[] = $orgUnit['org_unit_id'];
+            if ($orgUnit['level'] < $highestOrgUnitLevelForThisUser) {
+                $highestOrgUnitLevelForThisUser = $orgUnit['level'];
 
-        foreach ($orgUnits as  $orgId) {
-            $orgUnitList[] = $orgId['org_unit_id'];
+                $highestOrgUnitLevelIds = [];
+                $highestOrgUnitLevelIds[] = $orgUnit['org_unit_id'];
+            } else if ($orgUnit['level'] == $highestOrgUnitLevelForThisUser) {
+                $highestOrgUnitLevelIds[] = $orgUnit['org_unit_id'];
+            }
         }
-
 
         $users = User::select(
             "users.name as first_name",
@@ -78,6 +87,11 @@ class UsersController extends Controller
                 ->where('users.id', '<>', $user->id)
                 ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
         }
+
+        if ($highestOrgUnitLevelForThisUser != 0) { //ensures only users with national status can see their peers, the rest cannot
+            $users->whereNotIn('odkorgunit_user.odk_orgunit_id', $highestOrgUnitLevelIds);
+        }
+
         $users = $users->get();
 
         $roleIds = array();

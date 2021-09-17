@@ -42,11 +42,6 @@ class OrgunitsController extends Controller
         return view('interface/orgunits/index');
     }
 
-
-
-   
-
-
     public function getOrgunits()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {
