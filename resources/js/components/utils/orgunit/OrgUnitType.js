@@ -47,6 +47,7 @@ class OrgUnitType extends React.Component {
 
     render() {
 
+        //stops menu options from closing until user clicks outside (in the window)
         $(document).delegate(".dropdown-menu", "click", function (e) {
             e.stopPropagation();
         });
