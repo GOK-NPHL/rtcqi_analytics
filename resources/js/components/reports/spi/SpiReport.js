@@ -53,7 +53,7 @@ class SpiReport extends React.Component {
     componentDidMount() {
         (async () => {
             let returnedData = await FetchOrgunits();
-           
+
             let subCountyList = [];
             // returnedData.forEach((val) => {
             // });
@@ -69,7 +69,7 @@ class SpiReport extends React.Component {
                 startDate: '',
                 endDate: ''
             });
-            
+
             this.fetchOdkDataServer(defaultOrg,
                 this.state.orgUnitTimeline,
                 this.state.siteType,
@@ -218,8 +218,13 @@ class SpiReport extends React.Component {
 
                 if (this.state.siteType != null) {
                     if (this.state.siteType.length != 0) {
-                        row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
-                        exportRow.push(orgUnitSpiData['OrgUniType']);
+                        try {
+                            row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                            exportRow.push(orgUnitSpiData['OrgUniType']);
+                        } catch (err) {
+
+                        }
+
                     }
                 }
 
@@ -235,13 +240,28 @@ class SpiReport extends React.Component {
             });
 
             //======= Add  overaRowllSiteLevels table data =====//
-            overaRowllSiteLevels.push(
-                <tr key={uuidv4()}>
-                    <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
-                        <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
-                    </td>
-                </tr>);
-            tableOverallDataExport.push([orgUnitSpiData['orgName'].toUpperCase(), "", "", ""]);
+
+            try {
+                overaRowllSiteLevels.push(
+                    <tr key={uuidv4()}>
+                        <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
+
+                            <strong>{
+                                orgUnitSpiData['orgName'].toUpperCase()
+                            }</strong>
+
+                        </td>
+                    </tr>);
+            } catch (err) {
+
+            }
+
+            try {
+                tableOverallDataExport.push([orgUnitSpiData['orgName'].toUpperCase(), "", "", ""]);
+            } catch (err) {
+
+            }
+
 
             timeLines.map((timeline) => {
                 let row = [];

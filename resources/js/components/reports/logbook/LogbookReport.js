@@ -166,77 +166,106 @@ class LogbookReport extends React.Component {
             "July", "August", "September", "October", "November", "December"
         ];
 
-        // overall agreement
-        tableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={4} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        tableDataExport.push([dataToParse.orgName.toUpperCase()]);
+        try {
+            // overall agreement
+            tableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={4} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            tableDataExport.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
 
-        // positive Concordance
-        positiveConcordanceTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        positiveConcordanceTableDataExport.push([dataToParse.orgName.toUpperCase()]);
+        }
 
-        // completeness
-        completenessTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        completenessExportData.push([dataToParse.orgName.toUpperCase()]);
+        try {
+            // positive Concordance
+            positiveConcordanceTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            positiveConcordanceTableDataExport.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
 
-        // consistency
-        consistencyTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        consistencyExportData.push([dataToParse.orgName.toUpperCase()]);
+        }
 
-        // Invalid Rate
-        invalidRateTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        invalidRateExportData.push([dataToParse.orgName.toUpperCase()]);
+        try {
+            // completeness
+            completenessTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            completenessExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
 
-        // Supervisory Signature rates
-        supervisorySignatureTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        supervisorySignatureExportData.push([dataToParse.orgName.toUpperCase()]);
+        }
+        try {
+            // consistency
+            consistencyTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            consistencyExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
 
-        // Algorithm followed rates
-        algorithmFollowedTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        algorithmFollowedExportData.push([dataToParse.orgName.toUpperCase()]);
+        }
+        try {
+            // Invalid Rate
+            invalidRateTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            invalidRateExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
 
-        // hts Type rates
-        htsTypeTableData.push(
-            <tr key={uuidv4()}>
-                <td colSpan={3} scope="row">
-                    <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                </td>
-            </tr>);
-        htsTypeExportData.push([dataToParse.orgName.toUpperCase()]);
+        }
+        try {
+            // Supervisory Signature rates
+            supervisorySignatureTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            supervisorySignatureExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
+
+        }
+        try {
+
+            // Algorithm followed rates
+            algorithmFollowedTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            algorithmFollowedExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
+
+        }
+        try {
+            // hts Type rates
+            htsTypeTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            htsTypeExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
+
+        }
+
 
         // overall agreement data loop
         for (let [period, totals] of Object.entries(dataToParse.overall_agreement_rate)) {

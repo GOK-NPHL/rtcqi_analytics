@@ -46,6 +46,11 @@ class OrgUnitType extends React.Component {
     }
 
     render() {
+
+        $(document).delegate(".dropdown-menu", "click", function (e) {
+            e.stopPropagation();
+        });
+
         const marginLeft = {
             // marginLeft: "16px",
         };
@@ -58,9 +63,11 @@ class OrgUnitType extends React.Component {
                     className="dropdown-item"
                     href="#"
                     data-id={orgType}
-                    onClick={() => this.orgUnitTypeChangeHandler(event)}
+                    onClick={(event) => {
+                        this.orgUnitTypeChangeHandler(event);
+                    }}
                 >
-                    {orgType} 
+                    {orgType}
                     <i className="fa fa-check"
                         style={{ "display": this.state.orgUnitType.includes(orgType) ? "" : "none", "color": "green" }}
                         aria-hidden="true"></i>

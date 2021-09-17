@@ -9,7 +9,7 @@ class OverallPerformanceRadar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            
+
             series2: [
                 {
                     name: 'Level 0 (<40%)',
@@ -129,10 +129,10 @@ class OverallPerformanceRadar extends React.Component {
         let row = <div key={uuidv4()} className="row">
             {columns}
         </div>;
+
         if (this.props.serverData) {
 
             // if (Array.isArray(this.props.serverData)) {
-
 
             if (this.props.siteType != null && this.props.siteType.length != 0) {
                 console.log("first 1");
@@ -140,17 +140,27 @@ class OverallPerformanceRadar extends React.Component {
                 if (Array.isArray(this.props.serverData[0])) {
                     this.props.serverData.map((dataObjectParent) => {
                         //data returned comes in two different formtat. Should be written to standardize
-                        let singChart = this.prepareOverallLevelSiteData(dataObjectParent[0]);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(dataObjectParent[0]);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+
+                        }
+
                     });
                     if (columns.length > 0) {
                         overLay.push(row); //push remaining graphs in display
                     }
                 } else {
+
                     this.props.serverData.map((dataObjectParent) => {
                         for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
-                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                            try {
+                                let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                                [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                            } catch (err) {
+
+                            }
                         }
                     });
                     if (columns.length > 0) {
@@ -174,10 +184,10 @@ class OverallPerformanceRadar extends React.Component {
         } else {
             console.log("empty");
         }
-
+        
         return (
             <React.Fragment>
-                {this.props.singleItem ? columns: overLay}
+                {this.props.singleItem ? columns : overLay}
             </React.Fragment>
         );
     }
