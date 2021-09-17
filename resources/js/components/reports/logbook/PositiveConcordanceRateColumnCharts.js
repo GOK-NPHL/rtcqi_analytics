@@ -88,10 +88,10 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
         overallSiteGraphsData[orgName] = [category, seriesData];
 
         return <RTCard header={orgName} minHeight={this.props.minHeight}>
-            <StackedVertical 
-            yAxisGap={35}
-            yAxisName="concordance" formatter=""  color={['#004dc9', '#ffc100']}
-             minHeight={this.props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
+            <StackedVertical
+                yAxisGap={35}
+                yAxisName="concordance" formatter="" color={['#004dc9', '#ffc100']}
+                minHeight={this.props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
         </RTCard>
     }
 
@@ -123,8 +123,13 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
 
                 this.props.serverData.map((dataObjectParent) => {
                     for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                        let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+
+                        }
+
                     }
                 });
                 if (columns.length > 0) {
@@ -133,8 +138,13 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
 
             } else {
                 for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
-                    let singChart = this.prepareOverallLevelSiteData(dataObject);
-                    [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    try {
+                        let singChart = this.prepareOverallLevelSiteData(dataObject);
+                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    } catch (err) {
+
+                    }
+
                 }
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display
