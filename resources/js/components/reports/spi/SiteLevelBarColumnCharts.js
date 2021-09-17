@@ -127,17 +127,27 @@ class SiteLevelBarColumnCharts extends React.Component {
                 if (Array.isArray(this.props.serverData[0])) {
                     this.props.serverData.map((dataObjectParent) => {
                         //data returned comes in two different formtat. Should be written to standardize
-                        let singChart = this.prepareOverallLevelSiteData(dataObjectParent[0]);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(dataObjectParent[0]);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+
+                        }
+
                     });
                     if (columns.length > 0) {
                         overLay.push(row); //push remaining graphs in display
                     }
                 } else {
                     this.props.serverData.map((dataObjectParent) => {
+
                         for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
-                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                            try {
+                                let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                                [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                            } catch (err) {
+
+                            }
                         }
                     });
                     if (columns.length > 0) {
@@ -147,15 +157,19 @@ class SiteLevelBarColumnCharts extends React.Component {
                 console.log("hunt bug 1-");
 
             } else {
-               
+
                 for (let [key, dataObject] of Object.entries(this.props.serverData)) {
-                    let singChart = this.prepareOverallLevelSiteData(dataObject);
-                    [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    try {
+                        let singChart = this.prepareOverallLevelSiteData(dataObject);
+                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    } catch (err) {
+
+                    }
                 }
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display
                 }
-          
+
             }
 
         } else {
