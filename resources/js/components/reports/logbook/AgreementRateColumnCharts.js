@@ -95,9 +95,9 @@ class AgreementRateColumnCharts extends React.Component {
         overallSiteGraphsData[orgName] = [category, seriesData];
 
         return <RTCard header={orgName} minHeight={this.props.minHeight}>
-            <StackedVertical 
-            yAxisGap={43}
-            yAxisName="% agreement rates" formatter="%"  minHeight={this.props.minHeight} legend={['<95%', '95%-98%', '>98%']} category={category} series={seriesData} />
+            <StackedVertical
+                yAxisGap={43}
+                yAxisName="% agreement rates" formatter="%" minHeight={this.props.minHeight} legend={['<95%', '95%-98%', '>98%']} category={category} series={seriesData} />
         </RTCard>
     }
 
@@ -130,8 +130,13 @@ class AgreementRateColumnCharts extends React.Component {
 
                 this.props.serverData.map((dataObjectParent) => {
                     for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                        let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+
+                        }
+
                     }
                 });
                 if (columns.length > 0) {
@@ -142,8 +147,12 @@ class AgreementRateColumnCharts extends React.Component {
                 console.log("hunt bug 3");
                 console.log(this.props.serverData);
                 for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
-                    let singChart = this.prepareOverallLevelSiteData(dataObject);
-                    [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    try {
+                        let singChart = this.prepareOverallLevelSiteData(dataObject);
+                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                    } catch (err) {
+
+                    }
                 }
                 console.log("hunt bug 3-");
                 if (columns.length > 0) {

@@ -829,20 +829,10 @@ class LogbookReport extends React.Component {
 
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
-                    // console.log(displayData);
-                    [
-                        tableData,
-                        tableDataExport,
-                        positiveConcordanceTableData, positiveConcordanceTableDataExport,
-                        completenessTableData, completenessExportData,
-                        consistencyTableData, consistencyExportData,
-                        invalidRateTableData, invalidRateExportData,
-                        supervisorySignatureTableData, supervisorySignatureExportData,
-                        algorithmFollowedTableData, algorithmFollowedExportData,
-                        htsTypeTableData, htsTypeExportData
-                    ]
-                        = this.addTableRows(tableData,
-                            payload,
+                    try {
+                        // console.log(displayData);
+                        [
+                            tableData,
                             tableDataExport,
                             positiveConcordanceTableData, positiveConcordanceTableDataExport,
                             completenessTableData, completenessExportData,
@@ -851,7 +841,22 @@ class LogbookReport extends React.Component {
                             supervisorySignatureTableData, supervisorySignatureExportData,
                             algorithmFollowedTableData, algorithmFollowedExportData,
                             htsTypeTableData, htsTypeExportData
-                        );
+                        ]
+                            = this.addTableRows(tableData,
+                                payload,
+                                tableDataExport,
+                                positiveConcordanceTableData, positiveConcordanceTableDataExport,
+                                completenessTableData, completenessExportData,
+                                consistencyTableData, consistencyExportData,
+                                invalidRateTableData, invalidRateExportData,
+                                supervisorySignatureTableData, supervisorySignatureExportData,
+                                algorithmFollowedTableData, algorithmFollowedExportData,
+                                htsTypeTableData, htsTypeExportData
+                            );
+                    } catch (err) {
+
+                    }
+
                 }
             })
 
