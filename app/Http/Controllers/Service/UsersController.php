@@ -88,9 +88,9 @@ class UsersController extends Controller
                 ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
         }
 
-        if ($highestOrgUnitLevelForThisUser != 0) { //ensures only users with national status can see their peers, the rest cannot
-            $users->whereNotIn('odkorgunit_user.odk_orgunit_id', $highestOrgUnitLevelIds);
-        }
+        // if ($highestOrgUnitLevelForThisUser != 0) { //ensures only users with national status can see their peers, the rest cannot
+        //     $users->whereNotIn('odkorgunit_user.odk_orgunit_id', $highestOrgUnitLevelIds);
+        // }
 
         $users = $users->get();
 
