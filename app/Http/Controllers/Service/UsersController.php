@@ -90,7 +90,7 @@ class UsersController extends Controller
 
         // if ($highestOrgUnitLevelForThisUser != 0) { //ensures only users with national status can see their peers, the rest cannot
         //     $users->whereNotIn('odkorgunit_user.odk_orgunit_id', $highestOrgUnitLevelIds);
-        // }
+        // } // FEATURE REMOVED TO ALLOW SAME ORG UNIT USERS TO SEE EACH OTHER
 
         $users = $users->get();
 
