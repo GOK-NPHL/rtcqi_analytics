@@ -43,6 +43,34 @@ class OrgunitsController extends Controller
         return view('interface/orgunits/index');
     }
 
+    public function requestedOrgunits()
+    {
+        return view('interface/orgunits/requested_orgs');
+    }
+
+    public function getRequestedOrgnits()
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_requested_orgunits'])) {
+            return response()->json(['Message' => 'Not allowed to view requested organisation units: '], 500);
+        }
+
+        try {
+            $requestedNewOrgs = OrgunitRequest::select(
+                "orgunit_requests.orgunit_name as requested_name",
+                "orgunit_requests.status as status",
+                "odkorgunit.odk_unit_name as parent_org_name",
+                "users.name as requester_name",
+                "orgunit_requests.created_at as created_at",
+
+            )->join('users', 'orgunit_requests.requester_id', '=', 'users.id')
+                ->join('odkorgunit', 'odkorgunit.org_unit_id', '=', 'orgunit_requests.parent_orgunit_id')
+                ->get();
+            return $requestedNewOrgs;
+        } catch (Exception $ex) {
+            return response()->json(['Message' => 'Error getting requested new org units: ' . $ex->getMessage()], 500);
+        }
+    }
+
     public function getOrgunits()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_orgunit'])) {

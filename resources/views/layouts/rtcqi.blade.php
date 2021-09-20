@@ -136,6 +136,9 @@ use Illuminate\Support\Facades\Gate;
                             <?php if (Gate::allows('view_orgunit')) { ?>
                                 <a onclick="localStorage.setItem('page', 'Organization units');" class="collapse-item" href="{{ route('orgunitsIndex') }}">Organization units</a>
                             <?php } ?>
+                            <?php if (Gate::allows('view_requested_orgunits')) { ?>
+                                <a class="collapse-item" href="{{ route('requestedOrgunits') }}">Requested organization <br/> units</a>
+                            <?php } ?>
                             <?php if (Gate::allows('data_backup')) { ?>
                                 <div class="collapse-divider"></div>
                                 <h6 class="collapse-header">Administration</h6>
@@ -338,7 +341,7 @@ use Illuminate\Support\Facades\Gate;
     <!-- Custom scripts for all pages-->
     <script>
         let page = localStorage.getItem('page', 'Log book');
-                                console.log("the page is "+ page);
+        console.log("the page is " + page);
         document.getElementsByClassName("menu-head")[0].classList.remove("active");
         document.getElementsByClassName("menu-body")[0].classList.remove("show");
 

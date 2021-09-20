@@ -26,6 +26,7 @@ require('./components/reports/summaries/SummariesReport');
 
 //Intrface code
 require('./components/system/org-unit/OrgUnits');
+require('./components/system/org-unit/RequestedOrgUnits');
 require('./components/system/role/Roles');
 require('./components/system/users/Users');
 require('./components/system/users/Profile');

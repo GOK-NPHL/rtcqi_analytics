@@ -475,13 +475,13 @@ class Orgunit extends React.Component {
                                             </div> :
                                             <React.Fragment>
                                                 <div className="form-group">
-                                                    <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
+                                                    <label htmlFor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
                                                     <div className="col-sm-12">
-                                                        <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
+                                                        <label htmlFor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
                                                     </div>
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                                    <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
                                                     <div className="col-sm-12">
                                                         <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
                                                     </div>

@@ -33,4 +33,4 @@ Route::get('/service/profile', 'Service\UsersController@userProfile')->name('pro
 Route::get('/service/roles', 'Service\RolesController@index')->name('rolesIndex');
 Route::get('/service/users', 'Service\UsersController@index')->name('usersIndex');
 Route::get('/service/orgunits', 'Service\OrgunitsController@index')->name('orgunitsIndex');
-
+Route::get('/service/requested_orgunits', 'Service\OrgunitsController@requestedOrgunits')->name('requestedOrgunits');

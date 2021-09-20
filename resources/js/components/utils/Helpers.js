@@ -286,6 +286,18 @@ export async function RequestNewOrgnit(parentOrgunitId, orgunitName) {
     }
 }
 
+export async function FetchRequestedNewOrgs(userId) {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/get_requested_org_units`);
+        const requestedNewOrgs = response.data;
+        return requestedNewOrgs;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+}
+
 export async function Saveuser(first_name, last_name, email, password, orgunits, role, selectedViewableRoles) {
 
     try {

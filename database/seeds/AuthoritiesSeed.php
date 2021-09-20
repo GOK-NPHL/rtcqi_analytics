@@ -36,6 +36,7 @@ class AuthoritiesSeed extends Seeder
             array('name' => 'view_users_missing_organisation_units', 'group' => 'user', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'view_roles_not_assigned', 'group' => 'role', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'can_request_new_org_unit', 'group' => 'org unit', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
+            array('name' => 'view_requested_orgunits', 'group' => 'org unit', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
 
         );
         $authObj = new Authority();
