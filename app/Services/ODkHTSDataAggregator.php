@@ -94,7 +94,6 @@ class ODkHTSDataAggregator
                         $htsRegister = array();
                         $htsRegister['ehts'] = 0;
                         $htsRegister['hardcopy'] = 0;
-                        $htsRegister['unknown'] = 0;
                         $monthlySites['hts_type'] =   $htsRegister;
 
                         $completnesScores = ['completness' => 0];
@@ -168,7 +167,6 @@ class ODkHTSDataAggregator
                                 //if site uses ehts or hardcopy
                                 $monthlySites['hts_type']['ehts'] += $site['register']['ehts'];
                                 $monthlySites['hts_type']['hardcopy'] += $site['register']['hardcopy'];
-                                $monthlySites['hts_type']['unknown'] += $site['register']['unknown'];
                             } catch (Exception $ex) {
                                 //  Log::error($ex);
                             }
@@ -267,8 +265,7 @@ class ODkHTSDataAggregator
                 'algorithm_followed' => array(),
                 'register' => array(
                     'ehts' => 0,
-                    'hardcopy' => 0,
-                    'unknown' => 0
+                    'hardcopy' => 0
                 ),
 
             );
@@ -289,13 +286,11 @@ class ODkHTSDataAggregator
         try {
             if ($record['register'] == 'eHTS') {
                 $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['ehts'] = 1;
-            } else if ($record['register'] == 'Hardcopy') {
-                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
             } else {
-                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['unknown'] = 1;
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
             }
         } catch (Exception $ex) {
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['unknown'] = 1;
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
         }
 
         //check data completeness for this site Section-Section3-totals1-tnegative1

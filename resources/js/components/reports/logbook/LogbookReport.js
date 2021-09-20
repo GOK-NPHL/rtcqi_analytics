@@ -526,18 +526,12 @@ class LogbookReport extends React.Component {
             if (!hardcopy) hardcopy = 0;
             hardcopy = Math.round(hardcopy * 10) / 10; //round off to one decimal place
 
-            let unknown = (totals.unknown / no) * 100;
-            if (!unknown) unknown = 0;
-            unknown = Math.round(unknown * 10) / 10; //round off to one decimal place
-
             htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
             htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{unknown}</td>);
 
 
             htsTypeExportTableData.push(ehts);
             htsTypeExportTableData.push(hardcopy);
-            htsTypeExportTableData.push(unknown);
 
             htsTypeTableData.push(<tr key={uuidv4()}>{htsTypeRow}</tr>);
 
@@ -800,12 +794,11 @@ class LogbookReport extends React.Component {
             <th scope="col">___</th>
             <th scope="col">ehts</th>
             <th scope="col">hardcopy</th>
-            <th scope="col">unknown</th>
         </tr>;
 
         let htsTypeExportData = [];
 
-        htsTypeExportData.push(['___', 'ehts', 'hardcopy', 'unknown']);
+        htsTypeExportData.push(['___', 'ehts', 'hardcopy']);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -815,11 +808,10 @@ class LogbookReport extends React.Component {
                     <th scope="col">Programme</th>
                     <th scope="col">ehts</th>
                     <th scope="col">hardcopy</th>
-                    <th scope="col">unknown</th>
 
                 </tr>;
                 htsTypeExportData = [];
-                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy', 'unknown']);
+                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy']);
             }
         }
         // end hts Type  rate
