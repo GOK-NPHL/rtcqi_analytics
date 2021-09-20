@@ -409,7 +409,7 @@ class Orgunit extends React.Component {
                 </div>
 
 
-                <a href="#" className="float" onClick={(event) => {
+                <a data-toggle="tooltip" data-placement="top" title="Request creation of new org unit" href="#" className="float" onClick={(event) => {
                     event.preventDefault();
                     $('#newOrgUnitRequestForm').modal('toggle');
                 }}>
@@ -428,7 +428,6 @@ class Orgunit extends React.Component {
                             </div>
                             <div className="modal-body">
 
-
                                 <form>
                                     <div className="form-group">
                                         <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
@@ -444,7 +443,6 @@ class Orgunit extends React.Component {
                                     </div>
 
                                 </form>
-
 
                             </div>
                             <div className="modal-footer">
