@@ -8,7 +8,8 @@ class Tree extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            allowedPermissions: []
+            allowedPermissions: [],
+            currentlySelectedOrgUnit: null
         }
         this.organisationUnitOnclick = this.organisationUnitOnclick.bind(this);
     }
@@ -32,13 +33,23 @@ class Tree extends React.Component {
 
     organisationUnitOnclick(event) {
         // event.stopPropagation();
+        if (this.state.currentlySelectedOrgUnit != null) {
+            this.state.currentlySelectedOrgUnit.style.color = "black";
+        }
 
+        event.target.style.color = "orange";
+
+        console.log(event.target);
         let el = event.target.nextElementSibling;
+
         while (el) {
             el.classList.toggle("nested");
             el = el.nextElementSibling;
         }
         event.target.classList.toggle("caret-down");
+        this.setState({
+            currentlySelectedOrgUnit: event.target
+        });
     }
 
     render() {
@@ -64,7 +75,7 @@ class Tree extends React.Component {
                                 this.props.setcurrentSelectedOrg(item);
                                 this.props.setNewEditOrgUnitName(item.name);
                                 $('#orgActionModal').modal('toggle');
-                            }} className="caret">{name}</span>
+                            }} className="caret orgUnit">{name}</span>
                             {/* Add children org unit for the above added org as a ul*/}
                             {children.map((item) => {
                                 return <ul key={uuidv4()} className="nested"//{`${item.level > 2 ? "nested" : ""}`}
