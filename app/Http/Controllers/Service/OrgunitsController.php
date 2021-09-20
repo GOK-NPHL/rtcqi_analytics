@@ -10,6 +10,7 @@ use App\Http\Controllers\Service\Utils as ServiceUtils;
 use Illuminate\Http\Request;
 use App\OdkOrgunit;
 use App\OrgunitLevelMap;
+use App\OrgunitRequest;
 use App\Services\ODKUtils;
 use App\Services\SystemAuthorities;
 use App\User;
@@ -211,6 +212,29 @@ class OrgunitsController extends Controller
         } catch (Exception $ex) {
             Log::error($ex);
             return response()->json(['Message' => 'Could not save organisation unit: ' . $ex->getMessage()], 500);
+        }
+    }
+
+    public function requestNewOrgUnit(Request $request)
+    {
+        // if (!Gate::allows(SystemAuthorities::$authorities['add_orgunit'])) {
+        //     return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
+        // }
+        try {
+            $user = Auth::user();
+            OrgunitRequest::create([
+
+                'requester_id' => $user->id,
+                'parent_orgunit_id' => $request->parent_orgunit_id,
+                'orgunit_name' => $request->orgunit_name,
+                'status' => 'pending',
+
+            ]);
+
+            return response()->json(['Message' => 'Request submitted successfully'], 200);
+        } catch (Exception $ex) {
+            Log::error($ex);
+            return response()->json(['Message' => 'Could not save submitt request: ' . $ex->getMessage()], 500);
         }
     }
 }

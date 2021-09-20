@@ -13,7 +13,7 @@ class CreateOrgunitRequestTable extends Migration
      */
     public function up()
     {
-        Schema::create('orgunit_request', function (Blueprint $table) {
+        Schema::create('orgunit_requests', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->integer("requester_id");

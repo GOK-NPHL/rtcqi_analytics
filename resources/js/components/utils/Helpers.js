@@ -267,6 +267,25 @@ export async function AddSubOrg(org, name) {
     }
 }
 
+export async function RequestNewOrgnit(parentOrgunitId, orgunitName) {
+
+    let response;
+    try {
+        response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/request_new_orgnit`,
+            data: {
+                parent_orgunit_id: parentOrgunitId,
+                orgunit_name: orgunitName
+            }
+        });
+        return response;
+    } catch (err) {
+        // Handle Error Here
+        return err.response
+    }
+}
+
 export async function Saveuser(first_name, last_name, email, password, orgunits, role, selectedViewableRoles) {
 
     try {

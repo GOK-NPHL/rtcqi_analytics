@@ -4,7 +4,7 @@ import TreeView from '../../utils/TreeView';
 import OrgunitCreate from './CreateOrgunits';
 import Pagination from "react-js-pagination";
 import DataTable from "react-data-table-component";
-import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, DeleteAllOrgs, FetchUserAuthorities } from '../../utils/Helpers';
+import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, DeleteAllOrgs, FetchUserAuthorities, RequestNewOrgnit } from '../../utils/Helpers';
 
 import '../../../../css/OrgUnitFloatingButton.css';
 
@@ -29,7 +29,9 @@ class Orgunit extends React.Component {
             activePage: 1,
             isUpdateOrgunits: false,
             currentSelectedOrg: { 'name': 'Kenya', 'id': 0 },
-            newOrgunitRequestMessage: null
+            newOrgunitRequestMessage: null,
+            newOrgRequestError: '',
+            hasErrors: false
         };
         this.updateOrg = this.updateOrg.bind(this);
         this.editOrg = this.editOrg.bind(this);
@@ -41,7 +43,7 @@ class Orgunit extends React.Component {
         this.triggerOrgUnitsFetch = this.triggerOrgUnitsFetch.bind(this);
         this.deleteSelectedOrgUnit = this.deleteSelectedOrgUnit.bind(this);
         this.setcurrentSelectedOrg = this.setcurrentSelectedOrg.bind(this);
-
+        this.requestNewOrgUnit = this.requestNewOrgUnit.bind(this);
     }
 
     componentDidMount() {
@@ -64,6 +66,24 @@ class Orgunit extends React.Component {
                     newOrgToName: null
                 });
             });
+        })();
+    }
+
+    requestNewOrgUnit(parentOrgId, newOrgToName) {
+        (async () => {
+            let returnedData = await RequestNewOrgnit(parentOrgId, newOrgToName);
+            if (returnedData.status == 500) {
+                this.setState({
+                    newOrgRequestError: returnedData.data.Message,
+                    hasErrors: true
+                });
+            } else {
+                this.setState({
+                    newOrgToName: null,
+                    newOrgRequestError: returnedData.data.Message,
+                    hasErrors: false
+                });
+            }
         })();
     }
 
@@ -409,15 +429,21 @@ class Orgunit extends React.Component {
                     </div>
                 </div>
 
-
+                {/* open request org unit form */}
                 <a data-toggle="tooltip" data-placement="top" title="Request creation of new org unit" href="#" className="float" onClick={(event) => {
                     event.preventDefault();
+                    this.setState({
+                        newOrgunitRequestMessage: null,
+                        hasErrors: false,
+                        newOrgRequestError: '',
+                        newOrgToName: ''
+                    });
                     $('#newOrgUnitRequestForm').modal('toggle');
                 }}>
                     <i className="fa fa-plus my-float"></i>
                 </a>
 
-                {/* Alert message modal*/}
+                {/* Request new organisation unit form*/}
                 <div className="modal fade" id="newOrgUnitRequestForm" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered" role="document">
                         <div className="modal-content">
@@ -430,18 +456,34 @@ class Orgunit extends React.Component {
                             <div className="modal-body">
 
                                 <form>
-                                    <div className="form-group">
-                                        <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
-                                        <div className="col-sm-12">
-                                            <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
+                                    {this.state.hasErrors ?
+                                        <div className="alert alert-danger" role="alert">
+                                            {this.state.newOrgRequestError}
                                         </div>
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
-                                        <div className="col-sm-12">
-                                            <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
-                                        </div>
-                                    </div>
+                                        :
+                                        ''
+                                    }
+
+                                    {!this.state.hasErrors && this.state.newOrgRequestError ?
+
+                                        <div className="alert alert-success new_org_request  fade show" role="alert">
+                                            {this.state.newOrgRequestError}
+                                        </div> :
+                                        <React.Fragment>
+                                            <div className="form-group">
+                                                <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
+                                                <div className="col-sm-12">
+                                                    <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
+                                                </div>
+                                            </div>
+                                            <div className="form-group">
+                                                <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                                <div className="col-sm-12">
+                                                    <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                                </div>
+                                            </div>
+                                        </React.Fragment>
+                                    }
 
                                 </form>
 
@@ -451,17 +493,23 @@ class Orgunit extends React.Component {
                                     onClick={() => {
                                         $('#newOrgUnitRequestForm').modal('toggle');
                                         this.setState({
-                                            newOrgunitRequestMessage: null
+                                            newOrgunitRequestMessage: null,
+                                            hasErrors: false,
+                                            newOrgRequestError: '',
+                                            newOrgToName: ''
                                         });
                                     }}
-                                    className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
 
-                                <button type="button"
-                                    onClick={() => {
-                                        // this.updateOrg(this.state.orgToEdit.org_unit_id, this.state.newOrgToName);
-                                        $('#newOrgUnitRequestForm').modal('toggle');
-                                    }}
-                                    className="btn btn-primary">Send Request</button>
+                                {!this.state.hasErrors && this.state.newOrgRequestError ?
+                                    '' : <button type="button"
+                                        onClick={() => {
+                                            // this.updateOrg(this.state.orgToEdit.org_unit_id, this.state.newOrgToName);
+                                            this.requestNewOrgUnit(this.state.currentSelectedOrg.id, document.getElementById('newOrgName').value)
+                                            // $('#newOrgUnitRequestForm').modal('toggle');
+                                        }}
+                                        className="btn btn-primary">Send Request</button>
+                                }
                             </div>
                         </div>
                     </div>
@@ -476,6 +524,7 @@ class Orgunit extends React.Component {
         }
 
         return (
+
             <React.Fragment>
                 {pageContent}
             </React.Fragment>
