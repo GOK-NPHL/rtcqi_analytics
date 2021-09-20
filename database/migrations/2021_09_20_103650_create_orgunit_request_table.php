@@ -19,6 +19,7 @@ class CreateOrgunitRequestTable extends Migration
             $table->integer("requester_id");
             $table->uuid('parent_orgunit_id');
             $table->string("orgunit_name");
+            $table->string("status"); //pending, rejected, approved, 
         });
     }
 
