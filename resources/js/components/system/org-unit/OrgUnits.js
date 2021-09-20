@@ -28,7 +28,8 @@ class Orgunit extends React.Component {
             endeTableData: 10,
             activePage: 1,
             isUpdateOrgunits: false,
-            currentSelectedOrg: { 'name': 'Kenya', 'id': 0 }
+            currentSelectedOrg: { 'name': 'Kenya', 'id': 0 },
+            newOrgunitRequestMessage: null
         };
         this.updateOrg = this.updateOrg.bind(this);
         this.editOrg = this.editOrg.bind(this);
@@ -450,10 +451,10 @@ class Orgunit extends React.Component {
                                     onClick={() => {
                                         $('#newOrgUnitRequestForm').modal('toggle');
                                         this.setState({
-                                            alertMessage: null
+                                            newOrgunitRequestMessage: null
                                         });
                                     }}
-                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    className="btn btn-secondary" data-dismiss="modal">Cancel</button>
 
                                 <button type="button"
                                     onClick={() => {
