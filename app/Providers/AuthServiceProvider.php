@@ -95,6 +95,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define(SystemAuthorities::$authorities['view_roles_not_assigned'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_roles_not_assigned']);
         });
+        Gate::define(SystemAuthorities::$authorities['can_request_new_org_unit'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['can_request_new_org_unit']);
+        });
     }
 
     private function runAthurizationQuery($authority)

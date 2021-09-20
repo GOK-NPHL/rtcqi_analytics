@@ -28,7 +28,7 @@ class Orgunit extends React.Component {
             endeTableData: 10,
             activePage: 1,
             isUpdateOrgunits: false,
-            currentSelectedOrg: { 'name': 'Kenya', 'id': 0 },
+            currentSelectedOrg: { 'name': null, 'id': null },
             newOrgunitRequestMessage: null,
             newOrgRequestError: '',
             hasErrors: false
@@ -250,10 +250,10 @@ class Orgunit extends React.Component {
                                 httpOrgUnits: httpOrgUnits,
                                 tableOrgs: tableOrgs,
                                 tableEl: tableEl,
-                                allTableElements: tableEl
+                                allTableElements: tableEl,
+                                currentSelectedOrg: { 'name': httpOrgUnits.payload[0][0].odk_unit_name, 'id': httpOrgUnits.payload[0][0].org_unit_id }
                             });
                         }
-
                     }
                 })();
             }
@@ -430,90 +430,95 @@ class Orgunit extends React.Component {
                 </div>
 
                 {/* open request org unit form */}
-                <a data-toggle="tooltip" data-placement="top" title="Request creation of new org unit" href="#" className="float" onClick={(event) => {
-                    event.preventDefault();
-                    this.setState({
-                        newOrgunitRequestMessage: null,
-                        hasErrors: false,
-                        newOrgRequestError: '',
-                        newOrgToName: ''
-                    });
-                    $('#newOrgUnitRequestForm').modal('toggle');
-                }}>
-                    <i className="fa fa-plus my-float"></i>
-                </a>
 
-                {/* Request new organisation unit form*/}
-                <div className="modal fade" id="newOrgUnitRequestForm" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLongTitle">New Orgnanization unit request form</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
+                {this.state.allowedPermissions.includes('can_request_new_org_unit') ?
+                    <a data-toggle="tooltip" data-placement="top" title="Request creation of new org unit" href="#" className="float" onClick={(event) => {
+                        event.preventDefault();
+                        this.setState({
+                            newOrgunitRequestMessage: null,
+                            hasErrors: false,
+                            newOrgRequestError: '',
+                            newOrgToName: ''
+                        });
+                        $('#newOrgUnitRequestForm').modal('toggle');
+                    }}>
+                        <i className="fa fa-plus my-float"></i>
+                    </a>
+                    : ''
+                }
+                {this.state.allowedPermissions.includes('can_request_new_org_unit') ?
+                    // Request new organisation unit form
+                    <div className="modal fade" id="newOrgUnitRequestForm" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
+                        <div className="modal-dialog modal-dialog-centered" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="exampleModalLongTitle">New Orgnanization unit request form</h5>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
 
-                                <form>
-                                    {this.state.hasErrors ?
-                                        <div className="alert alert-danger" role="alert">
-                                            {this.state.newOrgRequestError}
-                                        </div>
-                                        :
-                                        ''
-                                    }
+                                    <form>
+                                        {this.state.hasErrors ?
+                                            <div className="alert alert-danger" role="alert">
+                                                {this.state.newOrgRequestError}
+                                            </div>
+                                            :
+                                            ''
+                                        }
+
+                                        {!this.state.hasErrors && this.state.newOrgRequestError ?
+
+                                            <div className="alert alert-success new_org_request  fade show" role="alert">
+                                                {this.state.newOrgRequestError}
+                                            </div> :
+                                            <React.Fragment>
+                                                <div className="form-group">
+                                                    <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
+                                                    <div className="col-sm-12">
+                                                        <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
+                                                    </div>
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                                    <div className="col-sm-12">
+                                                        <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                                    </div>
+                                                </div>
+                                            </React.Fragment>
+                                        }
+
+                                    </form>
+
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button"
+                                        onClick={() => {
+                                            $('#newOrgUnitRequestForm').modal('toggle');
+                                            this.setState({
+                                                newOrgunitRequestMessage: null,
+                                                hasErrors: false,
+                                                newOrgRequestError: '',
+                                                newOrgToName: ''
+                                            });
+                                        }}
+                                        className="btn btn-secondary" data-dismiss="modal">Close</button>
 
                                     {!this.state.hasErrors && this.state.newOrgRequestError ?
-
-                                        <div className="alert alert-success new_org_request  fade show" role="alert">
-                                            {this.state.newOrgRequestError}
-                                        </div> :
-                                        <React.Fragment>
-                                            <div className="form-group">
-                                                <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
-                                                <div className="col-sm-12">
-                                                    <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
-                                                </div>
-                                            </div>
-                                            <div className="form-group">
-                                                <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
-                                                <div className="col-sm-12">
-                                                    <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
-                                                </div>
-                                            </div>
-                                        </React.Fragment>
+                                        '' : <button type="button"
+                                            onClick={() => {
+                                                this.requestNewOrgUnit(this.state.currentSelectedOrg.id, document.getElementById('newOrgName').value)
+                                            }}
+                                            className="btn btn-primary">Send Request</button>
                                     }
-
-                                </form>
-
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button"
-                                    onClick={() => {
-                                        $('#newOrgUnitRequestForm').modal('toggle');
-                                        this.setState({
-                                            newOrgunitRequestMessage: null,
-                                            hasErrors: false,
-                                            newOrgRequestError: '',
-                                            newOrgToName: ''
-                                        });
-                                    }}
-                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                {!this.state.hasErrors && this.state.newOrgRequestError ?
-                                    '' : <button type="button"
-                                        onClick={() => {
-                                            // this.updateOrg(this.state.orgToEdit.org_unit_id, this.state.newOrgToName);
-                                            this.requestNewOrgUnit(this.state.currentSelectedOrg.id, document.getElementById('newOrgName').value)
-                                            // $('#newOrgUnitRequestForm').modal('toggle');
-                                        }}
-                                        className="btn btn-primary">Send Request</button>
-                                }
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    : ''
+                }
+
 
             </React.Fragment>
 

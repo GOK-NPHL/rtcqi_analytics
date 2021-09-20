@@ -217,9 +217,9 @@ class OrgunitsController extends Controller
 
     public function requestNewOrgUnit(Request $request)
     {
-        // if (!Gate::allows(SystemAuthorities::$authorities['add_orgunit'])) {
-        //     return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
-        // }
+        if (!Gate::allows(SystemAuthorities::$authorities['can_request_new_org_unit'])) {
+            return response()->json(['Message' => 'Not allowed to add organisation units: '], 500);
+        }
         try {
             $user = Auth::user();
             OrgunitRequest::create([

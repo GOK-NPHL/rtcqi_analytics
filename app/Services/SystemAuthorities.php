@@ -29,6 +29,7 @@ class SystemAuthorities
         'view_spi_report' => 'view_spi_report',
         'upload_new_orgunit_structure' => 'upload_new_orgunit_structure',
         'view_users_missing_organisation_units' => 'view_users_missing_organisation_units',
-        'view_roles_not_assigned' => 'view_roles_not_assigned'
+        'view_roles_not_assigned' => 'view_roles_not_assigned',
+        'can_request_new_org_unit' => 'can_request_new_org_unit'
     ];
 }
