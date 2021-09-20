@@ -31,7 +31,7 @@ class Tree extends React.Component {
         }
     }
 
-    organisationUnitOnclick(event) {
+    organisationUnitOnclick(event, item) {
         // event.stopPropagation();
         if (this.state.currentlySelectedOrgUnit != null) {
             this.state.currentlySelectedOrgUnit.style.color = "black";
@@ -39,7 +39,6 @@ class Tree extends React.Component {
 
         event.target.style.color = "orange";
 
-        console.log(event.target);
         let el = event.target.nextElementSibling;
 
         while (el) {
@@ -50,6 +49,8 @@ class Tree extends React.Component {
         this.setState({
             currentlySelectedOrgUnit: event.target
         });
+
+        this.props.setcurrentSelectedOrg(item);
     }
 
     render() {
@@ -69,7 +70,7 @@ class Tree extends React.Component {
                                     :
                                     <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                 : ''
-                            }<span onClick={() => this.organisationUnitOnclick(event)} onContextMenu={(event) => {
+                            }<span onClick={() => this.organisationUnitOnclick(event, item)} onContextMenu={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
                                 this.props.setcurrentSelectedOrg(item);
@@ -87,7 +88,7 @@ class Tree extends React.Component {
                                                 :
                                                 <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                                             : ''
-                                        }<span onClick={() => this.organisationUnitOnclick(event)}
+                                        }<span onClick={() => this.organisationUnitOnclick(event, item)}
 
                                             onContextMenu={(event) => {
                                                 event.preventDefault();
@@ -112,7 +113,7 @@ class Tree extends React.Component {
                                 :
                                 <input style={{ "marginRight": "2px" }} type="checkbox" onClick={() => this.props.clickHandler(item)} />
                             : ''
-                        }<span onClick={() => this.organisationUnitOnclick(event)}
+                        }<span onClick={() => this.organisationUnitOnclick(event, item)}
                             onContextMenu={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();

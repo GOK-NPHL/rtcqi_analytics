@@ -6,6 +6,7 @@ import Pagination from "react-js-pagination";
 import DataTable from "react-data-table-component";
 import { FetchOrgunits, DevelopOrgStructure, UpdateOrg, DeleteOrg, DeleteAllOrgs, FetchUserAuthorities } from '../../utils/Helpers';
 
+import '../../../../css/OrgUnitFloatingButton.css';
 
 class Orgunit extends React.Component {
 
@@ -27,6 +28,7 @@ class Orgunit extends React.Component {
             endeTableData: 10,
             activePage: 1,
             isUpdateOrgunits: false,
+            currentSelectedOrg: { 'name': 'Kenya', 'id': 0 }
         };
         this.updateOrg = this.updateOrg.bind(this);
         this.editOrg = this.editOrg.bind(this);
@@ -37,6 +39,8 @@ class Orgunit extends React.Component {
         this.dropCurrentOrgunitStructure = this.dropCurrentOrgunitStructure.bind(this);
         this.triggerOrgUnitsFetch = this.triggerOrgUnitsFetch.bind(this);
         this.deleteSelectedOrgUnit = this.deleteSelectedOrgUnit.bind(this);
+        this.setcurrentSelectedOrg = this.setcurrentSelectedOrg.bind(this);
+
     }
 
     componentDidMount() {
@@ -84,7 +88,7 @@ class Orgunit extends React.Component {
             localStorage.removeItem('orgunitList');
             localStorage.removeItem("treeStruc");
             localStorage.removeItem("orgunitTableStruc");
-            let message = returnedData.data.Message+". Your brower might freeze as the tree is refreshed";
+            let message = returnedData.data.Message + ". Your brower might freeze as the tree is refreshed";
             this.setState({ message: message, dropOrgUnit: false, httpOrgUnits: null });
             $('#messageModal').modal('show');
 
@@ -196,6 +200,15 @@ class Orgunit extends React.Component {
         });
     }
 
+    setcurrentSelectedOrg(currentSelectedOrg) {
+        if (currentSelectedOrg == null) {
+            currentSelectedOrg = { 'name': 'Kenya', 'id': 0 }
+        }
+        this.setState({
+            currentSelectedOrg: currentSelectedOrg
+        });
+    }
+
     render() {
 
         $("#org_success").hide();
@@ -272,7 +285,10 @@ class Orgunit extends React.Component {
 
                     </div>
                     <div style={{ "overflow": "scroll", "maxHeight": "700px", "minHeight": "500px", "paddingBottom": "6px", "paddingRight": "16px" }} className="col-sm-4">
-                        <TreeView orgUnits={this.state.tableOrgs} updateOrg={this.updateOrg} />
+                        <TreeView orgUnits={this.state.tableOrgs}
+                            updateOrg={this.updateOrg}
+                            setcurrentSelectedOrg={this.setcurrentSelectedOrg}
+                        />
                     </div>
                     <div className="col-sm-8">
 
@@ -387,6 +403,66 @@ class Orgunit extends React.Component {
                                 }
 
 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <a href="#" className="float" onClick={(event) => {
+                    event.preventDefault();
+                    $('#newOrgUnitRequestForm').modal('toggle');
+                }}>
+                    <i className="fa fa-plus my-float"></i>
+                </a>
+
+                {/* Alert message modal*/}
+                <div className="modal fade" id="newOrgUnitRequestForm" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">New Orgnanization unit request form</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+
+                                <form>
+                                    <div className="form-group">
+                                        <label htmlfor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
+                                        <div className="col-sm-12">
+                                            <label htmlfor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlfor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                        <div className="col-sm-12">
+                                            <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                        </div>
+                                    </div>
+
+                                </form>
+
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button"
+                                    onClick={() => {
+                                        $('#newOrgUnitRequestForm').modal('toggle');
+                                        this.setState({
+                                            alertMessage: null
+                                        });
+                                    }}
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                                <button type="button"
+                                    onClick={() => {
+                                        // this.updateOrg(this.state.orgToEdit.org_unit_id, this.state.newOrgToName);
+                                        $('#newOrgUnitRequestForm').modal('toggle');
+                                    }}
+                                    className="btn btn-primary">Send Request</button>
                             </div>
                         </div>
                     </div>

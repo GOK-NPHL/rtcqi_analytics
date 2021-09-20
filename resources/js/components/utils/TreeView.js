@@ -132,6 +132,7 @@ class TreeView extends React.Component {
         this.setState({
             currentSelectedOrg: currentSelectedOrg
         });
+        this.props.setcurrentSelectedOrg(currentSelectedOrg);
     }
 
     render() {
