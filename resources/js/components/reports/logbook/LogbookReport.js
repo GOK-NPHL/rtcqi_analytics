@@ -435,20 +435,15 @@ class LogbookReport extends React.Component {
             if (!signed) signed = 0;
             signed = Math.round(signed * 10) / 10; //round off to one decimal place
 
-            let partially = (totals.partially / no) * 100;
-            if (!partially) partially = 0;
-            partially = Math.round(partially * 10) / 10; //round off to one decimal place
 
             let notSigned = (totals.not_signed / no) * 100;
             if (!notSigned) notSigned = 0;
             notSigned = Math.round(notSigned * 10) / 10; //round off to one decimal place
 
             supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{signed}</td>);
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{partially}</td>);
             supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{notSigned}</td>);
 
             supervisorySignatureExportTableData.push(signed);
-            supervisorySignatureExportTableData.push(partially);
             supervisorySignatureExportTableData.push(notSigned);
 
             supervisorySignatureTableData.push(<tr key={uuidv4()}>{supervisorySignatureRow}</tr>);
@@ -479,20 +474,14 @@ class LogbookReport extends React.Component {
             if (!followed) followed = 0;
             followed = Math.round(followed * 10) / 10; //round off to one decimal place
 
-            let partially = (totals.partially / no) * 100;
-            if (!partially) partially = 0;
-            partially = Math.round(partially * 10) / 10; //round off to one decimal place
-
             let notFollowed = (totals.not_followed / no) * 100;
             if (!notFollowed) notFollowed = 0;
             notFollowed = Math.round(notFollowed * 10) / 10; //round off to one decimal place
 
             algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{followed}</td>);
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{partially}</td>);
             algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{notFollowed}</td>);
 
             algorithmFollowedExportTableData.push(followed);
-            algorithmFollowedExportTableData.push(partially);
             algorithmFollowedExportTableData.push(notFollowed);
 
             algorithmFollowedTableData.push(<tr key={uuidv4()}>{algorithmFollowedRow}</tr>);
@@ -729,14 +718,13 @@ class LogbookReport extends React.Component {
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
             <th scope="col">signed</th>
-            <th scope="col">partially</th>
             <th scope="col">not signed</th>
 
         </tr>;
 
         let supervisorySignatureExportData = [];
 
-        supervisorySignatureExportData.push(['___', 'signed', 'partially', 'not signed']);
+        supervisorySignatureExportData.push(['___', 'signed', 'not signed']);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -745,12 +733,11 @@ class LogbookReport extends React.Component {
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
                     <th scope="col">signed</th>
-                    <th scope="col">partially</th>
                     <th scope="col">not signed</th>
 
                 </tr>;
                 supervisorySignatureExportData = [];
-                supervisorySignatureExportData.push(['___', 'Programme', 'signed', 'partially', 'not signed']);
+                supervisorySignatureExportData.push(['___', 'Programme', 'signed', 'not signed']);
             }
         }
         // end Supervisory Signature rate
@@ -762,14 +749,13 @@ class LogbookReport extends React.Component {
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
             <th scope="col">followed</th>
-            <th scope="col">partially</th>
             <th scope="col">not followed</th>
 
         </tr>;
 
         let algorithmFollowedExportData = [];
 
-        algorithmFollowedExportData.push(['___', 'followed', 'partially', 'not followed']);
+        algorithmFollowedExportData.push(['___', 'followed', 'not followed']);
 
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -778,11 +764,10 @@ class LogbookReport extends React.Component {
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
                     <th scope="col">followed</th>
-                    <th scope="col">partially</th>
                     <th scope="col">not followed</th>
                 </tr>;
                 algorithmFollowedExportData = [];
-                algorithmFollowedExportData.push(['___', 'Programme', 'followed', 'partially', 'not followed']);
+                algorithmFollowedExportData.push(['___', 'Programme', 'followed', 'not followed']);
             }
         }
         // end Algorithm followed rate

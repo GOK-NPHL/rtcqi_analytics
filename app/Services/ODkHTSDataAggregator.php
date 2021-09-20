@@ -81,13 +81,11 @@ class ODkHTSDataAggregator
 
                         $signedSites = array();
                         $signedSites['signed'] = 0;
-                        $signedSites['partially'] = 0;
                         $signedSites['not_signed'] = 0;
                         $monthlySites['supervisory_signature'] =  $signedSites;
 
                         $algorithmFollowedSites = array();
                         $algorithmFollowedSites['followed'] = 0;
-                        $algorithmFollowedSites['partially'] = 0;
                         $algorithmFollowedSites['not_followed'] = 0;
                         $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
 
@@ -144,7 +142,7 @@ class ODkHTSDataAggregator
                                 //supervisory signatures aggregation
 
                                 if (in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
-                                    $monthlySites['supervisory_signature']['partially'] += 1;
+                                    $monthlySites['supervisory_signature']['not_signed'] += 1;
                                 }
                                 if (in_array(1, $site['supervisory_signature']) && !in_array(0, $site['supervisory_signature'])) {
                                     $monthlySites['supervisory_signature']['signed'] += 1;
@@ -155,7 +153,7 @@ class ODkHTSDataAggregator
 
                                 //algortihm followed counts
                                 if (in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
-                                    $monthlySites['algorithm_followed']['partially'] += 1;
+                                    $monthlySites['algorithm_followed']['not_followed'] += 1;
                                 }
                                 if (in_array(1, $site['algorithm_followed']) && !in_array(0, $site['algorithm_followed'])) {
                                     $monthlySites['algorithm_followed']['followed'] += 1;
