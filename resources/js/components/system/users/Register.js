@@ -51,8 +51,10 @@ class Register extends React.Component {
                 });
 
                 let canViewAssignRolesList = false;
-                if (userDetails['demographics']['role_id']== 12) {
-                    canViewAssignRolesList = true;
+                try {
+                    canViewAssignRolesList = roles[userDetails['demographics']['role_id']]['authorities']['role'].includes(12) // check if has view role option 
+                } catch (err) {
+                    //pass
                 }
 
                 this.setState({
@@ -343,8 +345,32 @@ class Register extends React.Component {
                                 <button
                                     onClick={this.props.userActionState != 'edit' ? () => this.saveUser() : () => this.updateCurrentUser()}
                                     style={{ "marginTop": "10px" }}
-                                    className="btn btn-primary"
+                                    className="btn btn-primary mr-2"
                                 > {this.props.userActionState == 'edit' ? 'Update User' : 'Save User'}</button>
+
+                                <button
+                                    style={{ "marginTop": "10px" }}
+                                    onClick={
+                                        () => {
+                                            this.setState({
+                                                selectedViewableRoles: [],
+                                                previousSelectedViewableRoles: [],
+                                                role: '',
+                                                roles: {},
+                                                selectedOrgs: {},
+                                                rolesOptions: [],
+                                                message: '',
+                                                first_name: '',
+                                                last_name: '',
+                                                email: '',
+                                                password: '',
+                                                assignedOrgUnits: [],
+                                                closeRegisterPage: true,
+                                                canViewAssignRolesList: false
+                                            });
+                                            this.props.toggleDisplay()
+                                        }
+                                    } className="btn btn-secondary">Cancel</button>
 
                             </div>
                         </div>

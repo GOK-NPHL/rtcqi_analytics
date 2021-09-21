@@ -241,7 +241,9 @@ class User extends React.Component {
             </div>;
         } else {
             if (this.state.allowedPermissions.includes('add_user'))
-                pageContent = <Register selectedUser={this.state.selectedUser} userActionState={this.state.userActionState} toggleDisplay={this.toggleDisplay} />;
+                pageContent = <Register 
+                selectedUser={this.state.selectedUser}  allowedPermissions = {this.state.allowedPermissions}
+                userActionState={this.state.userActionState} toggleDisplay={this.toggleDisplay} />;
         }
 
         let confirmationBox =
