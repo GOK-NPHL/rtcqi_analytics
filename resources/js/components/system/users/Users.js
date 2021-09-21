@@ -49,7 +49,7 @@ class User extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (prevState.showUserTable !== this.state.showUserTable) {
-            this.getUsers();
+            // this.getUsers();
         }
     }
     onChange(currentNode, selectedNodes) {
@@ -58,11 +58,19 @@ class User extends React.Component {
 
     toggleDisplay() {
         let booll = this.state.showUserTable;
+
         if (!booll) { //show user table
-            this.setState({
-                showUserTable: !booll,
-                userActionState: 'userList'
-            });
+            let users = [];
+            (async () => {
+                users = await FetchUsers();
+                this.setState({
+                    showUserTable: !booll,
+                    userActionState: 'userList',
+                    users: users,
+                    allTableElements: []
+                });
+            })();
+
         } else {
             this.setState({
                 showUserTable: !booll
@@ -72,11 +80,11 @@ class User extends React.Component {
     }
 
     // shouldComponentUpdate(nextProps, nextState) {
-    //     if (this.state.nextState != nextState.selectedUser) {
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
+        // if (this.state.users != nextState.users) {
+        //     return true;
+        // } else {
+        //     return false;
+        // }
     // }
 
     deleteUser() {
@@ -188,7 +196,7 @@ class User extends React.Component {
                                         orgUnit['props']['children'][1]['props']['children'][0].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()) ||
                                         orgUnit['props']['children'][2]['props']['children'].toLowerCase().trim().includes(event.target.value.trim().toLowerCase())
                                 );
-                                console.log(this.state.allTableElements);
+
                                 this.setState({
                                     currUsersTableEl: currUsersTableEl,
                                     activePage: 1,
