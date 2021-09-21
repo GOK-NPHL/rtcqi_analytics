@@ -183,7 +183,12 @@ class User extends React.Component {
                     <div className="form-group mb-2">
                         <input type="text"
                             onChange={(event) => {
-                                let currUsersTableEl = this.state.allTableElements.filter(orgUnit => orgUnit['props']['children'][1]['props']['children'][0].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()));
+                                let currUsersTableEl = this.state.allTableElements.filter(
+                                    orgUnit =>
+                                        orgUnit['props']['children'][1]['props']['children'][0].toLowerCase().trim().includes(event.target.value.trim().toLowerCase()) ||
+                                        orgUnit['props']['children'][2]['props']['children'].toLowerCase().trim().includes(event.target.value.trim().toLowerCase())
+                                );
+                                console.log(this.state.allTableElements);
                                 this.setState({
                                     currUsersTableEl: currUsersTableEl,
                                     activePage: 1,
