@@ -137,7 +137,7 @@ use Illuminate\Support\Facades\Gate;
                                 <a onclick="localStorage.setItem('page', 'Organization units');" class="collapse-item" href="{{ route('orgunitsIndex') }}">Organization units</a>
                             <?php } ?>
                             <?php if (Gate::allows('view_requested_orgunits')) { ?>
-                                <a class="collapse-item" href="{{ route('requestedOrgunits') }}">Requested organization <br/> units</a>
+                                <a class="collapse-item" href="{{ route('requestedOrgunits') }}">Requested organization <br /> units</a>
                             <?php } ?>
                             <?php if (Gate::allows('data_backup')) { ?>
                                 <div class="collapse-divider"></div>
@@ -147,9 +147,15 @@ use Illuminate\Support\Facades\Gate;
                         </div>
                     </div>
                 </li>
+
             <?php } ?>
 
-
+            <li class="nav-item menu-head">
+                <a onclick="event.preventDefault();
+                    document.getElementById('logout-form').submit();" class="nav-link " href="{{ route('home') }}">
+                    <strong> <i class="fas fa-sign-out-alt"></i> {{ __('Logout') }} </strong>
+                </a>
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
@@ -158,6 +164,8 @@ use Illuminate\Support\Facades\Gate;
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
+
+
 
         </ul>
         <!-- End of Sidebar -->
