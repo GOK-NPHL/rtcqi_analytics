@@ -106,6 +106,7 @@ class Roles extends React.Component {
         this.setState({
             showUserTable: !booll
         });
+
     }
 
     render() {
@@ -235,8 +236,24 @@ class Roles extends React.Component {
         let roleCreateButton = '';
         if (this.state.allowedPermissions.length > 0) {
             if (this.state.allowedPermissions.includes('add_role')) {
-                roleCreateButton = <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    className="fas fa-users fa-sm text-white-50"></i> Create Roles</a>;
+                if (this.state.showUserTable) {
+                    roleCreateButton = <a href="#" onClick={this.toggleDisplay} className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                        className="fas fa-users fa-sm text-white-50"></i> Create Roles</a>;
+                } else {
+
+                    roleCreateButton = <a href="#"
+                        onClick={
+                            () => {
+                                this.toggleDisplay();
+                                this.setState({
+                                    showUserTable: !booll
+                                });
+                            }
+                        }
+                        className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                        <i className="fas fa-arrow-left"></i> Back</a>;
+                }
+
             }
         }
 

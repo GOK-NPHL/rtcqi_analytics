@@ -115,7 +115,7 @@ class RoleCreate extends React.Component {
     }
 
     render() {
-        
+
         let pageContent = <div id="registration_form" className="card shadow mb-4">
             <div className="card-header py-3">
                 <h6 className="m-0 font-weight-bold text-primary">Role Creation</h6>
@@ -143,6 +143,9 @@ class RoleCreate extends React.Component {
                             </div>
                         </div>
                         <button onClick={() => this.saveRole()} className="btn btn-primary">Save Role</button>
+                        <button onClick={
+                            () => this.props.toggleDisplay()
+                        } className="btn btn-primary">Cancel</button>
 
                     </div>
                 </div>
