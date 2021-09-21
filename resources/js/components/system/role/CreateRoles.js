@@ -53,8 +53,6 @@ class RoleCreate extends React.Component {
         if (this.props.editMode) {
             this.setState({ roleName: this.props.roleToEdit.role_name });
             let currentAuthorities = this.props.roleToEdit.authorities;
-            console.log("currentAuthorities");
-            console.log(currentAuthorities);
             let selected = [];
             for (const [key, value] of Object.entries(currentAuthorities)) {
                 for (let i = 0; i < value.length; i++) {
@@ -78,7 +76,7 @@ class RoleCreate extends React.Component {
                     let returnedData = '';
                     (async () => {
                         returnedData = await UpdateRole(this.props.roleToEdit.role_id, this.state.roleName, this.state.selected);
-                        console.log(returnedData);
+
                         if (returnedData) {
                             this.setState({
                                 responseMessage: returnedData.data.Message
@@ -97,7 +95,7 @@ class RoleCreate extends React.Component {
                 if (this.state.allowedPermissions.includes('add_role')) {
                     (async () => {
                         let returnedData = await SaveRole(this.state.roleName, this.state.selected);
-                        console.log(returnedData);
+
                         if (returnedData) {
                             this.setState({
                                 responseMessage: returnedData.data.Message
@@ -142,10 +140,19 @@ class RoleCreate extends React.Component {
                                 />
                             </div>
                         </div>
-                        <button onClick={() => this.saveRole()} className="btn btn-primary">Save Role</button>
+                        <button onClick={() => this.saveRole()} className="btn btn-primary mr-2">Save Role</button>
+
                         <button onClick={
-                            () => this.props.toggleDisplay()
-                        } className="btn btn-primary">Cancel</button>
+                            () => {
+                                this.setState({
+                                    selected: [],
+                                    roleName: '',
+                                    permissionOptions: [],
+                                    allowedPermissions: []
+                                });
+                                this.props.toggleDisplay()
+                            }
+                        } className="btn btn-secondary">Cancel</button>
 
                     </div>
                 </div>
