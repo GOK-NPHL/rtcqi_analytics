@@ -93,6 +93,7 @@ class Tree extends React.Component {
 
                                             onContextMenu={(event) => {
                                                 event.preventDefault();
+                                                console.log(item);
                                                 event.stopPropagation();
                                                 this.props.setcurrentSelectedOrg(item);
                                                 this.props.setNewEditOrgUnitName(item.name);
@@ -117,6 +118,7 @@ class Tree extends React.Component {
                         }<span onClick={() => this.organisationUnitOnclick(event, item)}
                             onContextMenu={(event) => {
                                 event.preventDefault();
+                                console.log(item);
                                 event.stopPropagation();
                                 this.props.setcurrentSelectedOrg(item);
                                 this.props.setNewEditOrgUnitName(item.name);
