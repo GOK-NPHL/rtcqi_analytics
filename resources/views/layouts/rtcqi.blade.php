@@ -150,7 +150,7 @@ use Illuminate\Support\Facades\Gate;
 
             <?php } ?>
 
-            <li class="nav-item menu-head">
+            <li class="nav-item menu-head" style="margin-left: 5px;">
                 <a onclick="event.preventDefault();
                     document.getElementById('logout-form').submit();" class="nav-link " href="{{ route('home') }}">
                     <strong> <i class="fas fa-sign-out-alt"></i> {{ __('Logout') }} </strong>
