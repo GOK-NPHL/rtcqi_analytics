@@ -433,47 +433,32 @@ function uuidCompare(one, c) {
     });
 }
 
-let counter = 0;
 function OrgUnitStructureMaker(arr, orgUnitToAdd, processedItems) {
+
+    let orgUnit = {
+        id: orgUnitToAdd.org_unit_id,
+        name: orgUnitToAdd.odk_unit_name,
+        level: orgUnitToAdd.level,
+        parentId: orgUnitToAdd.parent_id,
+        updatedAt: orgUnitToAdd.updated_at,
+        children: [
+        ]
+    };
 
     if (arr.length != 0) {
 
-        arr.map((item) => {
+        try {
+            let parentOrg = processedItems[orgUnitToAdd.parent_id]
+            parentOrg.children.push(orgUnit);
+            processedItems[orgUnitToAdd.org_unit_id] = orgUnit;
+        } catch (err) {
+            arr.push(orgUnit);
+            processedItems[orgUnitToAdd.org_unit_id] = orgUnit;
+        }
 
-            if (item.id == orgUnitToAdd.parent_id && !processedItems.includes(orgUnitToAdd.org_unit_id)) {
-
-                let orgUnit = {
-                    id: orgUnitToAdd.org_unit_id,
-                    name: orgUnitToAdd.odk_unit_name,
-                    level: orgUnitToAdd.level,
-                    parentId: orgUnitToAdd.parent_id,
-                    updatedAt: orgUnitToAdd.updated_at,
-                    children: [
-                    ]
-                };
-                item.children.push(orgUnit);
-                processedItems.push(orgUnitToAdd.org_unit_id);
-
-            } else {
-                if (orgUnitToAdd.level > item.level && !processedItems.includes(orgUnitToAdd.org_unit_id)) {
-                    arr = OrgUnitStructureMaker(item.children, orgUnitToAdd, processedItems);
-                }
-            }
-        });
-
-    } else if (!processedItems.includes(orgUnitToAdd.parent_id)) {
-
-        let orgUnit = {
-            id: orgUnitToAdd.org_unit_id,
-            name: orgUnitToAdd.odk_unit_name,
-            level: orgUnitToAdd.level,
-            parentId: orgUnitToAdd.parent_id,
-            updatedAt: orgUnitToAdd.updated_at,
-            children: [
-            ]
-        };
+    } else {
         arr.push(orgUnit);
-        processedItems.push(orgUnitToAdd.org_unit_id);
+        processedItems[orgUnitToAdd.org_unit_id] = orgUnit;
     }
 
 }
@@ -482,25 +467,12 @@ export function DevelopOrgStructure(orunitData) {
     let cacheOrgUnit = localStorage.getItem("orgunitTableStruc");
     if (cacheOrgUnit == null) {
         let tableOrgs = [];
-        let processedItems = [];
+        let processedItems = {};
 
         orunitData.payload[0].map((orgUnitToAdd) => {
+            console.log("new way")
             OrgUnitStructureMaker(tableOrgs, orgUnitToAdd, processedItems);
 
-            if (!processedItems.includes(orgUnitToAdd.org_unit_id)) {
-
-                let orgUnit = {
-                    id: orgUnitToAdd.org_unit_id,
-                    name: orgUnitToAdd.odk_unit_name,
-                    level: orgUnitToAdd.level,
-                    parentId: orgUnitToAdd.parent_id,
-                    updatedAt: orgUnitToAdd.updated_at,
-                    children: [
-                    ]
-                };
-                tableOrgs.push(orgUnit);
-                processedItems.push(orgUnitToAdd.org_unit_id)
-            }
         });
 
         try {
