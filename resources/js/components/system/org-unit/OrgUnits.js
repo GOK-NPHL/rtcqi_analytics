@@ -29,6 +29,7 @@ class Orgunit extends React.Component {
             activePage: 1,
             isUpdateOrgunits: false,
             currentSelectedOrg: { 'name': null, 'id': null },
+            currentSelectedOrgRequest: { 'name': null, 'id': null },
             newOrgunitRequestMessage: null,
             newOrgRequestError: '',
             hasErrors: false
@@ -44,6 +45,7 @@ class Orgunit extends React.Component {
         this.deleteSelectedOrgUnit = this.deleteSelectedOrgUnit.bind(this);
         this.setcurrentSelectedOrg = this.setcurrentSelectedOrg.bind(this);
         this.requestNewOrgUnit = this.requestNewOrgUnit.bind(this);
+        this.setcurrentSelectedOrgRequest = this.setcurrentSelectedOrgRequest.bind(this);
     }
 
     componentDidMount() {
@@ -223,12 +225,23 @@ class Orgunit extends React.Component {
 
     setcurrentSelectedOrg(currentSelectedOrg) {
         if (currentSelectedOrg == null) {
-            currentSelectedOrg = { 'name': 'Kenya', 'id': 0 }
+            currentSelectedOrg = { 'name': 'null', 'id': null }
         }
         this.setState({
             currentSelectedOrg: currentSelectedOrg
         });
     }
+
+    setcurrentSelectedOrgRequest(currentSelectedOrg) {
+        if (currentSelectedOrg == null) {
+            currentSelectedOrg = { 'name': null, 'id': null }
+        }
+        this.setState({
+            currentSelectedOrgRequest: currentSelectedOrg
+        });
+    }
+
+
 
     render() {
 
@@ -447,51 +460,75 @@ class Orgunit extends React.Component {
                     : ''
                 }
                 {this.state.allowedPermissions.includes('can_request_new_org_unit') ?
+
                     // Request new organisation unit form
                     <div className="modal fade" id="newOrgUnitRequestForm" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
-                        <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title" id="exampleModalLongTitle">New Orgnanization unit request form</h5>
+                                    <h5 className="modal-title" id="exampleModalLongTitle">Add/Delete/Edit Orgnanization unit request form</h5>
                                     <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
+
                                 <div className="modal-body">
-
-                                    <form>
-                                        {this.state.hasErrors ?
-                                            <div className="alert alert-danger" role="alert">
-                                                {this.state.newOrgRequestError}
+                                    <div class="container-fluid">
+                                        <div className="row">
+                                            <div className="col-sm-5">
+                                                <div style={{
+                                                    "overflow": "scroll", "maxHeight": "400px", "minWidth": "100px",
+                                                    "minHeight": "300px", "paddingBottom": "6px",
+                                                    "paddingRight": "16px"
+                                                }} >
+                                                    <h6>Click Org unit to perform action</h6>
+                                                    <hr />
+                                                    <TreeView orgUnits={this.state.tableOrgs}
+                                                        updateOrg={this.updateOrg}
+                                                        setcurrentSelectedOrg={this.setcurrentSelectedOrgRequest}
+                                                    />
+                                                </div>
                                             </div>
-                                            :
-                                            ''
-                                        }
 
-                                        {!this.state.hasErrors && this.state.newOrgRequestError ?
+                                            <div className="col-sm-6">
+                                                <h6>Choose edit, delete or add new organization unit on selected organization unit on the left</h6>
+                                                <hr />
+                                                <form>
+                                                    {this.state.hasErrors ?
+                                                        <div className="alert alert-danger" role="alert">
+                                                            {this.state.newOrgRequestError}
+                                                        </div>
+                                                        :
+                                                        ''
+                                                    }
 
-                                            <div className="alert alert-success new_org_request  fade show" role="alert">
-                                                {this.state.newOrgRequestError}
-                                            </div> :
-                                            <React.Fragment>
-                                                <div className="form-group">
-                                                    <label htmlFor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
-                                                    <div className="col-sm-12">
-                                                        <label htmlFor="parentOrg" ><strong>{this.state.currentSelectedOrg.name}</strong></label>
-                                                    </div>
-                                                </div>
-                                                <div className="form-group">
-                                                    <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
-                                                    <div className="col-sm-12">
-                                                        <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
-                                                    </div>
-                                                </div>
-                                            </React.Fragment>
-                                        }
+                                                    {!this.state.hasErrors && this.state.newOrgRequestError ?
 
-                                    </form>
+                                                        <div className="alert alert-success new_org_request  fade show" role="alert">
+                                                            {this.state.newOrgRequestError}
+                                                        </div> :
+                                                        <React.Fragment>
+                                                            <div className="form-group">
+                                                                <div className="col-sm-12">
+                                                                    <label htmlFor="parentOrg" ><strong>{this.state.currentSelectedOrgRequest.name}</strong></label>
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-group">
+                                                                <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                                                <div className="col-sm-12">
+                                                                    <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                                                </div>
+                                                            </div>
+                                                        </React.Fragment>
+                                                    }
 
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div className="modal-footer">
                                     <button type="button"
                                         onClick={() => {

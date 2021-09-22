@@ -69,20 +69,19 @@ class RequestedOrgUnits extends React.Component {
 
                     <td>
                         <a
+                            data-toggle="tooltip" data-placement="top" title="View and act on submission"
                             onClick={
                                 () => {
-                                    this.toggleDisplay();
-                                    this.setState({
-                                        userActionState: 'edit',
-                                        selectedUser: user
-                                    });
+
+                                    $('#moreOrgunitInfo').modal('toggle');
                                 }
                             }
                             style={{ 'marginRight': '5px' }}
                             className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i className="fas fa-user-edit"></i>
+                            <i className="fas fa-eye"></i>
                         </a>
                         <a
+                            data-toggle="tooltip" data-placement="top" title="Delete this submission"
                             onClick={() => {
                                 this.setState({
                                     selectedUser: user
@@ -166,6 +165,70 @@ class RequestedOrgUnits extends React.Component {
 
             <React.Fragment>
                 {pageContent}
+
+                {/* Requested site more infor modal */}
+                <div className="modal fade" id="moreOrgunitInfo" tabIndex="-1" role="dialog" aria-labelledby="newOrgUnitRequestFormTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">New Orgnanization unit request form</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+
+                                <form>
+
+                                    <div className="alert alert-danger" role="alert">
+
+                                    </div>
+
+                                    <div className="alert alert-success new_org_request  fade show" role="alert">
+
+                                    </div> :
+                                    <React.Fragment>
+                                        <div className="form-group">
+                                            <label htmlFor="parentOrg" className="col-sm-12 col-form-label">Parent organization unit</label>
+                                            <div className="col-sm-12">
+                                                <label htmlFor="parentOrg" ><strong> </strong></label>
+                                            </div>
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                            <div className="col-sm-12">
+                                                <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                            </div>
+                                        </div>
+                                    </React.Fragment>
+
+                                </form>
+
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button"
+                                    onClick={() => {
+                                        $('#moreOrgunitInfo').modal('toggle');
+                                        this.setState({
+                                            newOrgunitRequestMessage: null,
+                                            hasErrors: false,
+                                            newOrgRequestError: '',
+                                            newOrgToName: ''
+                                        });
+                                    }}
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                                <button type="button"
+                                    onClick={() => {
+
+                                    }}
+                                    className="btn btn-primary">Send Request</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </React.Fragment>
         );
     }
