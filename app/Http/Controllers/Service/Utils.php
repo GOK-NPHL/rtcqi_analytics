@@ -24,6 +24,7 @@ class Utils
                 "odkorgunit.updated_at",
             )->where('odkorgunit.org_unit_id', $orgUnitId)
             ->orderBy('level', 'ASC')
+            ->orderBy('parent_id', 'ASC')
             ->orderBy('odk_unit_name', 'ASC')
                 ->get();
 
@@ -50,6 +51,7 @@ class Utils
             )->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->union($org5)
                 ->orderBy('level', 'ASC')
+                ->orderBy('parent_id', 'ASC')
                 ->orderBy('odk_unit_name', 'ASC')
                 ->get();
 
@@ -89,6 +91,7 @@ class Utils
                 ->union($org4)
                 ->union($org5)
                 ->orderBy('level', 'ASC')
+                ->orderBy('parent_id', 'ASC')
                 ->orderBy('odk_unit_name', 'ASC')
                 ->get();
 
@@ -140,6 +143,7 @@ class Utils
                 ->union($org4)
                 ->union($org5)
                 ->orderBy('level', 'ASC')
+                ->orderBy('parent_id', 'ASC')
                 ->orderBy('odk_unit_name', 'ASC')
                 ->get();
 
@@ -155,6 +159,7 @@ class Utils
                 "odkorgunit.updated_at"
             )
                 ->orderBy('level', 'ASC')
+                ->orderBy('parent_id', 'ASC')
                 ->orderBy('odk_unit_name', 'ASC')
                 ->get();
 

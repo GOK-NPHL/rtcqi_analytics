@@ -426,13 +426,20 @@ export async function DeleteUser(user) {
         return err.response
     }
 }
+function uuidCompare(one, c) {
+    return one.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 let counter = 0;
 function OrgUnitStructureMaker(arr, orgUnitToAdd, processedItems) {
 
-    // if(counter>100) return;
     if (arr.length != 0) {
 
         arr.map((item) => {
+
             if (item.id == orgUnitToAdd.parent_id && !processedItems.includes(orgUnitToAdd.org_unit_id)) {
 
                 let orgUnit = {
@@ -454,7 +461,8 @@ function OrgUnitStructureMaker(arr, orgUnitToAdd, processedItems) {
             }
         });
 
-    } else {
+    } else if (!processedItems.includes(orgUnitToAdd.parent_id)) {
+
         let orgUnit = {
             id: orgUnitToAdd.org_unit_id,
             name: orgUnitToAdd.odk_unit_name,
@@ -475,9 +483,12 @@ export function DevelopOrgStructure(orunitData) {
     if (cacheOrgUnit == null) {
         let tableOrgs = [];
         let processedItems = [];
+
         orunitData.payload[0].map((orgUnitToAdd) => {
             OrgUnitStructureMaker(tableOrgs, orgUnitToAdd, processedItems);
+
             if (!processedItems.includes(orgUnitToAdd.org_unit_id)) {
+
                 let orgUnit = {
                     id: orgUnitToAdd.org_unit_id,
                     name: orgUnitToAdd.odk_unit_name,
