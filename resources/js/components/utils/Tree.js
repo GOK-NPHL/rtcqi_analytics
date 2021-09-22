@@ -74,6 +74,7 @@ class Tree extends React.Component {
                                 event.preventDefault();
                                 event.stopPropagation();
                                 this.props.setcurrentSelectedOrg(item);
+                                console.log(item);
                                 this.props.setNewEditOrgUnitName(item.name);
                                 $('#orgActionModal').modal('toggle');
                             }} className="caret orgUnit">{name}</span>
