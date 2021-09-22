@@ -8,7 +8,9 @@ class LevelSelect extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            columnHierarchy: {}
+            columnHierarchy: {},
+            minLevel: 2,
+            maxLevel: 2
         };
         this.columnHierarchyOrderHandler = this.columnHierarchyOrderHandler.bind(this);
 
@@ -21,10 +23,11 @@ class LevelSelect extends React.Component {
         let col = event.target.dataset.column;
         let hierValue = event.target.value;
         let hierarMap = this.state.columnHierarchy;
-        hierarMap[col] = hierValue; 
+        hierarMap[col] = hierValue;
         this.setState({
             columnHierarchy: hierarMap,
-
+            maxLevel: this.state.maxLevel + 1,
+            minLevel: this.state.minLevel + 1,
         });
         this.props.setOrgunitExcelFileHierachy(hierarMap);
     }
@@ -77,7 +80,7 @@ class LevelSelect extends React.Component {
                             data-column={key}
                             onInput={() => this.columnHierarchyOrderHandler(event)}
                             type="number"
-                            size="3" min="2" max="9"
+                            size="3" min={this.state.minLevel} max={this.state.maxLevel}
                             className="inputLevel">
                         </input></td>
                 </tr>
