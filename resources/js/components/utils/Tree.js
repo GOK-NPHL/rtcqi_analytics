@@ -33,19 +33,71 @@ class Tree extends React.Component {
 
     organisationUnitOnclick(event, item) {
         // event.stopPropagation();
+        // console.log(event)
         if (this.state.currentlySelectedOrgUnit != null) {
-            this.state.currentlySelectedOrgUnit.style.color = "black";
+            this.state.currentlySelectedOrgUnit.style.color = "#858796";
         }
 
         event.target.style.color = "orange";
 
-        let el = event.target.nextElementSibling;
+        try {
 
-        while (el) {
-            el.classList.toggle("nested");
-            el = el.nextElementSibling;
+            let el = event.target.nextElementSibling;
+
+            while (el) {
+                console.log(el)
+                el.classList.toggle("nested");
+
+                //section to hide  3rd nodes from the clicked one
+                try {
+                    if (this.props.addCheckBox) { //because checkbox takes first space in the arrat is its added
+
+                        if (el.children.length > 1) {
+                            let elementsToHide = el.children;
+                            for (element in elementsToHide) {
+
+                                for (node in element.children) {
+                                    node.classList.remove("nested");
+                                    node.classList.add("nested");
+                                }
+
+                            }
+                        } else {
+                            el.children[0].children[2].classList.remove("nested");
+                            el.children[0].children[2].classList.add("nested");
+                        }
+
+                    } else {
+                        if (el.children.length > 1) {
+                            let elementsToHide = el.children;
+                            for (element in elementsToHide) {
+
+                                for (node in element.children) {
+                                    node.classList.remove("nested");
+                                    node.classList.add("nested");
+                                }
+
+                            }
+                        } else {
+                            el.children[0].children[1].classList.remove("nested");
+                            el.children[0].children[1].classList.add("nested");
+                        }
+
+                    }
+
+                } catch (err) {
+
+                }
+
+                el = el.nextElementSibling;
+
+            }
+            event.target.classList.toggle("caret-down");
+        } catch (err) {
+
         }
-        event.target.classList.toggle("caret-down");
+
+
         this.setState({
             currentlySelectedOrgUnit: event.target
         });
@@ -54,8 +106,9 @@ class Tree extends React.Component {
     }
 
     render() {
-        console.log("render")
+
         let arrayUIparser = (arr) => {
+            //isNested allow nesting of first level after parent only
             const res = [];
             arr.map((item, index) => {
 
@@ -74,13 +127,13 @@ class Tree extends React.Component {
                                 event.preventDefault();
                                 event.stopPropagation();
                                 this.props.setcurrentSelectedOrg(item);
-                                console.log(item);
                                 this.props.setNewEditOrgUnitName(item.name);
                                 $('#orgActionModal').modal('toggle');
                             }} className="caret orgUnit">{name}</span>
                             {/* Add children org unit for the above added org as a ul*/}
                             {children.map((item) => {
-                                return <ul key={uuidv4()} className="nested"//{`${item.level > 2 ? "nested" : ""}`}
+
+                                let returnElement = <ul key={uuidv4()} className="nested"//{`${item.level > 2 ? "nested" : ""}`}
                                 >
                                     <li>
                                         {this.props.addCheckBox ?
@@ -93,7 +146,7 @@ class Tree extends React.Component {
 
                                             onContextMenu={(event) => {
                                                 event.preventDefault();
-                                                console.log(item);
+
                                                 event.stopPropagation();
                                                 this.props.setcurrentSelectedOrg(item);
                                                 this.props.setNewEditOrgUnitName(item.name);
@@ -104,7 +157,7 @@ class Tree extends React.Component {
                                         {arrayUIparser(item.children)}
                                     </li>
                                 </ul>
-
+                                return returnElement;
                             })}
                         </li>);
                 } else {
@@ -118,7 +171,7 @@ class Tree extends React.Component {
                         }<span onClick={() => this.organisationUnitOnclick(event, item)}
                             onContextMenu={(event) => {
                                 event.preventDefault();
-                                console.log(item);
+
                                 event.stopPropagation();
                                 this.props.setcurrentSelectedOrg(item);
                                 this.props.setNewEditOrgUnitName(item.name);
@@ -131,6 +184,12 @@ class Tree extends React.Component {
 
             return <ul >{res}</ul>;
         }
+
+
+
+
+
+
         let treeStruc = [
             {
                 id: 0,

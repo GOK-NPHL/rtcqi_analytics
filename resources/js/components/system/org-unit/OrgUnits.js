@@ -473,7 +473,7 @@ class Orgunit extends React.Component {
                                 </div>
 
                                 <div className="modal-body">
-                                    <div class="container-fluid">
+                                    <div className="container-fluid">
                                         <div className="row">
                                             <div className="col-sm-5">
                                                 <div style={{

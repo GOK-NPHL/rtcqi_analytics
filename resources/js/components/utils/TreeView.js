@@ -100,7 +100,7 @@ class TreeView extends React.Component {
 
             (async () => {
                 console.log(this.state.currentSelectedOrg);
-                let orgUnitToDelete =this.state.currentSelectedOrg;
+                let orgUnitToDelete = this.state.currentSelectedOrg;
                 orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id']
                 let returnedData = await DeleteOrg(orgUnitToDelete);
                 localStorage.removeItem('orgunitList');
@@ -132,7 +132,12 @@ class TreeView extends React.Component {
         this.setState({
             currentSelectedOrg: currentSelectedOrg
         });
-        this.props.setcurrentSelectedOrg(currentSelectedOrg);
+        try {
+            this.props.setcurrentSelectedOrg(currentSelectedOrg);
+        } catch (err) {
+
+        }
+
     }
 
     render() {
