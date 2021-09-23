@@ -349,7 +349,7 @@ use Illuminate\Support\Facades\Gate;
     <!-- Custom scripts for all pages-->
     <script>
         let page = localStorage.getItem('page', 'Log book');
-        console.log("the page is " + page);
+        //console.log("the page is " + page);
         document.getElementsByClassName("menu-head")[0].classList.remove("active");
         document.getElementsByClassName("menu-body")[0].classList.remove("show");
 

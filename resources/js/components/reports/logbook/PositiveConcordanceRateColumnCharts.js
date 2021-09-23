@@ -33,7 +33,7 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
     }
 
     prepareOverallLevelSiteData(dataObject) {
-        console.log(dataObject);
+        //console.log(dataObject);
         let overallSiteGraphsData = {};
         let levelsMap = {
             'Positive_Concordance': 'Positive Concordance'

@@ -101,7 +101,7 @@ class OrgunitStructureCreate extends React.Component {
         if (this.props.sheetWithOrgs && this.props.orgunitExcelFileHierachy) {
 
             let orgunitExcelFileHierachy = this.props.orgunitExcelFileHierachy;
-            // console.log(orgunitExcelFileHierachy);
+            // //console.log(orgunitExcelFileHierachy);
             // const sortedOrgunitExcelFileHierachy = new Map([...Object.entries(orgunitExcelFileHierachy)].sort());
             const sortedOrgunitExcelFileHierachy = new Map([...Object.entries(orgunitExcelFileHierachy)].sort((a, b) => a[1] - b[1]));
             let sheetName = this.props.sheetWithOrgs;
@@ -122,7 +122,7 @@ class OrgunitStructureCreate extends React.Component {
                     rowValues[C] = cellValue.trim();
                 }
 
-                // console.log(sortedOrgunitExcelFileHierachy);
+                // //console.log(sortedOrgunitExcelFileHierachy);
                 for (const [hierachyCol, hierachyColLevel] of sortedOrgunitExcelFileHierachy.entries()) {
                     if (rowValues[hierachyCol] != undefined) {
                         if (hierachyColLevel == 2) {
@@ -160,7 +160,7 @@ class OrgunitStructureCreate extends React.Component {
                             if (orgUnitsProcessed.includes(currentOrgName)) {
                                 continue;
                             } else {
-                                // console.log("level two =>" + currentOrgName);
+                                // //console.log("level two =>" + currentOrgName);
                                 let uuid4 = uuidv4();
                                 var parentNameLength = currentOrgName.lastIndexOf("$");
                                 var parentName = currentOrgName.substring(0, parentNameLength);
@@ -192,7 +192,7 @@ class OrgunitStructureCreate extends React.Component {
 
         } else if (this.props.isSaveOrgs && this.props.isUpdateOrgunits) {
             this.props.updateUploadOrgs(tableOrgs);
-            console.log(tableOrgs)
+            //console.log(tableOrgs)
         }
         const columns = [
             {

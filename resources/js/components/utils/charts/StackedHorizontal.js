@@ -45,9 +45,9 @@ class StackedHorizontal extends React.Component {
     }
 
     componentDidMount() {
-        console.log("load data 2");
-            console.log(this.props.minHeight);
-            console.log(this.props.series);
+        //console.log("load data 2");
+            //console.log(this.props.minHeight);
+            //console.log(this.props.series);
         this.setState({
             option: {
                 series: this.props.series,
@@ -63,8 +63,8 @@ class StackedHorizontal extends React.Component {
             ||
             this.props.series != prevProps.series
         ) {
-            console.log("load data 1");
-            console.log(this.props.series);
+            //console.log("load data 1");
+            //console.log(this.props.series);
             this.setState({
                 option: {
                     series: this.props.series,

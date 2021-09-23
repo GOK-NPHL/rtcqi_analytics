@@ -33,7 +33,7 @@ class Tree extends React.Component {
 
     organisationUnitOnclick(event, item) {
         // event.stopPropagation();
-        // console.log(event)
+        // //console.log(event)
         if (this.state.currentlySelectedOrgUnit != null) {
             this.state.currentlySelectedOrgUnit.style.color = "#858796";
         }
@@ -45,7 +45,7 @@ class Tree extends React.Component {
             let el = event.target.nextElementSibling;
 
             while (el) {
-                console.log(el)
+                //console.log(el)
                 el.classList.toggle("nested");
 
                 //section to hide  3rd nodes from the clicked one

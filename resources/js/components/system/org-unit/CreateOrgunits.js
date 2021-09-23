@@ -76,7 +76,7 @@ class OrgunitCreate extends React.Component {
 
     saveOrgUnits(orgUnits) {
         let orgunitMetadata = [];
-        console.log(this.state.orgunitFileHierachy);
+        //console.log(this.state.orgunitFileHierachy);
         for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
             let orgMeta = {
                 'sheet': this.state.sheetWithOrgs,
@@ -88,7 +88,7 @@ class OrgunitCreate extends React.Component {
 
         (async () => {
             let response = await SaveOrgUnits(orgUnits, orgunitMetadata);
-            console.log(response);
+            //console.log(response);
             if (response['status'] == 200) {
                 this.props.setShowOrgunitLanding(true);
                 this.props.triggerOrgUnitsFetch();
@@ -102,7 +102,7 @@ class OrgunitCreate extends React.Component {
     updateUploadOrgs(orgUnits) {
 
         let orgunitMetadata = [];
-        console.log(this.state.orgunitFileHierachy);
+        //console.log(this.state.orgunitFileHierachy);
         for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
             let orgMeta = {
                 'sheet': this.state.sheetWithOrgs,
@@ -114,7 +114,7 @@ class OrgunitCreate extends React.Component {
 
         (async () => {
             let response = await updateUploadOrgUnits(orgUnits, orgunitMetadata);
-            console.log(response);
+            //console.log(response);
             if (response['status'] == 200) {
                 this.props.setShowOrgunitLanding(true);
                 this.props.triggerOrgUnitsFetch();
@@ -228,7 +228,7 @@ class OrgunitCreate extends React.Component {
         if (this.state.pageNo != 1) {
             createOrgsLanding = <></>
         }
-        console.log(this.state.pageNo);
+        //console.log(this.state.pageNo);
         return (
             <React.Fragment>
                 {nextBar}

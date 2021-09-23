@@ -44,7 +44,7 @@ class RequestedOrgUnits extends React.Component {
     }
 
     handlePageChange(pageNumber) {
-        console.log(`active page is ${pageNumber}`);
+        //console.log(`active page is ${pageNumber}`);
         let pgNumber = pageNumber * 10 + 1;
         this.setState({
             startTableData: pgNumber - 11,

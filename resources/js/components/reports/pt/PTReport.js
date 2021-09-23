@@ -14,8 +14,8 @@ class PTReport extends React.Component {
 
     render() {
         // const assetPath = document.getElementById("app").getAttribute("assetPath");
-        console.log(this.props);
-        // console.log(document.getElementById("app").getAttribute("assetPath"));
+        //console.log(this.props);
+        // //console.log(document.getElementById("app").getAttribute("assetPath"));
         const imgStyle = {
             width: "100%"
         };

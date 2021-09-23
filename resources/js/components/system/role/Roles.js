@@ -98,7 +98,7 @@ class Roles extends React.Component {
     }
 
     onChange(currentNode, selectedNodes) {
-        console.log("path::", currentNode.path);
+        //console.log("path::", currentNode.path);
     };
 
     toggleDisplay() {

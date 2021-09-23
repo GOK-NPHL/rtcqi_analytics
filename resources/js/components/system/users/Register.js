@@ -168,7 +168,7 @@ class Register extends React.Component {
     }
 
     roleOnChange(event) {
-        // console.log(event.target.value);
+        // //console.log(event.target.value);
         let roleId = event.target.value;
         let canViewAssignRolesList = false;
 

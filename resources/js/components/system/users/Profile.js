@@ -38,7 +38,7 @@ class Profile extends React.Component {
                 orgunits: profile.orgunits,
                 role_name: profile.role_name
             });
-            console.log(profile);
+            //console.log(profile);
         })();
     }
 

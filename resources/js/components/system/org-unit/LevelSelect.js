@@ -50,8 +50,8 @@ class LevelSelect extends React.Component {
                 }
                 let previewArrLength = sheetDataPreview.length;
                 for (var C = range.s.c; C <= range.e.c; ++C) {
-                    //console.log('Row : ' + R);
-                    //console.log('Column : ' + C);
+                    ////console.log('Row : ' + R);
+                    ////console.log('Column : ' + C);
                     var cellref = XLSX.utils.encode_cell({ c: C, r: R }); // construct A1 reference for cell
                     if (!sheet[cellref]) continue; // if cell doesn't exist, move on
                     var cell = sheet[cellref];

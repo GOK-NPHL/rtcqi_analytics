@@ -12,11 +12,11 @@ class TreeModal extends React.Component {
     }
 
     componentDidMount() {
-        console.log("mount");
+        //console.log("mount");
     }
 
     componentDidUpdate(prevProps) {
-        // console.log(this.props.currentSelectedOrg)
+        // //console.log(this.props.currentSelectedOrg)
     }
 
     componentWillReceiveProps(props) {

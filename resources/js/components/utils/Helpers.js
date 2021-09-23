@@ -113,10 +113,10 @@ export async function SaveRole(roleName, authoritiesSelected) {
             }
         });
         return response;
-        console.log("saved role");
+        //console.log("saved role");
     } catch (err) {
         // Handle Error Here
-        console.log(err);
+        //console.log(err);
         return err.response
     }
 }
@@ -222,7 +222,7 @@ export async function DeleteOrg(org) {
                 org: org,
             }
         });
-        console.log(response);
+        //console.log(response);
         return response;
     } catch (err) {
         // Handle Error Here
@@ -259,7 +259,7 @@ export async function AddSubOrg(org, name) {
                 child_org: name
             }
         });
-        console.log(response);
+        //console.log(response);
         return response;
     } catch (err) {
         // Handle Error Here
@@ -322,7 +322,7 @@ export async function Saveuser(first_name, last_name, email, password, orgunits,
         return response;
     } catch (err) {
         // Handle Error Here
-        console.log(err);
+        //console.log(err);
         return err.response
     }
 }
@@ -350,7 +350,7 @@ export async function Updateuser(first_name, last_name, email, password, orgunit
 
     } catch (err) {
         // Handle Error Here
-        console.log(err);
+        //console.log(err);
         return err.response
     }
 }
@@ -470,7 +470,7 @@ export function DevelopOrgStructure(orunitData) {
         let processedItems = {};
 
         orunitData.payload[0].map((orgUnitToAdd) => {
-            console.log("new way")
+            //console.log("new way")
             OrgUnitStructureMaker(tableOrgs, orgUnitToAdd, processedItems);
 
         });

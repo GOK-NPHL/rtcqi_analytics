@@ -22,7 +22,7 @@ class MEReport extends React.Component {
         const rowStle = {
             marginBottom: "10px"
         };
-        console.log(this.props)
+        //console.log(this.props)
         return (
             <React.Fragment>
 

@@ -122,8 +122,8 @@ class SiteLevelBarColumnCharts extends React.Component {
 
 
             if (this.props.siteType != null && this.props.siteType.length != 0) {
-                console.log("hunt bug 1");
-                console.log(this.props.serverData);
+                //console.log("hunt bug 1");
+                //console.log(this.props.serverData);
                 if (Array.isArray(this.props.serverData[0])) {
                     this.props.serverData.map((dataObjectParent) => {
                         //data returned comes in two different formtat. Should be written to standardize
@@ -154,7 +154,7 @@ class SiteLevelBarColumnCharts extends React.Component {
                         overLay.push(row); //push remaining graphs in display
                     }
                 }
-                console.log("hunt bug 1-");
+                //console.log("hunt bug 1-");
 
             } else {
 

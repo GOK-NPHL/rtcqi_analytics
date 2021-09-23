@@ -121,7 +121,7 @@ class AvgPerformanceSpider extends React.Component {
             ||
             this.props.indicator != prevProps.indicator
         ) {
-            console.log("updating..........");
+            //console.log("updating..........");
             this.setState({
                 option: {
                     series: [
@@ -143,7 +143,7 @@ class AvgPerformanceSpider extends React.Component {
 
 
     render() {
-        console.log("updating.......... 2");
+        //console.log("updating.......... 2");
         return (
             <EchartsForReact
                 option={this.state.option}

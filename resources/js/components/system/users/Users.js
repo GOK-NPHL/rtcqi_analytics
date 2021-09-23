@@ -53,7 +53,7 @@ class User extends React.Component {
         }
     }
     onChange(currentNode, selectedNodes) {
-        console.log("path::", currentNode.path);
+        //console.log("path::", currentNode.path);
     };
 
     toggleDisplay() {
@@ -99,7 +99,7 @@ class User extends React.Component {
     }
 
     handlePageChange(pageNumber) {
-        console.log(`active page is ${pageNumber}`);
+        //console.log(`active page is ${pageNumber}`);
         let pgNumber = pageNumber * 10 + 1;
         this.setState({
             startTableData: pgNumber - 11,

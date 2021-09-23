@@ -25,7 +25,7 @@ class OrgUnitButton extends React.Component {
                     $("#org_unit_button").show();
                 }
             }catch(err){
-                console.log(err);
+                //console.log(err);
             }
            
         });
@@ -55,7 +55,7 @@ class OrgUnitButton extends React.Component {
             for (let [key, value] of Object.entries(selectedOrgs)) {
                 orgUnitsList.push(key);
             }
-            console.log(orgUnitsList);
+            //console.log(orgUnitsList);
             this.props.orgUnitChangeHandler(orgUnitsList);
         }
 

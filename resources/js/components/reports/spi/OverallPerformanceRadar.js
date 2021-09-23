@@ -76,12 +76,12 @@ class OverallPerformanceRadar extends React.Component {
                 }
             }
         });
-        console.log("Reach 4");
-        console.log(timelineData);
+        //console.log("Reach 4");
+        //console.log(timelineData);
         let letSeriesData = [];
 
         for (let [timeline, dataArray] of Object.entries(timelineData)) {
-            console.log("Reach 3");
+            //console.log("Reach 3");
             let seriesData = {
                 value: dataArray,
                 name: timeline,
@@ -98,8 +98,8 @@ class OverallPerformanceRadar extends React.Component {
             letSeriesData.push(seriesData);
         }
 
-        console.log("Reach 5");
-        console.log(letSeriesData);
+        //console.log("Reach 5");
+        //console.log(letSeriesData);
         return <RTCard style={{ "padding": "0px", "minHeight": "500px" }} header={orgName}>
             <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
@@ -107,7 +107,7 @@ class OverallPerformanceRadar extends React.Component {
 
 
     addGraphsToArray(counter, row, columns, overLay, singChart) {
-        console.log("adding to chart")
+        //console.log("adding to chart")
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -135,8 +135,8 @@ class OverallPerformanceRadar extends React.Component {
             // if (Array.isArray(this.props.serverData)) {
 
             if (this.props.siteType != null && this.props.siteType.length != 0) {
-                console.log("first 1");
-                console.log(this.props.serverData);
+                //console.log("first 1");
+                //console.log(this.props.serverData);
                 if (Array.isArray(this.props.serverData[0])) {
                     this.props.serverData.map((dataObjectParent) => {
                         //data returned comes in two different formtat. Should be written to standardize
@@ -167,11 +167,11 @@ class OverallPerformanceRadar extends React.Component {
                         overLay.push(row); //push remaining graphs in display
                     }
                 }
-                console.log("first 1-");
+                //console.log("first 1-");
 
             } else {
-                console.log("last 1");
-                console.log(this.props.serverData);
+                //console.log("last 1");
+                //console.log(this.props.serverData);
                 for (let [key, dataObject] of Object.entries(this.props.serverData)) {
                     let singChart = this.prepareOverallLevelSiteData(dataObject);
                     [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
@@ -182,7 +182,7 @@ class OverallPerformanceRadar extends React.Component {
             }
 
         } else {
-            console.log("empty");
+            //console.log("empty");
         }
         
         return (

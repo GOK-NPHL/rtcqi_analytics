@@ -99,7 +99,7 @@ class TreeView extends React.Component {
         } else if (this.state.orgUnitAction == 'Delete') {
 
             (async () => {
-                console.log(this.state.currentSelectedOrg);
+                //console.log(this.state.currentSelectedOrg);
                 let orgUnitToDelete = this.state.currentSelectedOrg;
                 orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id']
                 let returnedData = await DeleteOrg(orgUnitToDelete);

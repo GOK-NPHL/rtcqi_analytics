@@ -807,7 +807,7 @@ class LogbookReport extends React.Component {
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
                     try {
-                        // console.log(displayData);
+                        // //console.log(displayData);
                         [
                             tableData,
                             tableDataExport,
