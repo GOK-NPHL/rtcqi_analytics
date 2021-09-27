@@ -523,7 +523,7 @@ class Orgunit extends React.Component {
                                                             <div className="form-group">
                                                                 <div className="col-sm-12">
 
-                                                                    <select onChange={
+                                                                    Select action: <select onChange={
 
                                                                         (event) => {
                                                                             this.setState({
@@ -550,7 +550,7 @@ class Orgunit extends React.Component {
                                                             }
 
                                                             {
-                                                                this.state.currentSelectedOrgRequest.level == 3 ?
+                                                                this.state.currentSelectedOrgRequest.level == 3 && this.state.requestFormAction != 'delete'?
                                                                     <div className="form-group">
                                                                         <label htmlFor="mflCode" className="col-sm-12 col-form-label">MFL Code</label>
                                                                         <div className="col-sm-12">
