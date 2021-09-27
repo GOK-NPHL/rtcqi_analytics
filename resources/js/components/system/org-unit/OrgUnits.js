@@ -468,7 +468,7 @@ class Orgunit extends React.Component {
                         <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title" id="exampleModalLongTitle">Add/Delete/Edit Orgnanization unit request form</h5>
+                                    <h5 className="modal-title" id="exampleModalLongTitle">Add/Delete Orgnanization unit request form</h5>
                                     <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -513,10 +513,10 @@ class Orgunit extends React.Component {
                                                         <React.Fragment>
                                                             <div className="form-group">
                                                                 <div className="col-sm-12">
-                                                                    You selected: 
+                                                                    You selected:
                                                                     <label htmlFor="parentOrg" >
                                                                         <strong>{this.state.currentSelectedOrgRequest.name}</strong>
-                                                                    </label> {this.state.requestFormAction == 'delete' ? 'to get deleted' : 'to have a new organization unit under it.'}
+                                                                    </label> {this.state.requestFormAction == 'delete' ? 'to get deleted' : 'to have a new organization unit created under it.'}
                                                                 </div>
                                                             </div>
 
