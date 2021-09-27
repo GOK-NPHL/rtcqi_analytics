@@ -29,7 +29,7 @@ class Orgunit extends React.Component {
             activePage: 1,
             isUpdateOrgunits: false,
             currentSelectedOrg: { 'name': null, 'id': null },
-            currentSelectedOrgRequest: { 'name': null, 'id': null },
+            currentSelectedOrgRequest: { 'name': null, 'id': null, 'level': null },
             newOrgunitRequestMessage: null,
             newOrgRequestError: '',
             hasErrors: false
@@ -233,8 +233,9 @@ class Orgunit extends React.Component {
     }
 
     setcurrentSelectedOrgRequest(currentSelectedOrg) {
+        console.log(currentSelectedOrg)
         if (currentSelectedOrg == null) {
-            currentSelectedOrg = { 'name': null, 'id': null }
+            currentSelectedOrg = { 'name': null, 'id': null, 'level': null }
         }
         this.setState({
             currentSelectedOrgRequest: currentSelectedOrg
@@ -264,7 +265,8 @@ class Orgunit extends React.Component {
                                 tableOrgs: tableOrgs,
                                 tableEl: tableEl,
                                 allTableElements: tableEl,
-                                currentSelectedOrg: { 'name': httpOrgUnits.payload[0][0].odk_unit_name, 'id': httpOrgUnits.payload[0][0].org_unit_id }
+                                currentSelectedOrg: { 'name': httpOrgUnits.payload[0][0].odk_unit_name, 'id': httpOrgUnits.payload[0][0].org_unit_id },
+                                currentSelectedOrgRequest: { 'name': httpOrgUnits.payload[0][0].odk_unit_name, 'id': httpOrgUnits.payload[0][0].org_unit_id, 'level': httpOrgUnits.payload[0][0].level },
                             });
                         }
                     }
@@ -481,7 +483,7 @@ class Orgunit extends React.Component {
                                                     "minHeight": "300px", "paddingBottom": "6px",
                                                     "paddingRight": "16px"
                                                 }} >
-                                                    <h6>Click Org unit to perform action</h6>
+                                                    <h6>Organization units</h6>
                                                     <hr />
                                                     <TreeView orgUnits={this.state.tableOrgs}
                                                         updateOrg={this.updateOrg}
@@ -490,8 +492,9 @@ class Orgunit extends React.Component {
                                                 </div>
                                             </div>
 
-                                            <div className="col-sm-6">
-                                                <h6>Choose edit, delete or add new organization unit on selected organization unit on the left</h6>
+                                            <div className="col-sm-7">
+                                                <h6>Select organization unit of the <strong>left</strong> and choose
+                                                    type of action (Add bellow it, Request delete)</h6>
                                                 <hr />
                                                 <form>
                                                     {this.state.hasErrors ?
@@ -510,15 +513,52 @@ class Orgunit extends React.Component {
                                                         <React.Fragment>
                                                             <div className="form-group">
                                                                 <div className="col-sm-12">
-                                                                    <label htmlFor="parentOrg" ><strong>{this.state.currentSelectedOrgRequest.name}</strong></label>
+                                                                    You selected: 
+                                                                    <label htmlFor="parentOrg" >
+                                                                        <strong>{this.state.currentSelectedOrgRequest.name}</strong>
+                                                                    </label> {this.state.requestFormAction == 'delete' ? 'to get deleted' : 'to have a new organization unit under it.'}
                                                                 </div>
                                                             </div>
+
                                                             <div className="form-group">
-                                                                <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
                                                                 <div className="col-sm-12">
-                                                                    <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+
+                                                                    <select onChange={
+
+                                                                        (event) => {
+                                                                            this.setState({
+                                                                                requestFormAction: event.target.value
+                                                                            }
+                                                                            );
+                                                                        }
+                                                                    } className="form-select" aria-label="Default select example">
+                                                                        <option value="add">Request new organization unit</option>
+                                                                        <option value="delete">Request delete</option>
+                                                                    </select>
+
                                                                 </div>
                                                             </div>
+
+                                                            {
+                                                                this.state.requestFormAction != 'delete' ?
+                                                                    <div className="form-group">
+                                                                        <label htmlFor="newOrgName" className="col-sm-12 col-form-label">New organization unit name</label>
+                                                                        <div className="col-sm-12">
+                                                                            <input type="text" className="form-control" id="newOrgName" placeholder="new org name" />
+                                                                        </div>
+                                                                    </div> : ''
+                                                            }
+
+                                                            {
+                                                                this.state.currentSelectedOrgRequest.level == 3 ?
+                                                                    <div className="form-group">
+                                                                        <label htmlFor="mflCode" className="col-sm-12 col-form-label">MFL Code</label>
+                                                                        <div className="col-sm-12">
+                                                                            <input type="text" className="form-control" id="mflCode" placeholder="mfl code" />
+                                                                        </div>
+                                                                    </div> : ''
+                                                            }
+
                                                         </React.Fragment>
                                                     }
 
