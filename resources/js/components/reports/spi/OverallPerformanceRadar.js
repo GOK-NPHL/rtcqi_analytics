@@ -51,6 +51,7 @@ class OverallPerformanceRadar extends React.Component {
             { text: "Personnel\nTraining\n& Certification", max: 100 },
             { text: "QA in\nCounselling", max: 100 },
             { text: "Physical\nFacility", max: 100 },
+            { text: "Safety", max: 100 },
             { text: 'Pre-testing\nphase', max: 100 },
             { text: 'Testing\nPhase', max: 100 },
             { text: 'Post-testing\nPhase', max: 100 },
@@ -58,10 +59,12 @@ class OverallPerformanceRadar extends React.Component {
             // { text: 'Overall\nPerformance', max: 100 }
         ];
         let legend = [];
-        let dataKeys = ["TestingPhase", "Safety", "QACounselling", "PreTestingPhase", "PostTestingPhase", "PhysicalFacility",
-            "PersonellTrainingAndCertification"]; //, "OverallPerformance"];
+        let dataKeys = ["PersonellTrainingAndCertification", "QACounselling", "PhysicalFacility", "Safety", "PreTestingPhase",
+            "TestingPhase", "PostTestingPhase", "ExternalQualityAssessment"
+        ]; //, "OverallPerformance"];
 
         let timelineData = {};
+
         dataKeys.map((key) => {
             let valueObj = dataObject[key];
             for (let [timeLine, data] of Object.entries(valueObj)) {
@@ -98,8 +101,6 @@ class OverallPerformanceRadar extends React.Component {
             letSeriesData.push(seriesData);
         }
 
-        //console.log("Reach 5");
-        //console.log(letSeriesData);
         return <RTCard style={{ "padding": "0px", "minHeight": "500px" }} header={orgName}>
             <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
@@ -184,7 +185,7 @@ class OverallPerformanceRadar extends React.Component {
         } else {
             //console.log("empty");
         }
-        
+
         return (
             <React.Fragment>
                 {this.props.singleItem ? columns : overLay}
