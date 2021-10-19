@@ -24,7 +24,15 @@ class ODKUtils
                 ->first();
 
             $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
+            //mimic how odk replaces org unit name for analyses
+            $stringReplace =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->country)));
+            $stringReplace =  str_replace(' ) ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' (', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' )', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $orgUnitSruc[] = $stringReplace;
             return [$orgUnitSruc, $level];
         } else if ($level == 2) {
             $orgUnitObject = OdkOrgunit::select(
@@ -35,8 +43,28 @@ class ODKUtils
                 ->first();
 
             $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplace =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->country)));
+            $stringReplace =  str_replace(' ) ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' (', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' )', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $orgUnitSruc[] = $stringReplace;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceCounty =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->county)));
+            $stringReplaceCounty =  str_replace(' ) ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $orgUnitSruc[] = $stringReplaceCounty;
+
             return [$orgUnitSruc, $level];
         } else if ($level == 3) {
 
@@ -50,9 +78,40 @@ class ODKUtils
                 ->first();
 
             $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplace =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->country)));
+            $stringReplace =  str_replace(' ( ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' (', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' )', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $orgUnitSruc[] = $stringReplace;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceCounty =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->county)));
+            $stringReplaceCounty =  str_replace(' ) ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $orgUnitSruc[] = $stringReplaceCounty;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceSubCounty =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->subcounty)));
+            $stringReplaceSubCounty =  str_replace(' ) ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $orgUnitSruc[] = $stringReplaceSubCounty;
+
+
             return [$orgUnitSruc, $level];
         } else if ($level == 4) {
 
@@ -68,10 +127,51 @@ class ODKUtils
                 ->first();
 
             $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplace =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->country)));
+            $stringReplace =  str_replace(' ) ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' (', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' )', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $orgUnitSruc[] = $stringReplace;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceCounty =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->county)));
+            $stringReplaceCounty =  str_replace(' ( ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $orgUnitSruc[] = $stringReplaceCounty;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceSubCounty =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->subcounty)));
+            $stringReplaceSubCounty =  str_replace(' ( ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $orgUnitSruc[] = $stringReplaceSubCounty;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceFacility =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->facility)));
+            $stringReplaceFacility =  str_replace(' ( ', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' (', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' )', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
+            $orgUnitSruc[] = $stringReplaceFacility;
+
+
             return [$orgUnitSruc, $level];
         } else if ($level == 5) {
 
@@ -89,11 +189,62 @@ class ODKUtils
                 ->first();
 
             $orgUnitSruc =  array();
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->country)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->county)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->subcounty)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->facility)));
-            $orgUnitSruc[] = str_replace(' ', '_', trim(strtolower($orgUnitObject->site)));
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplace =  str_replace(' ( ', '_', trim(strtolower($orgUnitObject->country)));
+            $stringReplace =  str_replace(' ) ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' (', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' )', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $orgUnitSruc[] = $stringReplace;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceCounty =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->county)));
+            $stringReplaceCounty =  str_replace(' ( ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $orgUnitSruc[] = $stringReplaceCounty;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceSubCounty =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->subcounty)));
+            $stringReplaceSubCounty =  str_replace(' ( ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' (', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' )', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $orgUnitSruc[] = $stringReplaceSubCounty;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceFacility =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->facility)));
+            $stringReplaceFacility =  str_replace(' ( ', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' (', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' )', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
+            $orgUnitSruc[] = $stringReplaceFacility;
+
+
+            //mimic how odk replaces org unit name for analyses
+            $stringReplaceSite =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->site)));
+            $stringReplaceSite =  str_replace(' ( ', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace(' (', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace(' )', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace('(', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace(')', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace(' ', '_', trim(strtolower($stringReplaceSite)));
+            $orgUnitSruc[] = $stringReplaceSite;
+
             return [$orgUnitSruc, $level];
         }
     }
