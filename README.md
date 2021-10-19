@@ -15,6 +15,7 @@
       </ul>
     </li>
     <li><a href="#license">License</a></li>
+    <li><a href="#cron">Restart cron</a></li>
   </ol>
 </details>
 
@@ -129,3 +130,7 @@ Database, web server and PHP settings are done from the docker files.
 ## License
 
 Distributed under the GPL-3.0 License. See `LICENSE` for more information.
+
+<!-- RESTART CRON -->
+## cron
+sudo service cron restart
