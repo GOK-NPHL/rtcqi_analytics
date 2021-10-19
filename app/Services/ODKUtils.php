@@ -32,6 +32,7 @@ class ODKUtils
             $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('-', '_', trim(strtolower($stringReplace)));
             $orgUnitSruc[] = $stringReplace;
             return [$orgUnitSruc, $level];
         } else if ($level == 2) {
@@ -52,6 +53,7 @@ class ODKUtils
             $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('-', '_', trim(strtolower($stringReplace)));
             $orgUnitSruc[] = $stringReplace;
 
 
@@ -63,6 +65,7 @@ class ODKUtils
             $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('-', '_', trim(strtolower($stringReplaceCounty)));
             $orgUnitSruc[] = $stringReplaceCounty;
 
             return [$orgUnitSruc, $level];
@@ -87,6 +90,7 @@ class ODKUtils
             $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('-', '_', trim(strtolower($stringReplace)));
             $orgUnitSruc[] = $stringReplace;
 
 
@@ -98,6 +102,7 @@ class ODKUtils
             $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('-', '_', trim(strtolower($stringReplaceCounty)));
             $orgUnitSruc[] = $stringReplaceCounty;
 
 
@@ -109,6 +114,7 @@ class ODKUtils
             $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('-', '_', trim(strtolower($stringReplaceSubCounty)));
             $orgUnitSruc[] = $stringReplaceSubCounty;
 
 
@@ -136,6 +142,7 @@ class ODKUtils
             $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('-', '_', trim(strtolower($stringReplace)));
             $orgUnitSruc[] = $stringReplace;
 
 
@@ -147,6 +154,7 @@ class ODKUtils
             $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('-', '_', trim(strtolower($stringReplaceCounty)));
             $orgUnitSruc[] = $stringReplaceCounty;
 
 
@@ -158,6 +166,7 @@ class ODKUtils
             $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('-', '_', trim(strtolower($stringReplaceSubCounty)));
             $orgUnitSruc[] = $stringReplaceSubCounty;
 
 
@@ -169,6 +178,7 @@ class ODKUtils
             $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('-', '_', trim(strtolower($stringReplaceFacility)));
             $orgUnitSruc[] = $stringReplaceFacility;
 
 
@@ -199,6 +209,7 @@ class ODKUtils
             $stringReplace =  str_replace('(', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(')', '_', trim(strtolower($stringReplace)));
             $stringReplace =  str_replace(' ', '_', trim(strtolower($stringReplace)));
+            $stringReplace =  str_replace('-', '_', trim(strtolower($stringReplace)));
             $orgUnitSruc[] = $stringReplace;
 
 
@@ -210,6 +221,7 @@ class ODKUtils
             $stringReplaceCounty =  str_replace('(', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(')', '_', trim(strtolower($stringReplaceCounty)));
             $stringReplaceCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceCounty)));
+            $stringReplaceCounty =  str_replace('-', '_', trim(strtolower($stringReplaceCounty)));
             $orgUnitSruc[] = $stringReplaceCounty;
 
 
@@ -221,6 +233,7 @@ class ODKUtils
             $stringReplaceSubCounty =  str_replace('(', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(')', '_', trim(strtolower($stringReplaceSubCounty)));
             $stringReplaceSubCounty =  str_replace(' ', '_', trim(strtolower($stringReplaceSubCounty)));
+            $stringReplaceSubCounty =  str_replace('-', '_', trim(strtolower($stringReplaceSubCounty)));
             $orgUnitSruc[] = $stringReplaceSubCounty;
 
 
@@ -232,6 +245,7 @@ class ODKUtils
             $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('-', '_', trim(strtolower($stringReplaceFacility)));
             $orgUnitSruc[] = $stringReplaceFacility;
 
 
@@ -243,6 +257,7 @@ class ODKUtils
             $stringReplaceSite =  str_replace('(', '_', trim(strtolower($stringReplaceSite)));
             $stringReplaceSite =  str_replace(')', '_', trim(strtolower($stringReplaceSite)));
             $stringReplaceSite =  str_replace(' ', '_', trim(strtolower($stringReplaceSite)));
+            $stringReplaceSite =  str_replace('-', '_', trim(strtolower($stringReplaceSite)));
             $orgUnitSruc[] = $stringReplaceSite;
 
             return [$orgUnitSruc, $level];
