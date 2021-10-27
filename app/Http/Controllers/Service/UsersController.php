@@ -80,12 +80,14 @@ class UsersController extends Controller
                 ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList)
                 ->orWhereNotIn('odkorgunit_user.odk_orgunit_id', function ($query) {
                     $query->select('org_unit_id')->from('odkorgunit');
-                });
+                })
+                ->groupBy('first_name', 'id', 'last_name', 'email', 'role_name');
         } else {
             Log::info("view_users_missing_organisation_units Action not allowed ======>");
             $users = $users->join('odkorgunit_user', 'odkorgunit_user.user_id', '=', 'users.id')
                 ->where('users.id', '<>', $user->id)
-                ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList);
+                ->whereIn('odkorgunit_user.odk_orgunit_id', $orgUnitList)
+                ->groupBy('first_name', 'id', 'last_name', 'email', 'role_name');
         }
 
         // if ($highestOrgUnitLevelForThisUser != 0) { //ensures only users with national status can see their peers, the rest cannot
