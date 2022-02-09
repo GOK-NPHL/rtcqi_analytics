@@ -85,6 +85,10 @@ sudo docker-compose exec  app bash
 
 you could add -u 0 get into the sudo session in the container.
 
+```
+sudo docker-compose exec -u 0  app bash
+```
+
 Next install required dependencies for the application as below:
 
 ```
