@@ -24,7 +24,7 @@ class ODKDataFetcher
 
     public function __construct()
     {
-        echo ("construct function was initialized.\n");
+        echo ("construct function was initialized on ". date('l jS \of F Y h:i:s A') .".\n");
     }
 
     public function fetchData()
@@ -109,8 +109,18 @@ class ODKDataFetcher
                 // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
                 $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
-                if ($this->shouldDownloadSubmission($response, $projectId, $formId)) {
-                    $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
+                echo("running getFormSubmissions for formId ".$formId."\n");
+                if ($formId != null) {
+                //if($this->shouldDownloadSubmission($response, $projectId, $formId)) {
+                    $shouldDl = $this->shouldDownloadSubmission($response, $projectId, $formId);
+                    if ($shouldDl == true) {
+                        echo("shouldDl = true, Downloading form submissions for form id: " . $formId . "\n");
+                        $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
+                    }else{
+                        echo("shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
+                    }
+                }else{
+                    echo("this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
                 }
             }
 
@@ -139,17 +149,23 @@ class ODKDataFetcher
             try {
                 $this->downloadFormOrgunitCascades($response, $projectId, $formId);
                 $orgUnitId = $this->getOrgunitIdOfsubmmission($response, $projectId, $formId);
-                if (empty($orgUnitId)) throw new Exception("Org unit for form id " . $formId . " not found in organisation structure");
+                if (empty($orgUnitId)){
+                    echo("Org unit for form id " . $formId . " not found in organisation structure \n");
+                    throw new Exception("Org unit for form id " . $formId . " not found in organisation structure");
+                }
                 $formSubmission = new FormSubmissions;
                 $formSubmission->project_id = $projectId;
                 $formSubmission->form_id = $formId;
                 $formSubmission->lastest_submission_date = $lastSubmissionDate;
                 $formSubmission->no_of_submissions =  $res["submissions"];
                 $formSubmission->org_id =  $orgUnitId;
+                echo("saving form submission for project id " . $projectId . " and form id " . $formId . "\n");
                 $formSubmission->save();
                 if ($res["submissions"] > 0) {
+                    echo("shouldDownloadSubmission -> returning TRUE for project id " . $projectId . " and form id " . $formId . "\n");
                     return true;
                 } else {
+                    echo("shouldDownloadSubmission -> returning false for project id " . $projectId . " and form id " . $formId . "\n");
                     return false;
                 }
             } catch (Exception $ex) {
@@ -157,8 +173,10 @@ class ODKDataFetcher
                 return false;
             }
         } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0) {
+            echo('$submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0 \n');
             $submission->lastest_submission_date = $lastSubmissionDate;
             $submission->no_of_submissions = $res["submissions"];
+            echo("-saving form submission for project id " . $projectId . " and form id " . $formId . "\n");
             $submission->save();
             return true;
         } else {
@@ -182,13 +200,13 @@ class ODKDataFetcher
         //delete previous downloade data
         Log::info("delete any previous downloads");
         try {
-            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
+            Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
         }
 
         try {
-            Storage::delete("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
+            Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
         } catch (Exception $e) {
             echo 'Message: ' . $e->getMessage();
         }
@@ -197,14 +215,14 @@ class ODKDataFetcher
 
         Http::withOptions([
             'verify' => false, //'debug' => true,
-            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
+            'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
 
         Http::withOptions([
             'verify' => false, //'debug' => true,
-            'sink' => storage_path("/app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
+            'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl.".zip?attachments=false");
@@ -216,7 +234,7 @@ class ODKDataFetcher
         try {
 
             $version = $this->getFormVersion($response, $projectId, $formId);
-            $definationURI = "/app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
+            $definationURI = "app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
 
             $fileUri = storage_path($definationURI);
             /** Load $inputFileName to a Spreadsheet Object  **/
@@ -263,7 +281,7 @@ class ODKDataFetcher
     private function downloadFormOrgunitCascades($response, $projectId, $formId)
     {
         $version = $this->getFormVersion($response, $projectId, $formId);
-        $definationURI = "/app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
+        $definationURI = "app/submissions/" . $projectId . "_" . $formId . "_" . $version . "_" . 'defination.xls';
 
         try {
             Storage::delete($definationURI);

@@ -179,7 +179,9 @@ class ODKUtils
             $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace('-', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('__', '_', trim(strtolower($stringReplaceFacility)));
             $orgUnitSruc[] = $stringReplaceFacility;
+            echo("stringReplaceFacility === " . $stringReplaceFacility);
 
 
             return [$orgUnitSruc, $level];
@@ -246,7 +248,9 @@ class ODKUtils
             $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace('-', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('__', '_', trim(strtolower($stringReplaceFacility)));
             $orgUnitSruc[] = $stringReplaceFacility;
+            echo("stringReplaceFacility === " . $stringReplaceFacility);
 
 
             //mimic how odk replaces org unit name for analyses
