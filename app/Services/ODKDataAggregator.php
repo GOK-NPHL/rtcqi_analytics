@@ -66,6 +66,7 @@ class ODKDataAggregator
             }
         } else {
             [$recordsReadData, $payload] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+            // dd(json_encode($payload));
         }
 
         return $payload;
@@ -95,6 +96,14 @@ class ODKDataAggregator
                 }
                 $results = array();
                 $results["orgName"] = $orgUnitName;
+                // $results["orgCode"] = "";
+                // if(strpos($orgUnitName, '_') !== false) {
+                //     $results["orgCode"] = explode("_", $orgUnitName)[0];
+                // }
+                // $results["facUnit"] = "";
+                // if(strpos($orgUnitName, '/') !== false) {
+                //     $results["facUnit"] = explode("/", $orgUnitName)[1];
+                // }
                 $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit, $records);
                 $results["QACounselling"] = $this->getQACounselling($orgUnit, $records);
                 $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit, $records);
