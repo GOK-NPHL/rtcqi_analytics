@@ -171,13 +171,15 @@ class ODKUtils
 
 
             //mimic how odk replaces org unit name for analyses
-            // $stringReplaceFacility =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->facility)));
-            // $stringReplaceFacility =  str_replace(' ( ', '_', trim(strtolower($stringReplaceFacility)));
-            // $stringReplaceFacility =  str_replace(' (', '_', trim(strtolower($stringReplaceFacility)));
-            // $stringReplaceFacility =  str_replace(' )', '_', trim(strtolower($stringReplaceFacility)));
-            $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($orgUnitObject->facility)));
+            $stringReplaceFacility =  str_replace(' ) ', '_', trim(strtolower($orgUnitObject->facility)));
+            $stringReplaceFacility =  str_replace(' ( ', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' )', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(' (', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
-            $stringReplaceFacility =  str_replace('.', '', trim(strtolower($orgUnitObject->facility)));
+            $stringReplaceFacility =  str_replace('(', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace(')', '_', trim(strtolower($stringReplaceFacility)));
+            $stringReplaceFacility =  str_replace('.', '', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace(' ', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace('-', '_', trim(strtolower($stringReplaceFacility)));
             $stringReplaceFacility =  str_replace('__', '_', trim(strtolower($stringReplaceFacility)));
