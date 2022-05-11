@@ -51,7 +51,7 @@ class Dashboard extends React.Component {
                     data: [24, 23, 56, 34, 32]
                 },
                 {
-                    name: 'Level 1  (50-59%)',
+                    name: 'Level 1  (40-59%)',
                     type: 'bar',
                     stack: 'total',
                     label: {

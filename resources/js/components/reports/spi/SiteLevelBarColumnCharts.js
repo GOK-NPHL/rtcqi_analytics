@@ -36,7 +36,7 @@ class SiteLevelBarColumnCharts extends React.Component {
         let overallSiteGraphsData = {};
         let levelsMap = {
             'level0': 'Level 0 (<40%)',
-            'level1': 'Level 1 (50-59%)',
+            'level1': 'Level 1 (40-59%)',
             'level2': 'Level 2 (60-79%)',
             'level3': 'Level 3 (80-89%)',
             'level4': 'Level 4 (>90%)'

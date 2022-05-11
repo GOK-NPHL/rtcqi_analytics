@@ -16,7 +16,7 @@ class StackedHorizontal extends React.Component {
                     }
                 },
                 legend: {
-                    data: ['Level 0 (<40%)', 'Level 1 (50-59%)', 'Level 2 (60-79%)', 'Level 3 (80-89%)', 'Level 4 (>90%)']
+                    data: ['Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)', 'Level 3 (80-89%)', 'Level 4 (>90%)']
                 },
                 grid: {
                     left: '3%',
