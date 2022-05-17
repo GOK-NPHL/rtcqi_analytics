@@ -234,7 +234,8 @@ class ODKDataAggregator
             "level2" => 0,
             "level3" => 0,
             "level4" => 0,
-            "counter" => 0
+            "counter" => 0,
+            "sites" => array()
         ];
         $overallSitesLevel = [];
         $rowCounters = [];
@@ -777,7 +778,7 @@ class ODKDataAggregator
         foreach ($overallSitesLevel as $timeLine => $timeLineData) {
             // value level0, level1 etc
             foreach ($timeLineData as $key => $value) {
-                if ($key != 'counter') {
+                if ($key != 'counter' && $key != 'sites') {
                     try {
                         $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
                     } catch (Exception $ex) {
@@ -813,6 +814,11 @@ class ODKDataAggregator
         if ($record["baselinefollowup"] == 'Baseline') {
             if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                 $overallSites[$this->timeLines[0]]["counter"] = $overallSites[$this->timeLines[0]]["counter"] + 1;
+                $overallSites[$this->timeLines[0]]["sites"][] = [ //$val;
+                    "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1) ),
+                    "mfl" => explode("_", $record["mysites_facility"])[0],
+                    "site" => $record["mysites"]
+                ];
                 $overallSites = $this->summTimelineData($this->timeLines[0], $val, $overallSites);
             }
         } else if ($record["baselinefollowup"] == 'followup') {
@@ -821,6 +827,11 @@ class ODKDataAggregator
                 if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                     if ($followupType == $this->timeLines[$x]) {
                         $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
+                        $overallSites[$this->timeLines[$x]]["sites"][] = [ //$val;
+                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1) ),
+                            "mfl" => explode("_", $record["mysites_facility"])[0],
+                            "site" => $record["mysites"]
+                        ];
                         $overallSites = $this->summTimelineData($this->timeLines[$x], $val, $overallSites);
                     }
                 }

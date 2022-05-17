@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
-import { FetchOrgunits, FetchOdkData } from '../../utils/Helpers'
+import { FetchOrgunits, FetchOdkData, exportToExcel } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -267,6 +267,7 @@ class SpiReport extends React.Component {
                 let row = [];
                 let tableOverallDataExportRow = [];
                 row.push(<td key={uuidv4()}>{timeline} (N={orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})</td>);
+                let sting = `${timeline} (N=${orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})`
                 tableOverallDataExportRow.push(timeline);
 
                 if (this.state.siteType != null) {
@@ -299,7 +300,47 @@ class SpiReport extends React.Component {
 
                 }
                 tableOverallDataExport.push(tableOverallDataExportRow);
-                overaRowllSiteLevels.push(<tr key={uuidv4()}>{row}</tr>);
+                overaRowllSiteLevels.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
+                    this.setState({
+                        nModal: {
+                            title: <>
+                                <h5>{sting || "Details"}</h5>
+                                <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
+                                    if (orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].length > 0) {
+                                        exportToExcel(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], 'Sites - ' + sting);
+                                    } else {
+                                        console.error('No data to export');
+                                        alert('No data to export')
+                                    }
+                                }}>
+                                    <i className='fa fa-download'></i>&nbsp;
+                                    Excel/CSV
+                                </button>
+                            </>,
+                            content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                                <table className='table table-condensed table-striped'>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>MFL Code</th>
+                                            <th>Site</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].map((st, indx) => {
+                                            return (<tr key={uuidv4()}>
+                                                <td>{indx + 1}.</td>
+                                                <td>{st.mfl || ''}</td>
+                                                <td>{(st.facility + ' - ' + st.site).toUpperCase() || ''}</td>
+                                            </tr>);
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>)
+                        }
+                    });
+                    $('#nModal').modal('toggle');
+                }}>{row}</tr>);
             });
 
         }
@@ -608,6 +649,34 @@ class SpiReport extends React.Component {
 
                 </div>
 
+
+
+
+
+                <React.Fragment>
+                    <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true" >
+                        <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <div className="modal-title" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%' }} id="nModalTitle">
+                                        {this.state.nModal?.title || <h5>Details</h5>}
+                                    </div>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    {
+                                        this.state.nModal?.content ? this.state.nModal?.content : ''
+                                    }
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div >
+                </React.Fragment>
             </React.Fragment>
         );
     }
