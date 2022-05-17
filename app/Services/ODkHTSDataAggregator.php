@@ -15,6 +15,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use League\Csv\Reader;
 use League\Csv\Statement;
@@ -103,14 +104,18 @@ class ODkHTSDataAggregator
 
                         $scores['total_sites'] = 0;
                         $monthlySites['totals'] = $scores;
+                        $monthlySites['sitenames'] = [
+                            '>98' => [],
+                            '95-98' => [],
+                            '<95' => [],
+                        ];
                         $monthlySites['concordance-totals'] = 0;
 
                         $monthlySites['concordance_t1_reactive'] = 0;
                         $monthlySites['concordance_t2_reactive'] = 0;
 
-                        foreach ($monthlySites as $site) { //sites per month -- sites in a month
+                        foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
                             try {
-
                                 $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
                                 $monthlySites['totals']['total_sites'] += 1;
                                 $agreementRate = $agreement * 100;
@@ -133,10 +138,13 @@ class ODkHTSDataAggregator
 
                                 if ($agreementRate > 98) {
                                     $monthlySites['totals']['>98'] += 1;
+                                    $monthlySites['sitenames']['>98'][] = $sitename;
                                 } else if ($agreementRate >= 95 && $agreementRate <= 98) {
                                     $monthlySites['totals']['95-98'] += 1;
+                                    $monthlySites['sitenames']['95-98'][] = $sitename;
                                 } else if ($agreementRate < 95) {
                                     $monthlySites['totals']['<95'] += 1;
+                                    $monthlySites['sitenames']['<95'][] = $sitename;
                                 }
 
                                 //supervisory signatures aggregation
@@ -178,6 +186,7 @@ class ODkHTSDataAggregator
 
                         $orgUnitArray['overall_agreement_rate'][$monthlyDate] = []; // do not include per site scores in payload
                         $orgUnitArray['overall_agreement_rate'][$monthlyDate]['totals'] = $monthlySites['totals'];
+                        $orgUnitArray['overall_agreement_rate'][$monthlyDate]['sitenames'] = $monthlySites['sitenames'];
                         $orgUnitArray['overall_concordance_totals'][$monthlyDate] = $totalConcordance;
                         $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
                         $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];

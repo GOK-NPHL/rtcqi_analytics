@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
-import { FetchOrgunits, FetchOdkHTSData } from '../../utils/Helpers'
+import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -298,7 +298,36 @@ class LogbookReport extends React.Component {
             row.push(<td key={uuidv4()} scope="row">{percent3}</td>);
             exportData.push(percent3);
 
-            tableData.push(<tr key={uuidv4()}>{row}</tr>);
+            tableData.push(<tr key={uuidv4()} onClick={() => {
+                this.setState({
+                    nModal: {
+                        title: sting,
+                        content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                            <table className='table table-condensed table-striped'>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Rate</th>
+                                        <th>Site</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {Object.keys(totals.sitenames).map((dx, indx) => {
+                                        return totals.sitenames[dx].map((siteName, index) => {
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index+1}.</td>
+                                                <td>{dx}%</td>
+                                                <td>({parseInt(siteName.match(/\d+/),10)}) &nbsp; {separateOrgUnitAndSite(siteName,"_").split('_').join(' ').toLocaleUpperCase()}</td>
+                                            </tr>);
+                                        })
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>)
+                    }
+                });
+                $('#nModal').modal('toggle');
+            }}>{row}</tr>);
             tableDataExport.push(exportData);
         }
         // end overall agreement data loop
@@ -1099,11 +1128,17 @@ class LogbookReport extends React.Component {
         </div>;
         // End  Data Tables for all the indicators
 
-
         return (
 
             <React.Fragment>
-
+                {/* <details open>
+                    <summary>this.state.odkData</summary>
+                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', marginBottom: '3em', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
+                        <pre>
+                            {JSON.stringify(this.state.odkData, null, 1)}
+                        </pre>
+                    </div>
+                </details> */}
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
@@ -1235,6 +1270,33 @@ class LogbookReport extends React.Component {
                     </div>
 
                 </div>
+
+
+
+
+
+                <React.Fragment>
+                    <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true" >
+                        <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="nModalTitle">{this.state.nModal?.title || "Details"}</h5>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    {
+                                        this.state.nModal?.content ? this.state.nModal?.content : ''
+                                    }
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div >
+                </React.Fragment>
             </React.Fragment>
         );
     }

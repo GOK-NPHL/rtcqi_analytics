@@ -45,6 +45,28 @@ export async function FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate,
 
 }
 
+// function to split a string by numbers and letters
+export function splitByNumbersAndLetters(str) {
+    var re = /(\d+|\D+)/g;
+    return str.split(re);
+}
+
+export function separateOrgUnitAndSite(str, delimiter) {
+    return str.replace("pmtct", delimiter + "pmtct")
+        .replace("lab", delimiter + "lab")
+        .replace("vct", delimiter + "vct")
+        .replace("opd", delimiter + "opd")
+        .replace("ccc", delimiter + "ccc")
+        .replace("pitc", delimiter + "pitc")
+        .replace("ipd", delimiter + "ipd")
+        .replace("vmmc", delimiter + "vmmc")
+        .replace("psc", delimiter + "psc")
+        .replace("pediatric", delimiter + "pediatric")
+        .replace("paediatric", delimiter + "paediatric")
+    .split(/[^A-Za-z]/).slice(1).join(" ").trim("");
+}
+
+
 export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) {
     try {
         const response = await axios({
