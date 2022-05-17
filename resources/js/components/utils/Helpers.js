@@ -60,6 +60,7 @@ export function separateOrgUnitAndSite(str, delimiter) {
         .replace("pitc", delimiter + "pitc")
         .replace("ipd", delimiter + "ipd")
         .replace("vmmc", delimiter + "vmmc")
+        .replace("yfc", delimiter + "yfc")
         .replace("psc", delimiter + "psc")
         .replace("pediatric", delimiter + "pediatric")
         .replace("paediatric", delimiter + "paediatric")
