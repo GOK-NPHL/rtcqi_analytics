@@ -298,7 +298,7 @@ class LogbookReport extends React.Component {
             row.push(<td key={uuidv4()} scope="row">{percent3}</td>);
             exportData.push(percent3);
 
-            tableData.push(<tr key={uuidv4()} onClick={() => {
+            tableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
                 this.setState({
                     nModal: {
                         title: sting,
