@@ -308,6 +308,7 @@ class LogbookReport extends React.Component {
                                     <tr>
                                         <th>#</th>
                                         <th>Rate</th>
+                                        <th>MFL Code</th>
                                         <th>Site</th>
                                     </tr>
                                 </thead>
@@ -317,7 +318,8 @@ class LogbookReport extends React.Component {
                                             return (<tr key={uuidv4()}>
                                                 <td>{index+1}.</td>
                                                 <td>{dx}%</td>
-                                                <td>({parseInt(siteName.match(/\d+/),10)}) &nbsp; {separateOrgUnitAndSite(siteName,"_").split('_').join(' ').toLocaleUpperCase()}</td>
+                                                <td>{parseInt(siteName.match(/\d+/),10)}</td>
+                                                <td>{separateOrgUnitAndSite(siteName,"_").split('_').join(' ').toLocaleUpperCase()}</td>
                                             </tr>);
                                         })
                                     })}
