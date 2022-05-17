@@ -52,7 +52,7 @@ export function splitByNumbersAndLetters(str) {
 }
 
 export function separateOrgUnitAndSite(str, delimiter) {
-    return str.replace("pmtct", delimiter + "pmtct")
+    let r = str.replace("pmtct", delimiter + "pmtct")
         .replace("lab", delimiter + "lab")
         .replace("vct", delimiter + "vct")
         .replace("opd", delimiter + "opd")
@@ -64,8 +64,59 @@ export function separateOrgUnitAndSite(str, delimiter) {
         .replace("pediatric", delimiter + "pediatric")
         .replace("paediatric", delimiter + "paediatric")
     .split(/[^A-Za-z]/).slice(1).join(" ").trim("");
+    if(r.includes("      ")){
+        return r.split("      ")[1] || r;
+    }else{
+        return r;
+    }
 }
 
+export function exportToExcel(bundle, filename) {
+    console.log('Exporting to Excel');
+    if (!filename || filename == '' || filename == null || filename == undefined) {
+        filename = 'data';
+    }
+    // let bundle = this.state.data
+    if (bundle.length > 0) {
+        let csv = '';
+        filename = filename + '-' + new Date().toLocaleDateString().split('/').join('_') + '.csv'
+        let keys = Object.keys(bundle[0])//.map(key => key.split('_').join(' '));
+        csv += keys.join(',') + '\r\n';
+        bundle.forEach(item => {
+            csv += keys.map(key => item[key]).join(',') + '\r\n';
+        });
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            if (document && document.createElement) {
+                let link = document.createElement("a");
+                if (link.download !== undefined) { // feature detection
+                    // Browsers that support HTML5 download attribute
+                    var url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                } else {
+                    link.setAttribute("href", 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+                }
+                link.style.visibility = 'hidden';
+                // link.textContent = 'Download '+filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } else {
+                if (window && window.open) {
+                    window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+                }
+            }
+        }
+        console.log('Exported to Excel');
+    } else {
+        console.log('No data to export');
+        alert('No data to export');
+    }
+}
 
 export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) {
     try {

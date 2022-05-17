@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
-import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite } from '../../utils/Helpers'
+import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -301,7 +301,31 @@ class LogbookReport extends React.Component {
             tableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
                 this.setState({
                     nModal: {
-                        title: sting,
+                        title: <>
+                            <h5>{sting || "Details"}</h5>
+                            <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
+                                if (Object.keys(totals.sitenames).length>0 && totals != null) {
+                                    let final_data = [];
+                                    Object.keys(totals.sitenames).map((dx, indx) => {
+                                        return totals.sitenames[dx].map((siteName, index) => {
+                                            final_data.push(
+                                                {
+                                                    "Rate": dx+'%',
+                                                    "MFL Code": parseInt(siteName.match(/\d+/), 10),
+                                                    "Site": separateOrgUnitAndSite(siteName, "_").split('_').join(' ').toLocaleUpperCase()
+                                                });
+                                        })
+                                    })
+                                    exportToExcel(final_data, 'Sites - ' + sting);
+                                } else {
+                                    console.error('No data to export');
+                                    alert('No data to export')
+                                }
+                            }}>
+                                <i className='fa fa-download'></i>&nbsp;
+                                Excel/CSV
+                            </button>
+                        </>,
                         content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
                             <table className='table table-condensed table-striped'>
                                 <thead>
@@ -316,10 +340,10 @@ class LogbookReport extends React.Component {
                                     {Object.keys(totals.sitenames).map((dx, indx) => {
                                         return totals.sitenames[dx].map((siteName, index) => {
                                             return (<tr key={uuidv4()}>
-                                                <td>{index+1}.</td>
+                                                <td>{index + 1}.</td>
                                                 <td>{dx}%</td>
-                                                <td>{parseInt(siteName.match(/\d+/),10)}</td>
-                                                <td>{separateOrgUnitAndSite(siteName,"_").split('_').join(' ').toLocaleUpperCase()}</td>
+                                                <td>{parseInt(siteName.match(/\d+/), 10)}</td>
+                                                <td>{separateOrgUnitAndSite(siteName, "_").split('_').join(' ').toLocaleUpperCase()}</td>
                                             </tr>);
                                         })
                                     })}
@@ -1282,7 +1306,9 @@ class LogbookReport extends React.Component {
                         <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title" id="nModalTitle">{this.state.nModal?.title || "Details"}</h5>
+                                    <div className="modal-title" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%'}} id="nModalTitle">
+                                        {this.state.nModal?.title || <h5>Details</h5>}
+                                    </div>
                                     <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
