@@ -307,7 +307,16 @@ class SpiReport extends React.Component {
                                 <h5>{sting || "Details"}</h5>
                                 <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
                                     if (orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].length > 0) {
-                                        exportToExcel(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], 'Sites - ' + sting);
+                                        exportToExcel(
+                                            Array.from(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], sp=>{
+                                                return {
+                                                    "mfl": sp.mfl.toUpperCase(),
+                                                    "facility": sp.facility.toUpperCase(),
+                                                    "site": sp.site.toUpperCase(),
+                                                }
+                                            }), 
+                                            'Sites - ' + sting
+                                        );
                                     } else {
                                         console.error('No data to export');
                                         alert('No data to export')
