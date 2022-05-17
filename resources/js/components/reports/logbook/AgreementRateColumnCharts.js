@@ -144,7 +144,7 @@ class AgreementRateColumnCharts extends React.Component {
                 }
 
             } else {
-                console.log("hunt bug 3");
+                // console.log("hunt bug 3");
                 console.log(this.props.serverData);
                 for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
                     try {
@@ -154,7 +154,7 @@ class AgreementRateColumnCharts extends React.Component {
 
                     }
                 }
-                console.log("hunt bug 3-");
+                // console.log("hunt bug 3-");
                 if (columns.length > 0) {
                     overLay.push(row); //push remaining graphs in display
                 }
