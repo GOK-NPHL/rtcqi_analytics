@@ -163,24 +163,30 @@ class Utils
     }
 
 
-    public function getOrgunitsByUser()
+    public function getOrgunitsByUser($user_id = null)
     {
         // get all org units & their levels registered.
         // for each orgunit registered, get its childeren upto lowest level.
         $combinedRecords = [];
         //$combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
-        $user = Auth::user();
+        
+        if( $user_id != null ) {
+            $usrid = $user_id;
+        }else{
+            $user = Auth::user();
+            $usrid = $user->id;
+        }
 
         $registeredOrgs = OdkOrgunit::select(
             "odkorgunit.level",
             "odkorgunit.org_unit_id"
         )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
             ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
-            ->where('users.id', $user->id)
+            ->where('users.id', $usrid)
             ->get();
 
         if (count($registeredOrgs) == 0) {
-            throw new Exception("User has no org unit attached");
+            throw new Exception("User has no org unit attached:".$usrid);
         }
         foreach ($registeredOrgs as $registeredOrg) {
             $utils = new Utils();

@@ -98,7 +98,20 @@ class UsersController extends Controller
 
         $roleIds = array();
         $payload = array();
-        return  $users;
+        foreach ($users as $user) {
+            $usr = $user;
+            $usr['org_units'] = OdkOrgunit::select(
+                "odkorgunit.level as level",
+                "odkorgunit.org_unit_id as id",
+                "odkorgunit.odk_unit_name as name"
+            )->join('odkorgunit_user', 'odkorgunit_user.odk_orgunit_id', '=', 'odkorgunit.org_unit_id')
+                ->join('users', 'users.id', '=', 'odkorgunit_user.user_id')
+                ->where('users.id', $user->id)
+                ->get();
+            $payload[] = $usr;
+        }
+        return $payload;
+        // return  $users;
     }
 
     public function getUsersDetails(Request $request)

@@ -125,6 +125,7 @@ class User extends React.Component {
                     <td>{user.first_name} {user.last_name}</td>
                     <td>{user.email}</td>
                     <td>{user.role_name}</td>
+                    <td>{user.org_units && user.org_units.length>0 ? [...new Set(Array.from(user.org_units, ou=>ou.name))].join(", ") : ""}</td>
                     {
                         this.state.allowedPermissions.includes('edit_user') ||
                             this.state.allowedPermissions.includes('delete_user') ?
@@ -215,6 +216,7 @@ class User extends React.Component {
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Role</th>
+                                <th scope="col">Organisation Units</th>
                                 {
                                     this.state.allowedPermissions.includes('edit_user') ||
                                         this.state.allowedPermissions.includes('delete_user') ?
