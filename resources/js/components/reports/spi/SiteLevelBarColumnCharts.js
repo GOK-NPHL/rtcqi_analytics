@@ -52,17 +52,16 @@ class SiteLevelBarColumnCharts extends React.Component {
         let letSeriesData = [];
 
         for (let [timeline, timeLineObjectValue] of Object.entries(overallSitesObject)) {
-
-            if (!category.includes(timeline)) {
-                category.push(timeline + ' (N=' + overallSitesObject[timeline]['counter'] + ') ');
-            }
-
-            for (let [levelName, levelValue] of Object.entries(timeLineObjectValue)) {
-
-                if (levelName != 'counter') {
-                    levelData[levelName].push(levelValue);
+            if (timeline != 'sites') {
+                if (!category.includes(timeline)) {
+                    category.push(timeline + ' (N=' + overallSitesObject[timeline]['counter'] + ') ');
                 }
 
+                for (let [levelName, levelValue] of Object.entries(timeLineObjectValue)) {
+                    if (levelName != 'counter' && levelName != 'sites') {
+                        levelData[levelName].push(levelValue);
+                    }
+                }
             }
         }
         for (let [level, dataArray] of Object.entries(levelData)) {
