@@ -35,6 +35,42 @@ class ODkHTSDataAggregator
         $this->reportSections["agreement_rate"] = 1;
     }
 
+    public function getSubmissions($orgUnitIds, $siteTypes, $startDate, $endDate)
+    {
+
+        $currentDate = new DateTime('now');
+
+        $this->startDate = empty($startDate) ?  $currentDate->modify('-3 months')->format("Y-m-d") : $startDate;
+        $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
+
+        // for each org unit, get the submissions
+        $formSubmissions = array();
+        ///////////
+        for ($x = 0; $x < count($orgUnitIds); $x++) {
+            try {
+                $odkUtils = new ODKUtils();
+                $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
+                $orgToProcess = $orgMeta[0];
+                $level = $orgMeta[1];
+
+                [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
+                $orgUnit['org_unit_id'] = $orgUnitIds[$x]['id'];
+
+                $records = null;
+
+                if (array_key_exists($orgUnit['org_unit_id'], $formSubmissions)) {
+                    $records = $formSubmissions[$orgUnit['org_unit_id']];
+                } else {
+                    $records = $this->getFormRecords($orgUnit);
+                    $formSubmissions[$orgUnit['org_unit_id']] = $records;
+                }
+            } catch (Exception $ex) {
+                Log::error($ex);
+            }
+        }
+        ///////////
+        return $formSubmissions;
+    }
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
 
@@ -470,11 +506,9 @@ class ODkHTSDataAggregator
 
     private function getFormRecords($orgUnit)
     {
-
-        $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
-        $level = $levelObj->level;
+        $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first() ?? ['level' => '1'];
+        $level = $levelObj->level ?? '1';
         $fileName = null;
-
         if ($level == 1) {
             $combinedRecords = [];
             $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
@@ -497,7 +531,6 @@ class ODkHTSDataAggregator
             $fileName = $this->getFileToProcess($projectId, $formId);
             return $this->getSingleFileRecords($fileName, $formId);
         } else {
-
             $odkUtils = new ODKUtils();
             [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "hts%");
             $fileName = $this->getFileToProcess($projectId, $formId);

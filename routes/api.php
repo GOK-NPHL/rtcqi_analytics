@@ -23,6 +23,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/odk_data', 'SpiReportController@getData');
 Route::post('/odk_hts_data', 'LogbookReportController@getData');
 
+Route::get('/odk_submissions', 'SubmissionsController@getData');
+Route::post('/odk_submissions', 'SubmissionsController@getData');
+
 Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
 Route::post('/save_orgunits', 'Service\OrgunitsController@saveOrgunits');
 Route::put('/update_org', 'Service\OrgunitsController@updateOrg');

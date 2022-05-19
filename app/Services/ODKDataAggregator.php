@@ -40,6 +40,31 @@ class ODKDataAggregator
     }
 
 
+    public function getSubmissions($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
+    {
+        Log::info("Request Data variables");
+        Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
+        Log::info($siteTypes);
+        Log::info( $startDate);
+        Log::info($endDate);
+
+        $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+
+        // for each org unit, get the submissions
+        $formSubmissions = array();
+        foreach ($orgUnitIds as $orgUnitId) {
+            $ou = OdkOrgunit::find($orgUnitId);
+            if($ou){
+                $formSubmissions[$orgUnitId] = $this->getFormRecords($ou);
+            }else{
+                Log::info("No Org Unit found for id: ".$orgUnitId);
+            }
+        }
+        return $formSubmissions;
+    }
+
     public function getData($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
     {
         Log::info("Request Data variables");
@@ -66,7 +91,6 @@ class ODKDataAggregator
             }
         } else {
             [$recordsReadData, $payload] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
-            // dd(json_encode($payload));
         }
 
         return $payload;

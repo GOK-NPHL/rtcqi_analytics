@@ -137,6 +137,24 @@ export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) 
     }
 
 }
+export async function FetchSubmissions(orgUnitIds, siteType, startDate, endDate) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/odk_submissions`,
+            data: {
+                orgUnitIds: orgUnitIds,
+                siteType: siteType,
+                startDate: startDate,
+                endDate: endDate
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+
+}
 
 export async function FetchRoles() {
 
