@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +28,9 @@ Route::get('/reports/logbook', 'LogbookReportController@index')->name('logbookIn
 Route::get('/reports/spi', 'SpiReportController@index')->name('spiIndex');
 Route::get('/reports/me', 'MEReportController@index')->name('meIndex');
 Route::get('/reports/summaries', 'SummariesReportController@index')->name('summariesIndex');
+
+//Services
+Route::get('/submissions', 'SubmissionsController@index')->name('submissionsIndex');
 
 //Services
 Route::get('/service/profile', 'Service\UsersController@userProfile')->name('profile');

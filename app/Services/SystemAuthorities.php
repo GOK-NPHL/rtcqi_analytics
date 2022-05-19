@@ -11,6 +11,8 @@ class SystemAuthorities
         'view_pt_report' => 'view_pt_report',
         'view_orgunit' => 'view_orgunit',
         'view_log_book_report' => 'view_log_book_report',
+        'submissions_section' => 'submissions_section',
+        'view_submissions' => 'view_submissions',
         'edit_user' => 'edit_user',
         'view_user' => 'view_user',
         'view_role' => 'view_role',
