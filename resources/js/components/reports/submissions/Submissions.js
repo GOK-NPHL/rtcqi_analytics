@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel, FetchSubmissions } from '../../utils/Helpers'
 import 'jspdf-autotable'
+import Pagination from 'react-js-pagination';
 
 
 class SubmissionsReport extends React.Component {
@@ -15,6 +16,10 @@ class SubmissionsReport extends React.Component {
             siteType: [],
             odkData: [],
             headers: [],
+            total: 0,
+            perPage: 50,
+            totalPages: 1,
+            page: 1,
             echartsMinHeight: '',
             orgUnitIndicators: [
                 'Site agreement Rates',
@@ -58,15 +63,22 @@ class SubmissionsReport extends React.Component {
 
     }
 
-    fetchOdkDataServer(orgUnitIds, siteType, startDate, endDate) {
+    fetchOdkDataServer(orgUnitIds, siteType, startDate, endDate, page, perpage) {
+        console.log('fetching odk data page: ' + page + ' perpage: ' + perpage);
+        let pg = page || 1;
+        let ppg = perpage || 50;
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchSubmissions(orgUnitIds, siteType, startDate, endDate);
+                    let returnedData = await FetchSubmissions(orgUnitIds, siteType, startDate, endDate, pg, ppg);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data?.result,
                             headers: returnedData.data?.headers,
+                            page: returnedData.data?.page || 1,
+                            total: returnedData.data?.total || 0,
+                            perPage: returnedData.data?.perPage || 0,
+                            totalPages: returnedData.data?.totalPages || 0,
                         });
                         // console.log(Object.values(returnedData.data?.result));
                     }
@@ -78,6 +90,9 @@ class SubmissionsReport extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return true
+        // if (prevState.showUserTable !== this.state.showUserTable) {
+        //     // this.getUsers();
+        // }
     }
 
 
@@ -90,6 +105,7 @@ class SubmissionsReport extends React.Component {
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 className="h4 mb-0 text-gray-500">Submissions</h1>
+                    <span>{Intl.NumberFormat().format(this.state.total || 0)} records</span>
                 </div>
 
                 {/* Filter bar */}
@@ -157,29 +173,79 @@ class SubmissionsReport extends React.Component {
                             </details></small>
                         </div> */}
                         <div className="table-responsive">
+                        <div className="pagination " style={{marginTop: '2em'}}>
+                                <Pagination  
+                                    itemClass="page-item"
+                                    linkClass="page-link"
+                                    activePage={this.state.page || 1}
+                                    itemsCountPerPage={this.state.perPage || 50}
+                                    totalItemsCount={this.state.total || 100}
+                                    pageRangeDisplayed={5}
+                                    onChange={(page) => {
+                                        this.setState({ page: page })
+                                        // FetchSubmissions()
+                                        console.log('fetching page', page)
+                                        this.fetchOdkDataServer(this.state.orgUnitDataIds,
+                                            this.state.siteType,
+                                            this.state.startDate,
+                                            this.state.endDate,
+                                            page,
+                                            this.state.perPage || 50
+                                        );
+                                    } } />
+                            </div>
                             <table className='table table-striped table-condensed'>
                                 <thead>
                                     <tr>
                                         {this.state.headers.map((header, index) => {
-                                            return <th key={index} style={{ textTransform: 'capitalize' }}>{header.replace('mysites', '').replace('_', ' ').replace('-', ' ')}</th>
+                                            return <th key={index} style={{ textTransform: 'capitalize', whiteSpace: 'nowrap', border: '1px solid #ccd6e3' }}>{header.replace('mysites_', '').replace('_', ' ').replace('-', ' ')}</th>
                                         })}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {Object.keys(this.state.odkData).map((ou, indx) => {
-                                        return <React.Fragment key={ou}>
-                                            <tr>
+                                    {this.state.odkData.map((dt, indx) => {
+                                        return <React.Fragment key={indx+"_"}>
+                                            {/* <tr>
                                                 <td colSpan={this.state.headers.length}>{ou}</td>
                                             </tr>
-                                            {this.state.odkData[ou].map((row, ky) => <tr key={ky}>
+                                            {Object.keys(dt).map((row, ky) => <tr key={ky}>
                                                 {this.state.headers.map((header, index) => {
-                                                    return <td key={index}>{row[header]}</td>
+                                                    return <td key={index}>{dt[header]}</td>
                                                 })}
-                                            </tr>)}
+                                            </tr>)} */}
+                                            <tr>
+                                                {this.state.headers.map((header, index) => {
+                                                    if(index < 2){
+                                                        return <td key={index}>{new Date(dt[header]).toLocaleString()}</td>
+                                                    }
+                                                    return <td key={index} style={{border: '1px solid #ccd6e3'}}>{dt[header]}</td>
+                                                })}
+                                            </tr>
                                         </React.Fragment>
                                     })}
                                 </tbody>
                             </table>
+                            <div className="pagination ">
+                                <Pagination  
+                                    itemClass="page-item"
+                                    linkClass="page-link"
+                                    activePage={this.state.page || 1}
+                                    itemsCountPerPage={this.state.perPage || 50}
+                                    totalItemsCount={this.state.total || 0}
+                                    pageRangeDisplayed={5}
+                                    onChange={(page) => {
+                                        this.setState({ page: page })
+                                        // FetchSubmissions()
+                                        console.log('fetching page', page)
+                                        this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
+                                            this.state.siteType,
+                                            this.state.startDate,
+                                            this.state.endDate,
+                                            page,
+                                            this.state.perPage || 50
+                                        );
+                                    } } />
+                            </div>
                         </div>
                     </div>
                 </div>

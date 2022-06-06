@@ -137,7 +137,8 @@ export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) 
     }
 
 }
-export async function FetchSubmissions(orgUnitIds, siteType, startDate, endDate) {
+export async function FetchSubmissions(orgUnitIds, siteType, startDate, endDate, page, perPage) {
+    // console.log('Fetching Submissions page: ' + page + ' perPage: ' + perPage);
     try {
         const response = await axios({
             method: 'post',
@@ -146,7 +147,9 @@ export async function FetchSubmissions(orgUnitIds, siteType, startDate, endDate)
                 orgUnitIds: orgUnitIds,
                 siteType: siteType,
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                page: page || 1,
+                perPage: perPage || 50
             }
         });
         return response;

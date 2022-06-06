@@ -50,10 +50,22 @@ class SubmissionsController extends Controller
             $endDate = $request->endDate;
 
             // $result = $odkObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
-            $result = $odkObj->getSubmissions($orgUnitIds, $siteType, $startDate, $endDate);
+            $result0 = $odkObj->getSubmissions($orgUnitIds, $siteType, $startDate, $endDate);
+            $resultx = array_values($result0);
+            $result = $resultx[0] ?? [];
+            // dd($result);
+            $page = $request->page ?? 1;
+            $perPage = $request->perPage ?? 50;
+            $total = count($result);
+            $pages = ceil($total / $perPage);
+            $result_page = array_slice($result, ($page - 1) * $perPage, $perPage);
             return [
                 'headers' => $columnsToUse,
-                'result' => $result
+                'result' => $result_page ?? [],
+                'total' => $total,
+                'totalPages' => $pages,
+                'perPage' => $perPage,
+                'page' => $page,
             ];
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
