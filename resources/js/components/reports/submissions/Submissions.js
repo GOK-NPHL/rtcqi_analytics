@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FetchOrgunits, FetchUserAuthorities, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel, FetchSubmissions } from '../../utils/Helpers'
+import { FetchOrgunits, exportToExcel, FetchUserAuthorities, FetchOdkHTSData, separateOrgUnitAndSite, FetchSubmissions } from '../../utils/Helpers'
 import 'jspdf-autotable'
 import Pagination from 'react-js-pagination';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
@@ -199,21 +199,18 @@ class SubmissionsReport extends React.Component {
                         <OrgUnitType orgUnitTypeChangeHandler={this.siteTypeChangeHandler}></OrgUnitType>
                     </div> */}
 
-                    {/* <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
-                        <input className='form-control' type='date' placeholder='Date' />
-                    </div> */}
-                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
+                    <div className="col-sm-12 col-lg-4 col-md-4 mb-sm-1 mb-1">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <div className="col-sm-12  col-lg-4 col-md-4 mb-sm-1 mb-1">
                         <button
                             onClick={() => {
                                 console.log('Filter')
                                 this.onFilter();
                             }}
                             type="button"
-                            style={{ "display": "inlineBlock" }}
+                            style={{ "display": "inlineBlock", marginRight: "7px" }}
                             className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
                         </button>
                         <button
@@ -225,8 +222,18 @@ class SubmissionsReport extends React.Component {
                                 }
                             }}
                             type="button"
-                            style={{ "display": "inlineBlock" }}
+                            style={{ "display": "inlineBlock", marginRight: "7px" }}
                             className="btn btn-sm btn-secondary font-weight-bold">Reset
+                        </button>
+                        <button
+                            disabled={!this.state.odkData || this.state.odkData.length == 0}
+                            onClick={() => {
+                                console.log('Export')
+                                exportToExcel(this.state.odkData, 'Submissions '+new Date().toLocaleString())
+                            }}
+                            type="button"
+                            style={{ "display": "inlineBlock", marginRight: "7px" }}
+                            className={"btn btn-sm btn-success font-weight-bold "+(!this.state.odkData || this.state.odkData.length == 0 ? "hidden" : "")}>Download
                         </button>
                     </div>
 
