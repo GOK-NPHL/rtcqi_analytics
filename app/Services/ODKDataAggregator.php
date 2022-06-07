@@ -40,15 +40,14 @@ class ODKDataAggregator
     }
 
 
-    public function getSubmissions($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
+    public function getSubmissions($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
         Log::info("Request Data variables");
-        Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
+        Log::info($orgUnitIds, $siteTypes, $startDate, $endDate);
         Log::info($siteTypes);
         Log::info( $startDate);
         Log::info($endDate);
 
-        $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
 
@@ -335,7 +334,6 @@ class ODKDataAggregator
 
     private function getFormRecords($orgUnit)
     {
-
         $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
         $level = $levelObj->level;
         $fileName = null;

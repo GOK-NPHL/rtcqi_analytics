@@ -64,29 +64,6 @@ use Illuminate\Support\Facades\Gate;
 
             <?php } ?>
 
-            <!--Submissions section  -->
-            <?php
-
-            if (Gate::allows('submissions_section')) { ?>
-                <!-- Divider -->
-
-                <hr class="sidebar-divider">
-                <!-- Heading -->
-                <div class="sidebar-heading">
-                    Submissions
-                </div>
-
-                <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item">
-                    <?php if (Gate::allows('view_submissions')) { ?>
-                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
-                            <i class="fas fa-fw fa-list-alt"></i>
-                            <span>View submissions</span>
-                        </a>
-                    <?php } ?>
-                </li>
-            <?php } ?>
-
             <!--Reports section  -->
             <?php
 
@@ -129,6 +106,30 @@ use Illuminate\Support\Facades\Gate;
                 </li>
             <?php } ?>
 
+
+            <!--Submissions section  -->
+            <?php
+
+            if (Gate::allows('submissions_section')) { ?>
+                <!-- Divider -->
+
+                <hr class="sidebar-divider">
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Submissions
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <?php if (Gate::allows('view_submissions')) { ?>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
+                            <i class="fas fa-fw fa-list-alt"></i>
+                            <span>View submissions</span>
+                        </a>
+                    <?php } ?>
+                </li>
+            <?php } ?>
+            
             <!--System admin section  -->
             <?php
 

@@ -37,7 +37,6 @@ class ODkHTSDataAggregator
 
     public function getSubmissions($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
-
         $currentDate = new DateTime('now');
 
         $this->startDate = empty($startDate) ?  $currentDate->modify('-3 months')->format("Y-m-d") : $startDate;
@@ -49,19 +48,26 @@ class ODkHTSDataAggregator
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
                 $odkUtils = new ODKUtils();
-                $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
+                $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]['org_unit_id']);
                 $orgToProcess = $orgMeta[0];
                 $level = $orgMeta[1];
-
                 [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x]['id'];
 
-                $records = null;
+                $records = $this->getFormRecords($orgUnitIds[$x]) ?? [];
 
+                if(isset($startDate) && isset($endDate)) {
+                    $records = array_filter($records, function ($record) use ($startDate, $endDate) {
+                        $date = new DateTime($record['start']);
+                        return $date >= new DateTime($startDate) && $date <= new DateTime($endDate);
+                    });
+                }
+                
                 if (array_key_exists($orgUnit['org_unit_id'], $formSubmissions)) {
-                    $records = $formSubmissions[$orgUnit['org_unit_id']];
+                    // $records = $formSubmissions[$orgUnit['org_unit_id']];
+                    $records = $formSubmissions[$orgUnitIds[$x]['org_unit_id']];
                 } else {
-                    $records = $this->getFormRecords($orgUnit);
+                    // $records = $this->getFormRecords($orgUnit);
                     $formSubmissions[$orgUnit['org_unit_id']] = $records;
                 }
             } catch (Exception $ex) {
@@ -71,6 +77,8 @@ class ODkHTSDataAggregator
         ///////////
         return $formSubmissions;
     }
+
+
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
 

@@ -1,9 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel, FetchSubmissions } from '../../utils/Helpers'
+import { FetchOrgunits, FetchUserAuthorities, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel, FetchSubmissions } from '../../utils/Helpers'
 import 'jspdf-autotable'
 import Pagination from 'react-js-pagination';
+import OrgUnitType from '../../utils/orgunit/OrgUnitType';
+import OrgUnitButton from '../../utils/orgunit/orgunit_button';
+import OrgDate from '../../utils/orgunit/OrgDate';
 
 
 class SubmissionsReport extends React.Component {
@@ -12,10 +15,15 @@ class SubmissionsReport extends React.Component {
         super(props);
         this.state = {
             orgUnits: [],
+            auths: [],
             orgUnitDataIds: ['0'],
+            pickedOU: [0],
             siteType: [],
+            siteTypes: [],
             odkData: [],
             headers: [],
+            startDate : '',
+            endDate: '',
             total: 0,
             perPage: 50,
             totalPages: 1,
@@ -34,37 +42,101 @@ class SubmissionsReport extends React.Component {
             indicatorIndexToDisplay: 0,
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
+        this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
+        this.siteTypeChangeHandler = this.siteTypeChangeHandler.bind(this);
+        this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
+        this.onFilter = this.onFilter.bind(this);
+        this.onReset = this.onReset.bind(this);
     }
 
     componentDidMount() {
         (async () => {
             let returnedData = await FetchOrgunits();
-
-            let subCountyList = [];
-            // returnedData.forEach((val) => {
-            // });
-            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']]; //get first orgunit of in list of authorized orgs
+            let defaultOU = returnedData.payload[0].slice(0, 1)
             this.setState({
                 odkData: [],
                 orgLevel: 1,
                 orgId: 1,
-                orgUnitDataIds: returnedData.payload[0].slice(0, 1), //[defaultOrg[0]],
+                orgUnitDataIds: defaultOU,
+                orgUnits: returnedData.payload[0],
                 startDate: '',
                 endDate: ''
             });
 
-            this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
+            this.fetchOdkDataServer(
+                defaultOU,
                 this.state.siteType,
                 this.state.startDate,
                 this.state.endDate
             );
 
+            FetchUserAuthorities().then((auths) => {
+                this.setState({ auths: auths });
+            }).catch((err) => {
+                console.log(err);
+            })
+
         })();
 
     }
 
+    orgUnitChangeHandler(ou) {
+        // console.log('org unit changed: ' + JSON.stringify(ou));
+        // console.log('allOrgs', this.state.orgUnits)
+        this.setState({
+            orgUnitDataIds: this.state.orgUnits.filter((org) => {
+                return ou.includes(org['org_unit_id']);
+            })
+        });
+    }
+
+    siteTypeChangeHandler(siteType) {
+        console.log('site type changed: ' + siteType);
+        this.setState({
+            siteType: siteType
+        });
+    }
+
+    orgDateChangeHandler(startDate, endDate) {
+        this.setState({
+            startDate: startDate,
+            endDate: endDate
+        });
+    }
+
+    onFilter() {
+        this.fetchOdkDataServer(
+            this.state.orgUnitDataIds,
+            // this.state.orgUnitTimeline,
+            this.state.siteType,
+            this.state.startDate,
+            this.state.endDate,
+            this.state.page || 1,
+            this.state.perPage || 50
+        );
+    }
+
+    onReset() {
+        this.setState({
+            orgUnitDataIds: ['0'],
+            siteType: [],
+            startDate: '',
+            endDate: '',
+            page: 1,
+            perPage: 50,
+        })
+        this.fetchOdkDataServer(
+            this.state.orgUnits[0],
+            [],
+            '',
+            '',
+            1,
+            50
+        );
+    }
+
     fetchOdkDataServer(orgUnitIds, siteType, startDate, endDate, page, perpage) {
-        console.log('fetching odk data page: ' + page + ' perpage: ' + perpage);
+        // console.log('fetching odk data page: ' + page + ' perpage: ' + perpage);
         let pg = page || 1;
         let ppg = perpage || 50;
         if (orgUnitIds) {
@@ -79,6 +151,7 @@ class SubmissionsReport extends React.Component {
                             total: returnedData.data?.total || 0,
                             perPage: returnedData.data?.perPage || 0,
                             totalPages: returnedData.data?.totalPages || 0,
+                            // siteType: Array.from(new Set(Array.from(returnedData.data?.result, (x) => x['mysites']))),
                         });
                         // console.log(Object.values(returnedData.data?.result));
                     }
@@ -110,37 +183,34 @@ class SubmissionsReport extends React.Component {
 
                 {/* Filter bar */}
                 <div className="row">
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    {/* <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <select className='form-control'>
                             <option>All</option>
                             <option>SPI</option>
                             <option>HTS</option>
                         </select>
-                    </div>
+                    </div> */}
 
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <select className='form-control'>
-                            <option>All counties</option>
-                            <option>Baringo county</option>
-                        </select>
+                        <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
 
-                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
-                        <select className='form-control'>
-                            <option>All sites</option>
-                            <option>CCC</option>
-                            <option>Laboratory</option>
-                        </select>
-                    </div>
+                    {/* <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
+                        <OrgUnitType orgUnitTypeChangeHandler={this.siteTypeChangeHandler}></OrgUnitType>
+                    </div> */}
 
-                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
+                    {/* <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
                         <input className='form-control' type='date' placeholder='Date' />
+                    </div> */}
+                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
+                        <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
 
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <button
                             onClick={() => {
                                 console.log('Filter')
+                                this.onFilter();
                             }}
                             type="button"
                             style={{ "display": "inlineBlock" }}
@@ -149,6 +219,10 @@ class SubmissionsReport extends React.Component {
                         <button
                             onClick={() => {
                                 console.log('Reset filters')
+                                // this.onReset();
+                                if(window && window.location) {
+                                    window.location.reload();
+                                }
                             }}
                             type="button"
                             style={{ "display": "inlineBlock" }}
@@ -162,19 +236,41 @@ class SubmissionsReport extends React.Component {
 
                 <div className="row">
                     <div className="col-md-12">
-                        {/* <div className="col-md-12" style={{ backgroundColor: '#fff', color: 'black', padding: '7px', borderRadius: '6px', margin: '2em auto' }}><small>
-                            <details open>
-                                <summary>this.state.odkData</summary>
-                                <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
-                                    <pre>
-                                        {JSON.stringify(this.state.odkData, null, 1)}
-                                    </pre>
-                                </div>
-                            </details></small>
+                        {/* <div className="col-md-12" style={{ backgroundColor: '#fff', color: 'black', padding: '7px', borderRadius: '6px', margin: '2em auto' }}>
+                            <small>
+                                <details>
+                                    <summary>this.state.orgUnits</summary>
+                                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
+                                        <pre>
+                                            {JSON.stringify(this.state.orgUnits, null, 1)}
+                                        </pre>
+                                    </div>
+                                </details>
+                            </small><br />
+                            <small>
+                                <details>
+                                    <summary>this.state.auths</summary>
+                                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
+                                        <pre>
+                                            {JSON.stringify(this.state.auths, null, 1)}
+                                        </pre>
+                                    </div>
+                                </details>
+                            </small><br />
+                            <small>
+                                <details>
+                                    <summary>this.state.siteType</summary>
+                                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
+                                        <pre>
+                                            {JSON.stringify(this.state.siteType, null, 1)}
+                                        </pre>
+                                    </div>
+                                </details>
+                            </small><br />
                         </div> */}
                         <div className="table-responsive">
-                        <div className="pagination " style={{marginTop: '2em'}}>
-                                <Pagination  
+                            <div className="pagination " style={{ marginTop: '2em' }}>
+                                <Pagination
                                     itemClass="page-item"
                                     linkClass="page-link"
                                     activePage={this.state.page || 1}
@@ -192,7 +288,7 @@ class SubmissionsReport extends React.Component {
                                             page,
                                             this.state.perPage || 50
                                         );
-                                    } } />
+                                    }} />
                             </div>
                             <table className='table table-striped table-condensed'>
                                 <thead>
@@ -204,7 +300,7 @@ class SubmissionsReport extends React.Component {
                                 </thead>
                                 <tbody>
                                     {this.state.odkData.map((dt, indx) => {
-                                        return <React.Fragment key={indx+"_"}>
+                                        return <React.Fragment key={indx + "_"}>
                                             {/* <tr>
                                                 <td colSpan={this.state.headers.length}>{ou}</td>
                                             </tr>
@@ -215,10 +311,10 @@ class SubmissionsReport extends React.Component {
                                             </tr>)} */}
                                             <tr>
                                                 {this.state.headers.map((header, index) => {
-                                                    if(index < 2){
+                                                    if (index < 2) {
                                                         return <td key={index}>{new Date(dt[header]).toLocaleString()}</td>
                                                     }
-                                                    return <td key={index} style={{border: '1px solid #ccd6e3'}}>{dt[header]}</td>
+                                                    return <td key={index} style={{ border: '1px solid #ccd6e3' }}>{dt[header]}</td>
                                                 })}
                                             </tr>
                                         </React.Fragment>
@@ -226,7 +322,7 @@ class SubmissionsReport extends React.Component {
                                 </tbody>
                             </table>
                             <div className="pagination ">
-                                <Pagination  
+                                <Pagination
                                     itemClass="page-item"
                                     linkClass="page-link"
                                     activePage={this.state.page || 1}
@@ -244,7 +340,7 @@ class SubmissionsReport extends React.Component {
                                             page,
                                             this.state.perPage || 50
                                         );
-                                    } } />
+                                    }} />
                             </div>
                         </div>
                     </div>
