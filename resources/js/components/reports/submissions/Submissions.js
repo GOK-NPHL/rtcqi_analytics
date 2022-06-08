@@ -191,7 +191,7 @@ class SubmissionsReport extends React.Component {
                         </select>
                     </div> */}
 
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <div className="col-sm-12  col-lg-3 col-md-3 mb-sm-1 mb-1">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
 

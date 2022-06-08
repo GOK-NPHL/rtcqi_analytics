@@ -124,7 +124,7 @@ use Illuminate\Support\Facades\Gate;
                     <?php if (Gate::allows('view_submissions')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
-                            <span>View submissions</span>
+                            <span>Submissions</span>
                         </a>
                     <?php } ?>
                 </li>
