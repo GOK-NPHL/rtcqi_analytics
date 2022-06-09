@@ -183,13 +183,6 @@ class SubmissionsReport extends React.Component {
 
                 {/* Filter bar */}
                 <div className="row">
-                    {/* <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <select className='form-control'>
-                            <option>All</option>
-                            <option>SPI</option>
-                            <option>HTS</option>
-                        </select>
-                    </div> */}
 
                     <div className="col-sm-12  col-lg-3 col-md-3 mb-sm-1 mb-1">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
@@ -246,30 +239,10 @@ class SubmissionsReport extends React.Component {
                         {/* <div className="col-md-12" style={{ backgroundColor: '#fff', color: 'black', padding: '7px', borderRadius: '6px', margin: '2em auto' }}>
                             <small>
                                 <details>
-                                    <summary>this.state.orgUnits</summary>
-                                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
-                                        <pre>
-                                            {JSON.stringify(this.state.orgUnits, null, 1)}
-                                        </pre>
-                                    </div>
-                                </details>
-                            </small><br />
-                            <small>
-                                <details>
                                     <summary>this.state.auths</summary>
                                     <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
                                         <pre>
                                             {JSON.stringify(this.state.auths, null, 1)}
-                                        </pre>
-                                    </div>
-                                </details>
-                            </small><br />
-                            <small>
-                                <details>
-                                    <summary>this.state.siteType</summary>
-                                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
-                                        <pre>
-                                            {JSON.stringify(this.state.siteType, null, 1)}
                                         </pre>
                                     </div>
                                 </details>
