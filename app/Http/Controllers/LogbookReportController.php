@@ -29,7 +29,8 @@ class LogbookReportController extends Controller
     public function index()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_log_book_report'])) {
-            return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
+            return view('reports/logbook/index', ['error' => 'You are not authorized to view this page.']);
+            // return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
         }
         return view('reports/logbook/index');
     }

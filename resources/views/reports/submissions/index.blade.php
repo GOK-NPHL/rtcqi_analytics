@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container-fluid">
-    <div id="SubmissionsReport"></div>
+    @if (isset($error))
+        <div class="alert alert-danger">
+            {{ $error }}
+        </div>
+    @else
+        <div id="SubmissionsReport"></div>
+    @endif
 </div>
 @endsection

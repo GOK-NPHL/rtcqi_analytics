@@ -26,7 +26,8 @@ class PTReportController extends Controller
     public function index()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_pt_report'])) {
-            return response()->json(['Message' => 'Not allowed to view pt report: '], 500);
+            return view('reports/pt/index', ['error' => 'You are not authorized to view this page.']);
+            // return response()->json(['Message' => 'Not allowed to view pt report: '], 500);
         }
         return view('reports/pt/index');
     }

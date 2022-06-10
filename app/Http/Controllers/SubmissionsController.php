@@ -29,7 +29,8 @@ class SubmissionsController extends Controller
     public function index()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_submissions'])) {
-            return response()->json(['Message' => 'Not allowed to view submissions: '], 500);
+            return view('reports/submissions/index', ['error' => 'You are not authorized to view this page.']);
+            // return response()->json(['Message' => 'Not allowed to view submissions: '], 500);
         }
         return view('reports/submissions/index');
     }

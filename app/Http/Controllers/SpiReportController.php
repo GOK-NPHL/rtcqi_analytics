@@ -29,7 +29,8 @@ class SpiReportController extends Controller
     public function index()
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_spi_report'])) {
-            return response()->json(['Message' => 'Not allowed to view spi report: '], 500);
+            return view('reports/spi/index', ['error' => 'You are not authorized to view this page.']);
+            // return response()->json(['Message' => 'Not allowed to view spi report: '], 500);
         }
         return view('reports/spi/index');
     }

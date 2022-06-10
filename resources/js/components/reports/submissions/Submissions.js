@@ -248,28 +248,28 @@ class SubmissionsReport extends React.Component {
                                 </details>
                             </small><br />
                         </div> */}
+                        <div className="pagination " style={{ marginTop: '2em' }}>
+                            <Pagination
+                                itemClass="page-item"
+                                linkClass="page-link"
+                                activePage={this.state.page || 1}
+                                itemsCountPerPage={this.state.perPage || 50}
+                                totalItemsCount={this.state.total || 100}
+                                pageRangeDisplayed={5}
+                                onChange={(page) => {
+                                    this.setState({ page: page })
+                                    // FetchSubmissions()
+                                    console.log('fetching page', page)
+                                    this.fetchOdkDataServer(this.state.orgUnitDataIds,
+                                        this.state.siteType,
+                                        this.state.startDate,
+                                        this.state.endDate,
+                                        page,
+                                        this.state.perPage || 50
+                                    );
+                                }} />
+                        </div>
                         <div className="table-responsive">
-                            <div className="pagination " style={{ marginTop: '2em' }}>
-                                <Pagination
-                                    itemClass="page-item"
-                                    linkClass="page-link"
-                                    activePage={this.state.page || 1}
-                                    itemsCountPerPage={this.state.perPage || 50}
-                                    totalItemsCount={this.state.total || 100}
-                                    pageRangeDisplayed={5}
-                                    onChange={(page) => {
-                                        this.setState({ page: page })
-                                        // FetchSubmissions()
-                                        console.log('fetching page', page)
-                                        this.fetchOdkDataServer(this.state.orgUnitDataIds,
-                                            this.state.siteType,
-                                            this.state.startDate,
-                                            this.state.endDate,
-                                            page,
-                                            this.state.perPage || 50
-                                        );
-                                    }} />
-                            </div>
                             <table className='table table-striped table-condensed'>
                                 <thead>
                                     <tr>
@@ -301,27 +301,27 @@ class SubmissionsReport extends React.Component {
                                     })}
                                 </tbody>
                             </table>
-                            <div className="pagination ">
-                                <Pagination
-                                    itemClass="page-item"
-                                    linkClass="page-link"
-                                    activePage={this.state.page || 1}
-                                    itemsCountPerPage={this.state.perPage || 50}
-                                    totalItemsCount={this.state.total || 0}
-                                    pageRangeDisplayed={5}
-                                    onChange={(page) => {
-                                        this.setState({ page: page })
-                                        // FetchSubmissions()
-                                        console.log('fetching page', page)
-                                        this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
-                                            this.state.siteType,
-                                            this.state.startDate,
-                                            this.state.endDate,
-                                            page,
-                                            this.state.perPage || 50
-                                        );
-                                    }} />
-                            </div>
+                        </div>
+                        <div className="pagination ">
+                            <Pagination
+                                itemClass="page-item"
+                                linkClass="page-link"
+                                activePage={this.state.page || 1}
+                                itemsCountPerPage={this.state.perPage || 50}
+                                totalItemsCount={this.state.total || 0}
+                                pageRangeDisplayed={5}
+                                onChange={(page) => {
+                                    this.setState({ page: page })
+                                    // FetchSubmissions()
+                                    console.log('fetching page', page)
+                                    this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
+                                        this.state.siteType,
+                                        this.state.startDate,
+                                        this.state.endDate,
+                                        page,
+                                        this.state.perPage || 50
+                                    );
+                                }} />
                         </div>
                     </div>
                 </div>
