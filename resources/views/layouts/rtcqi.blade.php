@@ -129,6 +129,29 @@ use Illuminate\Support\Facades\Gate;
                     <?php } ?>
                 </li>
             <?php } ?>
+
+            <!--Resources section  -->
+            <?php
+
+            if (Gate::allows('resources_section')) { ?>
+                <!-- Divider -->
+
+                <hr class="sidebar-divider">
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Resources
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <?php if (Gate::allows('view_resources')) { ?>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Resources');" href="{{ route('resourcesIndex') }}">
+                            <i class="fas fa-fw fa-folder"></i>
+                            <span>Files</span>
+                        </a>
+                    <?php } ?>
+                </li>
+            <?php } ?>
             
             <!--System admin section  -->
             <?php

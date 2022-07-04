@@ -171,6 +171,66 @@ export async function FetchRoles() {
     }
 
 }
+export async function FetchAllFiles() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/resources/files_all`);
+        const flList = response.data;
+        return flList;
+    } catch (err) {
+        return err.response
+    }
+}
+export async function FetchPublicFiles() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/resources/files_public`);
+        const pbFlst = response.data;
+        return pbFlst;
+    } catch (err) {
+        return err.response
+    }
+}
+export async function FetchPrivateFiles() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/resources/files_private`);
+        const prvFlst = response.data;
+        return prvFlst;
+    } catch (err) {
+        return err.response
+    }
+}
+
+export async function SaveFile(payload, isPub = false) {
+    let response;
+    try {
+        const formData = new FormData();
+        formData.append('file', payload);
+        formData.append('isPublic', isPub);
+        response = await axios.post(`${settings.rtcqiBaseApi}/resources/files`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
+
+export async function DeleteFile(fileId) {
+    let response;
+    try {
+        response = await axios({
+            method: 'delete',
+            url: `${settings.rtcqiBaseApi}/resources/files/${fileId}`,
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
 
 export async function FetchAuthorities() {
 

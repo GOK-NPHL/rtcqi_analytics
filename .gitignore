@@ -35,5 +35,6 @@ nbproject/
 .history/
 
 storage/*.csv
+storage/files/*
 package-lock.json
 public/js/app.js

@@ -38,3 +38,10 @@ Route::get('/service/roles', 'Service\RolesController@index')->name('rolesIndex'
 Route::get('/service/users', 'Service\UsersController@index')->name('usersIndex');
 Route::get('/service/orgunits', 'Service\OrgunitsController@index')->name('orgunitsIndex');
 Route::get('/service/requested_orgunits', 'Service\OrgunitsController@requestedOrgunits')->name('requestedOrgunits');
+
+//Files
+Route::get('resources', function () {
+    return redirect('/api/resources/files');
+})->name('resourcesIndex');
+
+Route::get('resources/files',['as'=>'resources.files', 'uses'=>'ResourceFilesController@index']);

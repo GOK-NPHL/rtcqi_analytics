@@ -50,3 +50,10 @@ Route::get('/get_user_profile', 'Service\UsersController@getUserProfile');
 Route::post('/update_user_profile', 'Service\UsersController@updateUserProfile');
 Route::delete('/delete_user', 'Service\UsersController@deleteUser');
 Route::get('/users_details', 'Service\UsersController@getUsersDetails');
+
+Route::get('resources/files_all',['as'=>'resources.files', 'uses'=>'ResourceFilesController@getAllFiles']);
+Route::get('resources/files_public',['as'=>'resources.files_public', 'uses'=>'ResourceFilesController@getPublicFiles']);
+Route::get('resources/files_private',['as'=>'resources.files_private', 'uses'=>'ResourceFilesController@getPrivateFiles']);
+Route::delete('resources/files/{id}',['as'=>'resources.delete', 'uses'=>'ResourceFilesController@destroy']);
+Route::get('resources/files/download/{id}',['as'=>'resources.download', 'uses'=>'ResourceFilesController@download']);
+Route::post('resources/files',['as'=>'resources.store', 'uses'=>'ResourceFilesController@store']);

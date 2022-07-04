@@ -21,6 +21,8 @@ require('./components/reports/logbook/LogbookReport');
 require('./components/reports/spi/SpiReport');
 require('./components/reports/submissions/Submissions');
 
+require('./components/system/resources/Resources');
+
 require('./components/reports/me/MEReport');
 
 require('./components/reports/summaries/SummariesReport');
