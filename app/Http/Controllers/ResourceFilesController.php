@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class ResourceFilesController extends Controller
 {
+    //middleware auth
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *

@@ -1,5 +1,6 @@
 <?php
 
+use App\ResourceFiles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -15,8 +16,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('auth/login');
+    return view('auth/login', [
+        'files' => ResourceFiles::where('is_public', 1)->get()
+    ]);
 });
+
+Route::get('resources/download_file/{id}', 'Auth\LoginController@downloadFile')->name('download-file');
 
 Auth::routes(['register' => false]);
 //Auth::routes();
