@@ -46,7 +46,7 @@ Route::get('/service/requested_orgunits', 'Service\OrgunitsController@requestedO
 
 //Files
 Route::get('resources', function () {
-    return redirect('/api/resources/files');
+    return redirect('/resources/files');
 })->name('resourcesIndex');
 
 Route::get('resources/files',['as'=>'resources.files', 'uses'=>'ResourceFilesController@index']);

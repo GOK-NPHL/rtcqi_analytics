@@ -153,27 +153,31 @@ class ResourceFiles extends React.Component {
                                         <th>Name</th>
                                         <th>Size</th>
                                         <th>Is public?</th>
-                                        <th>Actions</th>
+                                        {this.state.auths && this.state.auths.includes('manage_resources') && <th>Actions</th>}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {this.state.files && this.state.files.length > 0 ? this.state.files.map(fl => (
                                         <tr key={fl.id}>
-                                            <td style={{ border: '1px solid #ccd6e3' }}>{fl['name']}</td>
-                                            <td style={{ border: '1px solid #ccd6e3' }}>{Intl.NumberFormat('en-GB').format(fl['size'] / 1000000) + "MB"}</td>
-                                            <td style={{ border: '1px solid #ccd6e3' }}>{fl['is_public'] == "1" || fl['is_public'] === true ? <span title="Visible to the public" className="badge badge-success"><i className="fa fa-globe"></i> Yes</span> : <span title="Only visible to logged in users" className="badge badge-danger"><i className="fa fa-lock"></i> No</span>}</td>
                                             <td style={{ border: '1px solid #ccd6e3' }}>
                                                 <a href={
                                                     window.location.origin + '/api/resources/files/download/' + fl['id']
-                                                } target="_blank" download={fl['name']} className="btn btn-info btn-xs" style={{padding: '3px 5px', fontSize: '0.7em', background: 'darkcyan', borderColor: 'transparent'}}>Download</a>
-                                                &nbsp; &nbsp; &nbsp;
-                                                {this.state.auths && this.state.auths.includes('manage_resources') &&
-                                                    <button className="btn btn-danger btn-xs" style={{padding: '3px 5px', fontSize: '0.7em'}} onClick={(ev) => {
+                                                } target="_blank" download={fl['name']}>{fl['name']}</a>
+                                            </td>
+                                            <td style={{ border: '1px solid #ccd6e3' }}>{Intl.NumberFormat('en-GB').format(fl['size'] / 1000000) + "MB"}</td>
+                                            <td style={{ border: '1px solid #ccd6e3' }}>{fl['is_public'] == "1" || fl['is_public'] === true ? <span title="Visible to the public" className="badge badge-success"><i className="fa fa-globe"></i> Yes</span> : <span title="Only visible to logged in users" className="badge badge-danger"><i className="fa fa-lock"></i> No</span>}</td>
+                                            {this.state.auths && this.state.auths.includes('manage_resources') &&
+                                                <td style={{ border: '1px solid #ccd6e3' }}>
+                                                    {/* <a href={
+                                                    window.location.origin + '/api/resources/files/download/' + fl['id']
+                                                } target="_blank" download={fl['name']} className="btn btn-info btn-xs" style={{ padding: '3px 5px', fontSize: '0.7em', background: 'darkcyan', borderColor: 'transparent' }}>Download</a>
+                                                &nbsp; &nbsp; &nbsp; */}
+                                                    <button className="btn btn-danger btn-xs" style={{ padding: '3px 5px', fontSize: '0.7em' }} onClick={(ev) => {
                                                         ev.preventDefault();
                                                         window.confirm('Are you sure you want to delete this file?') && this.deleteFile(fl['id']);
                                                     }}>Delete</button>
-                                                }
-                                            </td>
+                                                </td>
+                                            }
                                         </tr>
                                     )) : <tr>
                                         <th colSpan={4}>No files at this moment. Check later.</th>
