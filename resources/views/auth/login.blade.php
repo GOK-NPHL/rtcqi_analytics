@@ -26,7 +26,7 @@
                                     download="{!! $file->name !!}"
                                     >{!! $file->name !!}</a>
                                 </td>
-                                <td>{{ number_format((float)$file->size/1000000, 2, '.', '') }}</td>
+                                <td>{{ number_format((float)$file->size/1000000, 2, '.', '') }}MB</td>
                             </tr>
                             @endforeach
                         </tbody>
