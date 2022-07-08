@@ -124,7 +124,9 @@ class ResourceFilesController extends Controller
         $file = ResourceFiles::find($id);
         $file->delete();
         //delete file
-        unlink($file->path);
+        if(file_exists($file->path)){
+            unlink($file->path);
+        }
         $files = ResourceFiles::all();
         return response()->json([ 'status' => 'success', 'message' => 'File deleted', 'data' => $files ], 200);
         // return redirect()->route('configuration.files')->with('status', 'success')->with('message', 'File deleted successfully')->with('data', $files);
