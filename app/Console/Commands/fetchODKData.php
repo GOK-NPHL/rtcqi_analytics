@@ -39,7 +39,7 @@ class fetchODKData extends Command
     public function handle()
     {   
         $odkObj = new ODKDataFetcher;
-        $res=$odkObj->fetchData();
+        $odkObj->fetchData();
         // error_log($res);
     }
 }
