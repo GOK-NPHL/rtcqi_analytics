@@ -154,7 +154,7 @@ class ODKDataAggregator
             }
         } else if ($record["baselinefollowup"] == 'followup') {
 
-            $followupType = $record["followup"];
+            $followupType = $record["followup"] ?? "followup1";
             for ($x = 0; $x < count($this->timeLines); $x++) {
                 if ($followupType == $this->timeLines[$x]) {
                     if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
@@ -844,7 +844,7 @@ class ODKDataAggregator
                 $overallSites = $this->summTimelineData($this->timeLines[0], $val, $overallSites);
             }
         } else if ($record["baselinefollowup"] == 'followup') {
-            $followupType = $record["followup"];
+            $followupType = $record["followup"] ?? "followup1";
             for ($x = 0; $x < count($this->timeLines); $x++) {
                 if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                     if ($followupType == $this->timeLines[$x]) {
