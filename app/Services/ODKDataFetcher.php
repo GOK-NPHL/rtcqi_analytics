@@ -118,6 +118,7 @@ class ODKDataFetcher
                         $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }else{
                         echo("shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
+                        $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }
                 }else{
                     echo("this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
