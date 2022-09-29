@@ -271,7 +271,7 @@ class ODKDataAggregator
                 $scores[$this->timeLines[$x]] = 0;
             }
         }
-
+        Log::info("records === " . json_encode($records));
         foreach ($records as $record) {
             Log::info("Start record traversal =========>>");
             $shouldProcessRecord = true;
@@ -415,7 +415,7 @@ class ODKDataAggregator
     {
         foreach ($score as $key => $value) {
             try {
-                $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator   
+                $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
                 $score[$key] = 0;
@@ -431,7 +431,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 3);
-        // $score = ($score / ($rowCounter * 3)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 3)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -463,7 +463,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 6);
-        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -498,7 +498,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 6);
-        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -534,7 +534,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 6);
-        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 6)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -570,7 +570,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 14);
-        // $score = ($score / ($rowCounter * 14)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 14)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -616,7 +616,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 11);
-        // $score = ($score / ($rowCounter * 11)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 11)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -667,7 +667,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 10);
-        // $score = ($score / ($rowCounter * 10)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 10)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -716,7 +716,7 @@ class ODKDataAggregator
         $score = $summationValues['score'];
         $rowCounter = $summationValues['rowCounter'];
         $score = $this->getPercentileValueForSections($score, $rowCounter, 10);
-        // $score = ($score / ($rowCounter * 10)) * 100; //get denominator   
+        // $score = ($score / ($rowCounter * 10)) * 100; //get denominator
         // $score = number_format((float)$score, 1, '.', ',');
 
         return $score;
@@ -766,7 +766,8 @@ class ODKDataAggregator
 
         foreach ($score as $key => $value) {
             try {
-                $score[$key] = ($value / $rowCounter[$key]); //get denominator   
+                $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key] )); //get denominator
+                // $score[$key] = ($value / $rowCounter[$key]); //get denominator
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
                 $score[$key] = 0;
@@ -802,7 +803,8 @@ class ODKDataAggregator
             foreach ($timeLineData as $key => $value) {
                 if ($key != 'counter' && $key != 'sites') {
                     try {
-                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
+                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / ($timeLineData["counter"] == 0 ? 1 : $timeLineData["counter"])) * 100, 0, '.', ',');
+                        // $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
                     } catch (Exception $ex) {
                         $timeLineData[$key] = '';
                     }
