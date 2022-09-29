@@ -45,7 +45,7 @@ class ODKDataAggregator
         Log::info("Request Data variables");
         Log::info($orgUnitIds, $siteTypes, $startDate, $endDate);
         Log::info($siteTypes);
-        Log::info( $startDate);
+        Log::info($startDate);
         Log::info($endDate);
 
         $this->startDate = $startDate;
@@ -55,10 +55,10 @@ class ODKDataAggregator
         $formSubmissions = array();
         foreach ($orgUnitIds as $orgUnitId) {
             $ou = OdkOrgunit::find($orgUnitId);
-            if($ou){
+            if ($ou) {
                 $formSubmissions[$orgUnitId] = $this->getFormRecords($ou);
-            }else{
-                Log::info("No Org Unit found for id: ".$orgUnitId);
+            } else {
+                Log::info("No Org Unit found for id: " . $orgUnitId);
             }
         }
         return $formSubmissions;
@@ -69,7 +69,7 @@ class ODKDataAggregator
         Log::info("Request Data variables");
         Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
         Log::info($siteTypes);
-        Log::info( $startDate);
+        Log::info($startDate);
         Log::info($endDate);
 
         $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
@@ -272,52 +272,57 @@ class ODKDataAggregator
             }
         }
         Log::info("records === " . json_encode($records));
-        foreach ($records as $record) {
-            Log::info("Start record traversal =========>>");
-            $shouldProcessRecord = true;
+        if (isset($records) && $records != null && $records != 0 && count($records) > 0) {
+            foreach ($records as $record) {
+                Log::info("Start record traversal =========>>");
+                $shouldProcessRecord = true;
 
-            if (isset($this->startDate) && !empty($this->startDate)) {
+                if (isset($this->startDate) && !empty($this->startDate)) {
 
-                $recordDate = strtotime($record['start']);
-                $newRecordformat = date('Y-m-d', $recordDate);
+                    $recordDate = strtotime($record['start']);
+                    $newRecordformat = date('Y-m-d', $recordDate);
 
-                $userStartDate = strtotime($this->startDate);
-                $newUserStartDate = date('Y-m-d', $userStartDate);
-                Log::info("start date =====>> 2");
-                Log::info($newUserStartDate);
-                Log::info($userStartDate);
-                if ($newUserStartDate > $newRecordformat) {
-                    Log::info("start date =====>>");
+                    $userStartDate = strtotime($this->startDate);
+                    $newUserStartDate = date('Y-m-d', $userStartDate);
+                    Log::info("start date =====>> 2");
                     Log::info($newUserStartDate);
                     Log::info($userStartDate);
+                    if ($newUserStartDate > $newRecordformat) {
+                        Log::info("start date =====>>");
+                        Log::info($newUserStartDate);
+                        Log::info($userStartDate);
+                        $shouldProcessRecord = false;
+                    }
+                }
+                if (isset($this->endDate) && !empty($this->endDate)) {
+
+                    $recordDate = strtotime($record['start']);
+                    $newRecordformat = date('Y-m-d', $recordDate);
+
+                    $userEndDate = strtotime($this->endDate);
+                    $newUserEndDate = date('Y-m-d', $userEndDate);
+
+                    if ($newRecordformat > $newUserEndDate) {
+                        $shouldProcessRecord = false;
+                    }
+                }
+
+                if (
+                    (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) != $this->siteType)
+                ) {
                     $shouldProcessRecord = false;
                 }
-            }
-            if (isset($this->endDate) && !empty($this->endDate)) {
 
-                $recordDate = strtotime($record['start']);
-                $newRecordformat = date('Y-m-d', $recordDate);
-
-                $userEndDate = strtotime($this->endDate);
-                $newUserEndDate = date('Y-m-d', $userEndDate);
-
-                if ($newRecordformat > $newUserEndDate) {
-                    $shouldProcessRecord = false;
+                if ($shouldProcessRecord) {
+                    [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
+                        $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
                 }
-            }
 
-            if (
-                (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) != $this->siteType)
-            ) {
-                $shouldProcessRecord = false;
+                Log::info("end record traversal ========>>");
             }
-
-            if ($shouldProcessRecord) {
-                [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
-                    $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
-            }
-
-            Log::info("end record traversal ========>>");
+        }else{
+            Log::info("No records found");
+            Log::info("end record traversal ========>> ".json_encode($records));
         }
 
         $results = array();
@@ -766,7 +771,7 @@ class ODKDataAggregator
 
         foreach ($score as $key => $value) {
             try {
-                $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key] )); //get denominator
+                $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key])); //get denominator
                 // $score[$key] = ($value / $rowCounter[$key]); //get denominator
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
@@ -839,7 +844,7 @@ class ODKDataAggregator
             if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                 $overallSites[$this->timeLines[0]]["counter"] = $overallSites[$this->timeLines[0]]["counter"] + 1;
                 $overallSites[$this->timeLines[0]]["sites"][] = [ //$val;
-                    "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1) ),
+                    "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
                     "mfl" => explode("_", $record["mysites_facility"])[0],
                     "site" => $record["mysites"]
                 ];
@@ -852,7 +857,7 @@ class ODKDataAggregator
                     if ($followupType == $this->timeLines[$x]) {
                         $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
                         $overallSites[$this->timeLines[$x]]["sites"][] = [ //$val;
-                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1) ),
+                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
                             "mfl" => explode("_", $record["mysites_facility"])[0],
                             "site" => $record["mysites"]
                         ];
