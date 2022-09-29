@@ -42,11 +42,11 @@ class ODKDataAggregator
 
     public function getSubmissions($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
-        Log::info("Request Data variables");
-        Log::info($orgUnitIds, $siteTypes, $startDate, $endDate);
-        Log::info($siteTypes);
-        Log::info($startDate);
-        Log::info($endDate);
+        // Log::info("Request Data variables");
+        // Log::info($orgUnitIds, $siteTypes, $startDate, $endDate);
+        // Log::info($siteTypes);
+        // Log::info($startDate);
+        // Log::info($endDate);
 
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -66,11 +66,11 @@ class ODKDataAggregator
 
     public function getData($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
     {
-        Log::info("Request Data variables");
-        Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
-        Log::info($siteTypes);
-        Log::info($startDate);
-        Log::info($endDate);
+        // Log::info("Request Data variables");
+        // Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
+        // Log::info($siteTypes);
+        // Log::info($startDate);
+        // Log::info($endDate);
 
         $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
         $this->startDate = $startDate;
@@ -170,7 +170,7 @@ class ODKDataAggregator
     private function processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section)
     {
         if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-            Log::info("processing kenya");
+            Log::info("processing national");
             $rowCounter = $rowCounter + 1; //no or rows processed.
             if ($section == $this->reportSections["overall_sites_level"]) {
                 $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -181,21 +181,21 @@ class ODKDataAggregator
                 $score =  $this->callFunctionBysecition($section, $record) + $score;
             }
         } else {
-            Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
+            // Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
             if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
                 Log::info("facility 1 " . $orgUnit['mysites_county']);
                 if (!empty($orgUnit['mysites_subcounty'])) {
-                    Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
+                    // Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
                     if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
 
                         if (!empty($orgUnit['mysites_facility'])) {
-                            Log::info(strtolower($record['mysites_facility']) . " facility3 " . $orgUnit['mysites_facility']);
+                            // Log::info(strtolower($record['mysites_facility']) . " facility3 " . $orgUnit['mysites_facility']);
                             if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
-                                Log::info(strtolower($record['mysites']) . " site1 " . $orgUnit['mysites']);
+                                // Log::info(strtolower($record['mysites']) . " site1 " . $orgUnit['mysites']);
                                 if (!empty($orgUnit['mysites'])) {
-                                    Log::info(strtolower($record['mysites']) . " site2 " . $orgUnit['mysites']);
+                                    // Log::info(strtolower($record['mysites']) . " site2 " . $orgUnit['mysites']);
                                     if (strtolower($record['mysites']) == $orgUnit['mysites']) {
-                                        Log::info(strtolower($record['mysites']) . " site3 " . $orgUnit['mysites']);
+                                        // Log::info(strtolower($record['mysites']) . " site3 " . $orgUnit['mysites']);
                                         $rowCounter = $rowCounter + 1; //no or rows processed.
                                         if ($section == $this->reportSections["overall_sites_level"]) {
                                             $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -271,10 +271,10 @@ class ODKDataAggregator
                 $scores[$this->timeLines[$x]] = 0;
             }
         }
-        Log::info("records === " . json_encode($records));
+        // Log::info("records === " . json_encode($records));
         if (isset($records) && $records != null && $records != 0 && count($records) > 0) {
             foreach ($records as $record) {
-                Log::info("Start record traversal =========>>");
+                // Log::info("Start record traversal =========>>");
                 $shouldProcessRecord = true;
 
                 if (isset($this->startDate) && !empty($this->startDate)) {
@@ -284,13 +284,13 @@ class ODKDataAggregator
 
                     $userStartDate = strtotime($this->startDate);
                     $newUserStartDate = date('Y-m-d', $userStartDate);
-                    Log::info("start date =====>> 2");
-                    Log::info($newUserStartDate);
-                    Log::info($userStartDate);
+                    // Log::info("start date =====>> 2");
+                    // Log::info($newUserStartDate);
+                    // Log::info($userStartDate);
                     if ($newUserStartDate > $newRecordformat) {
-                        Log::info("start date =====>>");
-                        Log::info($newUserStartDate);
-                        Log::info($userStartDate);
+                        // Log::info("start date =====>>");
+                        // Log::info($newUserStartDate);
+                        // Log::info($userStartDate);
                         $shouldProcessRecord = false;
                     }
                 }
@@ -318,12 +318,13 @@ class ODKDataAggregator
                         $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
                 }
 
-                Log::info("end record traversal ========>>");
+                // Log::info("end record traversal ========>>");
             }
-        }else{
-            Log::info("No records found");
-            Log::info("end record traversal ========>> ".json_encode($records));
         }
+        // else{
+        //     Log::info("No records found");
+        //     Log::info("end record traversal ========>> ".json_encode($records));
+        // }
 
         $results = array();
         if ($section == $this->reportSections["overall_sites_level"]) {
