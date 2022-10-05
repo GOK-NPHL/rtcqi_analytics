@@ -421,7 +421,8 @@ class ODKDataAggregator
     {
         foreach ($score as $key => $value) {
             try {
-                $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
+                $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator
+                // $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
                 $score[$key] = 0;
@@ -772,8 +773,8 @@ class ODKDataAggregator
 
         foreach ($score as $key => $value) {
             try {
-                $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key])); //get denominator
-                // $score[$key] = ($value / $rowCounter[$key]); //get denominator
+                // $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key])); //get denominator
+                $score[$key] = ($value / $rowCounter[$key]); //get denominator
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
                 $score[$key] = 0;
@@ -809,8 +810,8 @@ class ODKDataAggregator
             foreach ($timeLineData as $key => $value) {
                 if ($key != 'counter' && $key != 'sites') {
                     try {
-                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / ($timeLineData["counter"] == 0 ? 1 : $timeLineData["counter"])) * 100, 0, '.', ',');
-                        // $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
+                        // $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / ($timeLineData["counter"] == 0 ? 1 : $timeLineData["counter"])) * 100, 0, '.', ',');
+                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
                     } catch (Exception $ex) {
                         $timeLineData[$key] = '';
                     }
