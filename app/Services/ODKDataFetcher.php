@@ -118,6 +118,7 @@ class ODKDataFetcher
                         $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }else{
                         echo("shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
+                        $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }
                 }else{
                     echo("this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
@@ -198,20 +199,20 @@ class ODKDataFetcher
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
         //delete previous downloade data
-        Log::info("delete any previous downloads");
+        Log::info("delete any previous downloads for " . $formId);
         try {
             Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
         } catch (Exception $e) {
-            echo 'Message: ' . $e->getMessage();
+            echo 'Error deleting previous submissions for : ' .$formId. ', Message: ' . $e->getMessage();
         }
 
         try {
             Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
         } catch (Exception $e) {
-            echo 'Message: ' . $e->getMessage();
+            echo 'Error deleting previous submissions.csv.zip for : ' .$formId. ', Message: ' . $e->getMessage();
         }
 
-        Log::info("downloading new submissions");
+        Log::info("downloading new submissions for " . $formId . ", project " . $projectId . ", from " . $formSubmissionsUrl);
 
         Http::withOptions([
             'verify' => false, //'debug' => true,
