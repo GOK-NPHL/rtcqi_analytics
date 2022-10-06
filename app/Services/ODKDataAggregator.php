@@ -272,7 +272,7 @@ class ODKDataAggregator
             }
         }
         // Log::info("records === " . json_encode($records));
-        if (isset($records) && $records != null && $records != 0 && count($records) > 0) {
+        if (isset($records) && $records != null && count($records) > 0) {
             foreach ($records as $record) {
                 // Log::info("Start record traversal =========>>");
                 $shouldProcessRecord = true;
