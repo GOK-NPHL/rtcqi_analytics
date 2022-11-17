@@ -68,6 +68,18 @@ class OrgTimeline extends React.Component {
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow3')} href="#">
                             Follow-Up 3 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow4')} href="#">
+                            Follow-Up 4 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow5')} href="#">
+                            Follow-Up 5 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow6')} href="#">
+                            Follow-Up 6 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'otherFollowup')} href="#">
+                            Other Follow-Up <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
                         {/* <div class="dropdown-divider"></div> */}
                     </div>
                 </div>

@@ -308,13 +308,13 @@ class SpiReport extends React.Component {
                                 <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
                                     if (orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].length > 0) {
                                         exportToExcel(
-                                            Array.from(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], sp=>{
+                                            Array.from(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], sp => {
                                                 return {
                                                     "mfl": sp.mfl.toUpperCase(),
                                                     "facility": sp.facility.toUpperCase(),
                                                     "site": sp.site.toUpperCase(),
                                                 }
-                                            }), 
+                                            }),
                                             'Sites - ' + sting
                                         );
                                     } else {
@@ -544,17 +544,44 @@ class SpiReport extends React.Component {
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
                     </div>
-                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
+                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgTimeline onOrgTimelineChange={this.onOrgTimelineChange}></OrgTimeline>
                     </div>
 
-                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
+                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
                     </div>
 
                     <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
+                    {/* <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                        <div className="btn-group">
+                            <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Select Partner
+                            </button>
+                            <div className="dropdown-menu">
+                                <a
+                                    key={uuidv4()}
+                                    className="dropdown-item"
+                                    href="#"
+                                    // data-id={orgType}
+                                    onClick={(event) => {
+                                        // this.orgUnitTypeChangeHandler(event);
+                                    }}
+                                >
+                                    All
+                                    <i className="fa fa-check"
+                                        style={{
+                                            // "display": this.state.orgUnitType.includes(orgType) ? "" : "none",
+                                            "color": "green"
+                                        }}
+                                        aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div> */}
 
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <button
@@ -598,7 +625,7 @@ class SpiReport extends React.Component {
                                 >
                                     <i className="fas fa-chart-bar"></i> Site Level Columns</a>
                             </li>
-                            
+
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link" id="spidersTab"
                                     data-toggle="tab" href="#spiders" role="tab"

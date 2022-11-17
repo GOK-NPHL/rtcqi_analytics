@@ -20,7 +20,7 @@ use PhpParser\Node\Stmt\Continue_;
 class ODKDataAggregator
 {
     private $reportSections = array();
-    private $timeLines = ['baseline', 'follow1', 'follow2', 'follow3'];
+    private $timeLines = ['baseline', 'follow1', 'follow2', 'follow3', 'follow4', 'follow5', 'follow6', 'other'];
     private $userOrgTimelineParams = array();
     private $siteType = null;
     private $startDate = null;
