@@ -641,3 +641,69 @@ export function DevelopOrgStructure(orunitData) {
     }
 
 }
+
+
+
+export async function FetchPartners() {
+
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/partners`);
+        const partners = response.data;
+        return partners;
+    } catch (err) {
+        return err.response
+    }
+}
+export async function FetchPartner(id) {
+    try {
+        const response = await axios.get(`${settings.rtcqiBaseApi}/partners/${id}`);
+        const partner = response.data;
+        return partner;
+    } catch (err) {
+        return err.response
+    }
+}
+export async function SavePartner(partner) {
+    let response;
+    try {
+        response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/partners`,
+            data: {
+                ...partner
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
+
+export async function UpdatePartner(partner) {
+    let response;
+    try {
+        response = await axios({
+            method: 'put',
+            url: `${settings.rtcqiBaseApi}/partners/${partner.id}`,
+            data: {
+                ...partner
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
+
+export async function DeletePartner(id) {
+    let response;
+    try {
+        response = await axios({
+            method: 'delete',
+            url: `${settings.rtcqiBaseApi}/partners/${id}`,
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}

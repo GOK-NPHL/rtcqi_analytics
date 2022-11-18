@@ -152,7 +152,29 @@ use Illuminate\Support\Facades\Gate;
                     <?php } ?>
                 </li>
             <?php } ?>
-            
+
+            <!--partners section  -->
+            <?php
+            if (Gate::allows('partners_section')) { ?>
+                <!-- Divider -->
+
+                <hr class="sidebar-divider">
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Partners
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <?php if (Gate::allows('view_partners')) { ?>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'partners');" href="{{ route('partnersIndex') }}">
+                            <i class="fas fa-fw fa-handshake"></i>
+                            <span>Partners</span>
+                        </a>
+                    <?php } ?>
+                </li>
+            <?php } ?>
+
             <!--System admin section  -->
             <?php
 
@@ -345,8 +367,8 @@ use Illuminate\Support\Facades\Gate;
 
 
                                 <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault();
-                                                localStorage.removeItem('orgunitList');    
-                                                localStorage.removeItem('treeStruc'); 
+                                                localStorage.removeItem('orgunitList');
+                                                localStorage.removeItem('treeStruc');
                                                 document.getElementById('logout-form').submit();">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     {{ __('Logout') }}

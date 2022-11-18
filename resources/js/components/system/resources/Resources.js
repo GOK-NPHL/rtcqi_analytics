@@ -43,7 +43,7 @@ class ResourceFiles extends React.Component {
     uploadFile(fl, isPub) {
         (async () => {
             let result = await SaveFile(fl, isPub);
-            console.log('uploadFile response:::: ', result);
+            // console.log('uploadFile response:::: ', result);
             if (result.data.status === 'success') {
                 this.setState({
                     files: result.data.data,
@@ -64,7 +64,7 @@ class ResourceFiles extends React.Component {
     deleteFile(id) {
         (async () => {
             let result = await DeleteFile(id);
-            console.log('deleteFile response:::: ', result);
+            // console.log('deleteFile response:::: ', result);
             if (result.data.status === 'success') {
                 this.setState({
                     files: result.data.data,
@@ -194,8 +194,8 @@ class ResourceFiles extends React.Component {
                             <form onSubmit={(ev) => {
                                 ev.preventDefault();
                                 ev.stopPropagation();
-                                console.log('this.state.fileForUpload::: ', this.state.fileForUpload);
-                                console.log('t::: ', typeof this.state.fileForUpload);
+                                // console.log('this.state.fileForUpload::: ', this.state.fileForUpload);
+                                // console.log('t::: ', typeof this.state.fileForUpload);
                                 if (this.state.fileForUpload && this.state.fileForUpload != null) {
                                     this.uploadFile(this.state.fileForUpload, this.state.fileForUploadPublic);
                                 } else {

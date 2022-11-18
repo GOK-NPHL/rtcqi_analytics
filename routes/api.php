@@ -57,3 +57,13 @@ Route::get('resources/files_private',['as'=>'resources.files_private', 'uses'=>'
 Route::delete('resources/files/{id}',['as'=>'resources.delete', 'uses'=>'ResourceFilesController@destroy']);
 Route::get('resources/files/download/{id}',['as'=>'resources.download', 'uses'=>'ResourceFilesController@download']);
 Route::post('resources/files',['as'=>'resources.store', 'uses'=>'ResourceFilesController@store']);
+
+Route::get('partners',['as'=>'partners', 'uses'=>'PartnerController@getAllPartners']);
+Route::get('partners/{id}',['as'=>'partner', 'uses'=>'PartnerController@getPartner']);
+Route::get('partners/{id}/users',['as'=>'partner.users', 'uses'=>'PartnerController@getPartnerUsers']);
+Route::get('partners/{id}/org_units',['as'=>'partner.orgUnits', 'uses'=>'PartnerController@getPartnerOrgUnits']);
+Route::put('partners/{id}/users',['as'=>'partner.mapUsers', 'uses'=>'PartnerController@mapPartnerUsers']);
+Route::put('partners/{id}/org_units',['as'=>'partner.mapOrgUnits', 'uses'=>'PartnerController@mapPartnerOrgUnits']);
+Route::post('partners',['as'=>'partners.store', 'uses'=>'PartnerController@createPartner']);
+Route::put('partners/{id}',['as'=>'partners.update', 'uses'=>'PartnerController@updatePartner']);
+Route::delete('partners/{id}',['as'=>'partners.delete', 'uses'=>'PartnerController@deletePartner']);

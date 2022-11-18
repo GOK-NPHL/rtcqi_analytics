@@ -53,6 +53,15 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define(SystemAuthorities::$authorities['manage_resources'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['manage_resources']);
         });
+        Gate::define(SystemAuthorities::$authorities['partners_section'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['partners_section']);
+        });
+        Gate::define(SystemAuthorities::$authorities['view_partners'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_partners']);
+        });
+        Gate::define(SystemAuthorities::$authorities['manage_partners'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['manage_partners']);
+        });
         Gate::define(SystemAuthorities::$authorities['edit_user'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['edit_user']);
         });

@@ -22,6 +22,7 @@ require('./components/reports/spi/SpiReport');
 require('./components/reports/submissions/Submissions');
 
 require('./components/system/resources/Resources');
+require('./components/system/partners/Partners');
 
 require('./components/reports/me/MEReport');
 

@@ -49,4 +49,9 @@ Route::get('resources', function () {
     return redirect('/resources/files');
 })->name('resourcesIndex');
 
-Route::get('resources/files',['as'=>'resources.files', 'uses'=>'ResourceFilesController@index']);
+Route::get('resources/files', ['as' => 'resources.files', 'uses' => 'ResourceFilesController@index']);
+
+Route::get('partners', [
+    // 'as' => 'partners',
+    'uses' => 'PartnerController@index'
+])->name('partnersIndex');
