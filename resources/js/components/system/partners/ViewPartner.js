@@ -47,14 +47,14 @@ export function ViewPartner(ptnr) {
                                                 <td>Partner Status</td>
                                                 <td>{partner?.active ? <span className='badge badge-success'>Active</span> : <span className='badge badge-dark'>Disabled</span>}</td>
                                             </tr>
-                                            {/* <tr>
-<td>Partner Level</td>
-<td>{partner?.partner_level}</td>
-</tr>
-<tr>
-<td>Partner Parent</td>
-<td>{partner?.partner_parent}</td>
-</tr> */}
+                                            <tr>
+                                                <td>Organisation Unit Level</td>
+                                                <td> {partner?.level ? "Level "+partner?.level : <span className='badge badge-dark'>Not set</span>}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Partner Parent</td>
+                                                <td> {partner?.parent ? partner?.parent?.name : "-"}</td>
+                                            </tr>
                                             <tr>
                                                 <td>Partner Address</td>
                                                 <td>{partner?.address}</td>

@@ -23,8 +23,8 @@ class Partner extends Model
         'phone',
         'address',
 
-        // 'level',
-        // 'parent',
+        'level',
+        'parent_partner_id',
 
         'created_at',
         'updated_at'
@@ -66,5 +66,17 @@ class Partner extends Model
     public function org_units()
     {
         return $this->belongsToMany('App\OdkOrgunit', 'partner_org_units', 'partner_id', 'org_unit_id');
+    }
+
+    /**
+     * Get the parent partner for the partner.
+     */
+    public function parent()
+    {
+        if ($this->parent) {
+            return $this->belongsTo('App\Partner', 'parent_partner_id');
+        } else {
+            return null;
+        }
     }
 }

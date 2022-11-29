@@ -29,6 +29,17 @@ class PartnerController extends Controller
     public function getAllPartners()
     {
         $partners = Partner::all();
+        // parent name
+        foreach ($partners as $partner) {
+            if ($partner->parent_partner_id != null) {
+                $parent = Partner::find($partner->parent_partner_id);
+                if ($parent != null) {
+                    $partner->parent_name = $parent->name;
+                }
+            } else {
+                $partner->parent_name = null;
+            }
+        }
         return response()->json($partners);
     }
 
@@ -48,6 +59,13 @@ class PartnerController extends Controller
                 }
             }
             $partner->org_units = $partner_org_units;
+            // parent
+            if ($partner->parent_partner_id) {
+                $parent_partner = Partner::find($partner->parent_partner_id);
+                if ($parent_partner) {
+                    $partner->parent = $parent_partner;
+                }
+            }
         }
         return response()->json($partner);
     }
@@ -62,7 +80,7 @@ class PartnerController extends Controller
     public function getPartnerOrgUnits(Request $request)
     {
         $partner = Partner::find($request->id);
-        if($partner){
+        if ($partner) {
             $pous = PartnerOrgUnits::where('partner_id', $partner->id)->get();
             $partner_org_units = [];
             foreach ($pous as $partner_org_unit) {
@@ -91,7 +109,7 @@ class PartnerController extends Controller
                 // 'phone' => 'required|max:255',
                 // 'address' => 'required|max:255',
             ]);
-            dd($validatedData);
+
             if ($validatedData) {
                 $partner = new Partner;
                 $partner->name = $request->name;
@@ -104,6 +122,22 @@ class PartnerController extends Controller
                 $partner->email = $request->email;
                 $partner->phone = $request->phone;
                 $partner->address = $request->address;
+
+                // if parent
+                if ($request->parent_partner_id && $request->parent_partner_id != '') {
+                    $parent = Partner::find($request->parent_partner_id);
+                    if ($parent) {
+                        $partner->parent_partner_id = $parent->id;
+                    }
+                } else {
+                    $partner->parent_partner_id = null;
+                }
+
+                // org level
+                if ($request->level && $request->level != '') {
+                    $partner->level = $request->level;
+                }
+
                 $partner->save();
                 // map users
                 if ($request->users) {
@@ -254,6 +288,17 @@ class PartnerController extends Controller
                     $partner->email = $request->email;
                     $partner->phone = $request->phone;
                     $partner->address = $request->address;
+                    // if parent
+                    if ($request->parent_partner_id && $request->parent_partner_id != '') {
+                        $parent = Partner::find($request->parent_partner_id);
+                        if ($parent) {
+                            $partner->parent_partner_id = $parent->id;
+                        }
+                    }
+                    // org level
+                    if ($request->level && $request->level != '') {
+                        $partner->level = $request->level;
+                    }
                     $partner->save();
                     return response()->json($partner);
                 } else {

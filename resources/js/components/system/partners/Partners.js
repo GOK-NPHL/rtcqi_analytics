@@ -33,6 +33,8 @@ class Partners extends React.Component {
                 'email': '',
                 'phone': '',
                 'address': '',
+                'level': '',
+                'parent_id': '',
                 'users': [],
                 'org_units': [],
             },
@@ -45,15 +47,22 @@ class Partners extends React.Component {
         this.deleteAPartner = this.deleteAPartner.bind(this);
         this.updateAPartner = this.updateAPartner.bind(this);
         this.searchPartner = this.searchPartner.bind(this);
+        this.fetchAllPartners = this.fetchAllPartners.bind(this);
     }
 
-    componentDidMount() {
+    fetchAllPartners() {
         (async () => {
             let returnedData = await FetchPartners();
             this.setState({
                 partners: returnedData,
                 ptns: returnedData,
             });
+        })();
+    }
+
+    componentDidMount() {
+        (async () => {
+            this.fetchAllPartners();
 
             FetchUserAuthorities().then((auths) => {
                 this.setState({ auths: auths });
@@ -102,7 +111,7 @@ class Partners extends React.Component {
                 });
             } else {
                 this.setState({
-                    message: result?.data?.error || result?.statusText || 'An error occured while saving partner',
+                    message: result?.data?.message || result?.data?.error || result?.statusText || 'An error occured while saving partner',
                     status: 500,
                 });
             }
@@ -124,6 +133,8 @@ class Partners extends React.Component {
             });
 
             $('#partnerForm').modal('hide');
+
+            this.fetchAllPartners();
         })();
     }
 
@@ -143,11 +154,13 @@ class Partners extends React.Component {
                 });
             } else {
                 this.setState({
-                    message: result?.data?.error || result?.statusText || 'An error occured while deleting partner',
+                    message: result?.data?.message || result?.data?.error || result?.statusText || 'An error occured while deleting partner',
                     status: 500,
                 });
             }
+            this.fetchAllPartners();
         })();
+
     }
 
     updateAPartner(partner) {
@@ -166,7 +179,7 @@ class Partners extends React.Component {
                 });
             } else {
                 this.setState({
-                    message: result?.data?.error || result?.statusText || 'An error occured while updating partner',
+                    message: result?.data?.message || result?.data?.error || result?.statusText || 'An error occured while updating partner',
                     status: 500,
                 });
             }
@@ -186,6 +199,8 @@ class Partners extends React.Component {
                     'org_units': [],
                 }
             });
+
+            this.fetchAllPartners();
         })();
     }
 
@@ -299,9 +314,10 @@ class Partners extends React.Component {
                                     <tr>
                                         <th>Name</th>
                                         {/* <th>Description</th> */}
-                                        <th>Active</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        {/* <th>Start Date</th> */}
+                                        {/* <th>End Date</th> */}
+                                        <th>Parent</th>
                                         <th>Contact</th>{/*  incl. location, address, email, phone, url */}
                                         {this.state.auths && this.state.auths.includes('manage_partners') ? <th>Actions</th> : <th>&nbsp;</th>}
                                     </tr>
@@ -311,9 +327,10 @@ class Partners extends React.Component {
                                         <tr key={x + "_"}>
                                             <td style={{ verticalAlign: 'middle' }}>{fl.name}</td>
                                             {/* <td style={{verticalAlign: 'middle'}}>{fl.description}</td> */}
-                                            <td style={{ verticalAlign: 'middle', border: '1px solid #ccd6e3' }}>{fl['active'] == "1" || fl['active'] === true ? <span className="badge badge-success"><i className="fa fa-check"></i> Yes</span> : <span className="badge badge-danger"><i className="fa fa-lock"></i> No</span>}</td>
-                                            <td style={{ verticalAlign: 'middle' }}>{fl['start_date'] ? new Date(fl['start_date']).toDateString() : '-'}</td>
-                                            <td style={{ verticalAlign: 'middle' }}>{fl['end_date'] ? new Date(fl['end_date']).toDateString() : '-'}</td>
+                                            <td style={{ verticalAlign: 'middle', border: '1px solid #ccd6e3' }}>{fl['active'] == "1" || fl['active'] === true ? <span className="badge badge-success"><i className="fa fa-check"></i> Active</span> : <span className="badge badge-danger"><i className="fa fa-lock"></i> Disabled</span>}</td>
+                                            {/* <td style={{ verticalAlign: 'middle' }}>{fl['start_date'] ? new Date(fl['start_date']).toDateString() : '-'}</td> */}
+                                            {/* <td style={{ verticalAlign: 'middle' }}>{fl['end_date'] ? new Date(fl['end_date']).toDateString() : '-'}</td> */}
+                                            <td style={{ verticalAlign: 'middle' }}>{fl.parent_name || ''}</td>
                                             <td style={{ verticalAlign: 'middle' }}>
                                                 <div className="">
                                                     <p className='mb-0'>

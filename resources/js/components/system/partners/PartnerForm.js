@@ -1,6 +1,6 @@
 import React from 'react';
 import DualListBox from 'react-dual-listbox';
-import { FetchPartner, FetchOrgunits, FetchUsers } from '../../utils/Helpers';
+import { FetchPartners, FetchPartner, FetchOrgunits, FetchUsers } from '../../utils/Helpers';
 
 export function PartnerForm({ saveFxn, toEdit }) {
     let id = null;
@@ -11,6 +11,8 @@ export function PartnerForm({ saveFxn, toEdit }) {
     const [usersFixed, setUsersFixed] = React.useState([]);
     const [org_units, setOrgUnits] = React.useState([]);
     const [orgUnitsFixed, setOrgUnitsFixed] = React.useState([]);
+    const [allPartners, setAllPartners] = React.useState([]);
+    const [allPartnersFixed, setAllPartnersFixed] = React.useState([]);
     const [newPartner, setNewPartner] = React.useState({
         'name': '',
         'description': '',
@@ -23,6 +25,8 @@ export function PartnerForm({ saveFxn, toEdit }) {
         'phone': '',
         'address': '',
         'users': [],
+        "level": '',
+        "parent_partner_id": null,
         'org_units': [],
     });
     const [isEdit, setIsEdit] = React.useState(!!id);
@@ -53,6 +57,8 @@ export function PartnerForm({ saveFxn, toEdit }) {
                 'phone': '',
                 'address': '',
                 'users': [],
+                "level": '',
+                "parent_partner_id": null,
                 'org_units': []
             })
             setLoading(false);
@@ -69,11 +75,17 @@ export function PartnerForm({ saveFxn, toEdit }) {
 
         // org units
         FetchOrgunits().then((response) => {
-            let ous = response.payload[0].filter((ou) => {
-                return ou.level == 4;
-            }) || [];
+            let ous = response.payload[0]
+                // .filter((ou) => { return ou.level == 4; })
+                || [];
             setOrgUnits(ous);
             setOrgUnitsFixed(ous);
+        })
+
+        // partners
+        FetchPartners().then((response) => {
+            setAllPartners(response);
+            setAllPartnersFixed(response);
         })
     }, [id]);
 
@@ -91,6 +103,8 @@ export function PartnerForm({ saveFxn, toEdit }) {
                         ev.stopPropagation();
                         if (newPartner && newPartner.name != null) {
                             saveFxn(newPartner);
+                            // dismiss modal
+                            $('#partnerForm').modal('hide');
                         } else {
                             setMessage('Please fill in all fields')
                             setStatus(500)
@@ -277,8 +291,50 @@ export function PartnerForm({ saveFxn, toEdit }) {
                                     }} />
                                 </div>
                             </div>
-                            {/* org_units */}
+                            {/* parent_partner */}
                             <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
+                                <div className="col-md-3">
+                                    <label htmlFor="parent_partner_id">Parent partner</label>
+                                </div>
+                                <div className="col-md-9">
+                                    <select value={newPartner?.parent_partner_id || ''} className="form-control" id="parent_partner_id" name="parent_partner_id" onChange={(ev) => {
+                                        setNewPartner({
+                                            ...newPartner,
+                                            parent_partner_id: ev.target.value
+                                        })
+                                    }}>
+                                        <option value={''}> -- Select (None) -- </option>
+                                        {allPartners.map((par) => (
+                                            <option key={par.id} value={par.id}>{par.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            {/* level */}
+                            <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
+                                <div className="col-md-3">
+                                    <label htmlFor="level">Org unit Level</label>
+                                </div>
+                                <div className="col-md-9">
+                                    <select value={newPartner?.level || ''} className="form-control" id="level" name="level" onChange={(ev) => {
+                                        // filter org units
+                                        setOrgUnits(orgUnitsFixed.filter((ou) => ou.level == ev.target.value))
+                                        setNewPartner({
+                                            ...newPartner,
+                                            level: ev.target.value
+                                        })
+                                    }}>
+                                        <option value=""> -- Select -- </option>
+                                        <option value={1}>Level 1</option>
+                                        <option value={2}>Level 2</option>
+                                        <option value={3}>Level 3</option>
+                                        <option value={4}>Level 4</option>
+                                        {/* <option value={5}>Level 5</option> */}
+                                    </select>
+                                </div>
+                            </div>
+                            {/* org_units */}
+                            {newPartner && newPartner?.level && newPartner?.level > 0 && <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
                                 <div className="col-md-12">
                                     <div className='row mb-2'>
                                         <div className='col-sm-3 py-0' style={{ display: 'flex', alignItems: 'flex-end' }}>
@@ -319,7 +375,7 @@ export function PartnerForm({ saveFxn, toEdit }) {
                                         })
                                     }} />
                                 </div>
-                            </div>
+                            </div>}
                         </div>
                         <div className="modal-footer">
                             <button type="button" id="dismissSave" className="btn btn-link" data-dismiss="modal">Cancel</button>
