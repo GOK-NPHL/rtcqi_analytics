@@ -580,14 +580,14 @@ class SpiReport extends React.Component {
                                 {this.state.partners && this.state.partners.length > 0 ? (this.state.partners.length+" partner(s)") : "Select Partner"}
                             </button>
                             <div className="dropdown-menu">
-                                <a key={uuidv4()} className="dropdown-item" href="#" /* data-id={orgType} */ onClick={(event) => { /* this.orgUnitTypeChangeHandler(event); */ this.setState({ partners: [] }) }}
+                                <a key={uuidv4()} className="dropdown-item" href="#" onClick={(event) => { this.setState({ partners: [] }) }}
                                 >
                                     All <i className="fa fa-check" style={{ "display": this.state.partners.length == 0 ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
                                 </a>
                                 {
                                     this.state.allPartners.map((partner, index) => {
                                         return (
-                                            <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner}
+                                            <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
                                             onClick={(event) => {
                                                 if (this.state.partners.indexOf(partner.id) == -1) {
                                                     this.setState({ partners: [...this.state.partners, partner.id] })
