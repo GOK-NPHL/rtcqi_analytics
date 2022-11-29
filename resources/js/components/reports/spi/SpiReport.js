@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
-import { FetchOrgunits, FetchOdkData, exportToExcel } from '../../utils/Helpers'
+import { FetchOrgunits, FetchOdkData, exportToExcel, FetchPartners } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +23,7 @@ class SpiReport extends React.Component {
         this.state = {
             orgUnits: [],
             orgUnitDataIds: [0],
+            partners: [],
             orgUnitTimeline: [],
             siteType: [],
             echartsMinHeight: '',
@@ -30,7 +31,8 @@ class SpiReport extends React.Component {
                 'Average Performance per QA element',
                 'Overall Site Levels during Assessment',
             ],
-            indicatorIndexToDisplay: 0
+            indicatorIndexToDisplay: 0,
+            allPartners: [],
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
         this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
@@ -42,12 +44,23 @@ class SpiReport extends React.Component {
         this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
         this.exportAveragePerformancePDFData = this.exportAveragePerformancePDFData.bind(this);
         this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
+        this.fetchAllPartners = this.fetchAllPartners.bind(this);
 
     }
 
-    componentDidMount() {
-        //fetch counties
+    // componentDidMount() {
+    //     //fetch counties
 
+    // }
+
+
+    fetchAllPartners() {
+        (async () => {
+            let returnedData = await FetchPartners();
+            this.setState({
+                allPartners: returnedData,
+            });
+        })();
     }
 
     componentDidMount() {
@@ -63,6 +76,7 @@ class SpiReport extends React.Component {
                 orgUnits: returnedData.payload[0],
                 odkData: {},
                 orgLevel: 1,
+                partners: [],
                 orgId: 1,
                 orgUnitDataIds: [defaultOrg[0]],
                 orgUnitTimeline: [],
@@ -74,8 +88,11 @@ class SpiReport extends React.Component {
                 this.state.orgUnitTimeline,
                 this.state.siteType,
                 this.state.startDate,
-                this.state.endDate
+                this.state.endDate,
+                this.state.partners
             );
+
+            this.fetchAllPartners();
 
         })();
 
@@ -107,11 +124,11 @@ class SpiReport extends React.Component {
 
     }
 
-    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
@@ -159,7 +176,8 @@ class SpiReport extends React.Component {
             this.state.orgUnitTimeline,
             this.state.siteType,
             this.state.startDate,
-            this.state.endDate
+            this.state.endDate,
+            this.state.partners
         );
     }
 
@@ -555,33 +573,43 @@ class SpiReport extends React.Component {
                     <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
                         <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
                     </div>
-                    {/* <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <div className="btn-group">
                             <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Select Partner
+                                {this.state.partners && this.state.partners.length > 0 ? (this.state.partners.length+" partner(s)") : "Select Partner"}
                             </button>
                             <div className="dropdown-menu">
-                                <a
-                                    key={uuidv4()}
-                                    className="dropdown-item"
-                                    href="#"
-                                    // data-id={orgType}
-                                    onClick={(event) => {
-                                        // this.orgUnitTypeChangeHandler(event);
-                                    }}
+                                <a key={uuidv4()} className="dropdown-item" href="#" /* data-id={orgType} */ onClick={(event) => { /* this.orgUnitTypeChangeHandler(event); */ this.setState({ partners: [] }) }}
                                 >
-                                    All
-                                    <i className="fa fa-check"
-                                        style={{
-                                            // "display": this.state.orgUnitType.includes(orgType) ? "" : "none",
-                                            "color": "green"
-                                        }}
-                                        aria-hidden="true"></i>
+                                    All <i className="fa fa-check" style={{ "display": this.state.partners.length == 0 ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
                                 </a>
+                                {
+                                    this.state.allPartners.map((partner, index) => {
+                                        return (
+                                            <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner}
+                                            onClick={(event) => {
+                                                if (this.state.partners.indexOf(partner.id) == -1) {
+                                                    this.setState({ partners: [...this.state.partners, partner.id] })
+                                                } else {
+                                                    // remove the partner
+                                                    let partners = this.state.partners;
+                                                    partners = partners.filter((item) => {
+                                                        return item != partner.id
+                                                    })
+                                                    this.setState({ partners: partners })
+                                                }
+
+                                            }}
+                                            >
+                                                {partner.name} <i className="fa fa-check" style={{ "display": this.state.partners.includes(partner.id) ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
+                                            </a>
+                                        )
+                                    })
+                                }
                             </div>
                         </div>
-                    </div> */}
+                    </div>
 
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <button

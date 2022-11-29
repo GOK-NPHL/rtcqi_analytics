@@ -12,7 +12,6 @@ export function PartnerForm({ saveFxn, toEdit }) {
     const [org_units, setOrgUnits] = React.useState([]);
     const [orgUnitsFixed, setOrgUnitsFixed] = React.useState([]);
     const [allPartners, setAllPartners] = React.useState([]);
-    const [allPartnersFixed, setAllPartnersFixed] = React.useState([]);
     const [newPartner, setNewPartner] = React.useState({
         'name': '',
         'description': '',
@@ -85,7 +84,6 @@ export function PartnerForm({ saveFxn, toEdit }) {
         // partners
         FetchPartners().then((response) => {
             setAllPartners(response);
-            setAllPartnersFixed(response);
         })
     }, [id]);
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Partner;
+use App\PartnerOrgUnits;
 use App\Services\ODKDataAggregator;
 use App\Services\SystemAuthorities;
 use Exception;
@@ -44,6 +46,20 @@ class SpiReportController extends Controller
             $odkObj = new ODKDataAggregator;
             $orgTimeline = $request->orgTimeline;
             $orgUnitIds = $request->orgUnitIds;
+            // partners
+            $partners = $request->partners;
+            if($partners != null && $partners != ''){
+                // foreach partner, get the orgs and overwrite the orgUnitIds
+                $partner_ous = [];
+                foreach($partners as $partner){
+                    $ptnr = Partner::find($partner);
+                    if($ptnr != null){
+                        $ptnr_ous = PartnerOrgUnits::where('partner_id', $partner)->pluck('org_unit_id')->toArray();
+                        $partner_ous = array_merge($partner_ous, $ptnr_ous);
+                    }
+                }
+                $orgUnitIds = $partner_ous;
+            }
             $siteType = $request->siteType;
             $startDate = $request->startDate;
             $endDate = $request->endDate;

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { exportToExcel, FetchUserAuthorities, FetchPartners, FetchUsers, FetchOrgunits, SavePartner, DeletePartner } from '../../utils/Helpers'
+import { exportToExcel, FetchUserAuthorities, FetchPartners, FetchUsers, FetchOrgunits, SavePartner, DeletePartner, UpdatePartner } from '../../utils/Helpers'
 import 'jspdf-autotable'
 import Pagination from 'react-js-pagination';
 import OrgDate from '../../utils/orgunit/OrgDate';
@@ -165,7 +165,7 @@ class Partners extends React.Component {
 
     updateAPartner(partner) {
         (async () => {
-            let result = await SavePartner(partner);
+            let result = await UpdatePartner(partner);
             console.log('updateAPartner response:::: ', result);
             if (result.status == 200) {
                 this.setState({
@@ -389,7 +389,7 @@ class Partners extends React.Component {
                 </div>
 
                 {/* form */}
-                <PartnerForm saveFxn={this.state.toEdit != null ? this.updateAPartner : this.saveNewPartner} toEdit={this.state.toEdit} />
+                <PartnerForm saveFxn={this.state.toEdit /*!= null*/ ? this.updateAPartner : this.saveNewPartner} toEdit={this.state.toEdit} />
 
                 {/* view */}
                 {this.state.viewPartner && <ViewPartner partner={this.state.viewPartner} />}

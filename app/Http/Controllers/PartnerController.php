@@ -8,6 +8,7 @@ use App\PartnerOrgUnits;
 use App\PartnerUsers;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PartnerController extends Controller
 {
@@ -266,7 +267,7 @@ class PartnerController extends Controller
         }
     }
 
-    public function editPartner(Request $request)
+    public function updatePartner(Request $request)
     {
         try {
             // validate
@@ -300,6 +301,66 @@ class PartnerController extends Controller
                         $partner->level = $request->level;
                     }
                     $partner->save();
+
+                    // map org units
+                    if ($request->org_units && $request->org_units != '') {
+                        try {
+                            $partner_org_units = $request->org_units;
+                            // delete existing org unit mappings
+                            $current_mappings = PartnerOrgUnits::where('partner_id', $partner->id)->get();
+                            foreach ($current_mappings as $mapping) {
+                                $mapping->delete();
+                            }
+                            foreach ($partner_org_units as $ou) {
+                                // check if org unit exists
+                                $org_unit = OdkOrgunit::where('org_unit_id', $ou)->first();
+                                if ($org_unit) {
+                                    // check if org unit is already mapped
+                                    $partner_org_unit = PartnerOrgUnits::where('partner_id', $partner->id)->where('org_unit_id', $org_unit->id)->first();
+                                    if (!$partner_org_unit) {
+                                        $partner_org_unit = new PartnerOrgUnits;
+                                        $partner_org_unit->partner_id = $partner->id;
+                                        $partner_org_unit->org_unit_id = $org_unit->org_unit_id;
+                                        $partner_org_unit->save();
+                                    }
+                                } else {
+                                    return response()->json(['error' => 'Org unit not found: ' . $ou], 404);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            return response()->json(['error' => 'Error mapping org units to partner: ' . $e->getMessage()], 500);
+                        }
+                    }
+
+                    // map users
+                    if ($request->users && $request->users != '') {
+                        try {
+                            $partner_users = $request->users;
+                            // delete existing user mappings
+                            $current_mappings = PartnerUsers::where('partner_id', $partner->id)->get();
+                            foreach ($current_mappings as $mapping) {
+                                $mapping->delete();
+                            }
+                            foreach ($partner_users as $u) {
+                                // check if user exists
+                                $user = User::find($u);
+                                if ($user) {
+                                    // check if user is already mapped
+                                    $partner_user = PartnerUsers::where('partner_id', $partner->id)->where('user_id', $user->id)->first();
+                                    if (!$partner_user) {
+                                        $partner_user = new PartnerUsers;
+                                        $partner_user->partner_id = $partner->id;
+                                        $partner_user->user_id = $user->id;
+                                        $partner_user->save();
+                                    }
+                                } else {
+                                    return response()->json(['error' => 'User not found: ' . $u], 404);
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            return response()->json(['error' => 'Error mapping users to partner: ' . $e->getMessage()], 500);
+                        }
+                    }
                     return response()->json($partner);
                 } else {
                     return response()->json(['error' => 'Error editing partner: Partner not found.'], 500);

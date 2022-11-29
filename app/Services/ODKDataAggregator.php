@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\FormSubmissions;
 use App\OdkOrgunit;
 use App\OdkProject;
+use App\Partner;
+use App\PartnerOrgUnits;
 use Exception;
 use Illuminate\Support\Arr;
 use League\Csv\Reader;
@@ -170,7 +172,7 @@ class ODKDataAggregator
     private function processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section)
     {
         if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-            Log::info("processing national");
+            // Log::info("processing national");
             $rowCounter = $rowCounter + 1; //no or rows processed.
             if ($section == $this->reportSections["overall_sites_level"]) {
                 $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
