@@ -46,7 +46,7 @@ class SpiReportController extends Controller
             $odkObj = new ODKDataAggregator;
             $orgTimeline = $request->orgTimeline;
             $orgUnitIds = $request->orgUnitIds;
-            // partners
+            // <partners
             $partners = $request->partners;
             if($partners != null && $partners != ''){
                 // foreach partner, get the orgs and overwrite the orgUnitIds
@@ -60,6 +60,7 @@ class SpiReportController extends Controller
                 }
                 $orgUnitIds = $partner_ous;
             }
+            // partners/>
             $siteType = $request->siteType;
             $startDate = $request->startDate;
             $endDate = $request->endDate;

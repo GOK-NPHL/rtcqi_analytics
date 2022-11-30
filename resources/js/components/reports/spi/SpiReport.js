@@ -577,7 +577,7 @@ class SpiReport extends React.Component {
                         <div className="btn-group">
                             <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {this.state.partners && this.state.partners.length > 0 ? (this.state.partners.length+" partner(s)") : "Select Partner"}
+                                {this.state.partners && this.state.partners.length > 0 ? (this.state.partners.length + " partner(s)") : "Select Partner"}
                             </button>
                             <div className="dropdown-menu">
                                 <a key={uuidv4()} className="dropdown-item" href="#" onClick={(event) => { this.setState({ partners: [] }) }}
@@ -588,19 +588,18 @@ class SpiReport extends React.Component {
                                     this.state.allPartners.map((partner, index) => {
                                         return (
                                             <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
-                                            onClick={(event) => {
-                                                if (this.state.partners.indexOf(partner.id) == -1) {
-                                                    this.setState({ partners: [...this.state.partners, partner.id] })
-                                                } else {
-                                                    // remove the partner
-                                                    let partners = this.state.partners;
-                                                    partners = partners.filter((item) => {
-                                                        return item != partner.id
-                                                    })
-                                                    this.setState({ partners: partners })
-                                                }
-
-                                            }}
+                                                onClick={(event) => {
+                                                    if (this.state.partners.indexOf(partner.id) == -1) {
+                                                        this.setState({ partners: [...this.state.partners, partner.id] })
+                                                    } else {
+                                                        // remove the partner
+                                                        let partners = this.state.partners;
+                                                        partners = partners.filter((item) => {
+                                                            return item != partner.id
+                                                        })
+                                                        this.setState({ partners: partners })
+                                                    }
+                                                }}
                                             >
                                                 {partner.name} <i className="fa fa-check" style={{ "display": this.state.partners.includes(partner.id) ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
                                             </a>
