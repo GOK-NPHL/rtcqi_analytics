@@ -62,7 +62,7 @@ class ODkHTSDataAggregator
                         return $date >= new DateTime($startDate) && $date <= new DateTime($endDate);
                     });
                 }
-                
+
                 if (array_key_exists($orgUnit['org_unit_id'], $formSubmissions)) {
                     // $records = $formSubmissions[$orgUnit['org_unit_id']];
                     $records = $formSubmissions[$orgUnitIds[$x]['org_unit_id']];
@@ -104,8 +104,8 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
-        // Log::info("totals ======>>");
-        // Log::info($payload);
+        Log::info("totals ======>>");
+        Log::info($payload);
         $payload = $this->aggregateAgreementRates($payload);
 
         return $payload;
@@ -304,7 +304,7 @@ class ODkHTSDataAggregator
         $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
 
         if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
-            // Log::info($record);
+            Log::info($record);
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
                 't1_reactive' => 0,
                 't1_non_reactive' => 0,
@@ -388,7 +388,7 @@ class ODkHTSDataAggregator
         // $record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $score, $rowCounter, $section
 
         if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-            Log::info("processing kenya");
+            // Log::info("processing kenya");
             $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
 
             $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
@@ -396,21 +396,20 @@ class ODkHTSDataAggregator
             $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
             //$score =  $this->callFunctionBysecition($section, $record);
         } else {
-            Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
+            // Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
             if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
                 Log::info("facility 1 " . $orgUnit['mysites_county']);
                 if (!empty($orgUnit['mysites_subcounty'])) {
-                    Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
+                    // Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
                     if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
 
                         if (!empty($orgUnit['mysites_facility'])) {
-                            Log::info(strtolower($record['mysites_facility']) . " facility3 " . $orgUnit['mysites_facility']);
-                            if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
-                                Log::info(strtolower($record['mysites']) . " site1 " . $orgUnit['mysites']);
+                            $record_mfl = explode("_", $record['mysites_facility'])[0];
+                            $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
+                            // if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
+                            if ($record_mfl == $orgUnit_mfl) {
                                 if (!empty($orgUnit['mysites'])) {
-                                    Log::info(strtolower($record['mysites']) . " site2 " . $orgUnit['mysites']);
                                     if (strtolower($record['mysites']) == $orgUnit['mysites']) {
-                                        Log::info(strtolower($record['mysites']) . " site3 " . $orgUnit['mysites']);
                                         $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
 
                                         $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);

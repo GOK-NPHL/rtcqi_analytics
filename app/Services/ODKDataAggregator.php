@@ -185,19 +185,18 @@ class ODKDataAggregator
         } else {
             // Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
             if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
-                Log::info("facility 1 " . $orgUnit['mysites_county']);
+                // Log::info("facility 1 " . $orgUnit['mysites_county']);
                 if (!empty($orgUnit['mysites_subcounty'])) {
                     // Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
                     if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
 
                         if (!empty($orgUnit['mysites_facility'])) {
-                            // Log::info(strtolower($record['mysites_facility']) . " facility3 " . $orgUnit['mysites_facility']);
-                            if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
-                                // Log::info(strtolower($record['mysites']) . " site1 " . $orgUnit['mysites']);
+                            $record_mfl = explode("_", $record['mysites_facility'])[0];
+                            $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
+                            // if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
+                            if ($record_mfl == $orgUnit_mfl) {
                                 if (!empty($orgUnit['mysites'])) {
-                                    // Log::info(strtolower($record['mysites']) . " site2 " . $orgUnit['mysites']);
                                     if (strtolower($record['mysites']) == $orgUnit['mysites']) {
-                                        // Log::info(strtolower($record['mysites']) . " site3 " . $orgUnit['mysites']);
                                         $rowCounter = $rowCounter + 1; //no or rows processed.
                                         if ($section == $this->reportSections["overall_sites_level"]) {
                                             $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);

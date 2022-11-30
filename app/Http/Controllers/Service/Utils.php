@@ -169,7 +169,7 @@ class Utils
         // for each orgunit registered, get its childeren upto lowest level.
         $combinedRecords = [];
         //$combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
-        
+
         if( $user_id != null ) {
             $usrid = $user_id;
         }else{

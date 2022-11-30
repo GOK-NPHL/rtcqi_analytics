@@ -294,7 +294,14 @@ class ODKUtils
 
         try {
             $orgUnit['mysites_facility'] = $orgToProcess[3];
-            $orgUnitName = $orgToProcess[3];
+            // <mfl
+            $mfl = explode('_', $orgToProcess[3])[0];
+            $ou = OdkOrgunit::where('odk_unit_name', 'like', $mfl . '_%')->first();
+            Log::info('mfl:::::: ' . $mfl);
+            Log::info('ou:::::: ' . json_encode($ou));
+            $orgUnitName = $ou->odk_unit_name;
+            // mfl/>
+            // $orgUnitName = $orgToProcess[3];
         } catch (Exception $ex) {
             $orgUnit['mysites_facility'] = null;
         }
