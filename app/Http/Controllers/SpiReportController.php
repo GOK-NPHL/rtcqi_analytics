@@ -48,12 +48,13 @@ class SpiReportController extends Controller
             $orgUnitIds = $request->orgUnitIds;
             // <partners
             $partners = $request->partners;
-            if($partners != null && $partners != ''){
+            $aggregate_partners = $request->aggregate_partners ?? false;
+            if ($partners != null && $partners != '') {
                 // foreach partner, get the orgs and overwrite the orgUnitIds
                 $partner_ous = [];
-                foreach($partners as $partner){
+                foreach ($partners as $partner) {
                     $ptnr = Partner::find($partner);
-                    if($ptnr != null){
+                    if ($ptnr != null) {
                         $ptnr_ous = PartnerOrgUnits::where('partner_id', $partner)->pluck('org_unit_id')->toArray();
                         $partner_ous = array_merge($partner_ous, $ptnr_ous);
                     }
@@ -65,7 +66,15 @@ class SpiReportController extends Controller
             $startDate = $request->startDate;
             $endDate = $request->endDate;
 
-            $result = $odkObj->getData($orgUnitIds, $orgTimeline, $siteType, $startDate, $endDate);
+            $result = $odkObj->getData(
+                $orgUnitIds,
+                $orgTimeline,
+                $siteType,
+                $startDate,
+                $endDate,
+                $partners
+                // , $aggregate_partners
+            );
             return $result;
         } catch (Exception $ex) {
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);

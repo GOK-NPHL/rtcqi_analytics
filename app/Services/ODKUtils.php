@@ -297,8 +297,6 @@ class ODKUtils
             // <mfl
             $mfl = explode('_', $orgToProcess[3])[0];
             $ou = OdkOrgunit::where('odk_unit_name', 'like', $mfl . '_%')->first();
-            Log::info('mfl:::::: ' . $mfl);
-            Log::info('ou:::::: ' . json_encode($ou));
             $orgUnitName = $ou->odk_unit_name;
             // mfl/>
             // $orgUnitName = $orgToProcess[3];
@@ -337,7 +335,7 @@ class ODKUtils
             $formId = $submissionOrgUnitmap->form_id;
         } else {
             $countyId = $this->getCountyIdOfOrg($orgUnit['org_unit_id'], $levelObj);
-            Log::info("county id for file search =====>" . $countyId);
+            // Log::info("county id for file search =====>" . $countyId);
             $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
                 ->where('org_id', $countyId)
                 ->where('form_id', 'like', $formType) // for spi data
@@ -373,7 +371,7 @@ class ODKUtils
         } else if ($level == 3) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "org2.org_unit_id as org_unit_id",
+                "org2.org_unit_id as org_unit_id"
             )->join('odkorgunit as org2', 'odkorgunit.parent_id', '=', 'org2.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
                 ->first();
@@ -382,7 +380,7 @@ class ODKUtils
         } else if ($level == 4) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "org2.org_unit_id as org_unit_id",
+                "org2.org_unit_id as org_unit_id"
             )->join('odkorgunit as org3', 'odkorgunit.parent_id', '=', 'org3.org_unit_id')
                 ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')
                 ->where('odkorgunit.org_unit_id', $orgUnitId)
@@ -392,7 +390,7 @@ class ODKUtils
         } else if ($level == 5) {
 
             $orgUnitObject = OdkOrgunit::select(
-                "org2.org_unit_id as org_unit_id",
+                "org2.org_unit_id as org_unit_id"
             )->join('odkorgunit as org4', 'odkorgunit.parent_id', '=', 'org4.org_unit_id')
                 ->join('odkorgunit as org3', 'org4.parent_id', '=', 'org3.org_unit_id')
                 ->join('odkorgunit as org2', 'org3.parent_id', '=', 'org2.org_unit_id')

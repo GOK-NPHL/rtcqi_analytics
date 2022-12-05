@@ -24,6 +24,7 @@ class SpiReport extends React.Component {
             orgUnits: [],
             orgUnitDataIds: [0],
             partners: [],
+            aggregate_partners: false,
             orgUnitTimeline: [],
             siteType: [],
             echartsMinHeight: '',
@@ -46,6 +47,7 @@ class SpiReport extends React.Component {
         this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
         this.fetchAllPartners = this.fetchAllPartners.bind(this);
 
+        this.aggregateDataForPartners = this.aggregateDataForPartners.bind(this);
     }
 
     // componentDidMount() {
@@ -77,6 +79,7 @@ class SpiReport extends React.Component {
                 odkData: {},
                 orgLevel: 1,
                 partners: [],
+                aggregate_partners: false,
                 orgId: 1,
                 orgUnitDataIds: [defaultOrg[0]],
                 orgUnitTimeline: [],
@@ -89,10 +92,11 @@ class SpiReport extends React.Component {
                 this.state.siteType,
                 this.state.startDate,
                 this.state.endDate,
-                this.state.partners
+                this.state.partners,
+                // this.state.aggregate_partners
             );
-
             this.fetchAllPartners();
+
 
         })();
 
@@ -124,17 +128,23 @@ class SpiReport extends React.Component {
 
     }
 
-    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners) {
+    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners
+        // , aggregate_partners
+    ) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners);
+                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners, aggregate_partners);
                     if (returnedData.status == 200) {
-                        this.setState({
-                            odkData: returnedData.data,
-                        });
+                        // aggregate for partners
+                        if (this.state.aggregate_partners) {
+                            this.aggregateDataForPartners(returnedData.data);
+                        } else {
+                            this.setState({
+                                odkData: returnedData.data,
+                            });
+                        }
                     }
-
                 })();
             }
         }
@@ -177,8 +187,90 @@ class SpiReport extends React.Component {
             this.state.siteType,
             this.state.startDate,
             this.state.endDate,
-            this.state.partners
+            this.state.partners,
+            // this.state.aggregate_partners
         );
+    }
+
+    aggregateDataForPartners(data) {
+        let partner_name = this.state.allPartners.find(p => p.id == this.state.partners[0]).name;
+        // let data = this.state.odkData
+        let aggregated_data = {
+            "orgName": partner_name,
+        };
+        let org_count = Object.keys(data).length || 1;
+        Object.keys(data).forEach((orgId,ky) => {
+            let org_data = data[orgId];
+            Object.keys(org_data).forEach((indicator) => {
+                if (indicator == 'orgName') return;
+                let indicator_data = org_data[indicator];
+
+                if (aggregated_data[indicator] == undefined) {
+                    aggregated_data[indicator] = indicator_data;
+                } else {
+                    // aggregate
+                    // if obj
+                    if (typeof indicator_data == 'object') {
+                        Object.keys(indicator_data).forEach((key) => {
+                            if (aggregated_data[indicator][key] == undefined) {
+                                aggregated_data[indicator][key] = indicator_data[key];
+                            } else {
+                                if (typeof aggregated_data[indicator][key] == 'number') {
+                                    aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
+                                    if(org_count == ky+1){
+                                        aggregated_data[indicator][key] = aggregated_data[indicator][key]/org_count;
+                                    }
+                                } else if (typeof aggregated_data[indicator][key] == 'string') {
+                                    if (isNaN(aggregated_data[indicator][key])) {
+                                        aggregated_data[indicator][key] = aggregated_data[indicator][key] + ', ' + indicator_data[key];
+                                    }else{
+                                        aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
+                                        if(org_count == ky+1){
+                                            aggregated_data[indicator][key] = aggregated_data[indicator][key]/org_count;
+                                        }
+                                    }
+                                } else if (typeof aggregated_data[indicator][key] == 'object') {
+                                    // console.log('2nd level obj traversal: Org', orgId, ' Indicator: ', indicator, ' Key: ', key);
+                                    // aggregate values, todo avg
+                                    let new_val = {};
+                                    Object.keys(aggregated_data[indicator][key]).forEach((k) => {
+                                        new_val[k] = parseInt(aggregated_data[indicator][key][k]) + parseInt(indicator_data[key][k]);
+                                        if(org_count == ky+1){
+                                            new_val[k] = new_val[k]/org_count;
+                                        }
+                                    });
+                                    aggregated_data[indicator][key] = new_val;
+                                }
+                            }
+                        });
+                    } else if (typeof indicator_data == 'number') {
+                        aggregated_data[indicator] = parseInt(aggregated_data[indicator]) + parseInt(indicator_data);
+                        if(org_count == ky+1){
+                            aggregated_data[indicator] = aggregated_data[indicator]/org_count;
+                        }
+                    }
+                }
+            });
+        });
+        // console.log("aggregated_data:: ", aggregated_data);
+        this.setState({
+            odkData: {
+                [this.state.partners[0] || 'partner_' + Math.floor(Math.random() * 80)]: aggregated_data
+            }
+        });
+        // this.setState({ odkData: data });
+    }
+
+    aggregateIndicatorData(indicator_data1, indicator_data2) {
+        // if object traverse through the indicator data and aggregate the values (if numbers)
+        if (typeof indicator_data1 == 'object') {
+            Object.keys(indicator_data1).forEach((key) => {
+                indicator_data1[key] = this.aggregateIndicatorData(indicator_data1[key], indicator_data2[key]);
+            });
+            return indicator_data1;
+        } else {
+            return indicator_data1 + indicator_data2;
+        }
     }
 
     resetFilters() {
@@ -552,6 +644,12 @@ class SpiReport extends React.Component {
 
                 <div className="row">
 
+                    <div className="col-sm-12 mb-sm-1 mb-1">
+                        <details>
+                            <summary>odkData</summary>
+                            <pre style={{ padding: '4px', backgroundColor: 'wheat', border: '1px solid #a9ab89', maxHeight: '400px', overflowY: 'auto' }}>{JSON.stringify(this.state.odkData, null, 2)}</pre>
+                        </details>
+                    </div>
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <SpiOrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
                             orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
@@ -577,35 +675,52 @@ class SpiReport extends React.Component {
                         <div className="btn-group">
                             <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {this.state.partners && this.state.partners.length > 0 ? (this.state.partners.length + " partner(s)") : "Select Partner"}
+                                {this.state.partners && this.state.partners.length > 0 ? (
+                                    // this.state.partners.length + " partner(s)"
+                                    this.state.allPartners.find(p => p.id == this.state.partners[0]).name
+                                ) : "Select Partner"}
                             </button>
                             <div className="dropdown-menu">
-                                <a key={uuidv4()} className="dropdown-item" href="#" onClick={(event) => { this.setState({ partners: [] }) }}
-                                >
-                                    All <i className="fa fa-check" style={{ "display": this.state.partners.length == 0 ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
+                                <div>
+                                    <div className="form-check" style={{ padding: '3px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+                                        <input className="ml-2" type="checkbox" value={this.state.aggregate_partners} id="aggregate_partners" onClick={ev => {
+                                            let agg = ev.target.checked;
+                                            this.setState({ aggregate_partners: agg });
+                                        }} />
+                                        <label className="mb-0 ml-1" htmlFor="aggregate_partners">
+                                            Aggregate?
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr />
+                                <a key={uuidv4()} className="dropdown-item text-center" href="#" onClick={(event) => { this.setState({ partners: [] }) }}>
+                                    &mdash; None &mdash; <i className="fa fa-check" style={{ "display": this.state.partners.length == 0 ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
                                 </a>
-                                {
-                                    this.state.allPartners.map((partner, index) => {
-                                        return (
-                                            <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
-                                                onClick={(event) => {
-                                                    if (this.state.partners.indexOf(partner.id) == -1) {
-                                                        this.setState({ partners: [...this.state.partners, partner.id] })
-                                                    } else {
-                                                        // remove the partner
-                                                        let partners = this.state.partners;
-                                                        partners = partners.filter((item) => {
-                                                            return item != partner.id
-                                                        })
-                                                        this.setState({ partners: partners })
-                                                    }
-                                                }}
-                                            >
-                                                {partner.name} <i className="fa fa-check" style={{ "display": this.state.partners.includes(partner.id) ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
-                                            </a>
-                                        )
-                                    })
-                                }
+                                {this.state.allPartners.map((partner, index) => {
+                                    return (
+                                        <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
+                                            onClick={(event) => {
+                                                if (this.state.partners.indexOf(partner.id) == -1) {
+                                                    this.setState({
+                                                        partners: [
+                                                            // ...this.state.partners,
+                                                            partner.id
+                                                        ]
+                                                    })
+                                                } else {
+                                                    // remove the partner
+                                                    let partners = this.state.partners;
+                                                    partners = partners.filter((item) => {
+                                                        return item != partner.id
+                                                    })
+                                                    this.setState({ partners: partners })
+                                                }
+                                            }}
+                                        >
+                                            {partner.name} <i className="fa fa-check" style={{ "display": this.state.partners.includes(partner.id) ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
+                                        </a>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>

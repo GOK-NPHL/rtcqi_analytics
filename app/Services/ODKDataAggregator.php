@@ -66,8 +66,15 @@ class ODKDataAggregator
         return $formSubmissions;
     }
 
-    public function getData($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate)
-    {
+    public function getData(
+        $orgUnitIds,
+        $orgTimeline,
+        $siteTypes,
+        $startDate,
+        $endDate,
+        $partners = null
+        // $aggregate_partners = false
+    ) {
         // Log::info("Request Data variables");
         // Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
         // Log::info($siteTypes);
@@ -84,21 +91,50 @@ class ODKDataAggregator
             $payload = array();
             for ($x = 0; $x < count($siteTypes); $x++) {
                 $this->siteType = strtolower($siteTypes[$x]);
-                [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+                [$recordsReadData, $payld] = $this->getDataLoopOrgs(
+                    $orgUnitIds,
+                    $recordsReadData,
+                    $partners
+                    // , $aggregate_partners
+                );
                 for ($i = 0; $i < count($orgUnitIds); $i++) {
                     $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
                 }
                 $payload[] = $payld;
             }
         } else {
-            [$recordsReadData, $payload] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+            [$recordsReadData, $payload] = $this->getDataLoopOrgs(
+                $orgUnitIds,
+                $recordsReadData,
+                $partners
+                // , $aggregate_partners
+            );
         }
 
         return $payload;
     }
 
-    private function getDataLoopOrgs($orgUnitIds, $recordsReadData)
+
+    // function that receives two objects and if the values are numbers and the keys are the same, it adds the values and returns the aggregated object
+    private function aggregateObjects($obj1, $obj2)
     {
+        $obj = new \stdClass();
+        foreach ($obj1 as $key => $value) {
+            if (is_numeric($value) && is_numeric($obj2->$key)) {
+                $obj->$key = $value + $obj2->$key;
+            } else {
+                $obj->$key = $value;
+            }
+        }
+        return $obj;
+    }
+
+    private function getDataLoopOrgs(
+        $orgUnitIds,
+        $recordsReadData,
+        $partners
+        // , $aggregate_partners
+    ) {
         $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
@@ -110,6 +146,7 @@ class ODKDataAggregator
                 [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
 
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x];
+                $orgUnit['partners'] = $partners ?? null;
 
                 $records = null;
 
@@ -121,14 +158,6 @@ class ODKDataAggregator
                 }
                 $results = array();
                 $results["orgName"] = $orgUnitName;
-                // $results["orgCode"] = "";
-                // if(strpos($orgUnitName, '_') !== false) {
-                //     $results["orgCode"] = explode("_", $orgUnitName)[0];
-                // }
-                // $results["facUnit"] = "";
-                // if(strpos($orgUnitName, '/') !== false) {
-                //     $results["facUnit"] = explode("/", $orgUnitName)[1];
-                // }
                 $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit, $records);
                 $results["QACounselling"] = $this->getQACounselling($orgUnit, $records);
                 $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit, $records);
@@ -144,8 +173,10 @@ class ODKDataAggregator
                 Log::error($ex);
             }
         }
+
         return [$recordsReadData, $payload];
     }
+
 
     private function sumValues($record, $scores, $rowCounters, $section)
     {
@@ -158,7 +189,7 @@ class ODKDataAggregator
 
             $followupType = $record["followup"] ?? "follow1";
             for ($x = 0; $x < count($this->timeLines); $x++) {
-                if ($followupType == $this->timeLines[$x]) {
+                if (($followupType == $this->timeLines[$x]) || ($followupType == "other" && !empty($record["otherFollowup"]) && "follow" . $record["otherFollowup"] == $this->timeLines[$x])) {
                     if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                         $rowCounters[$this->timeLines[$x]] += 1;
                         $scores[$this->timeLines[$x]] += $this->callFunctionBysecition($section, $record);
@@ -171,6 +202,19 @@ class ODKDataAggregator
 
     private function processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section)
     {
+        // if (!empty($orgUnit['partners'])) {
+        //     // <aggregate_for_partner
+        //     $rowCounter = $rowCounter + 1; //no or rows processed.
+        //     if ($section == $this->reportSections["overall_sites_level"]) {
+        //         $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+        //     } else {
+        //         $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+        //         $scores = $valueAccumulations[0];
+        //         $rowCounters = $valueAccumulations[1];
+        //         $score =  $this->callFunctionBysecition($section, $record) + $score;
+        //     }
+        //     // aggregate_for_partner/>
+        // } else {
         if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
             // Log::info("processing national");
             $rowCounter = $rowCounter + 1; //no or rows processed.
@@ -183,16 +227,14 @@ class ODKDataAggregator
                 $score =  $this->callFunctionBysecition($section, $record) + $score;
             }
         } else {
-            // Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
             if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
-                // Log::info("facility 1 " . $orgUnit['mysites_county']);
                 if (!empty($orgUnit['mysites_subcounty'])) {
-                    // Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
                     if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
-
                         if (!empty($orgUnit['mysites_facility'])) {
                             $record_mfl = explode("_", $record['mysites_facility'])[0];
                             $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
+                            // <------ check_if_aggregation_for_partner_is_enabled
+
                             // if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
                             if ($record_mfl == $orgUnit_mfl) {
                                 if (!empty($orgUnit['mysites'])) {
@@ -244,6 +286,8 @@ class ODKDataAggregator
                 }
             }
         }
+        // }
+
 
         return [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section];
     }
