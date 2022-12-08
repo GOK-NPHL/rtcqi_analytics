@@ -193,72 +193,75 @@ class SpiReport extends React.Component {
     }
 
     aggregateDataForPartners(data) {
-        let partner_name = this.state.allPartners.find(p => p.id == this.state.partners[0]).name;
-        // let data = this.state.odkData
-        let aggregated_data = {
-            "orgName": partner_name,
-        };
-        let org_count = Object.keys(data).length || 1;
-        Object.keys(data).forEach((orgId,ky) => {
-            let org_data = data[orgId];
-            Object.keys(org_data).forEach((indicator) => {
-                if (indicator == 'orgName') return;
-                let indicator_data = org_data[indicator];
+        if (this.state.partners && this.state.partners.length > 0) {
+            let partner_name = '';
+            if (this.state.allPartners.length > 0) partner_name = this.state.allPartners.find(p => p.id == this.state.partners[0])?.name || '';
+            // let data = this.state.odkData
+            let aggregated_data = {
+                "orgName": partner_name,
+            };
+            let org_count = Object.keys(data).length || 1;
+            Object.keys(data).forEach((orgId, ky) => {
+                let org_data = data[orgId];
+                Object.keys(org_data).forEach((indicator) => {
+                    if (indicator == 'orgName') return;
+                    let indicator_data = org_data[indicator];
 
-                if (aggregated_data[indicator] == undefined) {
-                    aggregated_data[indicator] = indicator_data;
-                } else {
-                    // aggregate
-                    // if obj
-                    if (typeof indicator_data == 'object') {
-                        Object.keys(indicator_data).forEach((key) => {
-                            if (aggregated_data[indicator][key] == undefined) {
-                                aggregated_data[indicator][key] = indicator_data[key];
-                            } else {
-                                if (typeof aggregated_data[indicator][key] == 'number') {
-                                    aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
-                                    if(org_count == ky+1){
-                                        aggregated_data[indicator][key] = aggregated_data[indicator][key]/org_count;
-                                    }
-                                } else if (typeof aggregated_data[indicator][key] == 'string') {
-                                    if (isNaN(aggregated_data[indicator][key])) {
-                                        aggregated_data[indicator][key] = aggregated_data[indicator][key] + ', ' + indicator_data[key];
-                                    }else{
+                    if (aggregated_data[indicator] == undefined) {
+                        aggregated_data[indicator] = indicator_data;
+                    } else {
+                        // aggregate
+                        // if obj
+                        if (typeof indicator_data == 'object') {
+                            Object.keys(indicator_data).forEach((key) => {
+                                if (aggregated_data[indicator][key] == undefined) {
+                                    aggregated_data[indicator][key] = indicator_data[key];
+                                } else {
+                                    if (typeof aggregated_data[indicator][key] == 'number') {
                                         aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
-                                        if(org_count == ky+1){
-                                            aggregated_data[indicator][key] = aggregated_data[indicator][key]/org_count;
+                                        if (org_count == ky + 1) {
+                                            aggregated_data[indicator][key] = aggregated_data[indicator][key] / org_count;
                                         }
+                                    } else if (typeof aggregated_data[indicator][key] == 'string') {
+                                        if (isNaN(aggregated_data[indicator][key])) {
+                                            aggregated_data[indicator][key] = aggregated_data[indicator][key] + ', ' + indicator_data[key];
+                                        } else {
+                                            aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
+                                            if (org_count == ky + 1) {
+                                                aggregated_data[indicator][key] = aggregated_data[indicator][key] / org_count;
+                                            }
+                                        }
+                                    } else if (typeof aggregated_data[indicator][key] == 'object') {
+                                        // console.log('2nd level obj traversal: Org', orgId, ' Indicator: ', indicator, ' Key: ', key);
+                                        // aggregate values, todo avg
+                                        let new_val = {};
+                                        Object.keys(aggregated_data[indicator][key]).forEach((k) => {
+                                            new_val[k] = parseInt(aggregated_data[indicator][key][k]) + parseInt(indicator_data[key][k]);
+                                            if (org_count == ky + 1) {
+                                                new_val[k] = new_val[k] / org_count;
+                                            }
+                                        });
+                                        aggregated_data[indicator][key] = new_val;
                                     }
-                                } else if (typeof aggregated_data[indicator][key] == 'object') {
-                                    // console.log('2nd level obj traversal: Org', orgId, ' Indicator: ', indicator, ' Key: ', key);
-                                    // aggregate values, todo avg
-                                    let new_val = {};
-                                    Object.keys(aggregated_data[indicator][key]).forEach((k) => {
-                                        new_val[k] = parseInt(aggregated_data[indicator][key][k]) + parseInt(indicator_data[key][k]);
-                                        if(org_count == ky+1){
-                                            new_val[k] = new_val[k]/org_count;
-                                        }
-                                    });
-                                    aggregated_data[indicator][key] = new_val;
                                 }
+                            });
+                        } else if (typeof indicator_data == 'number') {
+                            aggregated_data[indicator] = parseInt(aggregated_data[indicator]) + parseInt(indicator_data);
+                            if (org_count == ky + 1) {
+                                aggregated_data[indicator] = aggregated_data[indicator] / org_count;
                             }
-                        });
-                    } else if (typeof indicator_data == 'number') {
-                        aggregated_data[indicator] = parseInt(aggregated_data[indicator]) + parseInt(indicator_data);
-                        if(org_count == ky+1){
-                            aggregated_data[indicator] = aggregated_data[indicator]/org_count;
                         }
                     }
+                });
+            });
+            // console.log("aggregated_data:: ", aggregated_data);
+            this.setState({
+                odkData: {
+                    [this.state.partners[0] || 'partner_' + Math.floor(Math.random() * 80)]: aggregated_data
                 }
             });
-        });
-        // console.log("aggregated_data:: ", aggregated_data);
-        this.setState({
-            odkData: {
-                [this.state.partners[0] || 'partner_' + Math.floor(Math.random() * 80)]: aggregated_data
-            }
-        });
-        // this.setState({ odkData: data });
+            // this.setState({ odkData: data });
+        }
     }
 
     aggregateIndicatorData(indicator_data1, indicator_data2) {
@@ -314,7 +317,7 @@ class SpiReport extends React.Component {
             tableData.push(
                 <tr key={uuidv4()}>
                     <td colSpan={4} scope="row">
-                        <strong>{orgunitName}</strong>
+                        <strong>{orgunitName} {this.state.partners && this.state.partners.length == 1 && this.state.aggregate_partners && " (Aggregate)"}</strong>
                     </td>
                 </tr>);
 
@@ -644,12 +647,12 @@ class SpiReport extends React.Component {
 
                 <div className="row">
 
-                    <div className="col-sm-12 mb-sm-1 mb-1">
+                    {/* <div className="col-sm-12 mb-sm-1 mb-1">
                         <details>
                             <summary>odkData</summary>
                             <pre style={{ padding: '4px', backgroundColor: 'wheat', border: '1px solid #a9ab89', maxHeight: '400px', overflowY: 'auto' }}>{JSON.stringify(this.state.odkData, null, 2)}</pre>
                         </details>
-                    </div>
+                    </div> */}
                     <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <SpiOrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
                             orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
@@ -673,8 +676,7 @@ class SpiReport extends React.Component {
                     </div>
                     <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
                         <div className="btn-group">
-                            <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {this.state.partners && this.state.partners.length > 0 ? (
                                     // this.state.partners.length + " partner(s)"
                                     this.state.allPartners.find(p => p.id == this.state.partners[0]).name
