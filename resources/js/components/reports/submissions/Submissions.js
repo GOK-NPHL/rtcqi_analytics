@@ -365,7 +365,9 @@ class SubmissionsReport extends React.Component {
                             <table className='table table-striped table-condensed'>
                                 <thead>
                                     <tr>
-                                        {this.state.headers.map((header, index) => {
+                                        {this.state.headers
+                                            .slice(0,8)
+                                            .map((header, index) => {
                                             return <th key={index} style={{ textTransform: 'capitalize', whiteSpace: 'nowrap', border: '1px solid #ccd6e3' }}>{header.replace('mysites_', '').replace('_', ' ').replace('-', ' ')}</th>
                                         })}
                                     </tr>
@@ -382,7 +384,9 @@ class SubmissionsReport extends React.Component {
                                                 })}
                                             </tr>)} */}
                                             <tr>
-                                                {this.state.headers.map((header, index) => {
+                                                {this.state.headers
+                                                    .slice(0,8)
+                                                    .map((header, index) => {
                                                     if (index < 2) {
                                                         return <td key={index}>{new Date(dt[header]).toLocaleString()}</td>
                                                     }
