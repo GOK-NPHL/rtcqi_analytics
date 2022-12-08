@@ -29,7 +29,7 @@ class SubmissionsReport extends React.Component {
             startDate: '',
             endDate: '',
             total: 0,
-            perPage: 150,
+            perPage: 100,
             totalPages: 1,
             page: 1,
             echartsMinHeight: '',
@@ -119,7 +119,7 @@ class SubmissionsReport extends React.Component {
             this.state.startDate,
             this.state.endDate,
             this.state.page || 1,
-            this.state.perPage || 150
+            this.state.perPage || 100
         );
     }
 
@@ -130,7 +130,7 @@ class SubmissionsReport extends React.Component {
             startDate: '',
             endDate: '',
             page: 1,
-            perPage: 150,
+            perPage: 100,
         })
         this.fetchOdkDataServer(
             this.state.orgUnits[0],
@@ -138,7 +138,7 @@ class SubmissionsReport extends React.Component {
             '',
             '',
             1,
-            150
+            100
         );
     }
 
@@ -148,7 +148,7 @@ class SubmissionsReport extends React.Component {
         // }));
         // console.log('fetching odk data page: ' + page + ' perpage: ' + perpage);
         let pg = page || 1;
-        let ppg = perpage || 150;
+        let ppg = perpage || 100;
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
@@ -345,8 +345,8 @@ class SubmissionsReport extends React.Component {
                                 itemClass="page-item"
                                 linkClass="page-link"
                                 activePage={this.state.page || 1}
-                                itemsCountPerPage={this.state.perPage || 150}
-                                totalItemsCount={this.state.total || 150}
+                                itemsCountPerPage={this.state.perPage || 100}
+                                totalItemsCount={this.state.total || 100}
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
@@ -357,7 +357,7 @@ class SubmissionsReport extends React.Component {
                                         this.state.startDate,
                                         this.state.endDate,
                                         page,
-                                        this.state.perPage || 150
+                                        this.state.perPage || 100
                                     );
                                 }} />
                         </div>
@@ -403,7 +403,7 @@ class SubmissionsReport extends React.Component {
                                 itemClass="page-item"
                                 linkClass="page-link"
                                 activePage={this.state.page || 1}
-                                itemsCountPerPage={this.state.perPage || 150}
+                                itemsCountPerPage={this.state.perPage || 100}
                                 totalItemsCount={this.state.total || 0}
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
@@ -415,7 +415,7 @@ class SubmissionsReport extends React.Component {
                                         this.state.startDate,
                                         this.state.endDate,
                                         page,
-                                        this.state.perPage || 150
+                                        this.state.perPage || 100
                                     );
                                 }} />
                         </div>

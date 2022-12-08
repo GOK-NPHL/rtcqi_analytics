@@ -55,11 +55,11 @@ class SubmissionsController extends Controller
             $resultx = array_values($result0);
             $result = $resultx[0] ?? [];
             $page = $request->page ?? 1;
-            $perPage = $request->perPage ?? 150;
+            $perPage = $request->perPage ?? 100;
             $total = count($result);
             $pages = ceil($total / $perPage);
             $result_page = array_slice($result, ($page - 1) * $perPage, $perPage);
-            Log::info('Total: ' . $total . ' Pages: ' . $pages . ' PerPage: ' . $perPage . ' Page: ' . $page);
+            // Log::info('Total: ' . $total . ' Pages: ' . $pages . ' PerPage: ' . $perPage . ' Page: ' . $page);
             return [
                 'headers' => $columnsToUse,
                 'result' => $result_page ?? [],
@@ -70,6 +70,7 @@ class SubmissionsController extends Controller
                 'orgs' => $orgUnitIds,
             ];
         } catch (Exception $ex) {
+            Log::error('Could not fetch data: ' . $ex->getMessage());
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
         }
     }
