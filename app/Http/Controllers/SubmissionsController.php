@@ -55,10 +55,11 @@ class SubmissionsController extends Controller
             $resultx = array_values($result0);
             $result = $resultx[0] ?? [];
             $page = $request->page ?? 1;
-            $perPage = $request->perPage ?? 50;
+            $perPage = $request->perPage ?? 150;
             $total = count($result);
             $pages = ceil($total / $perPage);
             $result_page = array_slice($result, ($page - 1) * $perPage, $perPage);
+            Log::info('Total: ' . $total . ' Pages: ' . $pages . ' PerPage: ' . $perPage . ' Page: ' . $page);
             return [
                 'headers' => $columnsToUse,
                 'result' => $result_page ?? [],
