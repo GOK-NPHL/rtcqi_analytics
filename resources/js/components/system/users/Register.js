@@ -52,7 +52,7 @@ class Register extends React.Component {
 
                 let canViewAssignRolesList = false;
                 try {
-                    canViewAssignRolesList = roles[userDetails['demographics']['role_id']]['authorities']['role'].includes(12) // check if has view role option 
+                    canViewAssignRolesList = roles[userDetails['demographics']['role_id']]['authorities']['role'].includes(12) // check if has view role option
                 } catch (err) {
                     //pass
                 }

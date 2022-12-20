@@ -85,7 +85,7 @@ class Partners extends React.Component {
                 let ous = org_units.payload[0].filter((ou) => {
                     return ou.level == 4;
                 }) || [];
-                this.setState({ org_units: ous, ous: ous });
+                this.setState({ org_units: ous, ous: org_units });
             }).catch((err) => {
                 console.log('Error fetching org units: ' + err);
             })
@@ -389,7 +389,7 @@ class Partners extends React.Component {
                 </div>
 
                 {/* form */}
-                <PartnerForm saveFxn={this.state.toEdit /*!= null*/ ? this.updateAPartner : this.saveNewPartner} toEdit={this.state.toEdit} />
+                {this.state.org_units && this.state.org_units.length>0 && <PartnerForm saveFxn={this.state.toEdit /*!= null*/ ? this.updateAPartner : this.saveNewPartner} toEdit={this.state.toEdit} />}
 
                 {/* view */}
                 {this.state.viewPartner && <ViewPartner partner={this.state.viewPartner} />}

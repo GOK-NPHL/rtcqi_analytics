@@ -16,4 +16,14 @@ class OdkOrgunit extends Model
     {
         return $this->belongsToMany('App\User','odkorgunit_user');
     }
+
+    public function children()
+    {
+        return $this->hasMany('App\OdkOrgunit', 'parent_id', 'org_unit_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo('App\OdkOrgunit', 'parent_id', 'org_unit_id');
+    }
 }

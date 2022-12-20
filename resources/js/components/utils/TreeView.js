@@ -153,6 +153,7 @@ class TreeView extends React.Component {
                     addCheckBox={this.props.addCheckBox}
                     clickHandler={this.props.clickHandler}
                     orgUnits={this.props.orgUnits}
+                    isHooks={this.props.isHooks ? true : false}
                     setcurrentSelectedOrg={this.setcurrentSelectedOrg}
                     setNewEditOrgUnitName={this.setNewEditOrgUnitName}
                 ></Tree>

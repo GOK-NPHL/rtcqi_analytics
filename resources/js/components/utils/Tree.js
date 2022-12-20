@@ -15,13 +15,16 @@ class Tree extends React.Component {
     }
 
     componentDidMount() {
+        console.log("Tree Mounted")
     }
 
     componentDidUpdate() {
+        console.log("Tree Updated")
     }
 
 
     shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.isHooks) return false;
         if (
             nextProps.orgUnits != this.props.orgUnits
         ) {

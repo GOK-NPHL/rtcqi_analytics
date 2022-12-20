@@ -1,8 +1,9 @@
 import React from 'react';
 import DualListBox from 'react-dual-listbox';
-import { FetchPartners, FetchPartner, FetchOrgunits, FetchUsers } from '../../utils/Helpers';
+import TreeView from '../../utils/TreeView';
+import { FetchPartners, FetchPartner, FetchOrgunits, FetchUsers, DevelopOrgStructure } from '../../utils/Helpers';
 
-export function PartnerForm({ saveFxn, toEdit }) {
+export function PartnerForm({ saveFxn, toEdit, ous }) {
     let id = null;
     if (toEdit) id = toEdit;
 
@@ -74,11 +75,11 @@ export function PartnerForm({ saveFxn, toEdit }) {
 
         // org units
         FetchOrgunits().then((response) => {
-            let ous = response.payload[0]
+            let ous_ = response.payload[0]
                 // .filter((ou) => { return ou.level == 4; })
                 || [];
-            setOrgUnits(ous);
-            setOrgUnitsFixed(ous);
+            setOrgUnits(ous_);
+            setOrgUnitsFixed(response);
         })
 
         // partners
@@ -86,6 +87,54 @@ export function PartnerForm({ saveFxn, toEdit }) {
             setAllPartners(response);
         })
     }, [id]);
+
+    const clickHandler = (orgunit) => {
+        let selectedOrgs = Array.from(newPartner.org_units, ou => {
+            if(typeof ou === 'object'){
+                return ou.org_unit_id
+            } else if(typeof ou === 'string'){
+                return ou
+            }
+        }) || []
+        if (selectedOrgs.includes(orgunit.id)) {
+            let new_ous = selectedOrgs.filter(ou => ou !== orgunit.id)
+            setNewPartner({
+                ...newPartner,
+                org_units: new_ous
+            })
+        } else {
+            let new_ous = [
+                ...newPartner.org_units,
+                org_units.find(ou => ou.org_unit_id === orgunit.id)
+            ].filter((item) => { return (item != undefined) && (item != null); })
+            setNewPartner({
+                ...newPartner,
+                org_units: Array.from(new_ous, nou => {
+                    if (typeof nou == 'object' && nou.org_unit_id) {
+                        return nou?.org_unit_id
+                    } else if (typeof nou == 'string') {
+                        return nou
+                    }
+                })
+            })
+        }
+
+
+
+        // reduce org_units to ids only
+        //     let org_units_ids = [];
+        //     newPartner.org_units.forEach((ou) => {
+        //         if(typeof ou == 'object' && ou.org_unit_id){
+        //             org_units_ids.push(ou.org_unit_id);
+        //         }else if(typeof ou == 'string'){
+        //             org_units_ids.push(ou);
+        //         }
+        //     })
+        //     setNewPartner({
+        //         ...newPartner,
+        //         org_units: org_units_ids
+        //     })
+    }
 
 
     return (
@@ -309,71 +358,127 @@ export function PartnerForm({ saveFxn, toEdit }) {
                                 </div>
                             </div>
                             {/* level */}
-                            <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
-                                <div className="col-md-3">
-                                    <label htmlFor="level">Org unit Level</label>
-                                </div>
-                                <div className="col-md-9">
-                                    <select value={newPartner?.level || ''} className="form-control" id="level" name="level" onChange={(ev) => {
-                                        // filter org units
-                                        setOrgUnits(orgUnitsFixed.filter((ou) => ou.level == ev.target.value))
-                                        setNewPartner({
-                                            ...newPartner,
-                                            level: ev.target.value
-                                        })
-                                    }}>
-                                        <option value=""> -- Select -- </option>
-                                        <option value={1}>Level 1</option>
-                                        <option value={2}>Level 2</option>
-                                        <option value={3}>Level 3</option>
-                                        <option value={4}>Level 4</option>
-                                        {/* <option value={5}>Level 5</option> */}
-                                    </select>
-                                </div>
-                            </div>
+                            {/*
+                                <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
+                                    <div className="col-md-3">
+                                        <label htmlFor="level">Org unit Level</label>
+                                    </div>
+                                    <div className="col-md-9">
+                                        <select value={newPartner?.level || ''} className="form-control" id="level" name="level" onChange={(ev) => {
+                                            // filter org units
+                                            setOrgUnits(orgUnitsFixed.filter((ou) => ou.level == ev.target.value))
+                                            setNewPartner({
+                                                ...newPartner,
+                                                level: ev.target.value
+                                            })
+                                        }}>
+                                            <option value=""> -- Select -- </option>
+                                            <option value={1}>Level 1</option>
+                                            <option value={2}>Level 2</option>
+                                            <option value={3}>Level 3</option>
+                                            <option value={4}>Level 4</option>
+                                            {/-* <option value={5}>Level 5</option> *-/}
+                                        </select>
+                                    </div>
+                                </div> */}
                             {/* org_units */}
-                            {newPartner && newPartner?.level && newPartner?.level > 0 && <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
-                                <div className="col-md-12">
-                                    <div className='row mb-2'>
-                                        <div className='col-sm-3 py-0' style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                            <label htmlFor="partner_org_units">Organisation units <small>({org_units.length})</small></label>
-                                        </div>
-                                        <div className='col-sm-9 py-0'>
-                                            <input type="text" className="form-control" id="partner_org_units_search" placeholder="Search org_units" onInput={(ev) => {
-                                                let term = ev.target.value.toLowerCase();
-                                                let filteredOUs = org_units.filter((ou) => {
-                                                    let name = ou.odk_unit_name
-                                                    // if search term is longer than 2 characters
+                            {/* {newPartner && newPartner?.level && newPartner?.level > 0 && <div className="form-group row p-2 my-2" style={{ borderBottom: '1px solid #e2e2e2' }}>
+                                    <div className="col-md-12">
+                                        <div className='row mb-2'>
+                                            <div className='col-sm-3 py-0' style={{ display: 'flex', alignItems: 'flex-end' }}>
+                                                <label htmlFor="partner_org_units">Organisation units <small>({org_units.length})</small></label>
+                                            </div>
+                                            <div className='col-sm-9 py-0'>
+                                                <input type="text" className="form-control" id="partner_org_units_search" placeholder="Search org_units" onInput={(ev) => {
+                                                    let term = ev.target.value.toLowerCase();
+                                                    let filteredOUs = org_units.filter((ou) => {
+                                                        let name = ou.odk_unit_name
+                                                        // if search term is longer than 2 characters
+                                                        if (term.length > 2) {
+                                                            return name.toLowerCase().indexOf(term) > -1;
+                                                        } else {
+                                                            return true;
+                                                        }
+                                                    }) || [];
                                                     if (term.length > 2) {
-                                                        return name.toLowerCase().indexOf(term) > -1;
+                                                        setOrgUnits(filteredOUs)
                                                     } else {
-                                                        return true;
+                                                        setOrgUnits(orgUnitsFixed)
                                                     }
-                                                }) || [];
-                                                if (term.length > 2) {
-                                                    setOrgUnits(filteredOUs)
-                                                } else {
-                                                    setOrgUnits(orgUnitsFixed)
-                                                }
-                                            }} />
+                                                }} />
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="col-md-12">
+                                        <DualListBox options={Array.from(org_units, ou => {
+                                            return {
+                                                // value: ou.id,
+                                                value: ou.org_unit_id,
+                                                label: ou.odk_unit_name.split('_').join(' ').trim().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
+                                            }
+                                        })} selected={newPartner.org_units} onChange={(selected) => {
+                                            setNewPartner({
+                                                ...newPartner,
+                                                org_units: selected
+                                            })
+                                        }} />
+                                    </div>
+                                </div>}
+                            */}
+
+                            {/* ------------- */}
+                            <div className="form-row">
+                                <div className="col-md-6 mb-6">
+                                    <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                        <p> Select Organisation Unit *</p>
+                                        <TreeView
+                                            assignedOrgUnits={(() => {
+                                                if (newPartner.org_units) {
+                                                    return newPartner.org_units.map(ou => ou)
+                                                } else {
+                                                    return []
+                                                }
+                                            })()}
+                                            addCheckBox={true}
+                                            clickHandler={clickHandler}
+                                            isHooks={true}
+                                            orgUnits={DevelopOrgStructure(orgUnitsFixed)}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="col-md-12">
-                                    <DualListBox options={Array.from(org_units, ou => {
-                                        return {
-                                            // value: ou.id,
-                                            value: ou.org_unit_id,
-                                            label: ou.odk_unit_name.split('_').join(' ').trim().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')
-                                        }
-                                    })} selected={newPartner.org_units} onChange={(selected) => {
-                                        setNewPartner({
-                                            ...newPartner,
-                                            org_units: selected
-                                        })
-                                    }} />
+                                <div id="selectedOrgs" className="col-md-6 mb-6">
+                                    <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                        <p> Selected Organisation Units *</p>
+                                        {newPartner.org_units && newPartner.org_units.length > 0 && newPartner.org_units.map((ou, index) => {
+                                            let name = ou
+                                            if (typeof ou === 'object') {
+                                                name = ou?.odk_unit_name
+                                            } else {
+                                                if (org_units.filter(o => o.org_unit_id === ou).length > 0) {
+                                                    name = org_units.filter(o => o.org_unit_id === ou)[0].odk_unit_name
+                                                }
+                                            }
+                                            return (
+                                                <div key={index} className="row">
+                                                    <div className="col-md-10">
+                                                        {name ? <p style={{ textTransform: 'capitalize' }}>{name.split('_').join(' ').trim()}</p> : <p>{ou}</p>}
+                                                    </div>
+                                                    <div className="col-md-2">
+                                                        <button className="btn text-danger btn-xs" onClick={() => {
+                                                            let new_orgs = newPartner.org_units.filter(ou => ou.org_unit_id !== ou.org_unit_id)
+                                                            setNewPartner({
+                                                                ...newPartner,
+                                                                org_units: new_orgs
+                                                            })
+                                                        }}>&times;</button>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
-                            </div>}
+                            </div>
+                            {/* ------------- */}
                         </div>
                         <div className="modal-footer">
                             <button type="button" id="dismissSave" className="btn btn-link" data-dismiss="modal">Cancel</button>

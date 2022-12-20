@@ -627,12 +627,24 @@ export function DevelopOrgStructure(orunitData) {
     if (cacheOrgUnit == null) {
         let tableOrgs = [];
         let processedItems = {};
-
-        orunitData.payload[0].map((orgUnitToAdd) => {
-            //console.log("new way")
-            OrgUnitStructureMaker(tableOrgs, orgUnitToAdd, processedItems);
-
-        });
+        if(orunitData.payload && orunitData.payload.length > 0 && orunitData.payload[0].length > 0){
+            orunitData.payload[0].map((orgUnitToAdd) => {
+                OrgUnitStructureMaker(tableOrgs, orgUnitToAdd, processedItems);
+            });
+        }else{
+            let table_Orgs = [];
+            let processed_Items = {};
+            return FetchOrgunits().then((orgs) => {
+                orgs.payload[0].map((org2add) => {
+                    OrgUnitStructureMaker(table_Orgs, org2add, processed_Items);
+                });
+                try {
+                    localStorage.setItem("orgunitTableStruc", JSON.stringify(table_Orgs));
+                } catch (err) { }
+            }).then(() => {
+                return tableOrgs;
+            });
+        }
 
         try {
             localStorage.setItem("orgunitTableStruc", JSON.stringify(tableOrgs));

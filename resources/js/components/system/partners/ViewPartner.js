@@ -49,7 +49,7 @@ export function ViewPartner(ptnr) {
                                             </tr>
                                             <tr>
                                                 <td>Organisation Unit Level</td>
-                                                <td> {partner?.level ? "Level "+partner?.level : <span className='badge badge-dark'>Not set</span>}</td>
+                                                <td> {partner?.level ? "Level " + partner?.level : <span className='badge badge-dark'>Not set</span>}</td>
                                             </tr>
                                             <tr>
                                                 <td>Partner Parent</td>
@@ -75,7 +75,7 @@ export function ViewPartner(ptnr) {
                                                 <td>Partner Users</td>
                                                 <td>
                                                     <ul>
-                                                        {partner.users.map((user, index) => {
+                                                        {partner?.users && partner?.users.length>0 && partner?.users.map((user, index) => {
                                                             return (
                                                                 <li key={index}>{user?.name || ''} {user?.last_name || ''} {user?.email ? '(' + user?.email + ')' : '-'}</li>
                                                             );
@@ -87,12 +87,33 @@ export function ViewPartner(ptnr) {
                                                 <td>Partner Organisation Units</td>
                                                 <td>
                                                     <ul>
-                                                        {partner.org_units.map((ou, index) => {
+                                                        {partner?.org_units && partner?.org_units.length>0 && partner?.org_units.map((ou, index) => {
                                                             return (
-                                                                <li key={index}>{ou?.odk_unit_name.split('_').join(' ').trim().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')} {ou?.level ? ' (Level ' + ou.level + ')' : ''}</li>
+                                                                <React.Fragment key={index}>
+                                                                    {(typeof ou == "object" && ou.odk_unit_name) ?
+                                                                        <li key={index}>{ou?.odk_unit_name.split('_').join(' ').trim().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')} {ou?.level ? ' (Level ' + ou.level + ')' : ''}</li>
+                                                                        : (
+                                                                            <li>{typeof ou == "string" ? { ou } : "-"}</li>
+                                                                        )}
+                                                                </React.Fragment>
                                                             );
                                                         })}
                                                     </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Partner Sites</td>
+                                                <td>
+                                                    <ul>
+                                                    {partner?.sites && partner?.sites.length>0 && partner?.sites.map((ou, index) => {
+                                                        return (
+                                                            <li key={index}>{ou?.odk_unit_name}</li>
+                                                        )
+                                                    })}
+                                                    </ul>
+                                                    {/* <pre>
+                                                        {JSON.stringify((partner?.sites || []), null, 2)}
+                                                    </pre> */}
                                                 </td>
                                             </tr>
                                         </tbody>

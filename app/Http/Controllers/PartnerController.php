@@ -52,14 +52,57 @@ class PartnerController extends Controller
             $partner->users = $partner->users()->get();
             // get org units
             $pous = PartnerOrgUnits::where('partner_id', $partner->id)->get();
-            $partner_org_units = [];
+            $partner_sites = [];
+            $partner_ous = [];
             foreach ($pous as $partner_org_unit) {
                 $ou = OdkOrgunit::where('org_unit_id', $partner_org_unit->org_unit_id)->first();
                 if ($ou) {
-                    $partner_org_units[] = $ou;
+                    $partner_ous[] = $ou;
+                    // check ou level. If level is less than 4, loop through all children till you get level 4 children and add them to the partner_sites array
+                    if ($ou->level < 4) {
+                        $children = $ou->children()->get();
+                        // $children = OdkOrgunit::where('parent_id', $ou->org_unit_id)->get();
+                        foreach ($children as $child) {
+                            if ($child->level == 4) {
+                                array_push($partner_sites, $child);
+                            }else {
+                                $grand_children = $child->children()->get();
+                                foreach ($grand_children as $grand_child) {
+                                    if ($grand_child->level == 4) {
+                                        array_push($partner_sites, $grand_child);
+                                    } else {
+                                        $great_grand_children = $grand_child->children()->get();
+                                        foreach ($great_grand_children as $great_grand_child) {
+                                            if ($great_grand_child->level == 4) {
+                                                array_push($partner_sites, $great_grand_child);
+                                            } else {
+                                                $great_great_grand_children = $great_grand_child->children()->get();
+                                                foreach ($great_great_grand_children as $great_great_grand_child) {
+                                                    if ($great_great_grand_child->level == 4) {
+                                                        array_push($partner_sites, $great_great_grand_child);
+                                                    } else {
+                                                        $great_great_great_grand_children = $great_great_grand_child->children()->get();
+                                                        foreach ($great_great_great_grand_children as $great_great_great_grand_child) {
+                                                            if ($great_great_great_grand_child->level == 4) {
+                                                                array_push($partner_sites, $great_great_great_grand_child);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        array_push($partner_sites, $ou);
+                    }
                 }
             }
-            $partner->org_units = $partner_org_units;
+            // $partner->org_units = $partner_org_units;
+            $partner->org_units = $partner_ous;
+            $partner->sites = $partner_sites;
             // parent
             if ($partner->parent_partner_id) {
                 $parent_partner = Partner::find($partner->parent_partner_id);
