@@ -6,6 +6,7 @@ import StackedHorizontal from '../utils/charts/StackedHorizontal'
 import TopLabels from './TopLabels'
 import { FetchUserAuthorities, FetchOrgunits, FetchOdkData } from '../utils/Helpers';
 import SiteLevelBarColumnCharts from '../reports/spi/SiteLevelBarColumnCharts';
+import SiteLevelBarCharts from '../reports/spi/SiteLevelBarCharts';
 import OverallPerformanceRadar from '../reports/spi/OverallPerformanceRadar';
 
 class Dashboard extends React.Component {
@@ -157,7 +158,7 @@ class Dashboard extends React.Component {
     }
 
     render() {
-        
+
         let dashBoardContent = '';
         if (this.state.allowedPermissions.length > 0 &&
             this.state.allowedPermissions.includes('view_dashboard')) {
@@ -177,6 +178,7 @@ class Dashboard extends React.Component {
                 <div className="row">
                     <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
                     <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
+                    <SiteLevelBarCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
                 </div>
             </React.Fragment>
         }
