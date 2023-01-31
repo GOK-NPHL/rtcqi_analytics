@@ -248,12 +248,6 @@ class SiteLevelBarColumnCharts extends React.Component {
                             credits: {
                                 enabled: false
                             },
-                            // series: Array.from(Object.keys(follow_data), (k, i) => {
-                            //     return {
-                            //         name: k,
-                            //         data: [parseFloat(follow_data[k]) || 0]
-                            //     }
-                            // })
                             series: [{
                                 name: 'LEVEL',
                                 colorByPoint: true,
@@ -275,7 +269,6 @@ class SiteLevelBarColumnCharts extends React.Component {
                                 <div className='card-body'>
                                     <div className='chart-container'>
                                         <div className='chart has-fixed-height' id={"follow_up_" + follow_up}>
-                                            {/* <pre>{JSON.stringify(follow_data, null, 2)}</pre> */}
                                             <HighchartsReact
                                                 highcharts={Highcharts}
                                                 options={options}
