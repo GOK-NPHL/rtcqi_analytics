@@ -70,7 +70,10 @@ class SubmissionsController extends Controller
                 'orgs' => $orgUnitIds,
             ];
         } catch (Exception $ex) {
-            Log::error('Could not fetch data: ' . $ex->getMessage());
+            // Log::error('Could not fetch data: ' . $ex->getMessage());
+            Log::error('<SubmissionsController->getData(): Could not fetch data: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</SubmissionsController->getData()');
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
         }
     }

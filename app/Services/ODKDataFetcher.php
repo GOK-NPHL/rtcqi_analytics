@@ -109,19 +109,19 @@ class ODKDataFetcher
                 // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
                 $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
-                echo("running getFormSubmissions for formId ".$formId."\n");
+                echo("getFormSubmissions:: running getFormSubmissions for formId ".$formId."\n");
                 if ($formId != null) {
                 //if($this->shouldDownloadSubmission($response, $projectId, $formId)) {
                     $shouldDl = $this->shouldDownloadSubmission($response, $projectId, $formId);
                     if ($shouldDl == true) {
-                        echo("shouldDl = true, Downloading form submissions for form id: " . $formId . "\n");
+                        echo("getFormSubmissions:: shouldDl = true, Downloading form submissions for form id: " . $formId . "\n");
                         $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }else{
-                        echo("shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
+                        echo("getFormSubmissions:: shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
                         $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
                     }
                 }else{
-                    echo("this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
+                    echo("getFormSubmissions:: this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
                 }
             }
 
@@ -171,6 +171,7 @@ class ODKDataFetcher
                 }
             } catch (Exception $ex) {
                 Log::error(" error =====>shouldDownloadSubmission() " . $ex->getMessage() . " \n");
+                Log::error($ex);
                 return false;
             }
         } else if ($submission->lastest_submission_date != $lastSubmissionDate && $res["submissions"] > 0) {
@@ -199,20 +200,22 @@ class ODKDataFetcher
     private function downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl)
     {
         //delete previous downloade data
-        Log::info("delete any previous downloads for " . $formId);
+        Log::info("downloadFormSubmissions:: delete any previous downloads for " . $formId);
         try {
             Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv');
         } catch (Exception $e) {
-            echo 'Error deleting previous submissions for : ' .$formId. ', Message: ' . $e->getMessage();
+            Log::error($e);
+            echo 'downloadFormSubmissions:: Error deleting previous submissions for : ' .$formId. ', Message: ' . $e->getMessage();
         }
 
         try {
             Storage::delete("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip');
         } catch (Exception $e) {
-            echo 'Error deleting previous submissions.csv.zip for : ' .$formId. ', Message: ' . $e->getMessage();
+            Log::error($e);
+            echo 'downloadFormSubmissions:: Error deleting previous submissions.csv.zip for : ' .$formId. ', Message: ' . $e->getMessage();
         }
 
-        Log::info("downloading new submissions for " . $formId . ", project " . $projectId . ", from " . $formSubmissionsUrl);
+        Log::info("downloadFormSubmissions:: downloading new submissions for " . $formId . ", project " . $projectId . ", from " . $formSubmissionsUrl);
 
         Http::withOptions([
             'verify' => false, //'debug' => true,
@@ -258,6 +261,7 @@ class ODKDataFetcher
             }
             return $orgUnitId;
         } catch (Exception $ex) {
+            Log::error($ex);
             Log::error(" error =====>getOrgunitIdOfsubmmission() " . $ex->getMessage() . " (form ". $formId .") \n");
             throw new Exception($ex->getMessage() . " " . $formId);
         }
@@ -287,6 +291,7 @@ class ODKDataFetcher
         try {
             Storage::delete($definationURI);
         } catch (Exception $e) {
+            Log::error($e);
             echo 'Message: ' . $e->getMessage();
         }
 

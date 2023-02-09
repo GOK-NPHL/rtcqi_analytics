@@ -136,6 +136,10 @@ class SpiReportController extends Controller
             );
             return $result;
         } catch (Exception $ex) {
+
+            Log::error('<SpiReportController->getData(): Could not fetch data: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</SpiReportController->getData()');
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
         }
     }

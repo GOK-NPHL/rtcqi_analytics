@@ -50,6 +50,9 @@ class LogbookReportController extends Controller
             $result = $odkObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
             return $result;
         } catch (Exception $ex) {
+            Log::error('<LogbookReportController->getData(): Could not fetch data: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</LogbookReportController->getData()');
             return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
         }
     }
