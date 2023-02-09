@@ -19,13 +19,13 @@ RUN apt-get update && apt-get install -y \
     mariadb-client \
     openssl \
     libzip-dev \
-    # php7.4-common \ 
-    # php-curl \ 
-    # php-json \ 
-    # php-mbstring \ 
-    # php-mysql \ 
-    # php-xml \ 
-    # php-zip \ 
+    # php7.4-common \
+    # php-curl \
+    # php-json \
+    # php-mbstring \
+    # php-mysql \
+    # php-xml \
+    # php-zip \
     sudo \
     cron \
     && docker-php-ext-install zip
@@ -53,6 +53,10 @@ WORKDIR /var/www
 
 # Create the log file to be able to run tail
 RUN touch /var/log/cron.log
+
+# increase the memory limit to 1024M
+# RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory-limit.ini
+RUN echo 'memory_limit = 2048M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
 
 # Setup cron job
 
