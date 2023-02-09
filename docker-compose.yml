@@ -51,6 +51,20 @@ services:
     # networks:
     #   - rtcqianalytics
 
+  redis:
+    container_name: rtcqianalytics-redis
+    restart: unless-stopped
+    image: redis:alpine
+    ports:
+      - 6382:6379
+    volumes:
+      - ./docker-compose/redis:/data
+
+
+networks:
+  app-network:
+    driver: "bridge"
+
 # networks:
 #   rtcqianalytics:
 #     driver: bridge
