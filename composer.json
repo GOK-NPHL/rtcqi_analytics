@@ -19,6 +19,7 @@
         "laravel/ui": "^2.4",
         "league/csv": "^9.7",
         "phpoffice/phpspreadsheet": "^1.17",
+        "predis/predis": "^2.1",
         "sentry/sentry-laravel": "^3.2"
     },
     "require-dev": {

@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class SpiReportController extends Controller
 {
@@ -44,6 +45,18 @@ class SpiReportController extends Controller
             return response()->json(['Message' => 'Not allowed to view spi report: '], 500);
         }
         try {
+            // cache key format = 'method:path:uniqueid'
+            $cache_unique_uid = md5($request->path() . json_encode($request->all()));
+            $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
+            // Log::info('Cache ID: ' . $cacheId);
+            if (Cache::has($cacheId)) {
+                Log::info('Cache hit for ' . $cacheId);
+                $data = Cache::get($cacheId);
+                return response()->json($data);
+            }
+            else{
+                Log::info('Cache miss for ' . $cacheId);
+            }
             $odkObj = new ODKDataAggregator;
             $orgTimeline = $request->orgTimeline;
             $orgUnitIds = $request->orgUnitIds;
@@ -134,6 +147,13 @@ class SpiReportController extends Controller
                 $partners
                 // , $aggregate_partners
             );
+            // cache the result; expires in 4 hours
+            if ($result) {
+                $cached = Cache::put($cacheId, $result, now()->addHours(4));
+                if (!$cached) {
+                    Log::error('<SpiReportController->getData(): Could not cache data');
+                }
+            }
             return $result;
         } catch (Exception $ex) {
 
