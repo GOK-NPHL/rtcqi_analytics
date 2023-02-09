@@ -12,12 +12,14 @@
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.8.4",
         "laravel/framework": "^7.29",
         "laravel/sanctum": "^2.10",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^2.4",
         "league/csv": "^9.7",
-        "phpoffice/phpspreadsheet": "^1.17"
+        "phpoffice/phpspreadsheet": "^1.17",
+        "sentry/sentry-laravel": "^3.2"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
