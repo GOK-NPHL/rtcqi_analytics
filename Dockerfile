@@ -59,7 +59,7 @@ RUN touch /var/log/cron.log
 RUN echo 'memory_limit = 2048M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
 
 # increase the execution time to 150 seconds
-RUN echo 'max_execution_time = 150' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini;
+RUN echo 'max_execution_time = 150' >> /usr/local/etc/php/conf.d/docker-php-ext-max-execution-time.ini;
 
 # Setup cron job
 
