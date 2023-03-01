@@ -25,6 +25,10 @@ class ODKDataFetcher
     public function __construct()
     {
         echo ("construct function was initialized on ". date('l jS \of F Y h:i:s A') .".\n");
+        // if ODK_URL is set in environment variables, use it
+        if (env('ODK_URL')) {
+            $this->baseOdkUrl = env('ODK_URL');
+        }
     }
 
     public function fetchData()
