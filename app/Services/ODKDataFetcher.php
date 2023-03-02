@@ -40,10 +40,6 @@ class ODKDataFetcher
         $autUrl = $this->baseOdkUrl . "sessions";
         $response = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],
         ])->post($autUrl, [
             'email' => config('app.odk_user'),
             'password' => config('app.odk_pass'),
@@ -92,10 +88,6 @@ class ODKDataFetcher
 
         $res = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($listUserUrl);
@@ -106,12 +98,8 @@ class ODKDataFetcher
     private function getProjectForm($response, $projectId)
     {
         $formUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms";
-        $res = Http::withoutVerifying()->withOptions([
+        $res = Http::withOptions([
             'verify' => false, //'debug' => true
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formUrl);
@@ -155,12 +143,8 @@ class ODKDataFetcher
 
 
         $formSubmissionsDetails =  $this->baseOdkUrl . "projects/" . $projectId . "/forms/$formId";
-        $res = Http::withoutVerifying()->withOptions([
+        $res = Http::withOptions([
             'verify' => false, //'debug' => true
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
             'X-Extended-Metadata' => 'true',
@@ -241,25 +225,15 @@ class ODKDataFetcher
 
         Log::info("downloadFormSubmissions:: downloading new submissions for " . $formId . ", project " . $projectId . ", from " . $formSubmissionsUrl);
 
-        Http::withoutVerifying()->withOptions([
-            'verify' => false, //'debug' => true
-
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],,
+        Http::withOptions([
+            'verify' => false, //'debug' => true,
             'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
 
-        Http::withoutVerifying()->withOptions([
-            'verify' => false, //'debug' => true
-
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],,
+        Http::withOptions([
+            'verify' => false, //'debug' => true,
             'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
@@ -305,13 +279,8 @@ class ODKDataFetcher
     {
         $formVerisonUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId;
         //get for version number
-        $version = Http::withoutVerifying()->withOptions([
-            'verify' => false, //'debug' => true
-
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],,
+        $version = Http::withOptions([
+            'verify' => false, //'debug' => true,
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formVerisonUrl)['version'];
@@ -336,13 +305,8 @@ class ODKDataFetcher
 
         //download new files
         $formDefinationUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId . "/versions/" . $version . ".xls";
-        Http::withoutVerifying()->withOptions([
-            'verify' => false, //'debug' => true
-
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],,
+        Http::withOptions([
+            'verify' => false, //'debug' => true,
             'sink' => storage_path($definationURI)
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
