@@ -26,15 +26,19 @@ class ODKDataFetcher
     {
         echo ("construct function was initialized on ". date('l jS \of F Y h:i:s A') .".\n");
         // if ODK_URL is set in environment variables, use it
-        if (env('ODK_URL')) {
-            $this->baseOdkUrl = env('ODK_URL');
+        if (config('app.odk_url')) {
+            Log::info(" ---- Using ODK URL from environment variables ---- ");
+            $this->baseOdkUrl = config('app.odk_url');
+        }else{
+            Log::info(" ---- Using default ODK URL ----");
+            $this->baseOdkUrl = 'https://odk.nphl.go.ke/v1/';
         }
     }
 
     public function fetchData()
-    {   Log::info("start fetching odk files");
+    {   Log::info("start fetching odk files from ". $this->baseOdkUrl);
         $autUrl = $this->baseOdkUrl . "sessions";
-        $response = Http::withOptions([
+        $response = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
         ])->post($autUrl, [
             'email' => config('app.odk_user'),

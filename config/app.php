@@ -231,4 +231,5 @@ return [
 
     'odk_user' =>  env('ODK_USER', ''),
     'odk_pass' =>  env('ODK_PASS', ''),
+    'odk_url' =>  env('ODK_URL', ''),
 ];
