@@ -86,7 +86,7 @@ class ODKDataFetcher
     {
         $listUserUrl = $this->baseOdkUrl . "projects";
 
-        $res = Http::withOptions([
+        $res = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
@@ -98,7 +98,7 @@ class ODKDataFetcher
     private function getProjectForm($response, $projectId)
     {
         $formUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms";
-        $res = Http::withOptions([
+        $res = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
@@ -143,7 +143,7 @@ class ODKDataFetcher
 
 
         $formSubmissionsDetails =  $this->baseOdkUrl . "projects/" . $projectId . "/forms/$formId";
-        $res = Http::withOptions([
+        $res = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
@@ -225,14 +225,14 @@ class ODKDataFetcher
 
         Log::info("downloadFormSubmissions:: downloading new submissions for " . $formId . ", project " . $projectId . ", from " . $formSubmissionsUrl);
 
-        Http::withOptions([
+        Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true,
             'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv')
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
         ])->get($formSubmissionsUrl);
 
-        Http::withOptions([
+        Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true,
             'sink' => storage_path("app/submissions/" . $projectId . "_" . $formId . "_" . 'submissions.csv.zip')
         ])->withHeaders([
@@ -279,7 +279,7 @@ class ODKDataFetcher
     {
         $formVerisonUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId;
         //get for version number
-        $version = Http::withOptions([
+        $version = Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true,
         ])->withHeaders([
             'Authorization' => 'Bearer ' . $response['token'],
@@ -305,7 +305,7 @@ class ODKDataFetcher
 
         //download new files
         $formDefinationUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/" . $formId . "/versions/" . $version . ".xls";
-        Http::withOptions([
+        Http::withoutVerifying()->withOptions([
             'verify' => false, //'debug' => true,
             'sink' => storage_path($definationURI)
         ])->withHeaders([
