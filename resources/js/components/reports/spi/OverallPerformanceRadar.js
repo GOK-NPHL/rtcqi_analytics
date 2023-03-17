@@ -101,7 +101,7 @@ class OverallPerformanceRadar extends React.Component {
             letSeriesData.push(seriesData);
         }
 
-        return <RTCard style={{ "padding": "0px", "minHeight": "500px" }} header={orgName}>
+        return <RTCard style={{ "padding": "0px", "minHeight": "500px" }} header={"PERFORMANCE DISTRIBUTION - "+orgName}>
             <AvgPerformanceSpider indicators={indicators} legend={legend} series={letSeriesData} />
         </RTCard>
     }

@@ -8,12 +8,15 @@ import { FetchUserAuthorities, FetchOrgunits, FetchOdkData } from '../utils/Help
 import SiteLevelBarColumnCharts from '../reports/spi/SiteLevelBarColumnCharts';
 import SiteLevelBarCharts from '../reports/spi/SiteLevelBarCharts';
 import OverallPerformanceRadar from '../reports/spi/OverallPerformanceRadar';
+import ReactJson from 'react-json-view';
+import CompletenessSummary from '../reports/spi/CompletenessSummary';
 
 class Dashboard extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            siteList: [],
             orgUnits: [],
             orgUnitDataIds: [0],
             orgUnitTimeline: [],
@@ -102,6 +105,7 @@ class Dashboard extends React.Component {
             ]
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
+        this.updateSites = this.updateSites.bind(this);
     }
 
     componentDidMount() {
@@ -157,8 +161,18 @@ class Dashboard extends React.Component {
 
     }
 
-    render() {
+    updateSites(sites) {
+        if (sites && sites.length > 0) {
+            this.setState({
+                siteList: sites
+            });
+            if (typeof window != 'undefined') {
+                document.getElementById('siteListTrigger').click();
+            }
+        }
+    }
 
+    render() {
         let dashBoardContent = '';
         if (this.state.allowedPermissions.length > 0 &&
             this.state.allowedPermissions.includes('view_dashboard')) {
@@ -173,11 +187,66 @@ class Dashboard extends React.Component {
                 </div>
 
 
-                <TopLabels serverData={this.state.odkData}/>
+                <TopLabels serverData={this.state.odkData} />
 
                 <div className="row">
                     <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
                     <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
+                    {/* ------- <completeness ------- */}
+                    <div className='col-md-12'>
+                        {this.state.odkData.length > 0 && this.state.odkData.map((j, k) => {
+                            let dataObject = j;
+                            if (dataObject && Object.keys(dataObject).length < 1) {
+                                return (<React.Fragment key={j}></React.Fragment>)
+                            } else {
+                                let orgName = dataObject['orgName'];
+                                let overallSitesLvl = dataObject["OverallSitesLevel"];
+                                let fllow = Object.keys(overallSitesLvl).sort((a, b) => {
+                                    // reverse alphabetical order
+                                    if (a < b) return 1;
+                                    if (a > b) return -1;
+                                    return 0;
+                                });
+                                let data = [];
+                                fllow.forEach((fl) => {
+                                    let fl_lower_levels = fllow.filter((f) => fllow.indexOf(f) > fllow.indexOf(fl))
+                                    let fl_sites = overallSitesLvl[fl]?.sites;
+                                    let fl_sites_found_in_lower_levels = [];
+                                    let fl_sites_not_found_in_lower_levels = [];
+                                    if (fl_sites && fl_sites.length > 0) {
+                                        fl_sites.forEach((fl_site) => {
+                                            let found = false;
+                                            fl_lower_levels.forEach((fl_lower_level) => {
+                                                if (overallSitesLvl[fl_lower_level].sites.find((site) => site.mfl == fl_site.mfl && site.site == fl_site.site)) {
+                                                    found = true;
+                                                }
+                                            });
+                                            if (found) {
+                                                fl_sites_found_in_lower_levels.push(fl_site);
+                                            } else {
+                                                fl_sites_not_found_in_lower_levels.push(fl_site);
+                                                // TODO: add attribute to fl_site to indicate the level it was not found in
+                                            }
+                                        });
+                                    }
+                                    let d = {
+                                        followup: fl,
+                                        sites: fl_sites,
+                                        fl_sites_found_in_lower_levels: fl_sites_found_in_lower_levels,
+                                        fl_sites_not_found_in_lower_levels: fl_sites_not_found_in_lower_levels
+                                    };
+                                    data.push(d);
+                                });
+                                return (
+                                    <React.Fragment key={k}>
+                                        {/* <ReactJson src={data} displayDataTypes={false} indentWidth={4} /> */}
+                                        <CompletenessSummary data={data} />
+                                    </React.Fragment>
+                                )
+                            }
+                        })}
+                    </div>
+                    {/* ------- completeness/> ------- */}
                     <SiteLevelBarCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
                 </div>
             </React.Fragment>

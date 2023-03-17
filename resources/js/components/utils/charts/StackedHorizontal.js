@@ -25,7 +25,8 @@ class StackedHorizontal extends React.Component {
                     containLabel: true
                 },
                 xAxis: {
-                    type: 'value'
+                    type: 'value',
+                    max: 100,
                 },
                 toolbox: {
                     right: 20,

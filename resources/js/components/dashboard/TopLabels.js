@@ -23,12 +23,12 @@ class TopLabels extends React.Component {
             prevProps.serverData != this.props.serverData
         ) {
 
-            console.log("data to parse =====>");
-            console.log(this.props.serverData);
+            // console.log("data to parse =====>");
+            // console.log(this.props.serverData);
 
             if (Array.isArray(this.props.serverData)) {
-                console.log("data processing =====>");
-                console.log(this.props.serverData);
+                // console.log("data processing =====>");
+                // console.log(this.props.serverData);
                 this.props.serverData.map((dataObjectParent) => {
 
                     this.setState({
