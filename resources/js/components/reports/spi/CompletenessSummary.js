@@ -89,7 +89,7 @@ function CompletenessSummary({ data }) {
                 </div >
             </React.Fragment>
 
-            <div className='card'>
+            <div className='card mb-4'>
                 <div className='card-header'>
                     <h3 className='card-title'>Completeness Summary</h3>
                 </div>
