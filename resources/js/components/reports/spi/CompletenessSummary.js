@@ -94,20 +94,22 @@ function CompletenessSummary({ data }) {
                     <h3 className='card-title'>Completeness Summary</h3>
                 </div>
                 <div className='card-body'>
-                    <table className='table table-bordered' style={{tableLayout: 'fixed'}}>
+                    <table className='table table-bordered' style={{ tableLayout: 'fixed' }}>
                         <thead>
-                            <tr style={{backgroundColor: '#f5f5f5'}}>
-                                <th style={{color: '#333'}} className='text-black text-uppercase text-center'>Followup</th>
-                                <th style={{color: '#333'}} className='text-black text-uppercase text-center'># Sites</th>
-                                <th style={{color: '#333'}} className='text-black text-uppercase text-center'># Sites Found in lower levels <br/> (Completeness rate)</th>
-                                <th style={{color: '#333'}} className='text-black text-uppercase text-center'># Sites <b>Not</b> found in lower levels</th>
+                            <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                <th style={{ color: '#333' }} className='text-black text-uppercase text-center'>Followup</th>
+                                <th style={{ color: '#333' }} className='text-black text-uppercase text-center'># Sites</th>
+                                <th style={{ color: '#333' }} className='text-black text-uppercase text-center'># Sites Found in lower levels <br /> (Completeness rate)</th>
+                                <th style={{ color: '#333' }} className='text-black text-uppercase text-center'># Sites <b>Not</b> found in lower levels</th>
+                                <th style={{ color: '#333' }} className='text-black text-uppercase text-center'># Sites <b>Not</b> received followup assessment</th>
                             </tr>
                         </thead>
                         <tbody>
                             {completenessData.map((d, i) => {
+                                let baseline_sites = completenessData[completenessData.length-1]?.sites.length || 0;
                                 return (
                                     <tr key={i}>
-                                        <td className='text-capitalize text-center' style={{fontWeight: '600'}}>{d.followup}</td>
+                                        <td className='text-capitalize text-center' style={{ fontWeight: '600' }}>{d.followup}</td>
                                         <td className='text-justify'>
                                             <span style={{ cursor: 'pointer' }} onClick={ev => {
                                                 setSites(d?.sites);
@@ -143,6 +145,9 @@ function CompletenessSummary({ data }) {
                                                     " (" + parseInt(d?.fl_sites_not_found_in_lower_levels.length / d?.sites.length * 100) + '%)'
                                                 }
                                             </span>
+                                        </td>
+                                        <td>
+                                            {Intl.NumberFormat().format( baseline_sites - d?.fl_sites_found_in_lower_levels.length )} {" (" + parseInt((baseline_sites - d?.fl_sites_found_in_lower_levels.length) / baseline_sites * 100) + '%)'}
                                         </td>
                                     </tr>
                                 )
