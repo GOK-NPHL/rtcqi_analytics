@@ -26,7 +26,7 @@ class StackedHorizontal extends React.Component {
                 },
                 xAxis: {
                     type: 'value',
-                    max: 100,
+                    max: 102,
                 },
                 toolbox: {
                     right: 20,
