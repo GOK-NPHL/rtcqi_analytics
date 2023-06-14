@@ -12,6 +12,7 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
     const [usersFixed, setUsersFixed] = React.useState([]);
     const [org_units, setOrgUnits] = React.useState([]);
     const [orgUnitsFixed, setOrgUnitsFixed] = React.useState([]);
+    const [ou_str, setOrgUnitsStructure] = React.useState([]);
     const [allPartners, setAllPartners] = React.useState([]);
     const [newPartner, setNewPartner] = React.useState({
         'name': '',
@@ -35,8 +36,8 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
             console.log('edit', id)
             FetchPartner(id).then((response) => {
                 let np = response;
-                np['users'] = response?.users?.map((u) => u.id);
-                np['org_units'] = response?.org_units?.map((u) => u.org_unit_id);
+                np['users'] = (response?.users && response?.users.length>0) ? response?.users?.map((u) => u.id) : [];
+                np['org_units'] = (response?.org_units && response?.org_units.length>0) ? response?.org_units?.map((u) => u.org_unit_id) : [];
                 delete np['created_at'];
                 delete np['updated_at'];
                 setNewPartner(np);
@@ -80,12 +81,17 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
                 || [];
             setOrgUnits(ous_);
             setOrgUnitsFixed(response);
+
+            let oustr = DevelopOrgStructure(response)
+            setOrgUnitsStructure(oustr)
         })
 
         // partners
         FetchPartners().then((response) => {
             setAllPartners(response);
         })
+
+
     }, [id]);
 
     const clickHandler = (orgunit) => {
@@ -351,7 +357,7 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
                                         })
                                     }}>
                                         <option value={''}> -- Select (None) -- </option>
-                                        {allPartners.map((par) => (
+                                        {allPartners && allPartners.length>0 && allPartners.map((par) => (
                                             <option key={par.id} value={par.id}>{par.name}</option>
                                         ))}
                                     </select>
@@ -433,8 +439,8 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
                                         <p> Select Organisation Unit *</p>
                                         <TreeView
                                             assignedOrgUnits={(() => {
-                                                if (newPartner.org_units) {
-                                                    return newPartner.org_units.map(ou => ou)
+                                                if (newPartner?.org_units && newPartner?.org_units.length > 0) {
+                                                    return newPartner?.org_units
                                                 } else {
                                                     return []
                                                 }
@@ -442,14 +448,14 @@ export function PartnerForm({ saveFxn, toEdit, ous }) {
                                             addCheckBox={true}
                                             clickHandler={clickHandler}
                                             isHooks={true}
-                                            orgUnits={DevelopOrgStructure(orgUnitsFixed)}
+                                            orgUnits={ou_str}
                                         />
                                     </div>
                                 </div>
                                 <div id="selectedOrgs" className="col-md-6 mb-6">
                                     <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
                                         <p> Selected Organisation Units *</p>
-                                        {newPartner.org_units && newPartner.org_units.length > 0 && newPartner.org_units.map((ou, index) => {
+                                        {newPartner?.org_units && newPartner?.org_units.length > 0 && newPartner?.org_units.map((ou, index) => {
                                             let name = ou
                                             if (typeof ou === 'object') {
                                                 name = ou?.odk_unit_name
