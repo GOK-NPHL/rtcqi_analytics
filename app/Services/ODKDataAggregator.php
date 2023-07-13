@@ -156,6 +156,35 @@ class ODKDataAggregator
                     $records = $this->getFormRecords($orgUnit);
                     $recordsReadData[$orgUnit['org_unit_id']] = $records;
                 }
+                // $facils = $this->getFacilities($orgUnit, $records);
+                // Log::info('Processing records '. json_encode(array_keys($records[0])) . ' for ' . $orgUnitName);
+                $facils = [];
+                $sites = [];
+                $facilityCount = 0;
+                $siteCount = 0;
+                if(isset($records) && count($records) > 0){
+                    foreach ($records as $record) {
+                        $facil = $record['mysites_facility'];
+                        if (!empty($facil) && $facil != '' && !in_array($facil, $facils)) {
+                            $facils[] = $facil;
+                        }
+                    }
+                }
+                if (count($facils) > 0) {
+                    foreach ($facils as $facil) {
+                        $facil_mfl = explode("_", $facil)[0];
+                        if( !empty($facil_mfl) && $facil_mfl != ''){
+                            $ou = OdkOrgunit::where('odk_unit_name', 'like', $facil_mfl.'_%')->first();
+                            if(!empty($ou)){
+                                $facilityCount++;
+                                $ch = $ou->children()->pluck('org_unit_id');
+                                $sites = array_merge($sites, $ch->toArray());
+                            }
+                        }
+                    }
+                    $sites = array_unique($sites);
+                    $siteCount = count($sites);
+                }
                 $results = array();
                 $results["orgName"] = $orgUnitName;
                 $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit, $records);
@@ -168,6 +197,8 @@ class ODKDataAggregator
                 $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit, $records);
                 $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit, $records);
                 $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit, $records);
+                $results["facilityCount"] = $facilityCount;
+                $results["siteCount"] = $siteCount;
                 $payload[$orgUnitIds[$x]] = $results;
             } catch (Exception $ex) {
                 Log::error($ex);
@@ -899,6 +930,21 @@ class ODKDataAggregator
             }
         } else if ($record["baselinefollowup"] == 'followup') {
             $followupType = $record["followup"] ?? "follow1";
+            for ($x = 0; $x < count($this->timeLines); $x++) {
+                if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                    if ($followupType == $this->timeLines[$x]) {
+                        $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
+                        $overallSites[$this->timeLines[$x]]["sites"][] = [ //$val;
+                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
+                            "mfl" => explode("_", $record["mysites_facility"])[0],
+                            "site" => $record["mysites"]
+                        ];
+                        $overallSites = $this->summTimelineData($this->timeLines[$x], $val, $overallSites);
+                    }
+                }
+            }
+        } else if ($record["baselinefollowup"] == 'other') {
+            $followupType = $record["followup"] ?? "other";
             for ($x = 0; $x < count($this->timeLines); $x++) {
                 if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
                     if ($followupType == $this->timeLines[$x]) {

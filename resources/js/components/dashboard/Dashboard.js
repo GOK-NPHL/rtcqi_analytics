@@ -24,8 +24,8 @@ class Dashboard extends React.Component {
             siteType: [],
             echartsMinHeight: '',
             odkData: [],
-            facility_count: 0,
-            site_count: 0,
+            facilityCount: 0,
+            siteCount: 0,
             allowedPermissions: [],
             dataset1: {
                 dimensions: ['indicator', 'Baseline(Round 13)', 'Y1_Q4(round 14)', 'Y2_Q1(round 15)', 'Y2_Q2(round 16)'],
@@ -156,8 +156,8 @@ class Dashboard extends React.Component {
                         this.setState({
                             odkData: returnedData.data,
 
-                            facility_count: returnedData?.data[orgUnitIds[0]]?.facility_count || 0,
-                            site_count: returnedData?.data[orgUnitIds[0]]?.site_count || 0,
+                            facilityCount: returnedData?.data[orgUnitIds[0]]?.facilityCount || 0,
+                            siteCount: returnedData?.data[orgUnitIds[0]]?.siteCount || 0,
                         });
                     }
 
@@ -195,7 +195,7 @@ class Dashboard extends React.Component {
                             <div className="card" style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                 <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                     <label className='mb-0'> Facilities: </label> &nbsp; &nbsp;
-                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.facility_count)}</b>
+                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.facilityCount)}</b>
                                 </div>
                             </div>
                         </div>
@@ -203,7 +203,7 @@ class Dashboard extends React.Component {
                             <div className="card" style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                 <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                     <label className='mb-0'> Sites: </label> &nbsp; &nbsp;
-                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.site_count)}</b>
+                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.siteCount)}</b>
                                 </div>
                             </div>
                         </div>

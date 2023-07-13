@@ -151,13 +151,6 @@ class SpiReportController extends Controller
                 $partners
                 // , $aggregate_partners
             );
-
-            if ($orgUnitIds && count($orgUnitIds) > 0) {
-                foreach ($orgUnitIds as $ouid) {
-                    $result[$ouid]['facility_count'] = OdkOrgunit::where('level', 4)->count() ?? 0; // TODO: filter where ouid is ancestor
-                    $result[$ouid]['site_count'] = OdkOrgunit::where('level', 5)->count() ?? 0; // TODO: filter where ouid is ancestor
-                }
-            }
             // cache the result; expires in 4 hours
             if ($result && !config('app.skip_cache')) {
                 $cached = Cache::put($cacheId, $result, now()->addHours(4));
