@@ -46,13 +46,15 @@ class LogbookReportController extends Controller
             $cache_unique_uid = md5($request->path() . json_encode($request->all()));
             $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
             // Log::info('Cache ID: ' . $cacheId);
-            if (Cache::has($cacheId)) {
-                Log::info('Cache hit for ' . $cacheId);
-                $data = Cache::get($cacheId);
-                return response()->json($data);
-            }
-            else{
-                Log::info('Cache miss for ' . $cacheId);
+            if (config('app.skip_cache')) {
+            } else {
+                if (Cache::has($cacheId)) {
+                    // Log::info('Cache hit for ' . $cacheId);
+                    $data = Cache::get($cacheId);
+                    return response()->json($data);
+                } else {
+                    Log::info('Cache miss for ' . $cacheId);
+                }
             }
 
             $odkObj = new ODkHTSDataAggregator;
@@ -63,7 +65,7 @@ class LogbookReportController extends Controller
 
             $result = $odkObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
             // cache the result; expires in 4 hours
-            if ($result) {
+            if ($result && !config('app.skip_cache')) {
                 $cached = Cache::put($cacheId, $result, now()->addHours(4));
                 if (!$cached) {
                     Log::error('<LogbookReportController->getData(): Could not cache data');

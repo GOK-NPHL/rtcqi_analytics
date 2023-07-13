@@ -10,6 +10,7 @@ import SiteLevelBarCharts from '../reports/spi/SiteLevelBarCharts';
 import OverallPerformanceRadar from '../reports/spi/OverallPerformanceRadar';
 import ReactJson from 'react-json-view';
 import CompletenessSummary from '../reports/spi/CompletenessSummary';
+import StatsLabel from '../utils/stats/StatsLabel';
 
 class Dashboard extends React.Component {
 
@@ -23,6 +24,8 @@ class Dashboard extends React.Component {
             siteType: [],
             echartsMinHeight: '',
             odkData: [],
+            facility_count: 0,
+            site_count: 0,
             allowedPermissions: [],
             dataset1: {
                 dimensions: ['indicator', 'Baseline(Round 13)', 'Y1_Q4(round 14)', 'Y2_Q1(round 15)', 'Y2_Q2(round 16)'],
@@ -152,6 +155,9 @@ class Dashboard extends React.Component {
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
+
+                            facility_count: returnedData?.data[orgUnitIds[0]]?.facility_count || 0,
+                            site_count: returnedData?.data[orgUnitIds[0]]?.site_count || 0,
                         });
                     }
 
@@ -180,15 +186,37 @@ class Dashboard extends React.Component {
             dashBoardContent = <React.Fragment>
 
                 {/* Page Heading */}
-                <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
+                <div className="d-sm-flex align-items-center justify-content-between mb-4 w-100">
+                    <div className="row w-100">
+                        <div className="col-md-6 p-0">
+                            <h1 className="h3 mb-0 text-gray-800">Dashboard</h1>
+                        </div>
+                        <div className="col-md-3 p-0 text-center px-2">
+                            <div className="card" style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <label className='mb-0'> Facilities: </label> &nbsp; &nbsp;
+                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.facility_count)}</b>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-3 p-0 text-center px-2">
+                            <div className="card" style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                    <label className='mb-0'> Sites: </label> &nbsp; &nbsp;
+                                    <b style={{color: 'black', fontSize: '1.3em'}}>{Intl.NumberFormat().format(this.state.site_count)}</b>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                         className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
                 </div>
 
-
-                <TopLabels serverData={this.state.odkData} />
-
+                <div className="row">
+                    <div className="col-md-12 p-0">
+                        <TopLabels serverData={this.state.odkData} />
+                    </div>
+                </div>
                 <div className="row">
                     <OverallPerformanceRadar singleItem={true} minHeight={500} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
                     <SiteLevelBarColumnCharts singleItem={true} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />

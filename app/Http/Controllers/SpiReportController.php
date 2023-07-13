@@ -49,13 +49,17 @@ class SpiReportController extends Controller
             $cache_unique_uid = md5($request->path() . json_encode($request->all()));
             $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
             // Log::info('Cache ID: ' . $cacheId);
-            if (Cache::has($cacheId)) {
-                Log::info('Cache hit for ' . $cacheId);
-                $data = Cache::get($cacheId);
-                return response()->json($data);
-            }
-            else{
-                Log::info('Cache miss for ' . $cacheId);
+
+
+            if (config('app.skip_cache')) {
+            } else {
+                if (Cache::has($cacheId)) {
+                    Log::info('Cache hit for ' . $cacheId);
+                    $data = Cache::get($cacheId);
+                    return response()->json($data);
+                } else {
+                    Log::info('Cache miss for ' . $cacheId);
+                }
             }
             $odkObj = new ODKDataAggregator;
             $orgTimeline = $request->orgTimeline;
@@ -86,7 +90,7 @@ class SpiReportController extends Controller
                             foreach ($children as $child) {
                                 if ($child->level == 4) {
                                     array_push($partner_sites, $child);
-                                }else {
+                                } else {
                                     $grand_children = $child->children()->get();
                                     foreach ($grand_children as $grand_child) {
                                         if ($grand_child->level == 4) {
@@ -147,8 +151,15 @@ class SpiReportController extends Controller
                 $partners
                 // , $aggregate_partners
             );
+
+            if ($orgUnitIds && count($orgUnitIds) > 0) {
+                foreach ($orgUnitIds as $ouid) {
+                    $result[$ouid]['facility_count'] = OdkOrgunit::where('level', 4)->count() ?? 0; // TODO: filter where ouid is ancestor
+                    $result[$ouid]['site_count'] = OdkOrgunit::where('level', 5)->count() ?? 0; // TODO: filter where ouid is ancestor
+                }
+            }
             // cache the result; expires in 4 hours
-            if ($result) {
+            if ($result && !config('app.skip_cache')) {
                 $cached = Cache::put($cacheId, $result, now()->addHours(4));
                 if (!$cached) {
                     Log::error('<SpiReportController->getData(): Could not cache data');

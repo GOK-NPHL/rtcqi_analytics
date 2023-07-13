@@ -65,7 +65,7 @@ class AgreementRateColumnCharts extends React.Component {
             }
 
             for (let [name, value] of Object.entries(totals['totals'])) {
-                console.log(name);
+                // console.log(name);
                 if (name != 'total_sites') {
                     let val = ((Number(value) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
                     if (isNaN(val)) val = 0;
@@ -102,7 +102,7 @@ class AgreementRateColumnCharts extends React.Component {
     }
 
     addGraphsToArray(counter, row, columns, overLay, singChart) {
-        console.log("adding to chart")
+        // console.log("adding to chart")
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -145,7 +145,7 @@ class AgreementRateColumnCharts extends React.Component {
 
             } else {
                 // console.log("hunt bug 3");
-                console.log(this.props.serverData);
+                // console.log(this.props.serverData);
                 for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
                     try {
                         let singChart = this.prepareOverallLevelSiteData(dataObject);
