@@ -355,7 +355,7 @@ class SPISubmissions extends React.Component {
 
                 <div className="row">
                     <div className="col-md-12">
-                        <div className="col-md-12" style={{ backgroundColor: '#fff', color: 'black', padding: '7px', borderRadius: '6px', margin: '20px auto' }}>
+                        {/* <div className="col-md-12" style={{ backgroundColor: '#fff', color: 'black', padding: '7px', borderRadius: '6px', margin: '20px auto' }}>
                             <small>
                                 <details>
                                     <summary>this.state.odkData</summary>
@@ -366,7 +366,7 @@ class SPISubmissions extends React.Component {
                                     </div>
                                 </details>
                             </small>
-                        </div>
+                        </div> */}
                         <div className="pagination " style={{ marginTop: '2em' }}>
                             <Pagination
                                 itemClass="page-item"
