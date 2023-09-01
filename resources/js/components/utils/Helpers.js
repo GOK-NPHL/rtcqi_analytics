@@ -141,14 +141,48 @@ export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) 
     }
 
 }
-export async function FetchSubmissions(orgUnitIds, siteType, startDate, endDate, page, perPage) {
+export async function FetchHTSSubmissions(orgUnitIds, siteType, startDate, endDate, page, perPage) {
     // console.log('Fetching Submissions page: ' + page + ' perPage: ' + perPage);
     try {
         const response = await axios({
             method: 'post',
-            url: `${settings.rtcqiBaseApi}/odk_submissions`,
+            url: `${settings.rtcqiBaseApi}/hts_submissions`,
             data: {
                 orgUnitIds: orgUnitIds,
+                siteType: siteType,
+                startDate: startDate,
+                endDate: endDate,
+                page: page || 1,
+                perPage: perPage || 50
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+
+}
+export async function FetchSPISubmissions(orgUnitIds, orgTimeline, siteType, partners, startDate, endDate, page, perPage) {
+    //orgTimeline, partners, aggregate_partners, orgUnitIds, siteType, startDate, endDate, page, perPage) {
+    // console.log('Fetching Submissions page: ' + page + ' perPage: ' + perPage);
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/spi_submissions`,
+            data: {
+                /*
+                    orgTimeline
+                    orgUnitIds
+                    partners
+                    aggregate_partners
+                    siteType
+                    startDate
+                    endDate
+                */
+                orgTimeline: orgTimeline,
+                orgUnitIds: orgUnitIds,
+                partners: partners,
+                aggregate_partners: false,
                 siteType: siteType,
                 startDate: startDate,
                 endDate: endDate,

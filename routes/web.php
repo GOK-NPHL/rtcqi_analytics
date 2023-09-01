@@ -36,6 +36,8 @@ Route::get('/reports/summaries', 'SummariesReportController@index')->name('summa
 
 //Services
 Route::get('/submissions', 'SubmissionsController@index')->name('submissionsIndex');
+Route::get('/submissions/hts', 'SubmissionsController@index')->name('submissionsIndex');
+Route::get('/submissions/spi', 'SubmissionsController@spi')->name('spiSubmissions');
 
 //Services
 Route::get('/service/profile', 'Service\UsersController@userProfile')->name('profile');

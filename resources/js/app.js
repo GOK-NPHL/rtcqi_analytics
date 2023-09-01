@@ -19,7 +19,8 @@ require('./components/reports/pt/PTReport');
 require('./components/reports/logbook/LogbookReport');
 
 require('./components/reports/spi/SpiReport');
-require('./components/reports/submissions/Submissions');
+require('./components/reports/submissions/HTSSubmissions');
+require('./components/reports/submissions/SPISubmissions');
 
 require('./components/system/resources/Resources');
 require('./components/system/partners/Partners');

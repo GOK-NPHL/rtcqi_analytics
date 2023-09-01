@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FetchOrgunits, exportToExcel, FetchUserAuthorities, FetchOdkHTSData, separateOrgUnitAndSite, FetchSubmissions, FetchPartners } from '../../utils/Helpers'
+import { FetchOrgunits, exportToExcel, FetchUserAuthorities, FetchOdkHTSData, separateOrgUnitAndSite, FetchHTSSubmissions, FetchPartners } from '../../utils/Helpers'
 import 'jspdf-autotable'
 import Pagination from 'react-js-pagination';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
@@ -152,7 +152,7 @@ class SubmissionsReport extends React.Component {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    let returnedData = await FetchSubmissions(orgUnitIds, siteType, startDate, endDate, pg, ppg);
+                    let returnedData = await FetchHTSSubmissions(orgUnitIds, siteType, startDate, endDate, pg, ppg);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data?.result,
@@ -187,7 +187,7 @@ class SubmissionsReport extends React.Component {
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">Submissions</h1>
+                    <h1 className="h4 mb-0 text-gray-500">HTS Submissions</h1>
                     <span>{Intl.NumberFormat().format(this.state.total || 0)} records</span>
                 </div>
 
@@ -295,7 +295,7 @@ class SubmissionsReport extends React.Component {
                                                     isDownloading: true
                                                 })
                                                 if (this.state.countyDl) {
-                                                    FetchSubmissions([this.state.countyDl], [], "", "", 1, 5000).then(returnedData => {
+                                                    FetchHTSSubmissions([this.state.countyDl], [], "", "", 1, 5000).then(returnedData => {
                                                         if (returnedData.status == 200) {
                                                             // console.log("Data2DL:: ", Object.keys(returnedData?.data?.result[0]));
                                                             let results = returnedData?.data?.result;
@@ -350,7 +350,7 @@ class SubmissionsReport extends React.Component {
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
-                                    // FetchSubmissions()
+                                    // FetchHTSSubmissions()
                                     console.log('fetching page', page)
                                     this.fetchOdkDataServer(this.state.orgUnitDataIds,
                                         this.state.siteType,
@@ -408,7 +408,7 @@ class SubmissionsReport extends React.Component {
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
-                                    // FetchSubmissions()
+                                    // FetchHTSSubmissions()
                                     console.log('fetching page', page)
                                     this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
                                         this.state.siteType,

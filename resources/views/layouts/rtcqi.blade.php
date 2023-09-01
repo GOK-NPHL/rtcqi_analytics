@@ -124,7 +124,11 @@ use Illuminate\Support\Facades\Gate;
                     <?php if (Gate::allows('view_submissions')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
-                            <span>Submissions</span>
+                            <span>HTS Submissions</span>
+                        </a>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'SPISubmissions');" href="{{ route('spiSubmissions') }}">
+                            <i class="fas fa-fw fa-list-alt"></i>
+                            <span>SPI Submissions</span>
                         </a>
                     <?php } ?>
                 </li>

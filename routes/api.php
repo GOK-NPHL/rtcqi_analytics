@@ -24,7 +24,8 @@ Route::post('/odk_data', 'SpiReportController@getData');
 Route::post('/odk_hts_data', 'LogbookReportController@getData');
 
 Route::get('/odk_submissions', 'SubmissionsController@getData');
-Route::post('/odk_submissions', 'SubmissionsController@getData');
+Route::post('/hts_submissions', 'SubmissionsController@getData');
+Route::post('/spi_submissions', 'SubmissionsController@getSPIData');
 
 Route::get('/org_units', 'Service\OrgunitsController@getOrgunits');
 Route::post('/save_orgunits', 'Service\OrgunitsController@saveOrgunits');
