@@ -72,6 +72,7 @@ class SpiReport extends React.Component {
             let subCountyList = [];
             // returnedData.forEach((val) => {
             // });
+            console.log("returnedData.payload[0][0]['org_unit_id']", returnedData.payload[0][0]['org_unit_id'])
             let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
             this.setState({
                 unfilteredOrgUnits: returnedData,
