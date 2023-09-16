@@ -75,11 +75,12 @@ class ODKDataAggregator
         $partners = null
         // $aggregate_partners = false
     ) {
-        // Log::info("Request Data variables");
+        Log::info("Request Data variables");
         // Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
-        // Log::info($siteTypes);
-        // Log::info($startDate);
-        // Log::info($endDate);
+        Log::info("orgUnitIds",$orgUnitIds);
+        Log::info("siteTypes", json_encode($siteTypes));
+        Log::info("startDate", $startDate);
+        Log::info("endDate", $endDate);
 
         $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
         $this->startDate = $startDate;
@@ -130,11 +131,12 @@ class ODKDataAggregator
     }
 
     private function getDataLoopOrgs(
-        $orgUnitIds,
+        $orgUnitIds = [0],
         $recordsReadData,
         $partners
         // , $aggregate_partners
     ) {
+        Log::info("getDataLoopOrgs orgUnitIds type = ".gettype($orgUnitIds));
         $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
