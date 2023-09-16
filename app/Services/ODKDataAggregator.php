@@ -75,12 +75,12 @@ class ODKDataAggregator
         $partners = null
         // $aggregate_partners = false
     ) {
-        Log::info("Request Data variables");
+        // Log::info("Request Data variables");
         // Log::info($orgUnitIds, $orgTimeline, $siteTypes, $startDate, $endDate);
-        Log::info("orgUnitIds",$orgUnitIds);
-        Log::info("siteTypes", $siteTypes);
-        Log::info("startDate", $startDate);
-        Log::info("endDate", $endDate);
+        // Log::info("orgUnitIds",$orgUnitIds);
+        // Log::info("siteTypes", $siteTypes);
+        // Log::info("startDate", $startDate);
+        // Log::info("endDate", $endDate);
 
         $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
         $this->startDate = $startDate;
