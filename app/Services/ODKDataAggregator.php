@@ -136,7 +136,6 @@ class ODKDataAggregator
         $partners
         // , $aggregate_partners
     ) {
-        Log::info("getDataLoopOrgs orgUnitIds type = ".gettype($orgUnitIds));
         $payload = array();
         for ($x = 0; $x < count($orgUnitIds); $x++) {
             try {
