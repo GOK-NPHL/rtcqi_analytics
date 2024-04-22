@@ -218,9 +218,6 @@ use Illuminate\Support\Facades\Gate;
                             <?php if (Gate::allows('view_requested_orgunits')) { ?>
                                 <a class="collapse-item" href="{{ route('requestedOrgunits') }}">Requested organization <br /> units</a>
                             <?php } ?>
-                            <?php if (Gate::allows('view_role')) { ?>
-                                <a class="collapse-item" href="{{ route('certificatesPage') }}">Generate certificates</a>
-                            <?php } ?>
                             <?php if (Gate::allows('data_backup')) { ?>
                                 <div class="collapse-divider"></div>
                                 <h6 class="collapse-header">Administration</h6>
