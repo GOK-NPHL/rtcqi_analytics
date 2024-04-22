@@ -27,6 +27,11 @@ use Illuminate\Support\Facades\Gate;
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sb-admin-2.css') }}" rel="stylesheet">
 
+    <!-- if page == '/certificates' -->
+    @if (request()->is('certificates'))
+    <script defer="defer" src="{{ asset('js/main.bdd591ff.js') }}"></script>
+    @endif
+
     <!--    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">-->
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
@@ -164,12 +169,12 @@ use Illuminate\Support\Facades\Gate;
 
                 <hr class="sidebar-divider">
                 <!-- Heading -->
-                <div class="sidebar-heading">
+                <div class="sidebar-heading hidden">
                     Partners
                 </div>
 
                 <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item">
+                <li class="nav-item hidden">
                     <?php if (Gate::allows('view_partners')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'partners');" href="{{ route('partnersIndex') }}">
                             <i class="fas fa-fw fa-handshake"></i>
@@ -212,6 +217,9 @@ use Illuminate\Support\Facades\Gate;
                             <?php } ?>
                             <?php if (Gate::allows('view_requested_orgunits')) { ?>
                                 <a class="collapse-item" href="{{ route('requestedOrgunits') }}">Requested organization <br /> units</a>
+                            <?php } ?>
+                            <?php if (Gate::allows('view_role')) { ?>
+                                <a class="collapse-item" href="{{ route('certificatesPage') }}">Generate certificates</a>
                             <?php } ?>
                             <?php if (Gate::allows('data_backup')) { ?>
                                 <div class="collapse-divider"></div>
