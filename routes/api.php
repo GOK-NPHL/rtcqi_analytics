@@ -37,6 +37,10 @@ Route::post('/update_upload_orgunits', 'Service\OrgunitsController@updateUploadO
 Route::post('/request_new_orgnit', 'Service\OrgunitsController@requestNewOrgUnit');
 Route::get('/get_requested_org_units', 'Service\OrgunitsController@getRequestedOrgnits');
 
+Route::get('/certificates', 'CertificatesController@indexAPI')->name('cert_index_data');
+Route::get('/certificates/dashboard', 'CertificatesController@dashboardAPI')->name('certificate_dashboard_data');
+Route::get('/certificate/view/{certid}', 'CertificatesController@viewCertAPI')->name('view_certificate_data');
+
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
 Route::get('/user_authorities', 'Service\Authorities@getUserAuthorities');

@@ -30,6 +30,8 @@ class AuthoritiesSeed extends Seeder
             array('name' => 'view_log_book_report', 'group' => 'report', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'submissions_section', 'group' => 'system', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'view_submissions', 'group' => 'report', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
+            array('name' => 'view_certificates', 'group' => 'report', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
+            array('name' => 'approve_certificates', 'group' => 'report', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'resources_section', 'group' => 'system', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'view_resources', 'group' => 'resource', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),
             array('name' => 'manage_resources', 'group' => 'resource', 'created_at' => new \dateTime, 'updated_at' => new \dateTime),

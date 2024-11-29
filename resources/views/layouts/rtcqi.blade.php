@@ -139,6 +139,35 @@ use Illuminate\Support\Facades\Gate;
                 </li>
             <?php } ?>
 
+            <!--Certificates section (certification_dashboard, cert_approvals_page)  --> 
+            <?php
+
+            if (Gate::allows('view_certificates')) { ?>
+                <!-- Divider -->
+
+                <hr class="sidebar-divider">
+                <!-- Heading -->
+                <div class="sidebar-heading">
+                    Certificates
+                </div>
+
+                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item">
+                    <?php if (Gate::allows('view_certificates')) { ?>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Certificate dashboard');" href="{{ route('certificate_dashboard') }}">
+                            <i class="fas fa-fw fa-list-alt"></i>
+                            <span>Certificate dashboard</span>
+                        </a>
+                    <?php } ?>
+                    <?php if (Gate::allows('approve_certificates')) { ?>
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Cert approvals');" href="{{ route('cert_approvals_page') }}">
+                            <i class="fas fa-fw fa-list-alt"></i>
+                            <span>Certificate approvals</span>
+                        </a>
+                    <?php } ?>
+                </li>
+            <?php } ?>
+
             <!--Resources section  -->
             <?php
 

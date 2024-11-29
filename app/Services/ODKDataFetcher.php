@@ -24,7 +24,7 @@ class ODKDataFetcher
 
     public function __construct()
     {
-        echo ("construct function was initialized on ". date('l jS \of F Y h:i:s A') .".\n");
+        // echo ("construct function was initialized on ". date('l jS \of F Y h:i:s A') .".\n");
         // if ODK_URL is set in environment variables, use it
         if (config('app.odk_url')) {
             Log::info(" ---- Using ODK URL from environment variables ---- ");

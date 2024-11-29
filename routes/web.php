@@ -39,6 +39,17 @@ Route::get('/submissions', 'SubmissionsController@index')->name('submissionsInde
 Route::get('/submissions/hts', 'SubmissionsController@index')->name('submissionsIndex');
 Route::get('/submissions/spi', 'SubmissionsController@spi')->name('spiSubmissions');
 
+
+// Certificates
+Route::get('/certificates', 'CertificatesController@index')->name('cert_approvals_page');
+
+Route::get('/certificates/dashboard', 'CertificatesController@dashboard')->name('certificate_dashboard');
+
+Route::get('/certificate/view/{certid}', 'CertificatesController@viewCert')->name('view_certificate');
+
+Route::post('/certificates/approve', 'CertificatesController@approve')->name('approve_certificate');
+
+
 //Services
 Route::get('/service/profile', 'Service\UsersController@userProfile')->name('profile');
 Route::get('/service/roles', 'Service\RolesController@index')->name('rolesIndex');

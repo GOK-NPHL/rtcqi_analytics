@@ -13,6 +13,10 @@ class SystemAuthorities
         'view_log_book_report' => 'view_log_book_report',
         'submissions_section' => 'submissions_section',
         'view_submissions' => 'view_submissions',
+
+        'view_certificates' => 'view_certificates',
+        'approve_certificates' => 'approve_certificates',
+        
         'resources_section' => 'resources_section',
         'view_resources' => 'view_resources',
         'manage_resources' => 'manage_resources',
