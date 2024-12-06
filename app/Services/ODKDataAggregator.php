@@ -163,7 +163,7 @@ class ODKDataAggregator
                 $sites = [];
                 $facilityCount = 0;
                 $siteCount = 0;
-                if(isset($records) && count($records) > 0){
+                if (isset($records) && count($records) > 0) {
                     foreach ($records as $record) {
                         $facil = $record['mysites_facility'];
                         if (!empty($facil) && $facil != '' && !in_array($facil, $facils)) {
@@ -174,9 +174,9 @@ class ODKDataAggregator
                 if (count($facils) > 0) {
                     foreach ($facils as $facil) {
                         $facil_mfl = explode("_", $facil)[0];
-                        if( !empty($facil_mfl) && $facil_mfl != ''){
-                            $ou = OdkOrgunit::where('odk_unit_name', 'like', $facil_mfl.'_%')->first();
-                            if(!empty($ou)){
+                        if (!empty($facil_mfl) && $facil_mfl != '') {
+                            $ou = OdkOrgunit::where('odk_unit_name', 'like', $facil_mfl . '_%')->first();
+                            if (!empty($ou)) {
                                 $facilityCount++;
                                 $ch = $ou->children()->pluck('org_unit_id');
                                 $sites = array_merge($sites, $ch->toArray());
@@ -415,7 +415,7 @@ class ODKDataAggregator
         }
     }
 
-    private function getFormRecords($orgUnit)
+    public function getFormRecords($orgUnit)
     {
         $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
         $level = $levelObj->level;
@@ -467,6 +467,40 @@ class ODKDataAggregator
         $stmt = Statement::create();
         $records = $stmt->process($csv);
         return $records;
+    }
+
+
+    public function getSingleFileRecordsV2($fileName)
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '4096M');
+        if (!Storage::exists($fileName)) {
+            return 0;
+        }
+
+        $url = Storage::path($fileName);
+        $csv = Reader::createFromPath($url, 'r');
+        $csv->setHeaderOffset(0); // Set the CSV header offset
+
+        $stmt = Statement::create();
+
+        // Use chunk-based processing
+        $chunkSize = 1000; // Process 1000 rows at a time
+        $offset = 0;
+        $results = [];
+
+        do {
+            $stmt = Statement::create()->offset($offset)->limit($chunkSize);
+            $records = $stmt->process($csv);
+
+            foreach ($records as $record) {
+                $results[] = $record; // Store or process records
+            }
+
+            $offset += $chunkSize;
+        } while (count($records) > 0);
+
+        return $results;
     }
 
     private function callFunctionBysecition($section, $record, $overallSites = 0)
@@ -878,7 +912,7 @@ class ODKDataAggregator
 
 
     //section 101 Overall Sites Level
-    private function getOverallSitesLevel($orgUnit, $records)
+    public function getOverallSitesLevel($orgUnit, $records)
     {
         $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["overall_sites_level"]);
         $overallSitesLevel = $summationValues['score'];
@@ -1019,7 +1053,7 @@ class ODKDataAggregator
         }
     }
 
-    private function getFileToProcess($projectId, $formId)
+    public function getFileToProcess($projectId, $formId)
     {
         $filePath = "submissions/" . $projectId . "_" . $formId . "_submissions.csv";
         return $filePath;

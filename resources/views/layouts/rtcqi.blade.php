@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Gate;
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="MoH Rapid Test Continous Quality Improvement ODK data Analytics Platform.">
-    <meta name="author" content="NPHL ICT" <!-- CSRF Token -->
+    <meta name="author" content="NPHL ICT"> <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'RTCQI Analytics') }}</title>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -28,13 +28,21 @@ use Illuminate\Support\Facades\Gate;
     <link href="{{ asset('css/sb-admin-2.css') }}" rel="stylesheet">
 
     <!-- if page == '/certificates' -->
-    @if (request()->is('certificates'))
+    {{-- @if (request()->is('certificates'))
     <script defer="defer" src="{{ asset('js/main.bdd591ff.js') }}"></script>
-    @endif
+    @endif --}}
 
     <!--    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">-->
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('jq/highcharts/12/highcharts-v12.0.2.css') }}" rel="stylesheet"> --}}
+
+    {{-- if page == cert_approvals_page --}}
+    @if (request()->is('certificates'))
+        <link rel="stylesheet" href="jq/dataTables.min.css">
+        <script src="jq/jquery-1.12.4.min.js"></script>
+        <script src="jq/dataTables.min.js"></script>
+    @endif
 
 </head>
 
@@ -139,7 +147,7 @@ use Illuminate\Support\Facades\Gate;
                 </li>
             <?php } ?>
 
-            <!--Certificates section (certification_dashboard, cert_approvals_page)  --> 
+            <!--Certificates section (certification_dashboard, cert_approvals_page)  -->
             <?php
 
             if (Gate::allows('view_certificates')) { ?>
@@ -156,13 +164,12 @@ use Illuminate\Support\Facades\Gate;
                     <?php if (Gate::allows('view_certificates')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Certificate dashboard');" href="{{ route('certificate_dashboard') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
-                            <span>Certificate dashboard</span>
+                            <span>Certification Dashboard</span>
                         </a>
-                    <?php } ?>
-                    <?php if (Gate::allows('approve_certificates')) { ?>
+
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Cert approvals');" href="{{ route('cert_approvals_page') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
-                            <span>Certificate approvals</span>
+                            <span>View Certificates</span>
                         </a>
                     <?php } ?>
                 </li>
