@@ -12,12 +12,19 @@
                     {{ $message }}
                 </div>
             @endif
+
+            {{-- <details>
+                <summary>Data</summary>
+                <pre style="white-space: pre-wrap;">
+                    {{ json_encode($data) }}
+                </pre>
+            </details> --}}
             <h1>National HTS Site Certification</h1>
             <h5> {{ count($data) }} records</h5>
             <div class="row">
                 <input type="hidden" id="data_json" value="{{ json_encode($data) }}">
                 <div class="col-md-12" id="CertificationIndex">
-                    <table class="" id="assessmentDataTable" style="font-size: 13px;">
+                    <table class="" id="assessmentDataTable" style="font-size: 14px;">
                         <thead>
                             <tr>
                                 <!-- <th>ID</th> -->
@@ -39,9 +46,12 @@
                             @foreach ($data as $row)
                                 <tr>
                                     <!-- <td>{{ $row['KEY'] }}</td> -->
-                                    <td class="toggleDetail" data-id="{{ $row['KEY'] }}"><span
-                                            data-id="{{ $row['KEY'] }}"><i id="icon:{{ $row['KEY'] }}"
-                                                data-id="{{ $row['KEY'] }}" class="fas fa-plus-square"></i></span></td>
+                                    <td class="toggleDetail" data-id="{{ $row['KEY'] }}">
+                                        <span data-id="{{ $row['KEY'] }}">
+                                            <i id="icon:{{ $row['KEY'] }}" data-id="{{ $row['KEY'] }}"
+                                                class="fas fa-plus-square"></i>
+                                        </span>
+                                    </td>
                                     <td style="text-transform: capitalize;">
                                         {{ str_replace('_', ' ', $row['mysites_county']) }}</td>
                                     <td style="text-transform: capitalize;">
@@ -62,7 +72,7 @@
                                     <!-- <td>{{ str_replace('_', ' ', $row['SubmitterName']) }}</td> -->
                                     <td>{{ str_replace('_', ' ', $row['dateofsubmission']) }}</td>
                                     <td style="font-weight: bold;"
-                                        class="{{  $row['Section-sec91percentage'] >= 90 ? 'bg-success' : '' }}">
+                                        class="{{ $row['Section-sec91percentage'] >= 90 ? 'bg-success' : '' }}">
                                         {{ round($row['Section-sec91percentage'], 2) }}%</td>
                                     <td>
                                         @if ($row['Section-sec91percentage'] >= 90)
@@ -198,8 +208,12 @@
         }
         document.addEventListener('DOMContentLoaded', function() {
             let table = new DataTable('#assessmentDataTable', {
+                buttons: ["copy", "csv", "excel", "pdf", "print", "pageLength"],
                 pageLength: 20,
-                lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]]
+                lengthMenu: [
+                    [10, 20, 50, 100, -1],
+                    [10, 20, 50, 100, "All"]
+                ]
             });
             let data = JSON.parse(document.getElementById('data_json').value);
 

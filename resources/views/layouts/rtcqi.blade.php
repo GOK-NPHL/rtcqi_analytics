@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Gate;
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sb-admin-2.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/buttons.dataTables.min.css') }}" rel="stylesheet">
 
     <!-- if page == '/certificates' -->
     {{-- @if (request()->is('certificates'))
@@ -38,10 +39,14 @@ use Illuminate\Support\Facades\Gate;
     {{-- <link href="{{ asset('jq/highcharts/12/highcharts-v12.0.2.css') }}" rel="stylesheet"> --}}
 
     {{-- if page == cert_approvals_page --}}
-    @if (request()->is('certificates'))
-        <link rel="stylesheet" href="jq/dataTables.min.css">
-        <script src="jq/jquery-1.12.4.min.js"></script>
-        <script src="jq/dataTables.min.js"></script>
+    @if (request()->is('certificates') || request()->is('certificates/dashboard'))
+        <link rel="stylesheet" href="/jq/dataTables.min.css">
+        <script src="/jq/jquery-1.12.4.min.js"></script>
+        <script src="/jq/dataTables.min.js"></script>
+        <script src="/jq/dataTables.buttons.min.js"></script>
+        <script src="/jq/buttons.flash.min.js"></script>
+        <script src="/jq/buttons.print.min.js"></script>
+        <script src="/jq/buttons.html5.min.js"></script>
     @endif
 
 </head>

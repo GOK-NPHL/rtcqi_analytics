@@ -116,10 +116,10 @@ class CertificatesController extends Controller
         foreach ($submissionOrgUnitmap as $mapping) {
             $projectId = $mapping->project_id;
             $formId = $mapping->form_id;
-            if($countyfilter){
+            if ($countyfilter) {
                 $filter = str_replace('_', ' ', $countyfilter);
                 $orgUnit = OdkOrgunit::where('odk_unit_name', 'like', $filter . '%')->where('level', 2)->first();
-                if($orgUnit){
+                if ($orgUnit) {
                     $orgUnit = $orgUnit->toArray();
                     [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
                 }
@@ -128,6 +128,16 @@ class CertificatesController extends Controller
             $perCountyRecords = $aggregator->getSingleFileRecordsV2($fileName);
             if ($perCountyRecords && is_array($perCountyRecords)) {
                 $combinedRecords = array_merge($combinedRecords, $perCountyRecords);
+            }
+        }
+
+        $unique_facility_records = [];
+        foreach ($combinedRecords as $record) {
+            $is_in_array = !empty(array_filter($unique_facility_records, function ($unq_facil) use ($record) {
+                return $unq_facil['mysites_facility'] == $record['mysites_facility'] && $unq_facil['mysites'] == $record['mysites'];
+            }));
+            if (!$is_in_array) {
+                $unique_facility_records[] = $record;
             }
         }
         /**
@@ -145,22 +155,52 @@ class CertificatesController extends Controller
             'level_3' => [],
             'level_4' => [],
         ];
-        foreach ($combinedRecords as $record) {
+        // foreach ($combinedRecords as $record) {
+        foreach ($unique_facility_records as $record) {
             $facility = $record['mysites_facility'];
             $site = $record['mysites'];
 
             $is_site_level_4 = $record['Section-sec91percentage'] >= 90;
             if ($is_site_level_4) {
                 $sites_summary['level_4'][] = $facility . ' | ' . $site;
-                // if (isset($sites_summary[$site])) {
-                //     $sites_summary[$site] += 1;
-                // } else {
-                //     $sites_summary[$site] = 1;
-                // }
             }
         }
 
         return $sites_summary;
+    }
+    private function getLatestRoutineData($data)
+    {
+        $aggregator = new ODKDataAggregator();
+        $odkUtils = new ODKUtils();
+        $allData = [];
+        $routineData = [];
+        $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
+            ->where('form_id', 'like', "spi%") // for spi data
+            ->get();
+        foreach ($submissionOrgUnitmap as $mapping) {
+            $projectId = $mapping->project_id;
+            $formId = $mapping->form_id;
+            $fileName = $aggregator->getFileToProcess($projectId, $formId);
+            $perCountyRecords = $aggregator->getSingleFileRecordsV2($fileName);
+            if ($perCountyRecords && is_array($perCountyRecords)) {
+                $allData = array_merge($allData, $perCountyRecords);
+            }
+        }
+
+
+        foreach ($data as $record) {
+            // find the first matching record in the allData and push it to routineData
+            $matchingRecord = array_values(array_filter($allData, function ($value) use ($record) {
+                // use mfl and site to match
+                return $value['mysites_facility'] == $record['mysites_facility'] && $value['mysites'] == $record['mysites'];
+            }));
+            if (count($matchingRecord) > 0) {
+                $routineData[] = $matchingRecord[0];
+            }
+        }
+
+
+        return $routineData;
     }
 
     private function getAssessmentLevelsSummary($data)
@@ -242,7 +282,7 @@ class CertificatesController extends Controller
             // 'section_9' => [], // Section-sec9percentage    // Retesting
         ];
 
-        foreach($data as $record){
+        foreach ($data as $record) {
             $perf_per_section['section_0'][] = $record['Section-sec0percentage'];
             $perf_per_section['section_1'][] = $record['Section-sec1percentage'];
             $perf_per_section['section_2'][] = $record['Section-sec2percentage'];
@@ -275,27 +315,69 @@ class CertificatesController extends Controller
             return view('reports.certification.dashboard', ['error' => 'You are not authorized to view this page.']);
             // return response()->json(['Message' => 'Not allowed to view certificates: '], 500);
         }
+        $user = Auth::user();
+        if (!$user) {
+            return view('reports.certification.index', ['error' => 'You are not authorized to view this page.']);
+        }
+        $user_level = 1;
+        $user_primary_org = OdkOrgunit::where('level', 1)->first();
+
+        $user_orgs = DB::table('odkorgunit_user')
+            ->join('odkorgunit', 'odkorgunit.org_unit_id', '=', 'odkorgunit_user.odk_orgunit_id')
+            ->where('odkorgunit_user.user_id', $user->id)
+            ->get();
 
         // county filter
         $filtercounty = $request->county ?? null;
 
         $summaries = [];
         $overall_sites_at_level_4 = $this->getOrgSitesAtLevel4($filtercounty);
-        Log::info('overall_sites_at_level_4 ' . json_encode($overall_sites_at_level_4));
+        // Log::info('overall_sites_at_level_4 ' . json_encode($overall_sites_at_level_4));
         $no_overall = count($overall_sites_at_level_4['level_4']);
         $summaries['all_eligible_l4_sites'] = $no_overall;
 
         $data = $this->fetchData();
-        if ($filtercounty && $filtercounty != 'All') {
-            $data = array_filter($data, function ($value) use ($filtercounty) {
-                return $value['mysites_county'] == $filtercounty;
-            });
+        if (in_array(1, array_column($user_orgs->toArray(), 'level'))) {
+            $user_level = 1;
+            if ($filtercounty && $filtercounty != 'All') {
+                $data = array_values(array_filter($data, function ($value) use ($filtercounty) {
+                    return $value['mysites_county'] == $filtercounty;
+                }));
+            }
+        } else {
+            // if level = county
+            $user_primary_org = $user_orgs->first();
+            if (in_array(2, array_column($user_orgs->toArray(), 'level'))) {
+                $user_level = 2;
+                foreach ($user_orgs as $user_org) {
+                    $data = array_values(array_filter($data, function ($value) use ($user_org) {
+                        return trim(strtolower(str_replace('_', ' ', $value['mysites_county']))) == trim(strtolower($user_org->odk_unit_name));
+                    }));
+                }
+            } else if (in_array(3, array_column($user_orgs->toArray(), 'level'))) {
+                $user_level = 3;
+                foreach ($user_orgs as $user_org) {
+                    $data = array_values(array_filter($data, function ($value) use ($user_org) {
+                        return trim(strtolower(str_replace('_', ' ', $value['mysites_subcounty']))) == trim(strtolower($user_org->odk_unit_name));
+                    }));
+                }
+            } else if (in_array(4, array_column($user_orgs->toArray(), 'level'))) {
+                $user_level = 4;
+                foreach ($user_orgs as $user_org) {
+                    $data = array_values(array_filter($data, function ($value) use ($user_org) {
+                        $record_mfl = explode("_", $value['mysites_facility'])[0];
+                        $user_org_mfl = explode("_", $user_org->odk_unit_name)[0];
+                        return trim(strtolower($record_mfl)) == trim(strtolower($user_org_mfl));
+                    }));
+                }
+            }
         }
         $assessment_data = $this->getAssessmentLevelsSummary($data);
+        $latest_routine_data = $this->getLatestRoutineData($data);
         $summaries['assessment_data'] = $assessment_data;
         $perf_per_section = $this->getPerfPerSection($data);
         $summaries['perf_per_section'] = $perf_per_section;
-        return view('reports/certification/dashboard', compact('summaries', 'data', 'filtercounty'));
+        return view('reports/certification/dashboard', compact('summaries', 'data', 'latest_routine_data', 'filtercounty', 'user_orgs', 'user_level', 'user_primary_org'));
     }
 
     public function dashboardAPI()
@@ -314,7 +396,7 @@ class CertificatesController extends Controller
             // return response()->json(['Message' => 'Not allowed to view certificates: '], 500);
         }
         $user = Auth::user();
-        if(!$user){
+        if (!$user) {
             return view('reports.certification.index', ['error' => 'You are not authorized to view this page.']);
         }
         // select ou.* from odkorgunit ou where ou.org_unit_id = (select uou.odk_orgunit_id from odkorgunit_user uou where uou.user_id = 655)
@@ -323,9 +405,41 @@ class CertificatesController extends Controller
             ->where('odkorgunit_user.user_id', $user->id)
             ->get();
         $data = $this->fetchData();
-        if(count($user_orgs) > 0){
+        if (count($user_orgs) > 0) {
             // check the level of the user's first org. if 1, show all certs. else, filter certs by level
-            $user_org_level = $user_orgs->first()->level;
+
+            // 111111111111111111111111111111111111111111111111
+            $data_filtered = [];
+            foreach ($user_orgs as $user_org) {
+                $user_org_level = $user_org->level;
+                if ($user_org_level == 1) {
+                    // show all certs
+                    $data_filtered = array_merge($data_filtered, $data);
+                } else {
+                    if ($user_org_level == 2) {
+                        $data_county = array_values(array_filter($data, function ($item) use ($user_org) {
+                            return trim(strtolower(str_replace('_', ' ', $item['mysites_county']))) == trim(strtolower($user_org->odk_unit_name));
+                        }));
+                        // Log::info('data_county: for ' . $user_org->odk_unit_name . ' is ' . count($data_county));
+                        $data_filtered = array_merge($data_filtered, $data_county);
+                    } else if ($user_org_level == 3) {
+                        $data_subcounty = array_values(array_filter($data, function ($item) use ($user_org) {
+                            return trim(strtolower(str_replace('_', ' ', $item['mysites_subcounty']))) == trim(strtolower($user_org->odk_unit_name));
+                        }));
+                        $data_filtered = array_merge($data_filtered, $data_subcounty);
+                    } else if ($user_org_level == 4) {
+                        $data_facility = array_values(array_filter($data, function ($item) use ($user_org) {
+                            $record_mfl = explode("_", $item['mysites_facility'])[0];
+                            $user_org_mfl = explode("_", $user_org->odk_unit_name)[0];
+                            return trim(strtolower($record_mfl)) == trim(strtolower($user_org_mfl));
+                        }));
+                        $data_filtered = array_merge($data_filtered, $data_facility);
+                    }
+                }
+            }
+            $data = $data_filtered;
+            // 111111111111111111111111111111111111111111111111
+
         }
         $approved_certs = ApprovedCerts::pluck('cert_id')->toArray();
         return view('reports/certification/index', compact('data', 'approved_certs'));
