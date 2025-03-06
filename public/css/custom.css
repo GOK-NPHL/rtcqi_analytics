@@ -35,3 +35,7 @@ table.darker-borders tr th,
 table.darker-borders tr td{
     border-color: #686868;
 }
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #a6def9;
+}

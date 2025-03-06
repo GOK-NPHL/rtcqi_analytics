@@ -49,6 +49,8 @@ Route::get('/certificate/view/{certid}', 'CertificatesController@viewCert')->nam
 
 Route::post('/certificates/approve', 'CertificatesController@approve')->name('approve_certificate');
 
+Route::get('/certificate/submission/{id}', 'CertificatesController@viewSubmission')->name('view_certification_submission');
+
 
 //Services
 Route::get('/service/profile', 'Service\UsersController@userProfile')->name('profile');
