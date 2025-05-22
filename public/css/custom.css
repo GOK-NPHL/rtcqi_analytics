@@ -4,3 +4,38 @@
 .hidden{
     display: none !important;
 }
+.list-group-item.list-group-item-action {
+    color: #333;
+    background-color: #f8f9fa;
+    border: 1px solid #3095fa;
+    border-radius: 4px;
+    text-align: center;
+    text-transform: uppercase;
+}
+.list-group-item.list-group-item-action:hover {
+    color: #333;
+    background-color: #3095fa;
+}
+.list-group-item.list-group-item-action.active {
+    color: #fff;
+    background-color: #024686;
+    border-color: #024686;
+}
+
+.bg-gray {
+    background-color: #e9e9e9;
+}
+.bg-green-light {
+    background-color: #a8daa8;
+}
+.bg-red-light {
+    background-color: #daa8a8;
+}
+table.darker-borders tr th,
+table.darker-borders tr td{
+    border-color: #686868;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #a6def9;
+}

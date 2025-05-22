@@ -23,6 +23,9 @@ Route::get('/', function () {
 
 Route::get('resources/download_file/{id}', 'Auth\LoginController@downloadFile')->name('download-file');
 
+// public cert verification page
+Route::get('/certificate-verification/{certid}', 'CertificatesController@verifyCertificate')->name('verify_certificate');
+
 Auth::routes(['register' => false]);
 //Auth::routes();
 
@@ -48,6 +51,8 @@ Route::get('/certificates/dashboard', 'CertificatesController@dashboard')->name(
 Route::get('/certificate/view/{certid}', 'CertificatesController@viewCert')->name('view_certificate');
 
 Route::post('/certificates/approve', 'CertificatesController@approve')->name('approve_certificate');
+
+Route::get('/certificate/submission/{id}', 'CertificatesController@viewSubmission')->name('view_certification_submission');
 
 
 //Services

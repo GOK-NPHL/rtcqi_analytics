@@ -1,11 +1,16 @@
 @extends('layouts.rtcqi')
 <script src="/jq/jquery-1.12.4.min.js"></script>
-<script src="/jq/highcharts/12/highcharts-v12.0.2.js"></script>
-<script src="/jq/highcharts/12/highcharts-more-v12.0.2.js"></script>
+<script src="/jq/highcharts/highcharts.js"></script>
+<script src="/jq/highcharts/exporting.js"></script>
+<script src="/jq/highcharts/highcharts-more.js"></script>
+
+<script src="/jq/bootstrap.min.js"></script>
+
 @section('content')
     <?php
+    $count_ = 0;
     // if filter by county, get that single county
-    if($filtercounty){
+    if ($filtercounty) {
         $unique_counties = [$filtercounty];
     } else {
         $filtercounty = 'All';
@@ -25,7 +30,7 @@
     }
 
     foreach (['level_0', 'level_1', 'level_2', 'level_3', 'level_4'] as $level) {
-        if(isset($summaries['assessment_data'][$level])){
+        if (isset($summaries['assessment_data'][$level])) {
             foreach ($summaries['assessment_data'][$level] as $site) {
                 $county_summary[$site['county']][$level]++;
                 $county_summary[$site['county']]['total']++;
@@ -33,6 +38,7 @@
         }
     }
     ?>
+
     <div class="container-fluid" style="color: #333;">
         @if (isset($error))
             <div class="alert alert-danger">
@@ -48,231 +54,498 @@
             <div class="row">
                 <div class="col-md-9 pt-4">
                     <h3>Dashboard
-                        @if(!!$filtercounty && $filtercounty != 'All')
-                        : &nbsp;
-                        <u style="text-transform: capitalize">{{ str_replace('_', ' ', $filtercounty) }} County</u>
-                        <a title="Remove filter" href={{ route('certificate_dashboard') }} class="text-danger" style>&times;</a>
-                    @endif
+                        @if (in_array(1, array_column($user_orgs->toArray(), 'level')))
+                            @if (!!$filtercounty && $filtercounty != 'All')
+                                : &nbsp;
+                                <u style="text-transform: capitalize">{{ str_replace('_', ' ', $filtercounty) }} County</u>
+                                <a title="Remove filter" href={{ route('certificate_dashboard') }} class="text-danger"
+                                    style>&times;</a>
+                            @endif
+                        @endif
                     </h3>
                 </div>
-                <div class="col-md-3 text-right">
-                    <form action="{{ route('certificate_dashboard') }}" method="get">
-                        <div style="display: inline-block; display: flex; flex-direction: column; align-items: flex-start;">
-                            <label for="county" class="w-100">Filter by county:
-                                {{-- @if(!!$filtercounty && $filtercounty != 'All')
-                                <span>({{ $filtercounty }})</span>
-                                <a href={{ route('certificate_dashboard') }} class="text-danger">Reset</a>
-                                @endif --}}
-                            </label>
-                            <div class="w-100" style="display: flex; flex-direction: row; align-items: center;">
-                                <select class="form-control form-control-sm" name="county" id="county" style="margin: 0 5px;">
-                                    <option
-                                        {{ !$filtercounty || $filtercounty == 'All' ? 'selected' : '' }}
-                                        value="All"
-                                    >All</option>
-                                    @foreach ($unique_counties as $county)
-                                        <option
-                                            value="{{ $county }}"
-                                            {{ $filtercounty == $county ? 'selected' : '' }}
-                                        >{{ ucwords(str_replace('_', ' ', $county)) }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                @if (in_array(1, array_column($user_orgs->toArray(), 'level')))
+                    <div class="col-md-3 text-right">
+                        <form action="{{ route('certificate_dashboard') }}" method="get">
+                            <div
+                                style="display: inline-block; display: flex; flex-direction: column; align-items: flex-start;">
+                                <label for="county" class="w-100">Filter by county:</label>
+                                <div class="w-100" style="display: flex; flex-direction: row; align-items: center;">
+                                    <select class="form-control form-control-sm" name="county" id="county"
+                                        style="margin: 0 5px;">
+                                        <option {{ !$filtercounty || $filtercounty == 'All' ? 'selected' : '' }}
+                                            value="All">All</option>
+                                        @foreach ($unique_counties as $county)
+                                            <option value="{{ $county }}"
+                                                {{ $filtercounty == $county ? 'selected' : '' }}>
+                                                {{ ucwords(str_replace('_', ' ', $county)) }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
+                        </form>
+                    </div>
+                @endif
             </div>
-            <details>
+
+            {{-- <details>
                 <summary>Data</summary>
                 <pre style="white-space: pre-wrap;">
                     {{ json_encode($summaries) }}
                 </pre>
-            </details>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Eligible, Targeted and Assessed Sites</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="eligible-assessed-sites" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Sites Certification Assessment</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="site-assessment" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Certification Assessment | Levels</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="cert-assessment-levels" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">County Summary</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="county-summary-table">
-                            <table class="table table-bordered table-striped table-sm">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center" scope="col">County</th>
-                                        <th class="text-center" scope="col">Level 0 Sites</th>
-                                        <th class="text-center" scope="col">Level 1 Sites</th>
-                                        <th class="text-center" scope="col">Level 2 Sites</th>
-                                        <th class="text-center" scope="col">Level 3 Sites</th>
-                                        <th class="text-center" scope="col">Level 4 Sites</th>
-                                        <th class="text-center" scope="col">% of Sites at Level 4</th>
-                                        <th class="text-center" scope="col">Total Sites</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($county_summary as $county => $county_data)
-                                        <tr>
-                                            <td style="text-transform: capitalize; font-weight: bold;">
-                                                {{ str_replace('_', ' ', $county) }}</td>
-                                            <td style="text-align: right;"> {{ $county_data['level_0'] }} </td>
-                                            <td style="text-align: right;"> {{ $county_data['level_1'] }} </td>
-                                            <td style="text-align: right;"> {{ $county_data['level_2'] }} </td>
-                                            <td style="text-align: right;"> {{ $county_data['level_3'] }} </td>
-                                            <td style="text-align: right;"> {{ $county_data['level_4'] }} </td>
-                                            <td style="text-align: right;">
-                                                {{ round(($county_data['level_4'] * 100) / $county_data['total'], 2) }}%
-                                            </td>
-                                            <td style="text-align: right;"> {{ $county_data['total'] }} </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 0: Admin Support to Sites</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec0-adminsupport" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 1: Personnel Training &amp; Certification</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec1-personnel-training-certification"
-                            style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 2: Quality assuarance & Councelling </h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec2-qa-counselling" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 3: Physical Facility</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec3-physical-facility" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 4: Safety</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec4-safety" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 5: Pre-Testing</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec5-pre-testing-phase" style="height: 700px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 6: Testing</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec6-testing-phase" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 7: Post-Testing</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec7-post-testing-phase" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </details> --}}
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Section 8: External Quality Assurance</h5>
-                        </div>
-                        <div class="card-body highcharts-light" id="sec8-eqa" style="height: 500px;">
-                        </div>
-                    </div>
-                </div>
+
+            <!-- List group -->
+            <div class="list-group" id="myList" role="tablist"
+                style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; font-weight: bold;">
+                <a style="max-width: 350px;" class="list-group-item list-group-item-action active" data-toggle="list"
+                    href="#home" role="tab">Overview</a>
+                <a style="max-width: 350px;" class="list-group-item list-group-item-action" data-toggle="list"
+                    href="#profile" role="tab">Sites not certified</a>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Average Performance per QA element across service provisions areas in
-                                Percentage</h5>
+            <hr>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div class="tab-pane active" id="home" role="tabpanel">
+                    {{-- OVERVIEW --}}
+                    <section class="main-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Eligible, Targeted and Assessed Sites</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="eligible-assessed-sites"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Sites Certification Assessment</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="site-assessment" style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body highcharts-light" id="perf-per-section" style="height: 500px;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Certification Assessment | Levels</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="cert-assessment-levels"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">County Summary</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="county-summary-table">
+                                        <table class="table table-bordered table-striped table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center" scope="col">County</th>
+                                                    <th class="text-center" scope="col">Level 0 Sites</th>
+                                                    <th class="text-center" scope="col">Level 1 Sites</th>
+                                                    <th class="text-center" scope="col">Level 2 Sites</th>
+                                                    <th class="text-center" scope="col">Level 3 Sites</th>
+                                                    <th class="text-center" scope="col">Level 4 Sites</th>
+                                                    <th class="text-center" scope="col">% of Sites at Level 4</th>
+                                                    <th class="text-center" scope="col">Total Sites</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($county_summary as $county => $county_data)
+                                                    <tr>
+                                                        <td style="text-transform: capitalize; font-weight: bold;">
+                                                            {{ str_replace('_', ' ', $county) }}</td>
+                                                        <td style="text-align: right;"> {{ $county_data['level_0'] }}
+                                                        </td>
+                                                        <td style="text-align: right;"> {{ $county_data['level_1'] }}
+                                                        </td>
+                                                        <td style="text-align: right;"> {{ $county_data['level_2'] }}
+                                                        </td>
+                                                        <td style="text-align: right;"> {{ $county_data['level_3'] }}
+                                                        </td>
+                                                        <td style="text-align: right;"> {{ $county_data['level_4'] }}
+                                                        </td>
+                                                        <td style="text-align: right;">
+                                                            {{ round(($county_data['level_4'] * 100) / $county_data['total'], 2) }}%
+                                                        </td>
+                                                        <td style="text-align: right;"> {{ $county_data['total'] }} </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 0: Admin Support to Sites</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec0-adminsupport"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 1: Personnel Training &amp; Certification</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec1-personnel-training-certification"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 2: Quality assuarance & Councelling </h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec2-qa-counselling"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 3: Physical Facility</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec3-physical-facility"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 4: Safety</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec4-safety" style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 5: Pre-Testing</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec5-pre-testing-phase"
+                                        style="height: 700px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 6: Testing</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec6-testing-phase"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 7: Post-Testing</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec7-post-testing-phase"
+                                        style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Section 8: External Quality Assurance</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="sec8-eqa" style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title">Average Performance per QA element across service provisions
+                                            areas
+                                            in
+                                            Percentage</h5>
+                                    </div>
+                                    <div class="card-body highcharts-light" id="perf-per-section" style="height: 500px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="tab-pane" id="profile" role="tabpanel">
+                    {{-- SITES NOT CERTIFIED --}}
+                    <section class="main-content">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive" style="font-size: 13px;">
+                                    <table class="table table-bordered table-sm darker-borders"
+                                        id="sitesNotCertifiedTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" rowspan="2" scope="col">County</th>
+                                                <th class="text-center" rowspan="2" scope="col">Subcounty</th>
+                                                <th class="text-center" rowspan="2" scope="col"
+                                                    style="min-width: 250px;">Facility</th>
+                                                <th class="text-center" rowspan="2" scope="col">Site</th>
+                                                <th class="text-center" rowspan="2" scope="col">Partner</th>
+                                                <th class="text-center bg-gray" colspan="2" scope="col"
+                                                    style="min-width: 200px;">0: Admin Support to Sites</th>
+                                                <th class="text-center" colspan="2" scope="col"
+                                                    style="min-width: 200px;">1: Personnel Training & Certification</th>
+                                                <th class="text-center bg-gray" colspan="2" scope="col"
+                                                    style="min-width: 200px;">2: Quality assuarance & Councelling </th>
+                                                <th class="text-center" colspan="2" scope="col"
+                                                    style="min-width: 200px;">3: Physical Facility</th>
+                                                <th class="text-center bg-gray" colspan="2" scope="col"
+                                                    style="min-width: 200px;">4: Safety</th>
+                                                <th class="text-center" colspan="2" scope="col"
+                                                    style="min-width: 200px;">5: Pre-Testing</th>
+                                                <th class="text-center bg-gray" colspan="2" scope="col"
+                                                    style="min-width: 200px;">6: Testing</th>
+                                                <th class="text-center" colspan="2" scope="col"
+                                                    style="min-width: 200px;">7: Post-Testing</th>
+                                                <th class="text-center bg-gray" colspan="2" scope="col"
+                                                    style="min-width: 200px;">8: External Quality Assurance</th>
+                                                <th class="text-center" rowspan="2" scope="col">Overall Score</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="text-center" scope="col">
+                                                    Assessment %</th>
+
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Evaluation %</th>
+                                                <th style="font-size: 12px;" class="bg-gray text-center" scope="col">
+                                                    Assessment %</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($data as $record)
+                                                <?php
+                                                $evaluation_record =
+                                                    array_values(
+                                                        array_filter($latest_routine_data, function ($value) use ($record) {
+                                                            return $value['mysites_facility'] == $record['mysites_facility'] && $value['mysites'] == $record['mysites'];
+                                                        }),
+                                                    ) ?? [];
+                                                if (count($evaluation_record) < 1) {
+                                                    $evaluation_record = [
+                                                        [
+                                                            'Section-sec0percentage' => 0,
+                                                            'Section-sec1percentage' => 0,
+                                                            'Section-sec2percentage' => 0,
+                                                            'Section-sec3percentage' => 0,
+                                                            'Section-sec4percentage' => 0,
+                                                            'Section-sec51percentage' => 0,
+                                                            'Section-sec61percentage' => 0,
+                                                            'Section-sec7percentage' => 0,
+                                                            'Section-sec8percentage' => 0,
+                                                        ],
+                                                    ];
+                                                } else {
+                                                    $evaluation_record = [
+                                                        'Section-sec0percentage' => $evaluation_record[0]['Section-sec2percentage'] ?? 0,
+                                                        'Section-sec1percentage' => $evaluation_record[0]['Section-sec1percentage'] ?? 0,
+                                                        'Section-sec2percentage' => $evaluation_record[0]['Section-sec2percentage'] ?? 0,
+                                                        'Section-sec3percentage' => $evaluation_record[0]['Section-sec3percentage'] ?? 0,
+                                                        'Section-sec4percentage' => $evaluation_record[0]['Section-sec4percentage'] ?? 0,
+                                                        'Section-sec51percentage' => $evaluation_record[0]['Section-sec51percentage'] ?? 0,
+                                                        'Section-sec61percentage' => $evaluation_record[0]['Section-sec61percentage'] ?? 0,
+                                                        'Section-sec7percentage' => $evaluation_record[0]['Section-sec7percentage'] ?? 0,
+                                                        'Section-sec8percentage' => $evaluation_record[0]['Section-sec8percentage'] ?? 0,
+                                                    ];
+                                                }
+                                                ?>
+                                                <tr>
+                                                    <td class="text-center" style="text-transform: capitalize;">
+                                                        {{ str_replace('_', ' ', $record['mysites_county']) }}</td>
+                                                    <td class="text-center" style="text-transform: capitalize;">
+                                                        {{ str_replace('_', ' ', $record['mysites_subcounty']) }}</td>
+                                                    <td class="text-center" style="text-transform: capitalize;">
+                                                        {{ str_replace('_', ' ', $record['mysites_facility']) }}</td>
+                                                    <td class="text-center" style="text-transform: uppercase;">
+                                                        {{ str_replace('_', ' ', $record['mysites']) }}</td>
+                                                    @if ($record['otherpartner'] != '')
+                                                        <td style="text-transform: capitalize;">
+                                                            {{ str_replace('_', ' ', $record['otherpartner']) }}</td>
+                                                    @else
+                                                        <td style="text-transform: capitalize;">
+                                                            {{ str_replace('_', ' ', $record['partner']) }}
+                                                        </td>
+                                                    @endif
+
+                                                    {{-- 0: Admin Support to Sites --}}
+                                                    <td class="bg-gray text-right  {{ ($evaluation_record['Section-sec0percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec0percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="bg-gray text-right {{ $record['Section-sec0percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec0percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 1: Personnel Training & Certification --}}
+                                                    <td class="text-right  {{ ($evaluation_record['Section-sec1percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec1percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="text-right {{ $record['Section-sec1percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec1percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 2: Quality assuarance & Councelling --}}
+                                                    <td class="bg-gray text-right  {{ ($evaluation_record['Section-sec2percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec2percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="bg-gray text-right {{ $record['Section-sec2percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec2percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 3: Physical Facility --}}
+                                                    <td class="text-right  {{ ($evaluation_record['Section-sec3percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec3percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="text-right {{ $record['Section-sec3percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec3percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 4: Safety --}}
+                                                    <td class="bg-gray text-right  {{ ($evaluation_record['Section-sec4percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec4percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="bg-gray text-right {{ $record['Section-sec4percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec4percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 5: Pre-Testing Phase --}}
+                                                    <td class="text-right  {{ ($evaluation_record['Section-sec51percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec51percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="text-right {{ $record['Section-sec51percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec51percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 6: Testing Phase --}}
+                                                    <td class="bg-gray text-right  {{ ($evaluation_record['Section-sec61percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec61percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="bg-gray text-right {{ $record['Section-sec61percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec61percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 7: Post-Testing Phase --}}
+                                                    <td class="text-right  {{ ($evaluation_record['Section-sec7percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec7percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="text-right {{ $record['Section-sec7percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec7percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    {{-- 8: External Quality Assurance --}}
+                                                    <td class="bg-gray text-right  {{ ($evaluation_record['Section-sec8percentage'] ?? 0) >= 90 ? 'bg-green-light' : 'bg-red-light' }}">
+                                                        {{ round(($evaluation_record['Section-sec8percentage'] ?? 0), 2) }}%
+                                                    </td>
+                                                    <td
+                                                        class="bg-gray text-right {{ $record['Section-sec8percentage'] >= 90 ? 'bg-green-light' : '' }}">
+                                                        {{ round($record['Section-sec8percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                    <td style="color: #222; font-weight: bold;"
+                                                        class="text-right {{ $record['Section-sec91percentage'] >= 90 ? 'bg-success' : '' }}">
+                                                        {{ round($record['Section-sec9percentage'] ?? 0, 2) }}%
+                                                    </td>
+
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         @endif
@@ -282,12 +555,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        let table = new DataTable('#sitesNotCertifiedTable', {
+            buttons: ["copy", "csv", "excel", "pdf", "print", "pageLength"],
+            pageLength: 20,
+            lengthMenu: [
+                [10, 20, 50, 100, -1],
+                [10, 20, 50, 100, "All"]
+            ]
+        });
+
         // eligible-assessed-sites (column)
         var eligibleAssessedSites = document.getElementById('eligible-assessed-sites');
         if (eligibleAssessedSites) {
             Highcharts.chart(eligibleAssessedSites, {
                 chart: {
                     type: 'column'
+                },
+                exporting: {
+                    enabled: true,
                 },
                 title: {
                     text: 'Eligible and Assessed Sites'

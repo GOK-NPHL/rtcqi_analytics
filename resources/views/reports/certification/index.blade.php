@@ -12,12 +12,19 @@
                     {{ $message }}
                 </div>
             @endif
+
+            {{-- <details>
+                <summary>Data</summary>
+                <pre style="white-space: pre-wrap;">
+                    {{ json_encode($data) }}
+                </pre>
+            </details> --}}
             <h1>National HTS Site Certification</h1>
             <h5> {{ count($data) }} records</h5>
             <div class="row">
                 <input type="hidden" id="data_json" value="{{ json_encode($data) }}">
                 <div class="col-md-12" id="CertificationIndex">
-                    <table class="" id="assessmentDataTable" style="font-size: 13px;">
+                    <table class="" id="assessmentDataTable" style="font-size: 14px;">
                         <thead>
                             <tr>
                                 <!-- <th>ID</th> -->
@@ -31,6 +38,7 @@
                                 <!-- <th>Submitted by</th> -->
                                 {{-- <th>Score per section</th> --}}
                                 <th>Submitted on</th>
+                                <th>Certificate approved?</th>
                                 <th>Overall Score</th>
                                 <th>Actions</th>
                             </tr>
@@ -39,9 +47,12 @@
                             @foreach ($data as $row)
                                 <tr>
                                     <!-- <td>{{ $row['KEY'] }}</td> -->
-                                    <td class="toggleDetail" data-id="{{ $row['KEY'] }}"><span
-                                            data-id="{{ $row['KEY'] }}"><i id="icon:{{ $row['KEY'] }}"
-                                                data-id="{{ $row['KEY'] }}" class="fas fa-plus-square"></i></span></td>
+                                    <td class="toggleDetail" data-id="{{ $row['KEY'] }}">
+                                        <span data-id="{{ $row['KEY'] }}">
+                                            <i id="icon:{{ $row['KEY'] }}" data-id="{{ $row['KEY'] }}"
+                                                class="fas fa-plus-square"></i>
+                                        </span>
+                                    </td>
                                     <td style="text-transform: capitalize;">
                                         {{ str_replace('_', ' ', $row['mysites_county']) }}</td>
                                     <td style="text-transform: capitalize;">
@@ -61,26 +72,49 @@
                                     <!-- <td>{{ str_replace('_', ' ', $row['initialfollowup']) }}</td> -->
                                     <!-- <td>{{ str_replace('_', ' ', $row['SubmitterName']) }}</td> -->
                                     <td>{{ str_replace('_', ' ', $row['dateofsubmission']) }}</td>
-                                    <td style="font-weight: bold;"
-                                        class="{{  $row['Section-sec91percentage'] >= 90 ? 'bg-success' : '' }}">
-                                        {{ round($row['Section-sec91percentage'], 2) }}%</td>
                                     <td>
-                                        @if ($row['Section-sec91percentage'] >= 90)
-                                            <!-- if the record is approved, show the view-certificate button -->
-                                            @if (in_array($row['KEY'], $approved_certs))
-                                                <a href="{{ route('view_certificate', ['certid' => $row['KEY']]) }}"
-                                                    class="btn btn-primary btn-sm">View Certificate</a>
-                                                <!-- else if the current user has approve_certificates authority, show the approval dialog/modal -->
-                                            @else
+                                        @if (in_array($row['KEY'], $approved_certs))
+                                            <strong>Yes</strong>
+                                        @else
+                                            @if ($row['Section-sec91percentage'] >= 90)
+                                                <span>No</span>
                                                 @if (Gate::allows('approve_certificates'))
-                                                    <!-- use window.confirm() to show the modal -->
-                                                    <button type="button"
-                                                        onclick="approveCertificateBox(`{{ $row['KEY'] }} | {{ $row['mysites_facility'] }} | {{ $row['mysites'] }}`)"
-                                                        class="btn btn-link btn-sm" style="padding: 2px 3px;">Approve
-                                                        certificate</button>
+                                                    <button type="button" onclick="approveCertificateBox(`{{ $row['KEY'] }} | {{ $row['mysites_facility'] }} | {{ $row['mysites'] }}`)" class="btn btn-link" style="padding: 2px 3px; text-align: center;">Approve now</button>
                                                 @endif
+                                            @else
+                                                <span>N/A</span>
                                             @endif
                                         @endif
+                                    </td>
+                                    <td style="font-weight: bold;"
+                                        class="{{ $row['Section-sec91percentage'] >= 90 ? 'bg-success' : '' }}">
+                                        {{ round($row['Section-sec91percentage'], 2) }}%</td>
+                                    <td>
+                                        {{-- dropdown button to view submission, view cert and approve cert --}}
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <div class="dropdown-menu" style="border-color: #728fb5">
+                                                <a
+                                                    href="{{ route('view_certification_submission', ['id' => $row['KEY']]) }}"
+                                                class="dropdown-item">View Submission</a>
+                                                @if ($row['Section-sec91percentage'] >= 90)
+                                                    <!-- if the record is approved, show the view-certificate button -->
+                                                    @if (in_array($row['KEY'], $approved_certs))
+                                                        <a href="{{ route('view_certificate', ['certid' => $row['KEY']]) }}"
+                                                            class="dropdown-item">View Certificate</a>
+                                                        <!-- else if the current user has approve_certificates authority, show the approval dialog/modal -->
+                                                    @else
+                                                        @if (Gate::allows('approve_certificates'))
+                                                            <!-- use window.confirm() to show the modal -->
+                                                            <button type="button" onclick="approveCertificateBox(`{{ $row['KEY'] }} | {{ $row['mysites_facility'] }} | {{ $row['mysites'] }}`)" class="dropdown-item" style="padding: 2px 3px; text-align: center;">Approve certificate</button>
+                                                        @endif
+                                                    @endif
+                                                @endif
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -198,8 +232,12 @@
         }
         document.addEventListener('DOMContentLoaded', function() {
             let table = new DataTable('#assessmentDataTable', {
+                buttons: ["copy", "csv", "excel", "pdf", "print", "pageLength"],
                 pageLength: 20,
-                lengthMenu: [[10, 20, 50, 100, -1], [10, 20, 50, 100, "All"]]
+                lengthMenu: [
+                    [10, 20, 50, 100, -1],
+                    [10, 20, 50, 100, "All"]
+                ]
             });
             let data = JSON.parse(document.getElementById('data_json').value);
 
