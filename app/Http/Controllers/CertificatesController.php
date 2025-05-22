@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use League\Csv\Reader;
 use League\Csv\Statement;
 use setasign\Fpdi\Fpdi;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CertificatesController extends Controller
 {
@@ -34,10 +35,11 @@ class CertificatesController extends Controller
         } else {
             $this->baseOdkUrl = 'https://odk.nphl.go.ke/v1/';
         }
-        $this->middleware('auth');
+        $this->middleware('auth')->except('verifyCertificate');
 
         $this->projectID = '56';
         $this->formID = 'National_HTS_Site_Certification_Checklist';
+
     }
 
     public function refreshData()
@@ -467,17 +469,24 @@ class CertificatesController extends Controller
         // use pdf template to generate pdf (storage/app/pdf_templates/rtcqi_cert_template.pdf)
         // variables to be replaced in the template are: CERT_NO, MFL_CODE, FACILITY_NAME, COUNTY_SUBCOUNTY, DATE_ISSUED
 
-        $cert_no = strtoupper(str_replace('uuid:', '', $cert['KEY']));
         $facility = $cert['mysites_facility'];
         // mfl = first element of facility when split by "_"
         $mfl_code = explode("_", $facility)[0];
         $facility = str_replace('_', ' ', strtoupper($facility . " - " . $cert['mysites']));
         $county_subcounty = str_replace('_', ' ', strtoupper($cert['mysites_county'] . " - " . $cert['mysites_subcounty']));
-        $date_issued = ApprovedCerts::where('cert_id', $certid)->first()->created_at ?? date('Y-m-d');
+        $approval = ApprovedCerts::where('cert_id', $certid)->first();
+        if(!$approval) {
+            return view('reports.certification.index', ['error' => 'Certificate not approved.']);
+        }
+        $date_issued = $approval->created_at ?? date('Y-m-d');
         // make date format YYYY-MM-DD
         $date_issued = date('Y-m-d', strtotime($date_issued));
 
+        // $cert_no = strtoupper(str_replace('uuid:', '', $cert['KEY']));
+        $cert_no = 'MOH/DNLS/RTCQI/' . $mfl_code . '/' . $approval->id;
+
         $pdf_template = Storage::path('pdf_templates/blank_rtcqi_cert_template.pdf');
+        $pdf_template = Storage::path('pdf_templates/rtcqi_cert_template_may25.pdf');
 
         $pdf = new Fpdi();
         $pdf->AddPage('L');
@@ -498,20 +507,36 @@ class CertificatesController extends Controller
         $pdf->SetXY(270, 19);
         $pdf->Write(10, $mfl_code);
 
-        $pdf->SetFont('Helvetica', 'B', 19);
+        $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(92, 75);
+        $pdf->SetXY(117, 73);
         $pdf->Write(10, $facility);
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(53, 85);
+        $pdf->SetXY(117, 81);
         $pdf->Write(10, $county_subcounty);
 
-        $pdf->SetFont('Helvetica', 'B', 19);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(150, 114);
-        $pdf->Write(10, $date_issued);
+        // $pdf->SetFont('Helvetica', 'B', 19);
+        // $pdf->SetTextColor(0, 0, 0);
+        // $pdf->SetXY(150, 114);
+        // $pdf->Write(10, $date_issued);
+
+        // Generate QR code
+        $qrCode = QrCode::format('png')
+                        ->size(100)
+                        ->generate("https://rtcqi.nphl.go.ke/certificate-verification/$cert_no");
+
+        // Save QR code to a temporary file
+        $qrCodePath = tempnam(sys_get_temp_dir(), 'qr_code');
+        file_put_contents($qrCodePath, $qrCode);
+
+        // Add QR code to PDF
+        $pdf->Image($qrCodePath, 140, 178, 20, 20, 'PNG');
+
+        // Remove temporary file
+        unlink($qrCodePath);
+
 
 
         $pdf->Output('cert.pdf', 'D');
@@ -521,6 +546,51 @@ class CertificatesController extends Controller
 
         // return json_encode($cert);
         // return view('reports/certification/cert', compact('cert'));
+    }
+
+    public function verifyCertificate(Request $request)
+    {
+        // 1. rate limit
+        // $ipAddress = $request->ip();
+        // $rateLimiter = RateLimiter::for('verify-certificate-' . $ipAddress, function () {
+        //     return Limit::perMinute(5)->by($ipAddress);
+        // });
+        // if ($rateLimiter->tooManyAttempts()) {
+        //     return response()->json([
+        //         'error' => 'Too many attempts. Please try again later.',
+        //     ], 429);
+        // }
+        // $rateLimiter->hit();
+
+
+        // 2. get cert details by certid. if legit, show certificate details. if not, show alert
+        $certId = $request->certid;
+        if(!$certId) return view('certificate-verification', ['error' => 'Invalid certificate. Please check the certificate number and try again.']);
+        if ($certId) {
+            $certDetails = $this->fetchData($certId);
+            if($certDetails) {
+                $facility = $certDetails[0]['mysites_facility'];
+                // mfl = first element of facility when split by "_"
+                $mfl_code = explode("_", $facility)[0];
+                $cert_approval = ApprovedCerts::where('cert_id', $certId)->first();
+                if(!$cert_approval) {
+                    // not verified
+                    return view('certificate-verification', ['error' => 'Invalid certificate. Please check the certificate number and try again. Error code: NV1']);
+                }
+                $date_issued = $cert_approval->created_at ?? date('Y-m-d');
+                $date_issued = date('Y-m-d', strtotime($date_issued));
+                // $cert_no = strtoupper(str_replace('uuid:', '', $cert['KEY']));
+                $cert_no = 'MOH/DNLS/RTCQI/' . $mfl_code . '/' . $cert_approval->id;
+
+                return view('certificate-verification', compact('certDetails', 'date_issued', 'cert_no'));
+            } else {
+                return view('certificate-verification', ['error' => 'Invalid certificate. Please check the certificate number and try again.']);
+            }
+        } else {
+            return view('certificate-verification', ['error' => 'Invalid certificate. Please check the certificate number and try again.']);
+        }
+
+        // render page.
     }
 
     public function viewSubmission(Request $request)

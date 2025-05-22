@@ -22,7 +22,8 @@
         "predis/predis": "^2.1",
         "sentry/sentry-laravel": "^3.2",
         "setasign/fpdf": "^1.8",
-        "setasign/fpdi": "^2.6"
+        "setasign/fpdi": "^2.6",
+        "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

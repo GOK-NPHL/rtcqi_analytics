@@ -23,6 +23,9 @@ Route::get('/', function () {
 
 Route::get('resources/download_file/{id}', 'Auth\LoginController@downloadFile')->name('download-file');
 
+// public cert verification page
+Route::get('/certificate-verification/{certid}', 'CertificatesController@verifyCertificate')->name('verify_certificate');
+
 Auth::routes(['register' => false]);
 //Auth::routes();
 
