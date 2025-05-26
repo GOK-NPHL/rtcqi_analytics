@@ -256,6 +256,10 @@ class ODKDataFetcher
             $column = $orgUnitLevel2[0]['column'];
             $sheet = $spreadsheet->getSheetByName($sheetName);
 
+            if($sheet == null){
+                throw new Exception("Sheet not found for sheet name: " . $sheetName);
+            }
+
             $data = array(1, $sheet->toArray(null, true, true, true));
             $alphabet = array(
                 'A', 'B', 'C', 'D', 'E',
