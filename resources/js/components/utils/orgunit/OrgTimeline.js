@@ -78,10 +78,16 @@ class OrgTimeline extends React.Component {
                             Follow-Up 6 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow7')} href="#">
-                            Follow-Up 6 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                            Follow-Up 7 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow8')} href="#">
-                            Follow-Up 6 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                            Follow-Up 8 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow9')} href="#">
+                            Follow-Up 9 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow10')} href="#">
+                            Follow-Up 10 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'otherFollowup')} href="#">
                             Other Follow-Up <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
