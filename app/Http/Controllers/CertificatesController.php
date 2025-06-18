@@ -577,7 +577,8 @@ class CertificatesController extends Controller
         if ($certId) {
             $certDetails = $this->fetchData($certId);
             if($certDetails) {
-                $facility = $certDetails[0]['mysites_facility'];
+                // $facility = $certDetails[0]['mysites_facility'];
+                $facility = $certDetails['mysites_facility'];
                 // mfl = first element of facility when split by "_"
                 $mfl_code = explode("_", $facility)[0];
                 $cert_approval = ApprovedCerts::where('cert_id', $certId)->first();

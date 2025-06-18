@@ -18,7 +18,7 @@
                         </div>
                     @else
                         <?php
-                            $cert = $certDetails[0];
+                            $cert = $certDetails;
                         ?>
                         <div class="alert alert-success">
                             <h4 style="font-weight: bold;">Valid Certificate</h4>
