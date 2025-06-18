@@ -8,6 +8,7 @@ use App\OdkOrgunit;
 use App\Services\ODKDataAggregator;
 use App\Services\ODKUtils;
 use App\Services\SystemAuthorities;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -469,6 +470,10 @@ class CertificatesController extends Controller
         // use pdf template to generate pdf (storage/app/pdf_templates/rtcqi_cert_template.pdf)
         // variables to be replaced in the template are: CERT_NO, MFL_CODE, FACILITY_NAME, COUNTY_SUBCOUNTY, DATE_ISSUED
 
+        if (!$cert) {
+            return view('reports.certification.index', ['error' => 'Certificate not found.']);
+        }
+        $assessment_date = \Carbon\Carbon::parse($cert['SubmissionDate'])->format('Y-m-d') ?? $cert['SubmissionDate'];
         $facility = $cert['mysites_facility'];
         // mfl = first element of facility when split by "_"
         $mfl_code = explode("_", $facility)[0];
@@ -515,7 +520,7 @@ class CertificatesController extends Controller
         // $pdf->SetXY(270, 19);
         // $pdf->Write(10, $mfl_code);
 
-        $pdf->SetFont('Helvetica', 'BI', 15);
+        $pdf->SetFont('Helvetica', 'B', 15);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(117, 73);
         $pdf->Write(10, $facility);
@@ -524,6 +529,11 @@ class CertificatesController extends Controller
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(117, 81);
         $pdf->Write(10, $county_subcounty);
+
+        $pdf->SetFont('Helvetica', 'B', 16);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(148, 103);
+        $pdf->Write(10, $assessment_date);
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
@@ -541,6 +551,12 @@ class CertificatesController extends Controller
 
         // Add QR code to PDF
         $pdf->Image($qrCodePath, 263, 10, 23, 23, 'PNG');
+
+
+        $pdf->SetFont('Helvetica', 'B', 8);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(262, 31);
+        $pdf->Write(10, 'Scan for Validity');
 
         // Remove temporary file
         unlink($qrCodePath);

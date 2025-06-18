@@ -22,8 +22,8 @@
                         ?>
                         <div class="alert alert-success">
                             <h4 style="font-weight: bold;">Valid Certificate</h4>
-                            <p style="margin-bottom: 0;">This certificate is valid. It was issued on {{ $date_issued }}.
-                            </p>
+                            {{-- <p style="margin-bottom: 0;">This certificate is valid. It was issued on {{ $date_issued }}. --}}
+                            <p style="margin-bottom: 0;">This certificate is valid for 2 years from {{ \Carbon\Carbon::parse($cert['SubmissionDate'])->format('Y-m-d') }} to {{ \Carbon\Carbon::parse($cert['SubmissionDate'])->addYears(2)->format('Y-m-d') }}.</p>
                         </div>
 
                         <table class="table">
@@ -57,7 +57,16 @@
                                 <th>{{ \Carbon\Carbon::parse($cert['SubmissionDate'])->format('Y-m-d') }}</th>
                             </tr>
                         </table>
-                        <p>For any queries, please contact the RTCQI team.</p>
+                        {{-- <p>For any queries, please contact the RTCQI team.</p> --}}
+
+                        <p>This site has successfully met the RT-CQI certification requirements of level 4, thereby upholding a high standard in the quality of HIV testing services provided.</p>
+
+                        <br/>
+                        <blockquote class="blockquote" style="margin-top: 20px; font-weight: semibold;">
+                            <p class="mb-0">Rapid Testing Continuous Quality Improvement ( RT-CQI)</p>
+                            <p class="mb-0">Division of National Laboratory services</p>
+                            {{-- <footer class="blockquote-footer">Division of National Laboratory services</footer> --}}
+                        </blockquote>
 
                         {{-- <hr/>
                         <details>
