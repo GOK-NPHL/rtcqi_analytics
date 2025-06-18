@@ -472,7 +472,12 @@ class CertificatesController extends Controller
         $facility = $cert['mysites_facility'];
         // mfl = first element of facility when split by "_"
         $mfl_code = explode("_", $facility)[0];
-        $facility = str_replace('_', ' ', strtoupper($facility . " - " . $cert['mysites']));
+
+        $facility = str_replace('_', ' ', strtoupper($facility));
+        $facility = str_replace($mfl_code, '', $facility);
+        // trim
+        $facility = trim($facility);
+        $facility = $facility . " (" . $mfl_code . ")" . " - " . str_replace('_', ' ', strtoupper($cert['mysites']));
         $county_subcounty = str_replace('_', ' ', strtoupper($cert['mysites_county'] . " - " . $cert['mysites_subcounty']));
         $approval = ApprovedCerts::where('cert_id', $certid)->first();
         if(!$approval) {
@@ -482,11 +487,14 @@ class CertificatesController extends Controller
         // make date format YYYY-MM-DD
         $date_issued = date('Y-m-d', strtotime($date_issued));
 
+        $date_issued = 'June, 2025';
+
         // $cert_no = strtoupper(str_replace('uuid:', '', $cert['KEY']));
         $cert_no = 'MOH/DNLS/RTCQI/' . $mfl_code . '/' . $approval->id;
 
-        $pdf_template = Storage::path('pdf_templates/blank_rtcqi_cert_template.pdf');
-        $pdf_template = Storage::path('pdf_templates/rtcqi_cert_template_may25.pdf');
+        // $pdf_template = Storage::path('pdf_templates/blank_rtcqi_cert_template.pdf');
+        // $pdf_template = Storage::path('pdf_templates/rtcqi_cert_template_may25.pdf');
+        $pdf_template = Storage::path('pdf_templates/rtcqi_cert_template_jun25.pdf');
 
         $pdf = new Fpdi();
         $pdf->AddPage('L');
@@ -502,12 +510,12 @@ class CertificatesController extends Controller
         $pdf->SetXY(8, 19);
         $pdf->Write(10, $cert_no);
 
-        $pdf->SetFont('Helvetica', '', 15);
-        $pdf->SetTextColor(255, 0, 0);
-        $pdf->SetXY(270, 19);
-        $pdf->Write(10, $mfl_code);
+        // $pdf->SetFont('Helvetica', '', 15);
+        // $pdf->SetTextColor(255, 0, 0);
+        // $pdf->SetXY(270, 19);
+        // $pdf->Write(10, $mfl_code);
 
-        $pdf->SetFont('Helvetica', 'B', 16);
+        $pdf->SetFont('Helvetica', 'BI', 15);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(117, 73);
         $pdf->Write(10, $facility);
@@ -517,22 +525,22 @@ class CertificatesController extends Controller
         $pdf->SetXY(117, 81);
         $pdf->Write(10, $county_subcounty);
 
-        // $pdf->SetFont('Helvetica', 'B', 19);
-        // $pdf->SetTextColor(0, 0, 0);
-        // $pdf->SetXY(150, 114);
-        // $pdf->Write(10, $date_issued);
+        $pdf->SetFont('Helvetica', 'B', 16);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(147, 128);
+        $pdf->Write(10, $date_issued);
 
         // Generate QR code
         $qrCode = QrCode::format('png')
                         ->size(100)
-                        ->generate("https://rtcqi.nphl.go.ke/certificate-verification/$cert_no");
+                        ->generate("https://rtcqi.nphl.go.ke/certificate-verification/$certid");
 
         // Save QR code to a temporary file
         $qrCodePath = tempnam(sys_get_temp_dir(), 'qr_code');
         file_put_contents($qrCodePath, $qrCode);
 
         // Add QR code to PDF
-        $pdf->Image($qrCodePath, 140, 178, 20, 20, 'PNG');
+        $pdf->Image($qrCodePath, 263, 10, 23, 23, 'PNG');
 
         // Remove temporary file
         unlink($qrCodePath);
