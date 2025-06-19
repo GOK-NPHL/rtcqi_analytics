@@ -700,75 +700,87 @@ class ODKDataAggregator
         if(isset($record["Section-Section5-job_aides_infectious_waste"])) {
             $values["sec5_1"] = $record["Section-Section5-job_aides_infectious_waste"];
         } else {
+            Log::error("Section-Section5-job_aides_infectious_waste" . " not found in record: " . json_encode($record));
             $values["sec5_1"] = 0;
         }
         if(isset($record["Section-Section5-bloodspills"])) {
             $values["sec5_2"] = $record["Section-Section5-bloodspills"];
         } else {
+            Log::error("Section-Section5-bloodspills" . " not found in record: " . json_encode($record));
             $values["sec5_2"] = 0;
         }
         if(isset($record["Section-Section5-job_aides_nationalalgo"])) {
             $values["sec5_3"] = $record["Section-Section5-job_aides_nationalalgo"];
         } else {
+            Log::error("Section-Section5-job_aides_nationalalgo" . " not found in record: " . json_encode($record));
             $values["sec5_3"] = 0;
         }
         if(isset($record["Section-Duokit_used"])) {
             $values["sec5_4"] = $record["Section-Duokit_used"];
         } else {
+            Log::error("Section-Duokit_used" . " not found in record: " . json_encode($record));
             $values["sec5_4"] = 0;
         }
         if(isset($record["Section-subsec5-Duokit_jobaide"])) {
             $values["sec5_5"] = $record["Section-subsec5-Duokit_jobaide"];
         } else {
+            Log::error("Section-subsec5-Duokit_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_5"] = 0;
         }
         if(isset($record["Section-subsec5-Determine_jobaide"])) {
             $values["sec5_7"] = $record["Section-subsec5-Determine_jobaide"];
         } else {
+            Log::error("Section-subsec5-Determine_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_7"] = 0;
         }
         if(isset($record["Section-subsec5-FirstResponce_jobaide"])) {
             $values["sec5_8"] = $record["Section-subsec5-FirstResponce_jobaide"];
         } else {
+            Log::error("Section-subsec5-FirstResponce_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_8"] = 0;
         }
         if(isset($record["Section-subsec5-expirationdate"])) {
             $values["sec5_9"] = $record["Section-subsec5-expirationdate"];
         } else {
+            Log::error("Section-subsec5-expirationdate" . " not found in record: " . json_encode($record));
             $values["sec5_9"] = 0;
         }
         if(isset($record["Section-subsec5-testkitskeptwell"])) {
             $values["sec5_10"] = $record["Section-subsec5-testkitskeptwell"];
         } else {
+            Log::error("Section-subsec5-testkitskeptwell" . " not found in record: " . json_encode($record));
             $values["sec5_10"] = 0;
         }
         if(isset($record["Section-subsec5-newconsignmentQC"])) {
             $values["sec5_11"] = $record["Section-subsec5-newconsignmentQC"];
         } else {
+            Log::error("Section-subsec5-newconsignmentQC" . " not found in record: " . json_encode($record));
             $values["sec5_11"] = 0;
         }
         if(isset($record["Section-subsec5-newkitlotQC"])) {
             $values["sec5_12"] = $record["Section-subsec5-newkitlotQC"];
         } else {
+            Log::error("Section-subsec5-newkitlotQC" . " not found in record: " . json_encode($record));
             $values["sec5_12"] = 0;
         }
         if(isset($record["Section-subsec5-monthlyQC"])) {
             $values["sec5_13"] = $record["Section-subsec5-monthlyQC"];
         } else {
+            Log::error("Section-subsec5-monthlyQC" . " not found in record: " . json_encode($record));
             $values["sec5_13"] = 0;
         }
         if(isset($record["Section-subsec5-qc_recorded"])) {
             $values["sec5_14"] = $record["Section-subsec5-qc_recorded"];
         } else {
+            Log::error("Section-subsec5-qc_recorded" . " not found in record: " . json_encode($record));
             $values["sec5_14"] = 0;
         }
         if(isset($record["Section-subsec5-stepstocorrect_invalid_QC"])) {
             $values["sec5_15"] = $record["Section-subsec5-stepstocorrect_invalid_QC"];
         } else {
+            Log::error("Section-subsec5-stepstocorrect_invalid_QC" . " not found in record: " . json_encode($record));
             $values["sec5_15"] = 0;
         }
-
-
 
         foreach ($values as $key => $val) {
             if (empty($val))
