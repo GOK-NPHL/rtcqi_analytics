@@ -559,9 +559,21 @@ class ODKDataAggregator
     {
 
         $values = array();
-        $values["sec_1"] = $record["Section-Section1-providers_undergone_training"];
-        $values["sec_2"] =  $record["Section-Section1-training_certificates_available"];
-        $values["sec_3"] = $record["Section-Section1-refresher_training"];
+        if(isset($record["Section-Section1-providers_undergone_training"])){
+            $values["sec_1"] = $record["Section-Section1-providers_undergone_training"];
+        } else {
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section1-training_certificates_available"])){
+            $values["sec_2"] = $record["Section-Section1-training_certificates_available"];
+        } else {
+            $values["sec_2"] = 0;
+        }
+        if(isset($record["Section-Section1-refresher_training"])){
+            $values["sec_3"] = $record["Section-Section1-refresher_training"];
+        } else {
+            $values["sec_3"] = 0;
+        }
 
         foreach ($values as $key => $val) {
             if (empty($val))
@@ -591,12 +603,36 @@ class ODKDataAggregator
     {
 
         $values = array();
-        $values["sec_1"] = $record["Section-Section2-attended_support_supervision"];
-        $values["sec_2"] =  $record["Section-Section2-provider_self_assessment"];
-        $values["sec_3"] = $record["Section-Section2-client_satisfaction_survey_done"];
-        $values["sec_4"] = $record["Section-Section2-observed_practice"];
-        $values["sec_5"] = $record["Section-Section2-scmlcsupport"];
-        $values["sec_6"] = $record["Section-Section2-cmlcsupport"];
+        if(isset($record["Section-Section2-attended_support_supervision"])){
+            $values["sec_1"] = $record["Section-Section2-attended_support_supervision"];
+        }else{
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section2-provider_self_assessment"])){
+            $values["sec_2"] = $record["Section-Section2-provider_self_assessment"];
+        }else{
+            $values["sec_2"] = 0;
+        }
+        if(isset($record["Section-Section2-client_satisfaction_survey_done"])){
+            $values["sec_3"] = $record["Section-Section2-client_satisfaction_survey_done"];
+        }else{
+            $values["sec_3"] = 0;
+        }
+        if(isset($record["Section-Section2-observed_practice"])){
+            $values["sec_4"] = $record["Section-Section2-observed_practice"];
+        }else{
+            $values["sec_4"] = 0;
+        }
+        if(isset($record["Section-Section2-scmlcsupport"])){
+            $values["sec_5"] = $record["Section-Section2-scmlcsupport"];
+        }else{
+            $values["sec_5"] = 0;
+        }
+        if(isset($record["Section-Section2-cmlcsupport"])){
+            $values["sec_6"] = $record["Section-Section2-cmlcsupport"];
+        }else{
+            $values["sec_6"] = 0;
+        }
 
         foreach ($values as $key => $val) {
             if (empty($val))
@@ -626,12 +662,36 @@ class ODKDataAggregator
     {
 
         $values = array();
-        $values["sec_1"] = $record["Section-Section3-HIV_testing_area"];
-        $values["sec_2"] =  $record["Section-Section3-sufficient_space"];
-        $values["sec_3"] = $record["Section-Section3-confidentiality"];
-        $values["sec_4"] = $record["Section-Section3-clean_testing_area"];
-        $values["sec_5"] = $record["Section-Section3-sufficient_lighting"];
-        $values["sec_6"] = $record["Section-Section3-secure_storage"];
+        if(isset($record["Section-Section3-HIV_testing_area"])){
+            $values["sec_1"] = $record["Section-Section3-HIV_testing_area"];
+        } else {
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section3-sufficient_space"])){
+            $values["sec_2"] =  $record["Section-Section3-sufficient_space"];
+        } else {
+            $values["sec_2"] =  0;
+        }
+        if(isset($record["Section-Section3-confidentiality"])){
+            $values["sec_3"] = $record["Section-Section3-confidentiality"];
+        } else {
+            $values["sec_3"] = 0;
+        }
+        if(isset($record["Section-Section3-clean_testing_area"])){
+            $values["sec_4"] = $record["Section-Section3-clean_testing_area"];
+        } else {
+            $values["sec_4"] = 0;
+        }
+        if(isset($record["Section-Section3-sufficient_lighting"])){
+            $values["sec_5"] = $record["Section-Section3-sufficient_lighting"];
+        } else {
+            $values["sec_5"] = 0;
+        }
+        if(isset($record["Section-Section3-secure_storage"])){
+            $values["sec_6"] = $record["Section-Section3-secure_storage"];
+        } else {
+            $values["sec_6"] = 0;
+        }
 
         foreach ($values as $key => $val) {
             if (empty($val))
@@ -662,12 +722,36 @@ class ODKDataAggregator
     {
 
         $values = array();
-        $values["sec_1"] = $record["Section-Section4-running_water"];
-        $values["sec_2"] =  $record["Section-Section4-soap"];
-        $values["sec_3"] = $record["Section-Section4-wastesegregationfacility"];
-        $values["sec_4"] = $record["Section-Section4-segregationonsite"];
-        $values["sec_5"] = $record["Section-Section4-pep_protocols"];
-        $values["sec_6"] = $record["Section-Section4-pep_protocols_followed"];
+        if(isset($record["Section-Section4-running_water"])){
+            $values["sec_1"] = $record["Section-Section4-running_water"];
+        } else {
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section4-soap"])){
+            $values["sec_2"] =  $record["Section-Section4-soap"];
+        } else {
+            $values["sec_2"] = 0;
+        }
+        if(isset($record["Section-Section4-wastesegregationfacility"])){
+            $values["sec_3"] = $record["Section-Section4-wastesegregationfacility"];
+        } else {
+            $values["sec_3"] = 0;
+        }
+        if(isset($record["Section-Section4-segregationonsite"])){
+            $values["sec_4"] = $record["Section-Section4-segregationonsite"];
+        } else {
+            $values["sec_4"] = 0;
+        }
+        if(isset($record["Section-Section4-pep_protocols"])){
+            $values["sec_5"] = $record["Section-Section4-pep_protocols"];
+        } else {
+            $values["sec_5"] = 0;
+        }
+        if(isset($record["Section-Section4-pep_protocols_followed"])){
+            $values["sec_6"] = $record["Section-Section4-pep_protocols_followed"];
+        } else {
+            $values["sec_6"] = 0;
+        }
 
         foreach ($values as $key => $val) {
             if (empty($val))
@@ -700,85 +784,71 @@ class ODKDataAggregator
         if(isset($record["Section-Section5-job_aides_infectious_waste"])) {
             $values["sec5_1"] = $record["Section-Section5-job_aides_infectious_waste"];
         } else {
-            // Log::error("Section-Section5-job_aides_infectious_waste" . " not found in record: " . json_encode($record));
             $values["sec5_1"] = 0;
         }
         if(isset($record["Section-Section5-bloodspills"])) {
             $values["sec5_2"] = $record["Section-Section5-bloodspills"];
         } else {
-            // Log::error("Section-Section5-bloodspills" . " not found in record: " . json_encode($record));
             $values["sec5_2"] = 0;
         }
         if(isset($record["Section-Section5-job_aides_nationalalgo"])) {
             $values["sec5_3"] = $record["Section-Section5-job_aides_nationalalgo"];
         } else {
-            // Log::error("Section-Section5-job_aides_nationalalgo" . " not found in record: " . json_encode($record));
             $values["sec5_3"] = 0;
         }
         if(isset($record["Section-Duokit_used"])) {
             $values["sec5_4"] = $record["Section-Duokit_used"];
         } else {
-            // Log::error("Section-Duokit_used" . " not found in record: " . json_encode($record));
             $values["sec5_4"] = 0;
         }
         if(isset($record["Section-subsec5-Duokit_jobaide"])) {
             $values["sec5_5"] = $record["Section-subsec5-Duokit_jobaide"];
         } else {
-            // Log::error("Section-subsec5-Duokit_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_5"] = 0;
         }
         if(isset($record["Section-subsec5-Determine_jobaide"])) {
             $values["sec5_7"] = $record["Section-subsec5-Determine_jobaide"];
         } else {
-            // Log::error("Section-subsec5-Determine_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_7"] = 0;
         }
         if(isset($record["Section-subsec5-FirstResponce_jobaide"])) {
             $values["sec5_8"] = $record["Section-subsec5-FirstResponce_jobaide"];
         } else {
-            // Log::error("Section-subsec5-FirstResponce_jobaide" . " not found in record: " . json_encode($record));
             $values["sec5_8"] = 0;
         }
         if(isset($record["Section-subsec5-expirationdate"])) {
             $values["sec5_9"] = $record["Section-subsec5-expirationdate"];
         } else {
-            // Log::error("Section-subsec5-expirationdate" . " not found in record: " . json_encode($record));
             $values["sec5_9"] = 0;
         }
         if(isset($record["Section-subsec5-testkitskeptwell"])) {
             $values["sec5_10"] = $record["Section-subsec5-testkitskeptwell"];
         } else {
-            // Log::error("Section-subsec5-testkitskeptwell" . " not found in record: " . json_encode($record));
             $values["sec5_10"] = 0;
         }
         if(isset($record["Section-subsec5-newconsignmentQC"])) {
             $values["sec5_11"] = $record["Section-subsec5-newconsignmentQC"];
         } else {
-            // Log::error("Section-subsec5-newconsignmentQC" . " not found in record: " . json_encode($record));
             $values["sec5_11"] = 0;
         }
         if(isset($record["Section-subsec5-newkitlotQC"])) {
             $values["sec5_12"] = $record["Section-subsec5-newkitlotQC"];
         } else {
-            // Log::error("Section-subsec5-newkitlotQC" . " not found in record: " . json_encode($record));
             $values["sec5_12"] = 0;
         }
         if(isset($record["Section-subsec5-monthlyQC"])) {
             $values["sec5_13"] = $record["Section-subsec5-monthlyQC"];
         } else {
-            // Log::error("Section-subsec5-monthlyQC" . " not found in record: " . json_encode($record));
             $values["sec5_13"] = 0;
         }
         if(isset($record["Section-subsec5-qc_recorded"])) {
             $values["sec5_14"] = $record["Section-subsec5-qc_recorded"];
         } else {
-            // Log::error("Section-subsec5-qc_recorded" . " not found in record: " . json_encode($record));
             $values["sec5_14"] = 0;
         }
         if(isset($record["Section-subsec5-stepstocorrect_invalid_QC"])) {
             $values["sec5_15"] = $record["Section-subsec5-stepstocorrect_invalid_QC"];
         } else {
-            // Log::error("Section-subsec5-stepstocorrect_invalid_QC" . " not found in record: " . json_encode($record));
             $values["sec5_15"] = 0;
         }
 
@@ -813,26 +883,62 @@ class ODKDataAggregator
     private function aggregateTestingPhase($record)
     {
         $values = array();
-        $values["sec5_1"] = $record["Section-Section6-hts_algorithmfollowed"];
-        $values["sec5_2"] =  $record["Section-Section6-duokit_algo_followed"];
 
-        $values["sec5_3"] = $record["Section-Section6-samplecollection"];
-
-        $values["sec5_4"] = $record["Section-Section6-Determine_algo"];
-
-        $values["sec5_5"] = $record["Section-Section6-Duokit_procedure"];
-
-        $values["sec5_7"] = $record["Section-Section6-FirstResponce_algo"];
-
-        $values["sec5_8"] = $record["Section-Section6-timersavailable"];
-
-        $values["sec5_9"] = $record["Section-Section6-timersused"];
-
-        $values["sec5_10"] = $record["Section-Section6-resultsinterpreted"];
-
-        $values["sec5_11"] = $record["Section-Section6-retesting"];
-
-        $values["sec5_12"] = $record["Section-Section6-retestingrecord"];
+        if(isset($record["Section-Section6-hts_algorithmfollowed"])) {
+            $values["sec5_1"] = $record["Section-Section6-hts_algorithmfollowed"];
+        } else {
+            $values["sec5_1"] = 0;
+        }
+        if(isset($record["Section-Section6-duokit_algo_followed"])) {
+            $values["sec5_2"] =  $record["Section-Section6-duokit_algo_followed"];
+        } else {
+            $values["sec5_2"] = 0;
+        }
+        if(isset($record["Section-Section6-samplecollection"])) {
+            $values["sec5_3"] = $record["Section-Section6-samplecollection"];
+        } else {
+            $values["sec5_3"] = 0;
+        }
+        if(isset($record["Section-Section6-Determine_algo"])) {
+            $values["sec5_4"] = $record["Section-Section6-Determine_algo"];
+        } else {
+            $values["sec5_4"] = 0;
+        }
+        if(isset($record["Section-Section6-Duokit_procedure"])) {
+            $values["sec5_5"] = $record["Section-Section6-Duokit_procedure"];
+        } else {
+            $values["sec5_5"] = 0;
+        }
+        if(isset($record["Section-Section6-FirstResponce_algo"])) {
+            $values["sec5_7"] = $record["Section-Section6-FirstResponce_algo"];
+        } else {
+            $values["sec5_7"] = 0;
+        }
+        if(isset($record["Section-Section6-timersavailable"])) {
+            $values["sec5_8"] = $record["Section-Section6-timersavailable"];
+        } else {
+            $values["sec5_8"] = 0;
+        }
+        if(isset($record["Section-Section6-timersused"])) {
+            $values["sec5_9"] = $record["Section-Section6-timersused"];
+        } else {
+            $values["sec5_9"] = 0;
+        }
+        if(isset($record["Section-Section6-resultsinterpreted"])) {
+            $values["sec5_10"] = $record["Section-Section6-resultsinterpreted"];
+        } else {
+            $values["sec5_10"] = 0;
+        }
+        if(isset($record["Section-Section6-retesting"])) {
+            $values["sec5_11"] = $record["Section-Section6-retesting"];
+        } else {
+            $values["sec5_11"] = 0;
+        }
+        if(isset($record["Section-Section6-retestingrecord"])) {
+            $values["sec5_12"] = $record["Section-Section6-retestingrecord"];
+        } else {
+            $values["sec5_12"] = 0;
+        }
 
 
         foreach ($values as $key => $val) {
@@ -864,25 +970,56 @@ class ODKDataAggregator
     private function aggregatePostTestingPhase($record)
     {
         $values = array();
-        $values["sec_1"] = $record["Section-Section7-Qc_records_review"];
-        $values["sec_2"] =  $record["Section-Section7-registeravailable"];
-
-        $values["sec_3"] = $record["Section-Section7-qualityelements"];
-
-        $values["sec_4"] = $record["Section-Section7-elementscapturedcorrectly"];
-
-        $values["sec_5"] = $record["Section-Section7-summaryavailable"];
-
-        $values["sec_6"] = $record["Section-Section7-invalid_results"];
-
-        $values["sec_7"] = $record["Section-Section7-invalid_repeated"];
-
-        $values["sec_8"] = $record["Section-Section7-client_docs_stored"];
-
-        $values["sec_9"] = $record["Section-Section7-secure_doc_storage"];
-
-        $values["sec_10"] = $record["Section-Section7-properly_labelled"];
-
+        if(isset($record["Section-Section7-Qc_records_review"])) {
+            $values["sec_1"] = $record["Section-Section7-Qc_records_review"];
+        } else {
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section7-registeravailable"])) {
+            $values["sec_2"] =  $record["Section-Section7-registeravailable"];
+        } else {
+            $values["sec_2"] =  0;
+        }
+        if(isset($record["Section-Section7-qualityelements"])) {
+            $values["sec_3"] = $record["Section-Section7-qualityelements"];
+        } else {
+            $values["sec_3"] = 0;
+        }
+        if(isset($record["Section-Section7-elementscapturedcorrectly"])) {
+            $values["sec_4"] = $record["Section-Section7-elementscapturedcorrectly"];
+        } else {
+            $values["sec_4"] = 0;
+        }
+        if(isset($record["Section-Section7-summaryavailable"])) {
+            $values["sec_5"] = $record["Section-Section7-summaryavailable"];
+        } else {
+            $values["sec_5"] = 0;
+        }
+        if(isset($record["Section-Section7-invalid_results"])) {
+            $values["sec_6"] = $record["Section-Section7-invalid_results"];
+        } else {
+            $values["sec_6"] = 0;
+        }
+        if(isset($record["Section-Section7-invalid_repeated"])) {
+            $values["sec_7"] = $record["Section-Section7-invalid_repeated"];
+        } else {
+            $values["sec_7"] = 0;
+        }
+        if(isset($record["Section-Section7-client_docs_stored"])) {
+            $values["sec_8"] = $record["Section-Section7-client_docs_stored"];
+        } else {
+            $values["sec_8"] = 0;
+        }
+        if(isset($record["Section-Section7-secure_doc_storage"])) {
+            $values["sec_9"] = $record["Section-Section7-secure_doc_storage"];
+        } else {
+            $values["sec_9"] = 0;
+        }
+        if(isset($record["Section-Section7-properly_labelled"])) {
+            $values["sec_10"] = $record["Section-Section7-properly_labelled"];
+        } else {
+            $values["sec_10"] = 0;
+        }
 
         foreach ($values as $key => $val) {
             if (empty($val))
@@ -913,24 +1050,56 @@ class ODKDataAggregator
     private function aggregateExternalQualityAssessment($record)
     {
         $values = array();
-        $values["sec_1"] = $record["Section-Section8-allprovidersenrolled"];
-        $values["sec_2"] =  $record["Section-Section8-providerstestPT"];
-
-        $values["sec_3"] = $record["Section-Section8-resultssubmittedonline"];
-
-        $values["sec_4"] = $record["Section-Section8-feedbackreceived"];
-
-        $values["sec_5"] = $record["Section-Section8-feedbackreviewed"];
-
-        $values["sec_6"] = $record["Section-Section8-feedbackreportfilled"];
-
-        $values["sec_7"] = $record["Section-Section8-providerscorrectiveaction"];
-
-        $values["sec_8"] = $record["Section-Section8-technicalsupervision"];
-
-        $values["sec_9"] = $record["Section-Section8-retrainingdone"];
-
-        $values["sec_10"] = $record["Section-Section8-feedbackdocumented"];
+        if(isset($record["Section-Section8-allprovidersenrolled"])){
+            $values["sec_1"] = $record["Section-Section8-allprovidersenrolled"];
+        }else{
+            $values["sec_1"] = 0;
+        }
+        if(isset($record["Section-Section8-providerstestPT"])){
+            $values["sec_2"] =  $record["Section-Section8-providerstestPT"];
+        }else{
+            $values["sec_2"] = 0;
+        }
+        if(isset($record["Section-Section8-resultssubmittedonline"])){
+            $values["sec_3"] = $record["Section-Section8-resultssubmittedonline"];
+        }else{
+            $values["sec_3"] = 0;
+        }
+        if(isset($record["Section-Section8-feedbackreceived"])){
+            $values["sec_4"] = $record["Section-Section8-feedbackreceived"];
+        }else{
+            $values["sec_4"] = 0;
+        }
+        if(isset($record["Section-Section8-feedbackreviewed"])){
+            $values["sec_5"] = $record["Section-Section8-feedbackreviewed"];
+        }else{
+            $values["sec_5"] = 0;
+        }
+        if(isset($record["Section-Section8-feedbackreportfilled"])){
+            $values["sec_6"] = $record["Section-Section8-feedbackreportfilled"];
+        }else{
+            $values["sec_6"] = 0;
+        }
+        if(isset($record["Section-Section8-providerscorrectiveaction"])){
+            $values["sec_7"] = $record["Section-Section8-providerscorrectiveaction"];
+        }else{
+            $values["sec_7"] = 0;
+        }
+        if(isset($record["Section-Section8-technicalsupervision"])){
+            $values["sec_8"] = $record["Section-Section8-technicalsupervision"];
+        }else{
+            $values["sec_8"] = 0;
+        }
+        if(isset($record["Section-Section8-retrainingdone"])){
+            $values["sec_9"] = $record["Section-Section8-retrainingdone"];
+        }else{
+            $values["sec_9"] = 0;
+        }
+        if(isset($record["Section-Section8-feedbackdocumented"])){
+            $values["sec_10"] = $record["Section-Section8-feedbackdocumented"];
+        }else{
+            $values["sec_10"] = 0;
+        }
 
 
         foreach ($values as $key => $val) {
