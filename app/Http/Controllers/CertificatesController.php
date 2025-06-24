@@ -482,8 +482,8 @@ class CertificatesController extends Controller
         $facility = str_replace($mfl_code, '', $facility);
         // trim
         $facility = trim($facility);
-        $facility = $facility . " (" . $mfl_code . ")" . " - " . str_replace('_', ' ', strtoupper($cert['mysites']));
-        $county_subcounty = str_replace('_', ' ', strtoupper($cert['mysites_county'] . " - " . $cert['mysites_subcounty']));
+        $facility = $facility . " (" . $mfl_code . ")" . " - " . str_replace('_', ' ', strtoupper($cert['mysites'])) . ' TESTING SITE';
+        $county_subcounty = str_replace('_', ' ', strtoupper($cert['mysites_subcounty'] . " SUB-COUNTY, " . $cert['mysites_county']) . " COUNTY");
         $approval = ApprovedCerts::where('cert_id', $certid)->first();
         if(!$approval) {
             return view('reports.certification.index', ['error' => 'Certificate not approved.']);
@@ -522,12 +522,12 @@ class CertificatesController extends Controller
 
         $pdf->SetFont('Helvetica', 'B', 15);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(117, 73);
+        $pdf->SetXY(94, 72.8);
         $pdf->Write(10, $facility);
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(117, 81);
+        $pdf->SetXY(96, 81);
         $pdf->Write(10, $county_subcounty);
 
         $pdf->SetFont('Helvetica', 'B', 16);
