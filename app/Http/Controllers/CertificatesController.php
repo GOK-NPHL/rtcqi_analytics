@@ -532,7 +532,7 @@ class CertificatesController extends Controller
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(148, 103);
+        $pdf->SetXY(144.5, 103.4);
         $pdf->Write(10, $assessment_date);
 
         $pdf->SetFont('Helvetica', 'B', 16);
