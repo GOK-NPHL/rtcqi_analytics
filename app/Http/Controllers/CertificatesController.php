@@ -473,7 +473,7 @@ class CertificatesController extends Controller
         if (!$cert) {
             return view('reports.certification.index', ['error' => 'Certificate not found.']);
         }
-        $assessment_date = \Carbon\Carbon::parse($cert['SubmissionDate'])->format('Y-m-d') ?? $cert['SubmissionDate'];
+        $assessment_date = \Carbon\Carbon::parse($cert['SubmissionDate'])->format('d-m-Y') ?? $cert['SubmissionDate'];
         $facility = $cert['mysites_facility'];
         // mfl = first element of facility when split by "_"
         $mfl_code = explode("_", $facility)[0];
@@ -488,9 +488,9 @@ class CertificatesController extends Controller
         if(!$approval) {
             return view('reports.certification.index', ['error' => 'Certificate not approved.']);
         }
-        $date_issued = $approval->created_at ?? date('Y-m-d');
+        $date_issued = $approval->created_at ?? date('d-m-Y');
         // make date format YYYY-MM-DD
-        $date_issued = date('Y-m-d', strtotime($date_issued));
+        $date_issued = date('d-m-Y', strtotime($date_issued));
 
         $date_issued = 'June, 2025';
 
