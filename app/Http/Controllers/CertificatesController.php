@@ -527,17 +527,17 @@ class CertificatesController extends Controller
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(92, 90);
+        $pdf->SetXY(108, 82.3);
         $pdf->Write(10, $county_subcounty);
 
         $pdf->SetFont('Helvetica', 'B', 16);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(144.6, 112.9);
+        $pdf->SetXY(144.6, 105);
         $pdf->Write(10, $assessment_date);
 
         $pdf->SetFont('Helvetica', 'B', 15);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(151, 137.7);
+        $pdf->SetXY(151, 130);
         $pdf->Write(10, $date_issued);
 
         // Generate QR code
