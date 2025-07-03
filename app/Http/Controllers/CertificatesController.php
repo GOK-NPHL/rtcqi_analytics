@@ -21,6 +21,7 @@ use League\Csv\Reader;
 use League\Csv\Statement;
 use setasign\Fpdi\Fpdi;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use League\Csv\Writer;
 
 class CertificatesController extends Controller
 {
@@ -171,6 +172,8 @@ class CertificatesController extends Controller
 
         return $sites_summary;
     }
+
+
     private function getLatestRoutineData($data)
     {
         $aggregator = new ODKDataAggregator();
@@ -390,6 +393,141 @@ class CertificatesController extends Controller
         }
         $summaries = $this->summaries();
         return response()->json($summaries);
+    }
+
+
+    public function eligibleForCertification()
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates'])) {
+            return view('reports.certification.index', ['error' => 'You are not authorized to view this page.']);
+        }
+        $user = Auth::user();
+        if (!$user) {
+            return view('reports.certification.index', ['error' => 'You are not authorized to view this page.']);
+        }
+        $data = $this->fetchData();
+        $assessed_facilities = array_column($data, 'mysites_facility');
+        $assessed_facilities = array_unique($assessed_facilities);
+        $assessed_facilities_mfl = array_map(function ($facility) {
+            return explode("_", $facility)[0];
+        }, $assessed_facilities);
+        $overall_sites_at_level_4 = $this->getOrgSitesAtLevel4();
+        $sites_ = $overall_sites_at_level_4['level_4'] ?? [];
+        $sites = [];
+        foreach($sites_ as $site) {
+            $site_parts = explode(' | ', $site);
+            $fc = '';
+            $st = '';
+            if (count($site_parts) == 2) {
+                $fc = $site_parts[0];
+                $st = $site_parts[1];
+            } else {
+                $st = $site_parts[0];
+            }
+
+            if($fc){
+                $fc_parts = explode('_', $fc);
+                $mfl = $fc_parts[0];
+                if(in_array($mfl, $assessed_facilities_mfl)){
+                    continue;
+                }
+                $ou = OdkOrgunit::where('level', 4)->where('odk_unit_name', 'like', $fc)->first();
+                if($ou){
+                    $subcounty = $ou->parent()->first();
+                    if($subcounty) {
+                        $county = $subcounty->parent()->first();
+                        $fc_parts = explode('_', $fc);
+                        $fc_parts = array_slice($fc_parts, 1);
+                        $facility = implode(' ', $fc_parts);
+                        $sites[] = [
+                            'mfl' => $mfl,
+                            'facility' => trim($facility),
+                            'subcounty' => $subcounty->odk_unit_name ?? '',
+                            'county' => $county->odk_unit_name ?? '',
+                            'site' => $st,
+                        ];
+                    }
+                }
+
+            }
+        }
+        $currentPage = request()->get('page', 1);
+        $perPage = request()->get('per_page', 20);
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedSites = array_slice($sites, $offset, $perPage);
+        $totalSites = count($sites);
+        $totalPages = ceil($totalSites / $perPage);
+        $eligible = [
+            'data' => $paginatedSites,
+            'current_page' => $currentPage,
+            'per_page' => $perPage,
+            'total' => $totalSites,
+            'total_pages' => $totalPages,
+        ];
+        return view('reports/certification/eligible', compact('eligible'));
+    }
+
+    public function eligibleForCertificationDl()
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates'])) {
+            return view('reports.certification.index', ['error' => 'You are not authorized to view this page.']);
+        }
+        $data = $this->fetchData();
+        $assessed_facilities = array_column($data, 'mysites_facility');
+        $assessed_facilities = array_unique($assessed_facilities);
+        $assessed_facilities_mfl = array_map(function ($facility) {
+            return explode("_", $facility)[0];
+        }, $assessed_facilities);
+        $overall_sites_at_level_4 = $this->getOrgSitesAtLevel4();
+        $sites_ = $overall_sites_at_level_4['level_4'] ?? [];
+        $sites = [];
+        foreach($sites_ as $site) {
+            $site_parts = explode(' | ', $site);
+            $fc = '';
+            $st = '';
+            if (count($site_parts) == 2) {
+                $fc = $site_parts[0];
+                $st = $site_parts[1];
+            } else {
+                $st = $site_parts[0];
+            }
+
+            if($fc){
+                $fc_parts = explode('_', $fc);
+                $mfl = $fc_parts[0];
+                if(in_array($mfl, $assessed_facilities_mfl)){
+                    continue;
+                }
+                $ou = OdkOrgunit::where('level', 4)->where('odk_unit_name', 'like', $fc)->first();
+                if($ou){
+                    $subcounty = $ou->parent()->first();
+                    if($subcounty) {
+                        $county = $subcounty->parent()->first();
+                        $fc_parts = explode('_', $fc);
+                        $fc_parts = array_slice($fc_parts, 1);
+                        $facility = implode(' ', $fc_parts);
+                        $sites[] = [
+                            'mfl' => $mfl,
+                            'facility' => trim($facility),
+                            'subcounty' => $subcounty->odk_unit_name ?? '',
+                            'county' => $county->odk_unit_name ?? '',
+                            'site' => $st,
+                        ];
+                    }
+                }
+
+            }
+        }
+        $filename = "eligible_sites.csv";
+        $headers = array_keys($sites[0]);
+        $csv = Writer::createFromString();
+        $csv->insertOne($headers);
+        foreach ($sites as $row) {
+            $csv->insertOne($row);
+        }
+        return response($csv->getContent())
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function index()

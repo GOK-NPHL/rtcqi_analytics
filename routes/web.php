@@ -46,6 +46,7 @@ Route::get('/submissions/spi', 'SubmissionsController@spi')->name('spiSubmission
 // Certificates
 Route::get('/certificates', 'CertificatesController@index')->name('cert_approvals_page');
 
+Route::get('/certification', 'CertificatesController@dashboard')->name('certificate_dashboard_alt');
 Route::get('/certificates/dashboard', 'CertificatesController@dashboard')->name('certificate_dashboard');
 
 Route::get('/certificate/view/{certid}', 'CertificatesController@viewCert')->name('view_certificate');
@@ -54,6 +55,8 @@ Route::post('/certificates/approve', 'CertificatesController@approve')->name('ap
 
 Route::get('/certificate/submission/{id}', 'CertificatesController@viewSubmission')->name('view_certification_submission');
 
+Route::get('/certification/eligible', 'CertificatesController@eligibleForCertification')->name('certification_eligible');
+// Route::get('/certification/eligible_download', 'CertificatesController@eligibleForCertificationDl')->name('certification_eligible_dl');
 
 //Services
 Route::get('/service/profile', 'Service\UsersController@userProfile')->name('profile');

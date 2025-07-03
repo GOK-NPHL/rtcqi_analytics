@@ -41,6 +41,8 @@ Route::get('/certificates', 'CertificatesController@indexAPI')->name('cert_index
 Route::get('/certificates/dashboard', 'CertificatesController@dashboardAPI')->name('certificate_dashboard_data');
 Route::get('/certificate/view/{certid}', 'CertificatesController@viewCertAPI')->name('view_certificate_data');
 
+Route::get('/certification/eligible_download', 'CertificatesController@eligibleForCertificationDl')->name('certification_eligible_dl');
+
 Route::get('/roles', 'Service\RolesController@getRoles');
 Route::get('/authorities', 'Service\Authorities@getAuthorities');
 Route::get('/user_authorities', 'Service\Authorities@getUserAuthorities');

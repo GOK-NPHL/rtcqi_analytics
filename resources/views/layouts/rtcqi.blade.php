@@ -176,6 +176,11 @@ use Illuminate\Support\Facades\Gate;
                             <i class="fas fa-fw fa-list-alt"></i>
                             <span>View Certificates</span>
                         </a>
+
+                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Cert approvals');" href="{{ route('certification_eligible') }}">
+                            <i class="fas fa-fw fa-list-alt"></i>
+                            <span>View Eligible Sites</span>
+                        </a>
                     <?php } ?>
                 </li>
             <?php } ?>

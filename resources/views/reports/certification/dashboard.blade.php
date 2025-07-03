@@ -103,7 +103,7 @@
                 <a style="max-width: 350px;" class="list-group-item list-group-item-action active" data-toggle="list"
                     href="#home" role="tab">Overview</a>
                 <a style="max-width: 350px;" class="list-group-item list-group-item-action" data-toggle="list"
-                    href="#profile" role="tab">Sites not certified</a>
+                    href="#assessedsites" role="tab">Assessed Sites not certified</a>
             </div>
             <hr>
             <!-- Tab panes -->
@@ -313,7 +313,7 @@
                         </div>
                     </section>
                 </div>
-                <div class="tab-pane" id="profile" role="tabpanel">
+                <div class="tab-pane" id="assessedsites" role="tabpanel">
                     {{-- SITES NOT CERTIFIED --}}
                     <section class="main-content">
                         <div class="row">
