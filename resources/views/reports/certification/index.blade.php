@@ -100,7 +100,7 @@
                                                 <a
                                                     href="{{ route('view_certification_submission', ['id' => $row['KEY']]) }}"
                                                 class="dropdown-item">View Submission</a>
-                                                @if ($row['Section-sec91percentage'] >= 90)
+                                                @if ($row['Section-sec91percentage'] >= 90 && Gate::allows('approve_certificates'))
                                                     <!-- if the record is approved, show the view-certificate button -->
                                                     @if (in_array($row['KEY'], $approved_certs))
                                                         <a href="{{ route('view_certificate', ['certid' => $row['KEY']]) }}"
