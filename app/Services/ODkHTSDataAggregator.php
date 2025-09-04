@@ -104,8 +104,8 @@ class ODkHTSDataAggregator
             $payload = array();
             $payload[] = $payld;
         }
-        Log::info("totals ======>>");
-        Log::info($payload);
+        // Log::info("totals ======>>");
+        // Log::info($payload);
         $payload = $this->aggregateAgreementRates($payload);
 
         return $payload;
