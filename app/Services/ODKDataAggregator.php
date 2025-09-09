@@ -81,38 +81,44 @@ class ODKDataAggregator
         // Log::info("siteTypes", $siteTypes);
         // Log::info("startDate", $startDate);
         // Log::info("endDate", $endDate);
+        try {
+            $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
+            $this->startDate = $startDate;
+            $this->endDate = $endDate;
 
-        $this->userOrgTimelineParams = empty($orgTimeline) ? [] : $orgTimeline;
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-
-        $recordsReadData = [];
-        $payload = null;
-        if (isset($siteTypes) && !empty($siteTypes)) {
-            $payload = array();
-            for ($x = 0; $x < count($siteTypes); $x++) {
-                $this->siteType = strtolower($siteTypes[$x]);
-                [$recordsReadData, $payld] = $this->getDataLoopOrgs(
+            $recordsReadData = [];
+            $payload = null;
+            if (isset($siteTypes) && !empty($siteTypes)) {
+                $payload = array();
+                for ($x = 0; $x < count($siteTypes); $x++) {
+                    $this->siteType = strtolower($siteTypes[$x]);
+                    [$recordsReadData, $payld] = $this->getDataLoopOrgs(
+                        $orgUnitIds,
+                        $recordsReadData,
+                        $partners
+                        // , $aggregate_partners
+                    );
+                    for ($i = 0; $i < count($orgUnitIds); $i++) {
+                        $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
+                    }
+                    $payload[] = $payld;
+                }
+            } else {
+                [$recordsReadData, $payload] = $this->getDataLoopOrgs(
                     $orgUnitIds,
                     $recordsReadData,
                     $partners
                     // , $aggregate_partners
                 );
-                for ($i = 0; $i < count($orgUnitIds); $i++) {
-                    $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
-                }
-                $payload[] = $payld;
             }
-        } else {
-            [$recordsReadData, $payload] = $this->getDataLoopOrgs(
-                $orgUnitIds,
-                $recordsReadData,
-                $partners
-                // , $aggregate_partners
-            );
-        }
 
-        return $payload;
+            return $payload;
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getData() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getData()');
+            return null;
+        }
     }
 
 
@@ -136,141 +142,167 @@ class ODKDataAggregator
         $partners
         // , $aggregate_partners
     ) {
-        $payload = array();
-        for ($x = 0; $x < count($orgUnitIds); $x++) {
-            try {
-                $odkUtils = new ODKUtils();
-                $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
-                $orgToProcess = $orgMeta[0];
-                $level = $orgMeta[1];
+        try {
+            $payload = array();
+            for ($x = 0; $x < count($orgUnitIds); $x++) {
+                try {
+                    $odkUtils = new ODKUtils();
+                    $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
+                    $orgToProcess = $orgMeta[0];
+                    $level = $orgMeta[1];
 
-                [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
+                    [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
 
-                $orgUnit['org_unit_id'] = $orgUnitIds[$x];
-                $orgUnit['partners'] = $partners ?? null;
+                    $orgUnit['org_unit_id'] = $orgUnitIds[$x];
+                    $orgUnit['partners'] = $partners ?? null;
 
-                $records = null;
+                    $records = null;
 
-                if (array_key_exists($orgUnit['org_unit_id'], $recordsReadData)) {
-                    $records = $recordsReadData[$orgUnit['org_unit_id']];
-                } else {
-                    $records = $this->getFormRecords($orgUnit);
-                    $recordsReadData[$orgUnit['org_unit_id']] = $records;
-                }
-                // $facils = $this->getFacilities($orgUnit, $records);
-                // Log::info('Processing records '. json_encode(array_keys($records[0])) . ' for ' . $orgUnitName);
-                $facils = [];
-                $sites = [];
-                $facilityCount = 0;
-                $siteCount = 0;
-                if (isset($records) && count($records) > 0) {
-                    foreach ($records as $record) {
-                        $facil = $record['mysites_facility'];
-                        if (!empty($facil) && $facil != '' && !in_array($facil, $facils)) {
-                            $facils[] = $facil;
-                        }
+                    if (array_key_exists($orgUnit['org_unit_id'], $recordsReadData)) {
+                        $records = $recordsReadData[$orgUnit['org_unit_id']];
+                    } else {
+                        $records = $this->getFormRecords($orgUnit);
+                        $recordsReadData[$orgUnit['org_unit_id']] = $records;
                     }
-                }
-                if (count($facils) > 0) {
-                    foreach ($facils as $facil) {
-                        $facil_mfl = explode("_", $facil)[0];
-                        if (!empty($facil_mfl) && $facil_mfl != '') {
-                            $ou = OdkOrgunit::where('odk_unit_name', 'like', $facil_mfl . '_%')->first();
-                            if (!empty($ou)) {
-                                $facilityCount++;
-                                $ch = $ou->children()->pluck('org_unit_id');
-                                $sites = array_merge($sites, $ch->toArray());
+                    // $facils = $this->getFacilities($orgUnit, $records);
+                    // Log::info('Processing records '. json_encode(array_keys($records[0])) . ' for ' . $orgUnitName);
+                    $facils = [];
+                    $sites = [];
+                    $facilityCount = 0;
+                    $siteCount = 0;
+                    if (isset($records) && count($records) > 0) {
+                        foreach ($records as $record) {
+                            $facil = $record['mysites_facility'];
+                            if (!empty($facil) && $facil != '' && !in_array($facil, $facils)) {
+                                $facils[] = $facil;
                             }
                         }
                     }
-                    $sites = array_unique($sites);
-                    $siteCount = count($sites);
+                    if (count($facils) > 0) {
+                        foreach ($facils as $facil) {
+                            $facil_mfl = explode("_", $facil)[0];
+                            if (!empty($facil_mfl) && $facil_mfl != '') {
+                                $ou = OdkOrgunit::where('odk_unit_name', 'like', $facil_mfl . '_%')->first();
+                                if (!empty($ou)) {
+                                    $facilityCount++;
+                                    $ch = $ou->children()->pluck('org_unit_id');
+                                    $sites = array_merge($sites, $ch->toArray());
+                                }
+                            }
+                        }
+                        $sites = array_unique($sites);
+                        $siteCount = count($sites);
+                    }
+                    $results = array();
+                    $results["orgName"] = $orgUnitName;
+                    $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit, $records);
+                    $results["QACounselling"] = $this->getQACounselling($orgUnit, $records);
+                    $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit, $records);
+                    $results["Safety"] = $this->getSafety($orgUnit, $records);
+                    $results["PreTestingPhase"] = $this->getPreTestingPhase($orgUnit, $records);
+                    $results["TestingPhase"] = $this->getTestingPhase($orgUnit, $records);
+                    $results["PostTestingPhase"] = $this->getPostTestingPhase($orgUnit, $records);
+                    $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit, $records);
+                    $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit, $records);
+                    $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit, $records);
+                    $results["facilityCount"] = $facilityCount;
+                    $results["siteCount"] = $siteCount;
+                    $payload[$orgUnitIds[$x]] = $results;
+                } catch (Exception $ex) {
+                    Log::error($ex);
                 }
-                $results = array();
-                $results["orgName"] = $orgUnitName;
-                $results["PersonellTrainingAndCertification"] = $this->getPersonellTrainingAndCertification($orgUnit, $records);
-                $results["QACounselling"] = $this->getQACounselling($orgUnit, $records);
-                $results["PhysicalFacility"] = $this->getPhysicalFacility($orgUnit, $records);
-                $results["Safety"] = $this->getSafety($orgUnit, $records);
-                $results["PreTestingPhase"] = $this->getPreTestingPhase($orgUnit, $records);
-                $results["TestingPhase"] = $this->getTestingPhase($orgUnit, $records);
-                $results["PostTestingPhase"] = $this->getPostTestingPhase($orgUnit, $records);
-                $results["ExternalQualityAssessment"] = $this->getExternalQualityAssessment($orgUnit, $records);
-                $results["OverallPerformance"] = $this->getOverallPerformance($orgUnit, $records);
-                $results["OverallSitesLevel"] = $this->getOverallSitesLevel($orgUnit, $records);
-                $results["facilityCount"] = $facilityCount;
-                $results["siteCount"] = $siteCount;
-                $payload[$orgUnitIds[$x]] = $results;
-            } catch (Exception $ex) {
-                Log::error($ex);
             }
-        }
 
-        return [$recordsReadData, $payload];
+            return [$recordsReadData, $payload];
+        } catch (Exception $ex) {
+                Log::error('<ODKDataAggregator->getDataLoopOrgs() Error: ' . $ex->getMessage());
+                Log::error($ex);
+                Log::error('</ODKDataAggregator->getDataLoopOrgs()');
+                return null;
+            }
     }
 
 
     private function sumValues($record, $scores, $rowCounters, $section)
     {
-        if ($record["baselinefollowup"] == 'Baseline') {
-            if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                $scores[$this->timeLines[0]] += $this->callFunctionBysecition($section, $record);
-                $rowCounters[$this->timeLines[0]] += 1;
-            }
-        } else if ($record["baselinefollowup"] == 'followup') {
+        try {
+            if ($record["baselinefollowup"] == 'Baseline') {
+                if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                    $scores[$this->timeLines[0]] += $this->callFunctionBysecition($section, $record);
+                    $rowCounters[$this->timeLines[0]] += 1;
+                }
+            } else if ($record["baselinefollowup"] == 'followup') {
 
-            $followupType = $record["followup"] ?? "follow1";
-            for ($x = 0; $x < count($this->timeLines); $x++) {
-                if (($followupType == $this->timeLines[$x]) || ($followupType == "other" && !empty($record["otherFollowup"]) && "follow" . $record["otherFollowup"] == $this->timeLines[$x])) {
-                    if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                        $rowCounters[$this->timeLines[$x]] += 1;
-                        $scores[$this->timeLines[$x]] += $this->callFunctionBysecition($section, $record);
+                $followupType = $record["followup"] ?? "follow1";
+                for ($x = 0; $x < count($this->timeLines); $x++) {
+                    if (($followupType == $this->timeLines[$x]) || ($followupType == "other" && !empty($record["otherFollowup"]) && "follow" . $record["otherFollowup"] == $this->timeLines[$x])) {
+                        if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                            $rowCounters[$this->timeLines[$x]] += 1;
+                            $scores[$this->timeLines[$x]] += $this->callFunctionBysecition($section, $record);
+                        }
                     }
                 }
             }
-        }
-        return [$scores, $rowCounters];
+            return [$scores, $rowCounters];
+        } catch (Exception $ex) {
+                Log::error('<ODKDataAggregator->sumValues() Error: ' . $ex->getMessage());
+                Log::error($ex);
+                Log::error('</ODKDataAggregator->sumValues()');
+                return null;
+            }
     }
 
     private function processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section)
     {
-        // if (!empty($orgUnit['partners'])) {
-        //     // <aggregate_for_partner
-        //     $rowCounter = $rowCounter + 1; //no or rows processed.
-        //     if ($section == $this->reportSections["overall_sites_level"]) {
-        //         $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
-        //     } else {
-        //         $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
-        //         $scores = $valueAccumulations[0];
-        //         $rowCounters = $valueAccumulations[1];
-        //         $score =  $this->callFunctionBysecition($section, $record) + $score;
-        //     }
-        //     // aggregate_for_partner/>
-        // } else {
-        if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-            // Log::info("processing national");
-            $rowCounter = $rowCounter + 1; //no or rows processed.
-            if ($section == $this->reportSections["overall_sites_level"]) {
-                $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+        try {
+            // if (!empty($orgUnit['partners'])) {
+            //     // <aggregate_for_partner
+            //     $rowCounter = $rowCounter + 1; //no or rows processed.
+            //     if ($section == $this->reportSections["overall_sites_level"]) {
+            //         $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+            //     } else {
+            //         $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+            //         $scores = $valueAccumulations[0];
+            //         $rowCounters = $valueAccumulations[1];
+            //         $score =  $this->callFunctionBysecition($section, $record) + $score;
+            //     }
+            //     // aggregate_for_partner/>
+            // } else {
+            if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
+                // Log::info("processing national");
+                $rowCounter = $rowCounter + 1; //no or rows processed.
+                if ($section == $this->reportSections["overall_sites_level"]) {
+                    $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                } else {
+                    $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+                    $scores = $valueAccumulations[0];
+                    $rowCounters = $valueAccumulations[1];
+                    $score =  $this->callFunctionBysecition($section, $record) + $score;
+                }
             } else {
-                $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
-                $scores = $valueAccumulations[0];
-                $rowCounters = $valueAccumulations[1];
-                $score =  $this->callFunctionBysecition($section, $record) + $score;
-            }
-        } else {
-            if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
-                if (!empty($orgUnit['mysites_subcounty'])) {
-                    if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
-                        if (!empty($orgUnit['mysites_facility'])) {
-                            $record_mfl = explode("_", $record['mysites_facility'])[0];
-                            $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
-                            // <------ check_if_aggregation_for_partner_is_enabled
+                if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
+                    if (!empty($orgUnit['mysites_subcounty'])) {
+                        if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
+                            if (!empty($orgUnit['mysites_facility'])) {
+                                $record_mfl = explode("_", $record['mysites_facility'])[0];
+                                $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
+                                // <------ check_if_aggregation_for_partner_is_enabled
 
-                            // if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
-                            if ($record_mfl == $orgUnit_mfl) {
-                                if (!empty($orgUnit['mysites'])) {
-                                    if (strtolower($record['mysites']) == $orgUnit['mysites']) {
+                                // if (strtolower($record['mysites_facility']) == $orgUnit['mysites_facility']) {
+                                if ($record_mfl == $orgUnit_mfl) {
+                                    if (!empty($orgUnit['mysites'])) {
+                                        if (strtolower($record['mysites']) == $orgUnit['mysites']) {
+                                            $rowCounter = $rowCounter + 1; //no or rows processed.
+                                            if ($section == $this->reportSections["overall_sites_level"]) {
+                                                $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                                            } else {
+                                                $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+                                                $scores = $valueAccumulations[0];
+                                                $rowCounters = $valueAccumulations[1];
+                                                $score =  $this->callFunctionBysecition($section, $record) + $score;
+                                            }
+                                        }
+                                    } else {
                                         $rowCounter = $rowCounter + 1; //no or rows processed.
                                         if ($section == $this->reportSections["overall_sites_level"]) {
                                             $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
@@ -278,229 +310,250 @@ class ODKDataAggregator
                                             $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
                                             $scores = $valueAccumulations[0];
                                             $rowCounters = $valueAccumulations[1];
-                                            $score =  $this->callFunctionBysecition($section, $record) + $score;
+                                            $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                         }
                                     }
+                                }
+                            } else {
+                                $rowCounter = $rowCounter + 1; //no or rows processed.
+                                if ($section == $this->reportSections["overall_sites_level"]) {
+                                    $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
                                 } else {
-                                    $rowCounter = $rowCounter + 1; //no or rows processed.
-                                    if ($section == $this->reportSections["overall_sites_level"]) {
-                                        $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
-                                    } else {
-                                        $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
-                                        $scores = $valueAccumulations[0];
-                                        $rowCounters = $valueAccumulations[1];
-                                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
-                                    }
+                                    $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+                                    $scores = $valueAccumulations[0];
+                                    $rowCounters = $valueAccumulations[1];
+                                    $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                 }
                             }
-                        } else {
-                            $rowCounter = $rowCounter + 1; //no or rows processed.
-                            if ($section == $this->reportSections["overall_sites_level"]) {
-                                $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
-                            } else {
-                                $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
-                                $scores = $valueAccumulations[0];
-                                $rowCounters = $valueAccumulations[1];
-                                $score =  $this->callFunctionBysecition($section, $record)  + $score;
-                            }
                         }
-                    }
-                } else {
-                    $rowCounter = $rowCounter + 1; //no or rows processed.
-                    if ($section == $this->reportSections["overall_sites_level"]) {
-                        $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
                     } else {
-                        $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
-                        $scores = $valueAccumulations[0];
-                        $rowCounters = $valueAccumulations[1];
-                        $score =  $this->callFunctionBysecition($section, $record)  + $score;
+                        $rowCounter = $rowCounter + 1; //no or rows processed.
+                        if ($section == $this->reportSections["overall_sites_level"]) {
+                            $overallSitesLevel =  $this->callFunctionBysecition($section, $record, $overallSitesLevel);
+                        } else {
+                            $valueAccumulations = $this->sumValues($record, $scores, $rowCounters, $section);
+                            $scores = $valueAccumulations[0];
+                            $rowCounters = $valueAccumulations[1];
+                            $score =  $this->callFunctionBysecition($section, $record)  + $score;
+                        }
                     }
                 }
             }
+            // }
+            return [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section];
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->processRecord() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->processRecord()');
+            return null;
         }
-        // }
-
-
-        return [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section];
     }
 
     private function getSummationValues($records, $orgUnit, $section)
     {
-        $rowCounter = 0;
-        $score = 0;
-        $overallSitesLevelScores = [
-            "level0" => 0,
-            "level1" => 0,
-            "level2" => 0,
-            "level3" => 0,
-            "level4" => 0,
-            "counter" => 0,
-            "sites" => array()
-        ];
-        $overallSitesLevel = [];
-        $rowCounters = [];
-        $scores = [];
+        try {
+            $rowCounter = 0;
+            $score = 0;
+            $overallSitesLevelScores = [
+                "level0" => 0,
+                "level1" => 0,
+                "level2" => 0,
+                "level3" => 0,
+                "level4" => 0,
+                "counter" => 0,
+                "sites" => array()
+            ];
+            $overallSitesLevel = [];
+            $rowCounters = [];
+            $scores = [];
 
-        for ($x = 0; $x < count($this->timeLines); $x++) {
-            if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                $overallSitesLevel[$this->timeLines[$x]] = $overallSitesLevelScores;
-                $rowCounters[$this->timeLines[$x]] = 0;
-                $scores[$this->timeLines[$x]] = 0;
+            for ($x = 0; $x < count($this->timeLines); $x++) {
+                if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                    $overallSitesLevel[$this->timeLines[$x]] = $overallSitesLevelScores;
+                    $rowCounters[$this->timeLines[$x]] = 0;
+                    $scores[$this->timeLines[$x]] = 0;
+                }
             }
-        }
-        // Log::info("records === " . json_encode($records));
-        if (isset($records) && $records != null && count($records) > 0) {
-            foreach ($records as $record) {
-                // Log::info("Start record traversal =========>>");
-                $shouldProcessRecord = true;
+            // Log::info("records === " . json_encode($records));
+            if (isset($records) && $records != null && count($records) > 0) {
+                foreach ($records as $record) {
+                    // Log::info("Start record traversal =========>>");
+                    $shouldProcessRecord = true;
 
-                if (isset($this->startDate) && !empty($this->startDate)) {
+                    if (isset($this->startDate) && !empty($this->startDate)) {
 
-                    $recordDate = strtotime($record['start']);
-                    $newRecordformat = date('Y-m-d', $recordDate);
+                        $recordDate = strtotime($record['start']);
+                        $newRecordformat = date('Y-m-d', $recordDate);
 
-                    $userStartDate = strtotime($this->startDate);
-                    $newUserStartDate = date('Y-m-d', $userStartDate);
-                    // Log::info("start date =====>> 2");
-                    // Log::info($newUserStartDate);
-                    // Log::info($userStartDate);
-                    if ($newUserStartDate > $newRecordformat) {
-                        // Log::info("start date =====>>");
+                        $userStartDate = strtotime($this->startDate);
+                        $newUserStartDate = date('Y-m-d', $userStartDate);
+                        // Log::info("start date =====>> 2");
                         // Log::info($newUserStartDate);
                         // Log::info($userStartDate);
+                        if ($newUserStartDate > $newRecordformat) {
+                            // Log::info("start date =====>>");
+                            // Log::info($newUserStartDate);
+                            // Log::info($userStartDate);
+                            $shouldProcessRecord = false;
+                        }
+                    }
+                    if (isset($this->endDate) && !empty($this->endDate)) {
+
+                        $recordDate = strtotime($record['start']);
+                        $newRecordformat = date('Y-m-d', $recordDate);
+
+                        $userEndDate = strtotime($this->endDate);
+                        $newUserEndDate = date('Y-m-d', $userEndDate);
+
+                        if ($newRecordformat > $newUserEndDate) {
+                            $shouldProcessRecord = false;
+                        }
+                    }
+
+                    if (
+                        (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) != $this->siteType)
+                    ) {
                         $shouldProcessRecord = false;
                     }
-                }
-                if (isset($this->endDate) && !empty($this->endDate)) {
 
-                    $recordDate = strtotime($record['start']);
-                    $newRecordformat = date('Y-m-d', $recordDate);
-
-                    $userEndDate = strtotime($this->endDate);
-                    $newUserEndDate = date('Y-m-d', $userEndDate);
-
-                    if ($newRecordformat > $newUserEndDate) {
-                        $shouldProcessRecord = false;
+                    if ($shouldProcessRecord) {
+                        [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
+                            $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
                     }
-                }
 
-                if (
-                    (isset($this->siteType) && substr(trim(strtolower($record['mysites'])), 0, strlen($this->siteType)) != $this->siteType)
-                ) {
-                    $shouldProcessRecord = false;
+                    // Log::info("end record traversal ========>>");
                 }
-
-                if ($shouldProcessRecord) {
-                    [$record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section] =
-                        $this->processRecord($record, $scores, $orgUnit, $overallSitesLevel, $rowCounters, $score, $rowCounter, $section);
-                }
-
-                // Log::info("end record traversal ========>>");
             }
-        }
-        // else{
-        //     Log::info("No records found");
-        //     Log::info("end record traversal ========>> ".json_encode($records));
-        // }
+            // else{
+            //     Log::info("No records found");
+            //     Log::info("end record traversal ========>> ".json_encode($records));
+            // }
 
-        $results = array();
-        if ($section == $this->reportSections["overall_sites_level"]) {
-            // $results['rowCounter'] = $rowCounter;
-            $results['score'] = $overallSitesLevel;
-            return $results;
-        } else {
-            $results['rowCounter'] = $rowCounters;
-            $results['score'] = $scores;
-            return $results;
+            $results = array();
+            if ($section == $this->reportSections["overall_sites_level"]) {
+                // $results['rowCounter'] = $rowCounter;
+                $results['score'] = $overallSitesLevel;
+                return $results;
+            } else {
+                $results['rowCounter'] = $rowCounters;
+                $results['score'] = $scores;
+                return $results;
+            }
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getSummationValues() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getSummationValues()');
+            return null;
         }
     }
 
     public function getFormRecords($orgUnit)
     {
-        $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
-        $level = $levelObj->level;
-        $fileName = null;
+        try {
+            $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
+            $level = $levelObj->level;
+            $fileName = null;
 
-        if ($level == 1) {
-            $combinedRecords = [];
-            $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
-                ->where('form_id', 'like', "spi%") // for spi data
-                ->get();
-            foreach ($submissionOrgUnitmap as $mapping) {
-                $projectId = $mapping->project_id;
-                $formId = $mapping->form_id;
-                $fileName = $this->getFileToProcess($projectId, $formId);
-                $perCountyRecords = $this->getSingleFileRecords($fileName);
-                if ($perCountyRecords) {
-                    $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
+            if ($level == 1) {
+                $combinedRecords = [];
+                $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
+                    ->where('form_id', 'like', "spi%") // for spi data
+                    ->get();
+                foreach ($submissionOrgUnitmap as $mapping) {
+                    $projectId = $mapping->project_id;
+                    $formId = $mapping->form_id;
+                    $fileName = $this->getFileToProcess($projectId, $formId);
+                    $perCountyRecords = $this->getSingleFileRecords($fileName);
+                    if ($perCountyRecords) {
+                        $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
+                    }
                 }
+                return $combinedRecords;
+            } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
+
+                $odkUtils = new ODKUtils();
+                [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
+
+                $fileName = $this->getFileToProcess($projectId, $formId);
+            } else {
+                $odkUtils = new ODKUtils();
+                [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
+                $fileName = $this->getFileToProcess($projectId, $formId);
             }
-            return $combinedRecords;
-        } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
 
-            $odkUtils = new ODKUtils();
-            [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
-
-            $fileName = $this->getFileToProcess($projectId, $formId);
-        } else {
-            $odkUtils = new ODKUtils();
-            [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
-            $fileName = $this->getFileToProcess($projectId, $formId);
-        }
-
-        if ($level != 1) {
-            return $this->getSingleFileRecords($fileName);
+            if ($level != 1) {
+                return $this->getSingleFileRecords($fileName);
+            }
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getFormRecords() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getFormRecords()');
+            return null;
         }
     }
 
     private function getSingleFileRecords($fileName)
     {
-        $url = "";
+        try {
+            $url = "";
 
-        if (Storage::exists($fileName)) {
-            $url = Storage::path($fileName);
-        } else {
-            return 0;
+            if (Storage::exists($fileName)) {
+                $url = Storage::path($fileName);
+            } else {
+                return 0;
+            }
+            $csv = Reader::createFromPath($url, 'r');
+            $csv->setHeaderOffset(0); //set the CSV header offset
+            $stmt = Statement::create();
+            $records = $stmt->process($csv);
+            return $records;
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getSingleFileRecords() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getSingleFileRecords()');
+            return null;
         }
-        $csv = Reader::createFromPath($url, 'r');
-        $csv->setHeaderOffset(0); //set the CSV header offset
-        $stmt = Statement::create();
-        $records = $stmt->process($csv);
-        return $records;
     }
 
 
     public function getSingleFileRecordsV2($fileName)
     {
-        set_time_limit(0);
-        ini_set('memory_limit', '4096M');
-        if (!Storage::exists($fileName)) {
-            return 0;
-        }
-
-        $url = Storage::path($fileName);
-        $csv = Reader::createFromPath($url, 'r');
-        $csv->setHeaderOffset(0); // Set the CSV header offset
-
-        $stmt = Statement::create();
-
-        // Use chunk-based processing
-        $chunkSize = 1000; // Process 1000 rows at a time
-        $offset = 0;
-        $results = [];
-
-        do {
-            $stmt = Statement::create()->offset($offset)->limit($chunkSize);
-            $records = $stmt->process($csv);
-
-            foreach ($records as $record) {
-                $results[] = $record; // Store or process records
+        try {
+            set_time_limit(0);
+            ini_set('memory_limit', '4096M');
+            if (!Storage::exists($fileName)) {
+                return 0;
             }
 
-            $offset += $chunkSize;
-        } while (count($records) > 0);
+            $url = Storage::path($fileName);
+            $csv = Reader::createFromPath($url, 'r');
+            $csv->setHeaderOffset(0); // Set the CSV header offset
 
-        return $results;
+            $stmt = Statement::create();
+
+            // Use chunk-based processing
+            $chunkSize = 1000; // Process 1000 rows at a time
+            $offset = 0;
+            $results = [];
+
+            do {
+                $stmt = Statement::create()->offset($offset)->limit($chunkSize);
+                $records = $stmt->process($csv);
+
+                foreach ($records as $record) {
+                    $results[] = $record; // Store or process records
+                }
+
+                $offset += $chunkSize;
+            } while (count($records) > 0);
+
+            return $results;
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getSingleFileRecordsV2() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getSingleFileRecordsV2()');
+            return null;
+        }
     }
 
     private function callFunctionBysecition($section, $record, $overallSites = 0)
@@ -530,29 +583,43 @@ class ODKDataAggregator
 
     private function getPercentileValueForSections($score, $rowCounter, $multiplier)
     {
-        foreach ($score as $key => $value) {
-            try {
-                $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator
-                // $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
-                $score[$key] = number_format((float)$score[$key], 0, '.', ',');
-            } catch (Exception $ex) {
-                $score[$key] = 0;
+        try {
+            foreach ($score as $key => $value) {
+                try {
+                    $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator
+                    // $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
+                    $score[$key] = number_format((float)$score[$key], 0, '.', ',');
+                } catch (Exception $ex) {
+                    $score[$key] = 0;
+                }
             }
+            return $score;
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getPercentileValueForSections() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getPercentileValueForSections()');
+            return null;
         }
-        return $score;
     }
 
     //section 1 (Personnel Training & Certification)
     private function getPersonellTrainingAndCertification($orgUnit, $records)
     {
-        $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["personnel_training_and_certification"]);
-        $score = $summationValues['score'];
-        $rowCounter = $summationValues['rowCounter'];
-        $score = $this->getPercentileValueForSections($score, $rowCounter, 3);
-        // $score = ($score / ($rowCounter * 3)) * 100; //get denominator
-        // $score = number_format((float)$score, 1, '.', ',');
-
-        return $score;
+        try {
+            $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["personnel_training_and_certification"]);
+            $score = $summationValues['score'];
+            $rowCounter = $summationValues['rowCounter'];
+            $score = $this->getPercentileValueForSections($score, $rowCounter, 3);
+            // $score = ($score / ($rowCounter * 3)) * 100; //get denominator
+            // $score = number_format((float)$score, 1, '.', ',');
+    
+            return $score;
+        } catch (Exception $ex) {
+            Log::error('<ODKDataAggregator->getPersonellTrainingAndCertification() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKDataAggregator->getPersonellTrainingAndCertification()');
+            return null;
+        }
     }
 
     private function aggregatePersonnellAndTrainingScore($record)
