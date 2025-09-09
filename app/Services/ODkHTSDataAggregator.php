@@ -81,217 +81,236 @@ class ODkHTSDataAggregator
 
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
+        try {
+            $currentDate = new DateTime('now');
 
-        $currentDate = new DateTime('now');
+            $this->startDate = empty($startDate) ?  $currentDate->modify('-3 months')->format("Y-m-d") : $startDate;
+            $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
 
-        $this->startDate = empty($startDate) ?  $currentDate->modify('-3 months')->format("Y-m-d") : $startDate;
-        $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
-
-        $recordsReadData = [];
-        $payload = null;
-        if (isset($siteTypes) && !empty($siteTypes)) {
-            $payload = array();
-            for ($x = 0; $x < count($siteTypes); $x++) {
-                $this->siteType = strtolower($siteTypes[$x]);
-                [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
-                for ($i = 0; $i < count($orgUnitIds); $i++) {
-                    $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
+            $recordsReadData = [];
+            $payload = null;
+            if (isset($siteTypes) && !empty($siteTypes)) {
+                $payload = array();
+                for ($x = 0; $x < count($siteTypes); $x++) {
+                    $this->siteType = strtolower($siteTypes[$x]);
+                    [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+                    for ($i = 0; $i < count($orgUnitIds); $i++) {
+                        $payld[$orgUnitIds[$i]]["OrgUniType"] = $siteTypes[$x];
+                    }
+                    $payload[] = $payld;
                 }
+            } else {
+                [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
+                $payload = array();
                 $payload[] = $payld;
             }
-        } else {
-            [$recordsReadData, $payld] = $this->getDataLoopOrgs($orgUnitIds, $recordsReadData);
-            $payload = array();
-            $payload[] = $payld;
-        }
-        // Log::info("totals ======>>");
-        // Log::info($payload);
-        $payload = $this->aggregateAgreementRates($payload);
+            // Log::info("totals ======>>");
+            // Log::info($payload);
+            $payload = $this->aggregateAgreementRates($payload);
 
-        return $payload;
+            return $payload;
+        } catch (Exception $ex) {
+            Log::error('<ODKHTSDataAggregator->getData() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKHTSDataAggregator->getData()');
+            return null;
+        }
     }
 
     private function aggregateAgreementRates($payload)
     {
+        try {
+            $orgUnitArray['overall_concordance_totals'] = [];
+            foreach ($payload as $payldkey => $payld) {
+                foreach ($payld as $orgUnitKey => $orgUnitArray) { //per organisation unit
+                    try {
+                        foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) { //summations for each org per month
+                            $scores = array();
+                            $scores['>98'] = 0;
+                            $scores['95-98'] = 0;
+                            $scores['<95'] = 0;
 
-        $orgUnitArray['overall_concordance_totals'] = [];
-        foreach ($payload as $payldkey => $payld) {
-            foreach ($payld as $orgUnitKey => $orgUnitArray) { //per organisation unit
-                try {
-                    foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) { //summations for each org per month
-                        $scores = array();
-                        $scores['>98'] = 0;
-                        $scores['95-98'] = 0;
-                        $scores['<95'] = 0;
+                            $signedSites = array();
+                            $signedSites['signed'] = 0;
+                            $signedSites['not_signed'] = 0;
+                            $monthlySites['supervisory_signature'] =  $signedSites;
 
-                        $signedSites = array();
-                        $signedSites['signed'] = 0;
-                        $signedSites['not_signed'] = 0;
-                        $monthlySites['supervisory_signature'] =  $signedSites;
+                            $algorithmFollowedSites = array();
+                            $algorithmFollowedSites['followed'] = 0;
+                            $algorithmFollowedSites['not_followed'] = 0;
+                            $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
 
-                        $algorithmFollowedSites = array();
-                        $algorithmFollowedSites['followed'] = 0;
-                        $algorithmFollowedSites['not_followed'] = 0;
-                        $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
+                            $htsRegister = array();
+                            $htsRegister['ehts'] = 0;
+                            $htsRegister['hardcopy'] = 0;
+                            $monthlySites['hts_type'] =   $htsRegister;
 
-                        $htsRegister = array();
-                        $htsRegister['ehts'] = 0;
-                        $htsRegister['hardcopy'] = 0;
-                        $monthlySites['hts_type'] =   $htsRegister;
+                            $completnesScores = ['completness' => 0];
+                            $consistencyScores = ['consistent' => 0];
+                            $invalidRateScores = ['invalid_results_rate' => 0];
 
-                        $completnesScores = ['completness' => 0];
-                        $consistencyScores = ['consistent' => 0];
-                        $invalidRateScores = ['invalid_results_rate' => 0];
+                            $invalidScores['invalids'] = 0;
+                            $invalidScores['totalTests'] = 0;
 
-                        $invalidScores['invalids'] = 0;
-                        $invalidScores['totalTests'] = 0;
+                            $scores['total_sites'] = 0;
+                            $monthlySites['totals'] = $scores;
+                            $monthlySites['sitenames'] = [
+                                '>98' => [],
+                                '95-98' => [],
+                                '<95' => [],
+                            ];
+                            $monthlySites['concordance-totals'] = 0;
 
-                        $scores['total_sites'] = 0;
-                        $monthlySites['totals'] = $scores;
-                        $monthlySites['sitenames'] = [
-                            '>98' => [],
-                            '95-98' => [],
-                            '<95' => [],
-                        ];
-                        $monthlySites['concordance-totals'] = 0;
+                            $monthlySites['concordance_t1_reactive'] = 0;
+                            $monthlySites['concordance_t2_reactive'] = 0;
 
-                        $monthlySites['concordance_t1_reactive'] = 0;
-                        $monthlySites['concordance_t2_reactive'] = 0;
+                            foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
+                                try {
+                                    $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                                    $monthlySites['totals']['total_sites'] += 1;
+                                    $agreementRate = $agreement * 100;
 
-                        foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
-                            try {
-                                $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
-                                $monthlySites['totals']['total_sites'] += 1;
-                                $agreementRate = $agreement * 100;
+                                    $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
+                                    $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
 
-                                $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
-                                $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
+                                    // check if this site has data completenss.
+                                    if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
+                                        $completnesScores['completness'] += 1;
+                                    }
 
-                                // check if this site has data completenss.
-                                if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
-                                    $completnesScores['completness'] += 1;
+                                    //check for data consistncy
+                                    if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
+                                        $consistencyScores['consistent'] += 1;
+                                    }
+
+                                    $invalidScores['totalTests'] += $site['t1_totals_tests'];
+                                    $invalidScores['invalids'] += $site['t1_invalids'];
+
+                                    if ($agreementRate > 98) {
+                                        $monthlySites['totals']['>98'] += 1;
+                                        $monthlySites['sitenames']['>98'][] = $sitename;
+                                    } else if ($agreementRate >= 95 && $agreementRate <= 98) {
+                                        $monthlySites['totals']['95-98'] += 1;
+                                        $monthlySites['sitenames']['95-98'][] = $sitename;
+                                    } else if ($agreementRate < 95) {
+                                        $monthlySites['totals']['<95'] += 1;
+                                        $monthlySites['sitenames']['<95'][] = $sitename;
+                                    }
+
+                                    //supervisory signatures aggregation
+
+                                    if (in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
+                                        $monthlySites['supervisory_signature']['not_signed'] += 1;
+                                    }
+                                    if (in_array(1, $site['supervisory_signature']) && !in_array(0, $site['supervisory_signature'])) {
+                                        $monthlySites['supervisory_signature']['signed'] += 1;
+                                    }
+                                    if (!in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
+                                        $monthlySites['supervisory_signature']['not_signed'] += 1;
+                                    }
+
+                                    //algortihm followed counts
+                                    if (in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
+                                        $monthlySites['algorithm_followed']['not_followed'] += 1;
+                                    }
+                                    if (in_array(1, $site['algorithm_followed']) && !in_array(0, $site['algorithm_followed'])) {
+                                        $monthlySites['algorithm_followed']['followed'] += 1;
+                                    }
+                                    if (!in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
+                                        $monthlySites['algorithm_followed']['not_followed'] += 1;
+                                    }
+                                    //end
+                                    //if site uses ehts or hardcopy
+                                    $monthlySites['hts_type']['ehts'] += $site['register']['ehts'];
+                                    $monthlySites['hts_type']['hardcopy'] += $site['register']['hardcopy'];
+                                } catch (Exception $ex) {
+                                    //  Log::error($ex);
                                 }
-
-                                //check for data consistncy
-                                if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
-                                    $consistencyScores['consistent'] += 1;
-                                }
-
-                                $invalidScores['totalTests'] += $site['t1_totals_tests'];
-                                $invalidScores['invalids'] += $site['t1_invalids'];
-
-                                if ($agreementRate > 98) {
-                                    $monthlySites['totals']['>98'] += 1;
-                                    $monthlySites['sitenames']['>98'][] = $sitename;
-                                } else if ($agreementRate >= 95 && $agreementRate <= 98) {
-                                    $monthlySites['totals']['95-98'] += 1;
-                                    $monthlySites['sitenames']['95-98'][] = $sitename;
-                                } else if ($agreementRate < 95) {
-                                    $monthlySites['totals']['<95'] += 1;
-                                    $monthlySites['sitenames']['<95'][] = $sitename;
-                                }
-
-                                //supervisory signatures aggregation
-
-                                if (in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
-                                    $monthlySites['supervisory_signature']['not_signed'] += 1;
-                                }
-                                if (in_array(1, $site['supervisory_signature']) && !in_array(0, $site['supervisory_signature'])) {
-                                    $monthlySites['supervisory_signature']['signed'] += 1;
-                                }
-                                if (!in_array(1, $site['supervisory_signature']) && in_array(0, $site['supervisory_signature'])) {
-                                    $monthlySites['supervisory_signature']['not_signed'] += 1;
-                                }
-
-                                //algortihm followed counts
-                                if (in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
-                                    $monthlySites['algorithm_followed']['not_followed'] += 1;
-                                }
-                                if (in_array(1, $site['algorithm_followed']) && !in_array(0, $site['algorithm_followed'])) {
-                                    $monthlySites['algorithm_followed']['followed'] += 1;
-                                }
-                                if (!in_array(1, $site['algorithm_followed']) && in_array(0, $site['algorithm_followed'])) {
-                                    $monthlySites['algorithm_followed']['not_followed'] += 1;
-                                }
-                                //end
-                                //if site uses ehts or hardcopy
-                                $monthlySites['hts_type']['ehts'] += $site['register']['ehts'];
-                                $monthlySites['hts_type']['hardcopy'] += $site['register']['hardcopy'];
-                            } catch (Exception $ex) {
-                                //  Log::error($ex);
                             }
-                        }
-                        $totalConcordance = 0;
-                        try {
-                            $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
-                            $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
-                        } catch (Exception $ex) {
-                        }
+                            $totalConcordance = 0;
+                            try {
+                                $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
+                                $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
+                            } catch (Exception $ex) {
+                            }
 
-                        $orgUnitArray['overall_agreement_rate'][$monthlyDate] = []; // do not include per site scores in payload
-                        $orgUnitArray['overall_agreement_rate'][$monthlyDate]['totals'] = $monthlySites['totals'];
-                        $orgUnitArray['overall_agreement_rate'][$monthlyDate]['sitenames'] = $monthlySites['sitenames'];
-                        $orgUnitArray['overall_concordance_totals'][$monthlyDate] = $totalConcordance;
-                        $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
-                        $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
-                        $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
-                        $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
-                        $orgUnitArray['hts_type'][$monthlyDate] = $monthlySites['hts_type'];
+                            $orgUnitArray['overall_agreement_rate'][$monthlyDate] = []; // do not include per site scores in payload
+                            $orgUnitArray['overall_agreement_rate'][$monthlyDate]['totals'] = $monthlySites['totals'];
+                            $orgUnitArray['overall_agreement_rate'][$monthlyDate]['sitenames'] = $monthlySites['sitenames'];
+                            $orgUnitArray['overall_concordance_totals'][$monthlyDate] = $totalConcordance;
+                            $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
+                            $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
+                            $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
+                            $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
+                            $orgUnitArray['hts_type'][$monthlyDate] = $monthlySites['hts_type'];
 
-                        //invalid rates
-                        $invlidRate = 0;
-                        try {
-                            $invlidRate = ($invalidScores['invalids'] * 100) /  $invalidScores['totalTests'];
-                            $invlidRate = number_format((float)$invlidRate, 1, '.', '');
-                        } catch (Exception $ex) {
+                            //invalid rates
+                            $invlidRate = 0;
+                            try {
+                                $invlidRate = ($invalidScores['invalids'] * 100) /  $invalidScores['totalTests'];
+                                $invlidRate = number_format((float)$invlidRate, 1, '.', '');
+                            } catch (Exception $ex) {
+                            }
+                            $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 1, '.', '');
                         }
-                        $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 1, '.', '');
+                    } catch (Exception $ex) {
+                        Log::error($ex);
                     }
-                } catch (Exception $ex) {
-                    Log::error($ex);
-                }
 
-                $payld[$orgUnitKey] = $orgUnitArray;
+                    $payld[$orgUnitKey] = $orgUnitArray;
+                }
+                $payload[$payldkey] = $payld;
             }
-            $payload[$payldkey] = $payld;
+            return $payload;
+        } catch (Exception $ex) {
+            Log::error('<ODKHTSDataAggregator->aggregateAgreementRates() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKHTSDataAggregator->aggregateAgreementRates()');
+            return null;
         }
-        return $payload;
     }
 
     //get scores for each organisation unit from rquest parameters
     private function getDataLoopOrgs($orgUnitIds, $recordsReadData)
     {
-        $payload = array();
-        for ($x = 0; $x < count($orgUnitIds); $x++) {
-            try {
-                $odkUtils = new ODKUtils();
-                $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
-                $orgToProcess = $orgMeta[0];
-                $level = $orgMeta[1];
+        try {
+            $payload = array();
+            for ($x = 0; $x < count($orgUnitIds); $x++) {
+                try {
+                    $odkUtils = new ODKUtils();
+                    $orgMeta = $odkUtils->getOrgsByLevel($orgUnitIds[$x]);
+                    $orgToProcess = $orgMeta[0];
+                    $level = $orgMeta[1];
 
-                [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
+                    [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
 
-                $orgUnit['org_unit_id'] = $orgUnitIds[$x];
+                    $orgUnit['org_unit_id'] = $orgUnitIds[$x];
 
-                $records = null;
+                    $records = null;
 
-                if (array_key_exists($orgUnit['org_unit_id'], $recordsReadData)) {
-                    $records = $recordsReadData[$orgUnit['org_unit_id']];
-                } else {
-                    $records = $this->getFormRecords($orgUnit);
-                    $recordsReadData[$orgUnit['org_unit_id']] = $records;
+                    if (array_key_exists($orgUnit['org_unit_id'], $recordsReadData)) {
+                        $records = $recordsReadData[$orgUnit['org_unit_id']];
+                    } else {
+                        $records = $this->getFormRecords($orgUnit);
+                        $recordsReadData[$orgUnit['org_unit_id']] = $records;
+                    }
+                    $results = array();
+                    $results["orgName"] = $orgUnitName;
+
+                    $results["overall_agreement_rate"] = $this->getOverallAgreementsRate($orgUnit, $records); //get per site sums/scores
+
+                    $payload[$orgUnitIds[$x]] = $results;
+                } catch (Exception $ex) {
+                    Log::error($ex);
                 }
-                $results = array();
-                $results["orgName"] = $orgUnitName;
-
-                $results["overall_agreement_rate"] = $this->getOverallAgreementsRate($orgUnit, $records); //get per site sums/scores
-
-                $payload[$orgUnitIds[$x]] = $results;
-            } catch (Exception $ex) {
-                Log::error($ex);
             }
+            return [$recordsReadData, $payload];
+        } catch (Exception $ex) {
+            Log::error('<ODKHTSDataAggregator->getDataLoopOrgs() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKHTSDataAggregator->getDataLoopOrgs()');
+            return null;
         }
-        return [$recordsReadData, $payload];
     }
 
     private function sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section)
