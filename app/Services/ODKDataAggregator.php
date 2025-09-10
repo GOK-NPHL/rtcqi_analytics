@@ -22,7 +22,7 @@ use PhpParser\Node\Stmt\Continue_;
 class ODKDataAggregator
 {
     private $reportSections = array();
-    private $timeLines = ['baseline', 'follow1', 'follow2', 'follow3', 'follow4', 'follow5', 'follow6', 'follow7', 'follow8', 'other'];
+    private $timeLines = ['baseline', 'follow1', 'follow2', 'follow3', 'follow4', 'follow5', 'follow6', 'follow7', 'follow8', 'follow9', 'follow10', 'other'];
     private $userOrgTimelineParams = array();
     private $siteType = null;
     private $startDate = null;
@@ -612,7 +612,7 @@ class ODKDataAggregator
             $score = $this->getPercentileValueForSections($score, $rowCounter, 3);
             // $score = ($score / ($rowCounter * 3)) * 100; //get denominator
             // $score = number_format((float)$score, 1, '.', ',');
-    
+
             return $score;
         } catch (Exception $ex) {
             Log::error('<ODKDataAggregator->getPersonellTrainingAndCertification() Error: ' . $ex->getMessage());
