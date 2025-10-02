@@ -44,12 +44,15 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define(SystemAuthorities::$authorities['view_submissions'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_submissions']);
         });
-        
+
         Gate::define(SystemAuthorities::$authorities['view_certificates'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_certificates']);
         });
         Gate::define(SystemAuthorities::$authorities['approve_certificates'], function ($user) {
             return $this->runAthurizationQuery(SystemAuthorities::$authorities['approve_certificates']);
+        });
+        Gate::define(SystemAuthorities::$authorities['view_certification_dashboard'], function ($user) {
+            return $this->runAthurizationQuery(SystemAuthorities::$authorities['view_certification_dashboard']);
         });
 
         Gate::define(SystemAuthorities::$authorities['resources_section'], function ($user) {
