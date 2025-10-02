@@ -163,6 +163,7 @@ class ODkHTSDataAggregator
 
                             $monthlySites['concordance_t1_reactive'] = 0;
                             $monthlySites['concordance_t2_reactive'] = 0;
+                            $monthlySites['concordance_t3_reactive'] = 0;
 
                             foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
                                 try {

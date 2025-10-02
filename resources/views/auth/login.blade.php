@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         @if( isset($files) && count($files) > 0 )
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="card">
                 <div class="card-header">{{ __('Resources / Files') }}</div>
 
@@ -21,7 +21,7 @@
                             <tr>
                                 <td>
                                     <!-- <a href="{{'/api/resources/files/download/'.$file->id}}" target="_blank" download="{{$file->name}}">{{ $file->name }}</a> -->
-                                    <a 
+                                    <a
                                     href="{{ url('/resources/download_file/'.$file->id) }}"
                                     download="{!! $file->name !!}"
                                     >{!! $file->name !!}</a>
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-7">
             @else
             <div class="col-md-8">
                 @endif
@@ -88,7 +88,7 @@
                             <div class="form-group row mb-0">
                                 <div class="col-md-8 offset-md-4">
                                     <button type="submit" onclick="
-                                     localStorage.removeItem('orgunitList');    
+                                     localStorage.removeItem('orgunitList');
                                                 localStorage.removeItem('treeStruc');
                                                 localStorage.removeItem('orgunitTableStruc');
                                                 localStorage.removeItem('page');" class="btn btn-primary">

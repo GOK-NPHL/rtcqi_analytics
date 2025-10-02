@@ -15,8 +15,9 @@ class SystemAuthorities
         'view_submissions' => 'view_submissions',
 
         'view_certificates' => 'view_certificates',
+        'view_certification_dashboard' => 'view_certification_dashboard',
         'approve_certificates' => 'approve_certificates',
-        
+
         'resources_section' => 'resources_section',
         'view_resources' => 'view_resources',
         'manage_resources' => 'manage_resources',

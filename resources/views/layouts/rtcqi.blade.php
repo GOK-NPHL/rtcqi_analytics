@@ -155,7 +155,7 @@ use Illuminate\Support\Facades\Gate;
             <!--Certificates section (certification_dashboard, cert_approvals_page)  -->
             <?php
 
-            if (Gate::allows('view_certificates')) { ?>
+            if (Gate::allows('view_certificates') || Gate::allows('view_certification_dashboard')) { ?>
                 <!-- Divider -->
 
                 <hr class="sidebar-divider">
@@ -166,17 +166,19 @@ use Illuminate\Support\Facades\Gate;
 
                 <!-- Nav Item - Pages Collapse Menu -->
                 <li class="nav-item">
-                    <?php if (Gate::allows('view_certificates')) { ?>
+                    <?php if (Gate::allows('view_certification_dashboard')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Certificate dashboard');" href="{{ route('certificate_dashboard') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
                             <span>Certification Dashboard</span>
                         </a>
-
+                    <?php } ?>
+                    <?php if (Gate::allows('view_certificates')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Cert approvals');" href="{{ route('cert_approvals_page') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
                             <span>View Certificates</span>
                         </a>
-
+                    <?php } ?>
+                    <?php if (Gate::allows('view_certificates')) { ?>
                         <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Cert approvals');" href="{{ route('certification_eligible') }}">
                             <i class="fas fa-fw fa-list-alt"></i>
                             <span>View Eligible Sites</span>

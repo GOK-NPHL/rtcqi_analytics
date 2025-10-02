@@ -317,7 +317,7 @@ class CertificatesController extends Controller
 
     public function dashboard(Request $request)
     {
-        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates'])) {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates']) || !Gate::allows(SystemAuthorities::$authorities['view_certification_dashboard'])) {
             return view('reports.certification.dashboard', ['error' => 'You are not authorized to view this page.']);
             // return response()->json(['Message' => 'Not allowed to view certificates: '], 500);
         }
@@ -388,7 +388,7 @@ class CertificatesController extends Controller
 
     public function dashboardAPI()
     {
-        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates'])) {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_certificates']) || !Gate::allows(SystemAuthorities::$authorities['view_certification_dashboard'])) {
             return response()->json(['Message' => 'Not allowed to view certificates: '], 500);
         }
         $summaries = $this->summaries();
@@ -1103,7 +1103,6 @@ class CertificatesController extends Controller
         $cert = $this->fetchData($certid);
         return response()->json($cert);
     }
-
 
     public function approve(Request $request)
     {
