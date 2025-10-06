@@ -324,7 +324,7 @@ class ODkHTSDataAggregator
         $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
 
         if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
-            Log::info($record);
+            // Log::info($record);
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
                 't1_reactive' => 0,
                 't1_non_reactive' => 0,
