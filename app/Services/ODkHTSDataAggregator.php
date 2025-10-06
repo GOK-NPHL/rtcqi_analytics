@@ -163,16 +163,20 @@ class ODkHTSDataAggregator
 
                             $monthlySites['concordance_t1_reactive'] = 0;
                             $monthlySites['concordance_t2_reactive'] = 0;
-                            $monthlySites['concordance_t3_reactive'] = 0;
+                            // $monthlySites['concordance_t3_reactive'] = 0;
 
                             foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
                                 try {
+                                    //3-test = (t3_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
+                                    $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                                    //2-test = (t2_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
                                     $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
                                     $monthlySites['totals']['total_sites'] += 1;
                                     $agreementRate = $agreement * 100;
 
                                     $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
                                     $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
+                                    $monthlySites['concordance_t3_reactive'] += $site['t3_reactive'];
 
                                     // check if this site has data completenss.
                                     if (array_key_exists('completeness', $site) && !array_key_exists('incompleteness', $site)) {
@@ -329,6 +333,7 @@ class ODkHTSDataAggregator
                 't1_reactive' => 0,
                 't1_non_reactive' => 0,
                 't2_reactive' => 0,
+                't3_reactive' => 0,
                 't1_non_reactive_totals' => 0,
                 't1_invalids' => 0,
                 't1_totals_tests' => 0,
@@ -344,6 +349,7 @@ class ODkHTSDataAggregator
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
+        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t3_reactive'] += $record['Section-section1-testreactive3'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_invalids'] += $record['Section-section0-totalinvalid'];
         $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += ($record['Section-section0-testreactive'] +
             $record['Section-section0-nonreactive'] +
