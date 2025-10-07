@@ -163,14 +163,16 @@ class ODkHTSDataAggregator
 
                             $monthlySites['concordance_t1_reactive'] = 0;
                             $monthlySites['concordance_t2_reactive'] = 0;
-                            // $monthlySites['concordance_t3_reactive'] = 0;
+                            $monthlySites['concordance_t3_reactive'] = 0;
 
                             foreach ($monthlySites as $sitename => $site) { //sites per month -- sites in a month
                                 try {
                                     //3-test = (t3_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
                                     $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+
                                     //2-test = (t2_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
-                                    $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                                    // $agreement = ($site['t2_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+
                                     $monthlySites['totals']['total_sites'] += 1;
                                     $agreementRate = $agreement * 100;
 
@@ -321,92 +323,102 @@ class ODkHTSDataAggregator
     private function sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section)
     {
 
-        $dateValue = strtotime($record['registerstartdate']);
-
-        $yr = date("Y", $dateValue);
-        $mon = date("m", $dateValue);
-        $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
-
-        if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
-            // Log::info($record);
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
-                't1_reactive' => 0,
-                't1_non_reactive' => 0,
-                't2_reactive' => 0,
-                't3_reactive' => 0,
-                't1_non_reactive_totals' => 0,
-                't1_invalids' => 0,
-                't1_totals_tests' => 0,
-                'supervisory_signature' => array(),
-                'algorithm_followed' => array(),
-                'register' => array(
-                    'ehts' => 0,
-                    'hardcopy' => 0
-                ),
-
-            );
-        }
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t3_reactive'] += $record['Section-section1-testreactive3'];
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_invalids'] += $record['Section-section0-totalinvalid'];
-        $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += ($record['Section-section0-testreactive'] +
-            $record['Section-section0-nonreactive'] +
-            $record['Section-section0-totalinvalid']);
         try {
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_totals'] += $record['Section-Section3-totals1-tnegative1'];
-        } catch (Exception $ex) {
-        }
+            $dateValue = strtotime($record['registerstartdate']);
 
-        //check if this site uses eHTS of Hardcopy
-        try {
-            if ($record['register'] == 'eHTS') {
-                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['ehts'] = 1;
-            } else {
+            $yr = date("Y", $dateValue);
+            $mon = date("m", $dateValue);
+            $siteConcatName = $record['mysites_county'] . $record['mysites_subcounty'] . $record['mysites_facility'] . $record['mysites'];
+
+            if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
+                // Log::info($record);
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName] = array(
+                    't1_reactive' => 0,
+                    't1_non_reactive' => 0,
+                    't2_reactive' => 0,
+                    't3_reactive' => 0,
+                    't1_non_reactive_totals' => 0,
+                    't1_invalids' => 0,
+                    't1_totals_tests' => 0,
+                    'supervisory_signature' => array(),
+                    'algorithm_followed' => array(),
+                    'register' => array(
+                        'ehts' => 0,
+                        'hardcopy' => 0
+                    ),
+
+                );
+            }
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += $record['Section-section0-testreactive'];
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive'] += $record['Section-section0-nonreactive'];
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t2_reactive'] += $record['Section-section1-testreactive1'];
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t3_reactive'] += $record['Section-section2-testreactive3'] ?? 0;
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_invalids'] += $record['Section-section0-totalinvalid'];
+            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += ($record['Section-section0-testreactive'] +
+                $record['Section-section0-nonreactive'] +
+                $record['Section-section0-totalinvalid']);
+            try {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_totals'] += $record['Section-Section3-totals1-tnegative1'];
+            } catch (Exception $ex) {
+            }
+            // Log::info($siteConcatName . json_encode($monthScoreMap[$yr . '-' . $mon][$siteConcatName]) . PHP_EOL);
+
+            //check if this site uses eHTS of Hardcopy
+            try {
+                if ($record['register'] == 'eHTS') {
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['ehts'] = 1;
+                } else {
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
+                }
+            } catch (Exception $ex) {
                 $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
             }
+
+            //check data completeness for this site Section-Section3-totals1-tnegative1
+            if (
+                trim(strtolower($record['Section-tezt'])) == 'provided' &&
+                trim(strtolower($record['Section-lots1'])) == 'provided' &&
+                trim(strtolower($record['Section-note1'])) == 'provided' &&
+                trim(strtolower($record['Section-tezt1'])) == 'provided' &&
+                trim(strtolower($record['Section-lots2'])) == 'provided' &&
+                trim(strtolower($record['Section-note2'])) == 'provided'
+            ) {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['completeness'] = 1;
+            } else {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['incompleteness'] = 1;
+            }
+
+            //check if supervisor signed or not signed
+            if (
+                trim(strtolower($record['Section-Section4-surpervisor'])) == 1
+            ) {
+                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
+            } else {
+                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 0);
+            }
+            //end
+
+            //check if supervisor signed or not signed
+            if (
+                trim(strtolower($record['Section-Section4-algorithm'])) == 1
+            ) {
+                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
+            } else {
+                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 0);
+            }
+            //end
+
+            $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
+
+            return [$monthScoreMap, $rowsPerMonthAndScoreCounter];
         } catch (Exception $ex) {
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['register']['hardcopy'] = 1;
+            Log::error($ex);
+            Log::error('<ODKHTSDataAggregator->sumValues() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</ODKHTSDataAggregator->sumValues()');
+            // return [null, null];
+            return null;
         }
-
-        //check data completeness for this site Section-Section3-totals1-tnegative1
-        if (
-            trim(strtolower($record['Section-tezt'])) == 'provided' &&
-            trim(strtolower($record['Section-lots1'])) == 'provided' &&
-            trim(strtolower($record['Section-note1'])) == 'provided' &&
-            trim(strtolower($record['Section-tezt1'])) == 'provided' &&
-            trim(strtolower($record['Section-lots2'])) == 'provided' &&
-            trim(strtolower($record['Section-note2'])) == 'provided'
-        ) {
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['completeness'] = 1;
-        } else {
-            $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['incompleteness'] = 1;
-        }
-
-        //check if supervisor signed or not signed
-        if (
-            trim(strtolower($record['Section-Section4-surpervisor'])) == 1
-        ) {
-            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
-        } else {
-            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 0);
-        }
-        //end
-
-        //check if supervisor signed or not signed
-        if (
-            trim(strtolower($record['Section-Section4-algorithm'])) == 1
-        ) {
-            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
-        } else {
-            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 0);
-        }
-        //end
-
-        $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
-
-        return [$monthScoreMap, $rowsPerMonthAndScoreCounter];
     }
 
     private function processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section)
@@ -424,7 +436,7 @@ class ODkHTSDataAggregator
         } else {
             // Log::info(strtolower($record['mysites_county']) . "  compp  " . $orgUnit['mysites_county']);
             if (strtolower($record['mysites_county']) == $orgUnit['mysites_county']) {
-                Log::info("facility 1 " . $orgUnit['mysites_county']);
+                // Log::info("facility 1 " . $orgUnit['mysites_county']);
                 if (!empty($orgUnit['mysites_subcounty'])) {
                     // Log::info(strtolower($record['mysites_subcounty']) . " facility2 " . $orgUnit['mysites_subcounty']);
                     if (strtolower($record['mysites_subcounty']) == $orgUnit['mysites_subcounty']) {
