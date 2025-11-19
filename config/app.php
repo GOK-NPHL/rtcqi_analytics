@@ -232,4 +232,8 @@ return [
     'odk_user' =>  env('ODK_USER', ''),
     'odk_pass' =>  env('ODK_PASS', ''),
     'odk_url' =>  env('ODK_URL', ''),
+
+    'DWH_CLIENT_ID' => env('DWH_CLIENT_ID', ''),
+    'DWH_CLIENT_SECRET' => env('DWH_CLIENT_SECRET', ''),
+    'DWH_SCOPE' => env('DWH_SCOPE', ''),
 ];

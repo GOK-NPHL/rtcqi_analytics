@@ -21,7 +21,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/odk_data', 'SpiReportController@getData');
-Route::post('/odk_hts_data', 'LogbookReportController@getData');
+// Route::post('/odk_hts_data', 'LogbookReportController@getData');
+Route::post('/odk_hts_data', 'LogbookReportController@getDwhData');
+// Route::get('/dwh_hts_data_raw', 'LogbookReportController@getDwhDataRaw');
+// Route::post('/dwh_hts_data', 'LogbookReportController@getDwhData');
 
 Route::get('/odk_submissions', 'SubmissionsController@getData');
 Route::post('/hts_submissions', 'SubmissionsController@getData');

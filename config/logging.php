@@ -96,6 +96,9 @@ return [
             'handler' => NullHandler::class,
         ],
 
+        'file' => [
+            'path' => storage_path('logs/laravel.log'),
+        ],
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
