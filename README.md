@@ -138,3 +138,10 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 <!-- RESTART CRON -->
 ## cron
 sudo service cron restart
+
+
+
+### DWH data pull job
+```
+php artisan dwh:pull
+```
