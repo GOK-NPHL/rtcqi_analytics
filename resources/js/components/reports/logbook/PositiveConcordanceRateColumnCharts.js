@@ -49,7 +49,9 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
         orgName = orgName.toUpperCase();
         let overallDataObject = dataObject.overall_concordance_totals;
 
-        let levelData = { 'Positive_Concordance': [] };
+        let levelData = {
+            'Positive_Concordance': []
+        };
         let category = [];
         let seriesData = [];
 

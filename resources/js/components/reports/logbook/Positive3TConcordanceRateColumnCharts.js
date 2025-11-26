@@ -7,101 +7,130 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            series2: [
-                {
-                    name: 'Level 0 (<40%)',
-                    type: 'bar',
-                    stack: 'total',
-                    label: {
-                        show: true
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    data: [24, 23, 56, 34, 32]
-                }
-            ]
-        };
+        this.state = {};
         this.addGraphsToArray = this.addGraphsToArray.bind(this);
         this.prepareOverallLevelSiteData = this.prepareOverallLevelSiteData.bind(this);
-
     }
 
     componentDidMount() {
-
     }
 
     prepareOverallLevelSiteData(dataObject) {
-        //console.log(dataObject);
-        let overallSiteGraphsData = {};
+        // Mapping of keys in the JSON to Display Names
         let levelsMap = {
-            'T3T1': 'T3 / T1 Positive Agreement Rate',
-            'T3T2': 'T3 / T2 Positive Agreement Rate',
-            'T2T1': 'T2 / T1 Positive Agreement Rate',
-            // 'Positive_Concordance': 'Positive Concordance',
-        }
+            'Positive_Concordance': 'Overall',
+            'T3T1': 'T3 / T1',
+            'T3T2': 'T3 / T2',
+            'T2T1': 'T2 / T1',
+        };
 
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        const monthNames = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
 
         let orgName = dataObject.orgName;
-
         if (dataObject.orgName) orgName += ' ' + (dataObject['OrgUniType'] != undefined ? dataObject['OrgUniType'] : '');
         orgName = orgName.toUpperCase();
-        let overallDataObject = dataObject.overall_concordance_totals;
 
-        let test_agreements = dataObject.overall-positive-test-agreements;
+        // 1. Get a distinct list of all periods (months) from the main dataset to align the X-Axis
+        let overallDataObject = dataObject.overall_concordance_totals || {};
+        let periods = Object.keys(overallDataObject).sort();
 
-        let levelData = {
-            'T3T1': [],
-            'T3T2': [],
-            'T2T1': [],
-            // 'Positive_Concordance': []
-        };
-        let category = [];
+        // 2. Prepare the X-Axis Categories (Month names + N value from Overall data)
+        let category = periods.map(period => {
+            const d = new Date(period);
+            // Get N value from overall_agreement_rate for the label
+            let nVal = 0;
+            if (dataObject.overall_agreement_rate &&
+                dataObject.overall_agreement_rate[period] &&
+                dataObject.overall_agreement_rate[period]['totals']) {
+                nVal = dataObject.overall_agreement_rate[period]['totals']['total_sites'];
+            }
+            return monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (N=" + nVal + ")";
+        });
+
+        // 3. Prepare Series Data
         let seriesData = [];
 
-        for (let [period, totals] of Object.entries(overallDataObject)) {
-            let row = [];
-            const d = new Date(period);
-            let no = dataObject.overall_agreement_rate[period]['totals']['total_sites'];
-            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (N=" + no + ")"
-            if (!category.includes(val)) {
-                category.push(val);
-            }
-            levelData['Positive_Concordance'].push(totals);
-        }
+        // Helper function to calculate percentage from the nested T3/T2/T1 objects
+        const calculatePercentage = (periodData) => {
+            if (!periodData) return 0;
 
-        for (let [period, data] of Object.entries(dataObjectT3T1)) {}
+            // Sum totals from all buckets (>98, 95-98, <95)
+            let totalSites = 0;
+            let passingSites = 0; // Assuming Concordance means >98 bucket, or >98 + 95-98
 
-        for (let [level, dataArray] of Object.entries(levelData)) {
-            let seriesEntry = {
-                name: '',
+            // Loop through buckets provided in JSON (e.g., ">98", "<95")
+            Object.keys(periodData).forEach(bucketKey => {
+                let val = periodData[bucketKey]?.totals || 0;
+                totalSites += val;
+
+                // Logic: What counts as "Concordant"? usually >98.
+                // Adjust if you need to include "95-98"
+                if(bucketKey === '>98') {
+                    passingSites += val;
+                }
+            });
+
+            if (totalSites === 0) return 0;
+            return ((passingSites / totalSites) * 100).toFixed(1);
+        };
+
+        // Iterate through our 4 Metrics (Overall, T3T1, etc)
+        Object.keys(levelsMap).forEach(key => {
+            let dataArray = [];
+
+            periods.forEach(period => {
+                let value = 0;
+
+                if (key === 'Positive_Concordance') {
+                    // Overall is already a percentage string in the JSON
+                    value = parseFloat(overallDataObject[period] || 0);
+                } else {
+                    // For T3T1, T3T2, T2T1, we need to dig into the objects
+                    let lookupKey = '';
+                    if (key === 'T3T1') lookupKey = 'positive_agreement_rate_t3_t1';
+                    if (key === 'T3T2') lookupKey = 'positive_agreement_rate_t3_t2';
+                    if (key === 'T2T1') lookupKey = 'positive_agreement_rate_t2_t1';
+
+                    let periodData = dataObject[lookupKey] ? dataObject[lookupKey][period] : null;
+                    value = calculatePercentage(periodData);
+                }
+                dataArray.push(value);
+            });
+
+            // Create the series object
+            seriesData.push({
+                name: levelsMap[key],
                 type: 'bar',
-                stack: 'total',
                 label: {
-                    show: true
+                    show: true,
+                    position: 'top', // Better for grouped bars
+                    formatter: '{c}%'
                 },
                 emphasis: {
                     focus: 'series'
                 },
-                data: ''
-            };
-            seriesEntry['data'] = dataArray;
-            seriesEntry['name'] = levelsMap[level];
-            seriesData.push(seriesEntry);
-        }
+                data: dataArray
+            });
+        });
 
-        overallSiteGraphsData[orgName] = [category, seriesData];
-
-        return <RTCard header={orgName} minHeight={this.props.minHeight}>
-            <StackedVertical
-                yAxisGap={35}
-                yAxisName="concordance" formatter="" color={['#004dc9', '#ffc100']}
-                minHeight={this.props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
-        </RTCard>
+        return (
+            <RTCard header={orgName} minHeight={this.props.minHeight}>
+                <StackedVertical
+                    yAxisGap={35}
+                    yAxisName="Concordance %"
+                    formatter="%"
+                    // formatter="{value} %"
+                    color={['#58bc77', '#8c3070', '#ba5899', '#ea87ac', '#fc8452',  '#d19f71', '#8fa840']}
+                    minHeight={this.props.minHeight}
+                    legend={Object.values(levelsMap)}
+                    category={category}
+                    series={seriesData}
+                />
+            </RTCard>
+        );
     }
 
     addGraphsToArray(counter, row, columns, overLay, singChart) {
@@ -129,38 +158,44 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
         if (this.props.serverData) {
 
             if (this.props.siteType != null && this.props.siteType.length != 0) {
-
                 this.props.serverData.map((dataObjectParent) => {
                     for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
                         try {
                             let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
                             [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
                         } catch (err) {
-
+                            console.error(err);
                         }
-
                     }
                 });
                 if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
+                    overLay.push(row);
                 }
 
             } else {
-                for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
-                    try {
-                        let singChart = this.prepareOverallLevelSiteData(dataObject);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
-                    } catch (err) {
+                // Handling for Single Site/Default view
+                let dataSrc = Array.isArray(this.props.serverData) ? this.props.serverData[0] : this.props.serverData;
 
-                    }
-
+                // If serverData is an array of objects
+                if(Array.isArray(this.props.serverData) && this.props.serverData.length > 0){
+                     dataSrc = this.props.serverData[0];
                 }
+
+                if(dataSrc){
+                     for (let [key, dataObject] of Object.entries(dataSrc)) {
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(dataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                }
+
                 if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
+                    overLay.push(row);
                 }
             }
-
-        } else {
 
         }
 
@@ -170,7 +205,6 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
             </React.Fragment>
         );
     }
-
 }
 
 export default Positive3TConcordanceRateColumnCharts;

@@ -149,6 +149,10 @@ class DWHHTSDataFetcher
 
             $data2Save = [];
             foreach ($dataDwh as $data) {
+                $lat = $data['Latitude'] ?? null;
+                $lon = $data['Longitude'] ?? null;
+                if (is_string($lat)) $lat = floatval($lat);
+                if (is_string($lon)) $lon = floatval($lon);
                 $data2Save[] = [
                     'encounter_key'      => $data['Encounter_key'] ?? null,
                     'patient_pk_hash'    => $data['PatientPKHash'] ?? null,
@@ -159,8 +163,8 @@ class DWHHTSDataFetcher
                     'facility_level'     => $data['Facility_Level'] ?? null,
                     'sdp'                => $data['SDP'] ?? null,
                     'sdp_agency'         => $data['SDP_Agency'] ?? null,
-                    'latitude'           => $data['Latitude'] ?? null,
-                    'longitude'          => $data['Longitude'] ?? null,
+                    'latitude'           => $lat, //$data['Latitude'] ?? null,
+                    'longitude'          => $lon, //$data['Longitude'] ?? null,
                     'emr'                => $data['EMR'] ?? null,
                     'test_date'          => $data['TestDate'] ?? null,
                     'test_month'          => isset($data['TestDate']) ? date('Y-m', strtotime($data['TestDate'])) : null,

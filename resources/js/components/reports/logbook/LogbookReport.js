@@ -979,7 +979,7 @@ class LogbookReport extends React.Component {
 
         let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
         // let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
-        let positive3tConcordanceRateColumnCharts = <Positive3TConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let positive3tConcordanceRateColumnCharts = <><Positive3TConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} /></>
 
 
         // Data Tables for all the indicators
