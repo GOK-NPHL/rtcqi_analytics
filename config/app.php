@@ -233,6 +233,8 @@ return [
     'odk_pass' =>  env('ODK_PASS', ''),
     'odk_url' =>  env('ODK_URL', ''),
 
+    'skip_cache' => env('SKIP_CACHE', false),
+
     'DWH_CLIENT_ID' => env('DWH_CLIENT_ID', ''),
     'DWH_CLIENT_SECRET' => env('DWH_CLIENT_SECRET', ''),
     'DWH_SCOPE' => env('DWH_SCOPE', ''),

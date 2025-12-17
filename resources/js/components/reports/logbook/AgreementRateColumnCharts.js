@@ -58,7 +58,7 @@ class AgreementRateColumnCharts extends React.Component {
             let row = [];
             const d = new Date(period);
 
-            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + '\n (N=' + totals['totals']['total_sites'] + ') ';
+            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + '\n (S=' + totals['totals']['total_sites'] + ', T=' + totals['totals']['total_tests'] + ') ';
 
             if (!category.includes(val)) {
                 category.push(val);

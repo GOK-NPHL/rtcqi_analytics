@@ -42,12 +42,14 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
             const d = new Date(period);
             // Get N value from overall_agreement_rate for the label
             let nVal = 0;
+            let tVal = 0;
             if (dataObject.overall_agreement_rate &&
                 dataObject.overall_agreement_rate[period] &&
                 dataObject.overall_agreement_rate[period]['totals']) {
                 nVal = dataObject.overall_agreement_rate[period]['totals']['total_sites'];
+                tVal = dataObject.overall_agreement_rate[period]['totals']['total_tests'];
             }
-            return monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (N=" + nVal + ")";
+            return monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (S=" + nVal + ", T=" + tVal + ")";
         });
 
         // 3. Prepare Series Data
@@ -78,6 +80,7 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
         };
 
         // Iterate through our 4 Metrics (Overall, T3T1, etc)
+        // console.log(levelsMap);
         Object.keys(levelsMap).forEach(key => {
             let dataArray = [];
 

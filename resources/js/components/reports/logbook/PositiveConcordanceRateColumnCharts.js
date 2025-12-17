@@ -60,7 +60,8 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
             const d = new Date(period);
 
             let no = dataObject.overall_agreement_rate[period]['totals']['total_sites'];
-            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (N=" + no + ")"
+            let tsts = dataObject.overall_agreement_rate[period]['totals']['total_tests'];
+            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + "\n (S=" + no + ", T=" + tsts + ")"
 
             if (!category.includes(val)) {
                 category.push(val);

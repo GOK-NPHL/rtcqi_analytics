@@ -26,6 +26,7 @@ class LogbookReport extends React.Component {
             orgUnits: [],
             orgUnitDataIds: [0],
             siteType: [],
+            emrs: [],
             echartsMinHeight: '',
             orgUnitIndicators: [
                 'Site agreement Rates',
@@ -33,11 +34,13 @@ class LogbookReport extends React.Component {
                 'Completeness rate',
                 'Consistency rate',
                 'Invalid rate',
+                'Inconclusive rate',
                 // 'Supervisory Signature rate',
                 'Algorithm Followed rate',
-                'Sites using eHTS register',
+                // 'Sites using eHTS register',
+                'eHTS Distribution',
             ],
-            indicatorIndexToDisplay: 1,
+            indicatorIndexToDisplay: 0,
             isLoading: false,
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
@@ -160,6 +163,7 @@ class LogbookReport extends React.Component {
         completenessTableData, completenessExportData,
         consistencyTableData, consistencyExportData,
         invalidRateTableData, invalidRateExportData,
+        inconclusiveRateTableData, inconclusiveRateExportData,
         supervisorySignatureTableData, supervisorySignatureExportData,
         algorithmFollowedTableData, algorithmFollowedExportData,
         htsTypeTableData, htsTypeExportData
@@ -233,6 +237,18 @@ class LogbookReport extends React.Component {
 
         }
         try {
+            // Inconclusive Rate
+            inconclusiveRateTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={3} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            inconclusiveRateExportData.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
+
+        }
+        try {
             // Supervisory Signature rates
             supervisorySignatureTableData.push(
                 <tr key={uuidv4()}>
@@ -261,7 +277,7 @@ class LogbookReport extends React.Component {
             // hts Type rates
             htsTypeTableData.push(
                 <tr key={uuidv4()}>
-                    <td colSpan={3} scope="row">
+                    <td colSpan={dataToParse?.emrs?.length+1} scope="row">
                         <strong>{dataToParse.orgName.toUpperCase()}</strong>
                     </td>
                 </tr>);
@@ -278,8 +294,8 @@ class LogbookReport extends React.Component {
             let exportData = [];
             const d = new Date(period);
 
-            row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={totals['totals']['total_sites']})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + totals['totals']['total_sites'] + ")"
+            row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + totals['totals']['total_sites'] + ", T=" + totals['totals']['total_tests'] + ")"
             exportData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -387,80 +403,90 @@ class LogbookReport extends React.Component {
         // positive agreement data loop - t3/t1
         // console.log(dataToParse);
         let range_ = ['>98', '95-98', '<95'];
+        console.log('dataToParse', dataToParse);
+        let overallDataObject = dataToParse.overall_agreement_rate;
         for (let [period, dataObjectT3T1] of Object.entries(dataToParse.positive_agreement_rate_t3_t1)) {
             let dataObjectT3T2 = dataToParse.positive_agreement_rate_t3_t2[period];
             let dataObjectT2T1 = dataToParse.positive_agreement_rate_t2_t1[period];
-            range_.map((range, index) => {
+            // range_.map((range, index) => {
                 let row = [];
                 const d = new Date(period);
-                row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} <b>({range})</b>
+                row.push(<td key={uuidv4()} scope="row">{
+                    monthNames[d.getMonth()]} {d.getFullYear()}
+                    {/* <b>({range})</b> */}
                     {/* (N={dataObjectT3T1['totals']['total_sites']}) */}
+                    {" (S=" + overallDataObject[period]['totals']['total_sites'] + ", T=" + overallDataObject[period]['totals']['total_tests'] + ")"}
                 </td>);
                 if (this.state.siteType != null) {
                     if (this.state.siteType.length != 0) {
                         row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     }
                 }
-                let ttl = monthNames[d.getMonth()] + "-" + d.getFullYear() + ")"
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1[range]?.totals}</td>);
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2[range]?.totals}</td>);
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1[range]?.totals}</td>);
-                positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
-                    this.setState({
-                        nModal: {
-                            title: <>
-                                <h5>{ttl || "Details"}</h5>
-                                {/* Add export button here */}
-                            </>,
-                            content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
-                                <table className='table table-condensed table-striped'>
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Indicator</th>
-                                            <th>MFL Code</th>
-                                            <th>Site</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {dataObjectT3T1[range]?.sites.map((siteName, index) => {
-                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                            let mfl = siteName.split('___')[1]?.split('_')[0];
-                                            return (<tr key={uuidv4()}>
-                                                <td>{index + 1}.</td>
-                                                <td>T3/T1</td>
-                                                <td>{mfl}</td>
-                                                <td>{site}</td>
-                                            </tr>);
-                                        })}
-                                        {dataObjectT3T2[range]?.sites.map((siteName, index) => {
-                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                            let mfl = siteName.split('___')[1]?.split('_')[0];
-                                            return (<tr key={uuidv4()}>
-                                                <td>{index + 1}.</td>
-                                                <td>T3/T2</td>
-                                                <td>{mfl}</td>
-                                                <td>{site}</td>
-                                            </tr>);
-                                        })}
-                                        {dataObjectT2T1[range]?.sites.map((siteName, index) => {
-                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                            let mfl = siteName.split('___')[1]?.split('_')[0];
-                                            return (<tr key={uuidv4()}>
-                                                <td>{index + 1}.</td>
-                                                <td>T2/T1</td>
-                                                <td>{mfl}</td>
-                                                <td>{site}</td>
-                                            </tr>);
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>)
-                        }
-                    });
-                    $('#nModal').modal('toggle');
-                }}>{row}</tr>);
-            });
+                let ttl = monthNames[d.getMonth()] + "-" + d.getFullYear() + ")";
+                // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1[range]?.totals}</td>);
+                // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2[range]?.totals}</td>);
+                // row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1[range]?.totals}</td>);
+                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1?.avg}</td>);
+                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2?.avg}</td>);
+                row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1?.avg}</td>);
+                positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()}
+                    onClick={() => {
+                        this.setState({
+                            nModal: {
+                                title: <>
+                                    <h5>{ttl || "Details"}</h5>
+                                    {/* Add export button here */}
+                                </>,
+                                content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                                    <table className='table table-condensed table-striped'>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Indicator</th>
+                                                <th>MFL Code</th>
+                                                <th>Site</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {dataObjectT3T1[range]?.sites.map((siteName, index) => {
+                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                                let mfl = siteName.split('___')[1]?.split('_')[0];
+                                                return (<tr key={uuidv4()}>
+                                                    <td>{index + 1}.</td>
+                                                    <td>T3/T1</td>
+                                                    <td>{mfl}</td>
+                                                    <td>{site}</td>
+                                                </tr>);
+                                            })}
+                                            {dataObjectT3T2[range]?.sites.map((siteName, index) => {
+                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                                let mfl = siteName.split('___')[1]?.split('_')[0];
+                                                return (<tr key={uuidv4()}>
+                                                    <td>{index + 1}.</td>
+                                                    <td>T3/T2</td>
+                                                    <td>{mfl}</td>
+                                                    <td>{site}</td>
+                                                </tr>);
+                                            })}
+                                            {dataObjectT2T1[range]?.sites.map((siteName, index) => {
+                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                                let mfl = siteName.split('___')[1]?.split('_')[0];
+                                                return (<tr key={uuidv4()}>
+                                                    <td>{index + 1}.</td>
+                                                    <td>T2/T1</td>
+                                                    <td>{mfl}</td>
+                                                    <td>{site}</td>
+                                                </tr>);
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>)
+                            }
+                        });
+                        $('#nModal').modal('toggle');
+                    }}
+                >{row}</tr>);
+            // });
         }
 
         // completeness data
@@ -470,8 +496,9 @@ class LogbookReport extends React.Component {
             let completenessExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            completenessRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            completenessRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             completenessExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -500,8 +527,9 @@ class LogbookReport extends React.Component {
             let consistencyExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             consistencyExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -530,8 +558,9 @@ class LogbookReport extends React.Component {
             let invalidRateExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            invalidRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            invalidRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T="+tsts + ")"
             invalidRateExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -548,7 +577,33 @@ class LogbookReport extends React.Component {
             invalidRateExportData.push(invalidRateExportTableData);
         }
 
-        // end invalid rate data loop
+        // inconclusive rate data loop
+        for (let [period, totals] of Object.entries(dataToParse.inconclusive_rates)) {
+
+            let inconclusiveRateRow = [];
+            let inconclusiveRateExportTableData = [];
+            const d = new Date(period);
+            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T="+tsts + ")"
+            inconclusiveRateExportTableData.push(sting);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    inconclusiveRateExportTableData.push(dataToParse['OrgUniType']);
+                }
+            }
+
+            inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            inconclusiveRateExportTableData.push(totals);
+
+            inconclusiveRateTableData.push(<tr key={uuidv4()}>{inconclusiveRateRow}</tr>);
+
+            inconclusiveRateExportData.push(inconclusiveRateExportTableData);
+        }
+
+        // end inconclusive rate data loop
 
         // supervisory_signature data loop
         for (let [period, totals] of Object.entries(dataToParse.supervisory_signature)) {
@@ -556,8 +611,9 @@ class LogbookReport extends React.Component {
             let supervisorySignatureExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             supervisorySignatureExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -594,8 +650,9 @@ class LogbookReport extends React.Component {
             let algorithmFollowedExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             algorithmFollowedExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -626,13 +683,13 @@ class LogbookReport extends React.Component {
 
         // hts_type data loop
         for (let [period, totals] of Object.entries(dataToParse.hts_type)) {
-
             let htsTypeRow = [];
             let htsTypeExportTableData = [];
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
+            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             htsTypeExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -641,20 +698,30 @@ class LogbookReport extends React.Component {
                 }
             }
 
-            let ehts = (totals.ehts / no) * 100;
-            if (!ehts) ehts = 0;
-            ehts = Math.round(ehts * 10) / 10; //round off to one decimal place
 
-            let hardcopy = (totals.hardcopy / no) * 100;
-            if (!hardcopy) hardcopy = 0;
-            hardcopy = Math.round(hardcopy * 10) / 10; //round off to one decimal place
+            // let ehts = (totals.ehts / no) * 100;
+            // if (!ehts) ehts = 0;
+            // ehts = Math.round(ehts * 10) / 10; //round off to one decimal place
 
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
+            // let hardcopy = (totals.hardcopy / no) * 100;
+            // if (!hardcopy) hardcopy = 0;
+            // hardcopy = Math.round(hardcopy * 10) / 10; //round off to one decimal place
+
+            // htsTypeRow.push(<td key={uuidv4()} scope="row">{ehts}</td>);
+            // htsTypeRow.push(<td key={uuidv4()} scope="row">{hardcopy}</td>);
+            // htsTypeExportTableData.push(ehts);
+            // htsTypeExportTableData.push(hardcopy);
 
 
-            htsTypeExportTableData.push(ehts);
-            htsTypeExportTableData.push(hardcopy);
+            let month_emr_totals = Object.values(totals).reduce((a, b) => a + b, 0);
+            dataToParse?.emrs?.forEach((emr) => {
+                let curr = totals[emr] || 0;
+                let rate = (curr / month_emr_totals) * 100;
+                if (!rate) rate = 0;
+                rate = Math.round(rate * 10) / 10; //round off to one decimal place
+                htsTypeRow.push(<td key={uuidv4()} scope="row">{rate}<sub>%</sub></td>);
+                htsTypeExportTableData.push(rate);
+            });
 
             htsTypeTableData.push(<tr key={uuidv4()}>{htsTypeRow}</tr>);
 
@@ -669,6 +736,7 @@ class LogbookReport extends React.Component {
             completenessTableData, completenessExportData,
             consistencyTableData, consistencyExportData,
             invalidRateTableData, invalidRateExportData,
+            inconclusiveRateTableData, inconclusiveRateExportData,
             supervisorySignatureTableData, supervisorySignatureExportData,
             algorithmFollowedTableData, algorithmFollowedExportData,
             htsTypeTableData, htsTypeExportData
@@ -849,6 +917,35 @@ class LogbookReport extends React.Component {
         }
         // end invalid rate
 
+
+        // inconclusive rate
+        let inconclusiveRateTableData = [];
+        let inconclusiveRateTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Inconclusive rate</th>
+
+        </tr>;
+
+        let inconclusiveRateExportData = [];
+
+        inconclusiveRateExportData.push(['___', 'Inconclusive rate']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                inconclusiveRateTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Inconclusive rate</th>
+
+                </tr>;
+                inconclusiveRateExportData = [];
+                inconclusiveRateExportData.push(['___', 'Programme', 'Inconclusive rate']);
+            }
+        }
+        // end inconclusive rate
+
         //  Supervisory Signature rate
         let supervisorySignatureTableData = [];
         let supervisorySignatureTableDataHeaders = <tr>
@@ -914,8 +1011,8 @@ class LogbookReport extends React.Component {
         let htsTypeTableDataHeaders = <tr>
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
-            <th scope="col">ehts</th>
-            <th scope="col">hardcopy</th>
+            {/* <th scope="col">ehts</th>
+            <th scope="col">hardcopy</th> */}
         </tr>;
 
         let htsTypeExportData = [];
@@ -928,8 +1025,8 @@ class LogbookReport extends React.Component {
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
-                    <th scope="col">ehts</th>
-                    <th scope="col">hardcopy</th>
+                    {/* <th scope="col">ehts</th>
+                    <th scope="col">hardcopy</th> */}
 
                 </tr>;
                 htsTypeExportData = [];
@@ -940,11 +1037,39 @@ class LogbookReport extends React.Component {
 
         //process data tables with values and prepare export objects with data
         if (this.state.odkData) {
-
+            // console.log('this.state.odkData', this.state.odkData);
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
                     try {
                         // //console.log(displayData);
+                        if (key == 0 && payload?.emrs && payload?.emrs.length > 0) {
+                            //////
+                            htsTypeTableDataHeaders = <tr>
+                                <th scope="col">___</th>
+                                {payload?.emrs.map((emr, emrIndex) => {
+                                    return <th scope="col" key={uuidv4()}>{emr}</th>
+                                })}
+                            </tr>;
+
+                            htsTypeExportData = [];
+                            htsTypeExportData.push(['___', ...payload?.emrs]);
+
+                            if (this.state.siteType != null) {
+                                if (this.state.siteType.length != 0) {
+                                    htsTypeTableDataHeaders = <tr>
+                                        <th scope="col">___</th>
+                                        <th scope="col">Programme</th>
+                                        {payload?.emrs.map((emr, emrIndex) => {
+                                            return <th scope="col" key={uuidv4()}>{emr}</th>
+                                        })}
+                                    </tr>;
+                                    htsTypeExportData = [];
+                                    htsTypeExportData.push(['___', 'Programme', ...payload?.emrs]);
+                                }
+                            }
+                            //////
+                        }
+
                         [
                             tableData,
                             tableDataExport,
@@ -952,6 +1077,7 @@ class LogbookReport extends React.Component {
                             completenessTableData, completenessExportData,
                             consistencyTableData, consistencyExportData,
                             invalidRateTableData, invalidRateExportData,
+                            inconclusiveRateTableData, inconclusiveRateExportData,
                             supervisorySignatureTableData, supervisorySignatureExportData,
                             algorithmFollowedTableData, algorithmFollowedExportData,
                             htsTypeTableData, htsTypeExportData
@@ -963,6 +1089,7 @@ class LogbookReport extends React.Component {
                                 completenessTableData, completenessExportData,
                                 consistencyTableData, consistencyExportData,
                                 invalidRateTableData, invalidRateExportData,
+                                inconclusiveRateTableData, inconclusiveRateExportData,
                                 supervisorySignatureTableData, supervisorySignatureExportData,
                                 algorithmFollowedTableData, algorithmFollowedExportData,
                                 htsTypeTableData, htsTypeExportData
@@ -1023,7 +1150,7 @@ class LogbookReport extends React.Component {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
                         <React.Fragment>
                             <React.Fragment>
-                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
                                     <div className="row">
                                         {/* Begin Positive concordance rate  */}
                                         <div className="col-sm-9">
@@ -1040,8 +1167,8 @@ class LogbookReport extends React.Component {
                                         {/* End Positive concordance rate  */}
                                     </div>
                                 </div>
-                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
-                                <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+                                    <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
                                     {positive3tConcordanceRateColumnCharts}
                                 </div>
                             </React.Fragment>
@@ -1141,6 +1268,34 @@ class LogbookReport extends React.Component {
             <div className="row">
 
                 {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Inconclusive rate' ?
+                        <React.Fragment>
+                            {/* Begin  Inconclusive rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
+
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {inconclusiveRateTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {inconclusiveRateTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End Inconclusive  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Invalid rate' ?
                         <React.Fragment>
                             {/* Begin  Invalid rate  */}
@@ -1229,20 +1384,19 @@ class LogbookReport extends React.Component {
                 }
 
                 {
-                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Sites using eHTS register' ?
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'eHTS Distribution' /*'Sites using eHTS register'*/ ?
                         <React.Fragment>
                             {/* Begin hts type rate  */}
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
                                 <div className="row">
-
-                                    <div className="col-sm-6  col-xm-6 col-md-6">
-                                        <p style={{ fontWeight: "900" }}>Sites using eHTS register</p>
-
+                                    <div className="col-sm-12">
+                                        {/* <p style={{ fontWeight: "900" }}>Sites using eHTS register</p> */}
+                                        <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
                                     </div>
-                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                    <div className="col-sm-2">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
                                     </div>
-                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                    <table id="positiveConcordanceRatesz" className="table">
                                         <thead className="thead-dark">
                                             {htsTypeTableDataHeaders}
                                         </thead>
