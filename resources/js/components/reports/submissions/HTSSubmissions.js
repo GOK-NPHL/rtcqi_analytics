@@ -41,7 +41,8 @@ class SubmissionsReport extends React.Component {
                 'Invalid rate',
                 'Supervisory Signature rate',
                 'Algorithm Followed rate',
-                'Sites using eHTS register',
+                // 'Sites using eHTS register',
+                'eHTS Distribution',
             ],
             indicatorIndexToDisplay: 0,
         }
