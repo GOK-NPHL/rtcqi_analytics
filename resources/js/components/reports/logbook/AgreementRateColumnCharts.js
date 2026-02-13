@@ -50,7 +50,7 @@ class AgreementRateColumnCharts extends React.Component {
         orgName = orgName.toUpperCase();
         let overallDataObject = dataObject.overall_agreement_rate;
 
-        let levelData = { '<95': [], '<': [], '95-98': [], '>98': [] };
+        let levelData = { '<95': [], '95-98': [], '>98': [] };
         let category = [];
         let seriesData = [];
 
@@ -58,15 +58,14 @@ class AgreementRateColumnCharts extends React.Component {
             let row = [];
             const d = new Date(period);
 
-            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + '\n (S=' + totals['totals']['total_sites'] + ', T=' + totals['totals']['total_tests'] + ') ';
+            let val = monthNames[d.getMonth()] + '\n' + d.getFullYear() + '\n (N=' + totals['totals']['total_sites'] + ') ';
 
             if (!category.includes(val)) {
                 category.push(val);
             }
 
             for (let [name, value] of Object.entries(totals['totals'])) {
-                // console.log(name);
-                if (name != 'total_sites') {
+                if (name in levelData) {
                     let val = ((Number(value) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
                     if (isNaN(val)) val = 0;
                     levelData[name].push(val);

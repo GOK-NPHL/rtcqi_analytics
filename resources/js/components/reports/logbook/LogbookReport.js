@@ -11,6 +11,8 @@ import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import AgreementRateColumnCharts from './AgreementRateColumnCharts';
 import PositiveConcordanceRateColumnCharts from './PositiveConcordanceRateColumnCharts';
 import Positive3TConcordanceRateColumnCharts from './Positive3TConcordanceRateColumnCharts';
+import SimpleRateColumnChart from './SimpleRateColumnChart';
+import EHTSDistributionChart from './EHTSDistributionChart';
 
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
@@ -55,11 +57,8 @@ class LogbookReport extends React.Component {
     }
 
     componentDidMount() {
-        //fetch counties
-    }
-
-    componentDidMount() {
         (async () => {
+            this.setState({ isLoading: true });
             let returnedData = await FetchOrgunits();
 
             let subCountyList = [];
@@ -91,12 +90,15 @@ class LogbookReport extends React.Component {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
+                    // this.setState({ isLoading: true });
                     let returnedData = await FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate);
                     if (returnedData.status == 200) {
                         this.setState({
                             odkData: returnedData.data,
                             isLoading: false,
                         });
+                    } else {
+                        this.setState({ isLoading: false, });
                     }
 
                 })();
@@ -125,7 +127,7 @@ class LogbookReport extends React.Component {
     }
 
     onFilterButtonClickEvent() {
-        this.setState({ isLoading: true });
+        // this.setState({ isLoading: true });
         this.fetchOdkDataServer(
             this.state.orgUnitDataIds,
             this.state.siteType,
@@ -1108,6 +1110,11 @@ class LogbookReport extends React.Component {
         // let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
         let positive3tConcordanceRateColumnCharts = <><Positive3TConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} /></>
 
+        let completenessChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="completeness" chartLabel="Completeness Rate %" yAxisName="% completeness rate" isDirect={false} color={['#91cc75']} />
+        let consistencyChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="consistency" chartLabel="Consistency Rate %" yAxisName="% consistency rate" isDirect={false} color={['#5470c6']} />
+        let invalidRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="invalid_rates" chartLabel="Invalid Rate %" yAxisName="% invalid rate" isDirect={true} color={['#ee6666']} />
+        let inconclusiveRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="inconclusive_rates" chartLabel="Inconclusive Rate %" yAxisName="% inconclusive rate" isDirect={true} color={['#fc8452']} />
+        let ehtsDistributionChart = <EHTSDistributionChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
 
         // Data Tables for all the indicators
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
@@ -1141,7 +1148,7 @@ class LogbookReport extends React.Component {
                             </div>
                             {/* chart */}
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
-                                <p style={{ fontWeight: "900" }}>Site agreement Rate Chart</p>
+                                <p style={{ fontWeight: "900" }}>Site agreement Rate Chart:</p>
                                 {agreementRateColumnCharts}
                             </div>
                             {/* end site agreement rates */}
@@ -1232,6 +1239,10 @@ class LogbookReport extends React.Component {
                                     {/* End completeness  rate  */}
                                 </div>
                             </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Completeness Rate Chart:</p>
+                                {completenessChart}
+                            </div>
                         </React.Fragment> : ''
                 }
 
@@ -1258,6 +1269,10 @@ class LogbookReport extends React.Component {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Consistency Rate Chart:</p>
+                                {consistencyChart}
                             </div>
                             {/* End Consistency  rate  */}
                         </React.Fragment> : ''
@@ -1291,6 +1306,10 @@ class LogbookReport extends React.Component {
                                     </table>
                                 </div>
                             </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Inconclusive Rate Chart:</p>
+                                {inconclusiveRateChart}
+                            </div>
                             {/* End Inconclusive  rate  */}
                         </React.Fragment> : ''
                 }
@@ -1318,6 +1337,10 @@ class LogbookReport extends React.Component {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Invalid Rate Chart:</p>
+                                {invalidRateChart}
                             </div>
                             {/* End Invalid  rate  */}
                         </React.Fragment> : ''
@@ -1390,7 +1413,6 @@ class LogbookReport extends React.Component {
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
                                 <div className="row">
                                     <div className="col-sm-12">
-                                        {/* <p style={{ fontWeight: "900" }}>Sites using eHTS register</p> */}
                                         <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
                                     </div>
                                     <div className="col-sm-2">
@@ -1406,6 +1428,10 @@ class LogbookReport extends React.Component {
                                     </table>
                                 </div>
                             </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>eHTS Distribution Chart:</p>
+                                {ehtsDistributionChart}
+                            </div>
                             {/* End hts type  rate  */}
                         </React.Fragment> : ''
                 }
@@ -1415,8 +1441,23 @@ class LogbookReport extends React.Component {
         </div>;
         // End  Data Tables for all the indicators
 
+        if(this.state.isLoading){
+            return (
+                <React.Fragment>
+                    <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 className="h4 mb-0 text-gray-900">Logbook REPORT: {
+                            this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
+                        }</h1>
+                    </div>
+                    <div style={{textAlign: 'center'}}>
+                        <div className="spinner-border" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </React.Fragment>
+            )
+        }
         return (
-
             <React.Fragment>
                 {/* <details open>
                     <summary>this.state.odkData</summary>
@@ -1429,7 +1470,7 @@ class LogbookReport extends React.Component {
 
                 {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">Logbook REPORT: {
+                    <h1 className="h4 mb-0 text-gray-900">Logbook REPORT: {
                         this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
                     }</h1>
 
