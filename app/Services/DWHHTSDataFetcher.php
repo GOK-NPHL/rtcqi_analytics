@@ -77,12 +77,15 @@ class DWHHTSDataFetcher
         });
     }
 
-    public function fetchData()
+    public function fetchData($period = null)
     {
         try {
             $dataDwhUrl = $this->dataDwhUrl;
-            // add page and page size
             $dataDwhUrl .= '&pageNumber=' . $this->pageNumber . '&pageSize=' . $this->pageSize;
+            if ($period) {
+                $period = date('Y-m-01', strtotime($period));
+                $dataDwhUrl .= '&startTestDate=' . $period;
+            }
             echo("DWHHTSDataFetcher->fetchData:: Fetching page $this->pageNumber\n");
             echo("DWHHTSDataFetcher->fetchData:: url $dataDwhUrl\n");
             $token = Cache::get('oauth2_access_token') ?? $this->accessToken;
@@ -211,6 +214,24 @@ class DWHHTSDataFetcher
             Log::error($ex);
             echo("DWH data save failed: " . $ex->getMessage() . "\n");
             throw new Exception("DWH data save failed: " . $ex->getMessage());
+        }
+    }
+
+    public function getAvailablePeriods()
+    {
+        try {
+            // select distinct test_month from dwh_hts_encounter_data order by test_month desc
+            $periods = DwhHtsEncounterData::select('test_month')
+                ->distinct()
+                ->whereNotNull('test_month')
+                ->orderBy('test_month', 'desc')
+                ->pluck('test_month')
+                ->toArray();
+            return $periods;
+        } catch (Exception $ex) {
+            Log::error($ex);
+            echo("DWH getAvailablePeriods failed: " . $ex->getMessage() . "\n");
+            throw new Exception("DWH getAvailablePeriods failed: " . $ex->getMessage());
         }
     }
 }
