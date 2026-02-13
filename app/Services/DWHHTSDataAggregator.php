@@ -48,7 +48,7 @@ class DWHHTSDataAggregator
     {
         $currentDate = new DateTime('now');
 
-        $this->startDate = empty($startDate) ?  $currentDate->modify('-4 months')->format("Y-m-d") : $startDate;
+        $this->startDate = empty($startDate) ?  $currentDate->modify('-5 months')->format("Y-m-d") : $startDate;
         $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
 
         // for each org unit, get the submissions
@@ -93,7 +93,7 @@ class DWHHTSDataAggregator
         try {
             $currentDate = new DateTime('now');
 
-            $this->startDate = empty($startDate) ?  $currentDate->modify('-4 months')->format("Y-m-d") : $startDate;
+            $this->startDate = empty($startDate) ?  $currentDate->modify('-5 months')->format("Y-m-d") : $startDate;
             $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
 
             $recordsReadData = [];
