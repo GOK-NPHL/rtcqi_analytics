@@ -104,7 +104,7 @@ class DWHHTSDataFetcher
             if ($response->successful()) {
                 $dataDwh = $response->json();
                 // $this->pageNumber = $dataDwh['pageNumber'];// + 1;
-                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . " DWH data fetched successfully\n");
+                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
                 if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
                     Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
                     echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
@@ -112,9 +112,10 @@ class DWHHTSDataFetcher
                 }
                 // if $dataDwh['pageNumber'] is not equal to the last page number, recurse
                 $this->saveDataDwh($dataDwh);
-                if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
+                // if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
+                if (count($dataDwh['extract']) > 0) {
                     $this->pageNumber = $dataDwh['pageNumber'] + 1;
-                    $this->fetchData($period = null);
+                    $this->fetchData($period);
                 } else {
                     echo("DWHHTSDataFetcher->fetchData:: ALL_PAGES DWH data fetched successfully\n");
                     // DwhDataPullJob->status = 'SUCCESS'
@@ -125,7 +126,7 @@ class DWHHTSDataFetcher
                 if ($response->status() == 401) {
                     Log::error("DWH access token expired. Refreshing token.");
                     $this->getAccessToken();
-                    $this->fetchData($period = null);
+                    $this->fetchData($period);
                 }
                 // DwhDataPullJob->status = 'FAILED', page = $this->pageNumber
                 echo("DWH data fetch failed: " . $response->status() . "\n");
