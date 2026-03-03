@@ -45,7 +45,7 @@ class DWHHTSDataFetcher
         $this->dataDwhUrl = 'https://data.kenyahmis.org:9783/api/Dataset?code=HTS&name=HtsTests';
 
         $this->pageNumber = 1;
-        $this->pageSize = 50;
+        $this->pageSize = 250;
 
         $this->getAccessToken();
 
