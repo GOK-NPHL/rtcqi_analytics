@@ -83,10 +83,12 @@ class DWHHTSDataFetcher
             $dataDwhUrl = $this->dataDwhUrl;
             $dataDwhUrl .= '&pageNumber=' . $this->pageNumber;
             if ($period) {
-                $period = date('Y-m-01', strtotime($period));
-                $dataDwhUrl .= '&startTestDate=' . $period;
+                // $period = date('Y-m-01', strtotime($period));
+                $period = date('Y-m', strtotime($period));
+                $dataDwhUrl .= '&startTestDate=' . $period . '&endTestDate=' . $period;
                 // seems to only work with a page size of 50
-                $this->pageSize = 50;
+                // $this->pageSize = 50;
+                $this->pageSize = 250;
             }
             $dataDwhUrl .= '&pageSize=' . $this->pageSize;
             // echo("DWHHTSDataFetcher->fetchData:: Fetching page $this->pageNumber\n");
