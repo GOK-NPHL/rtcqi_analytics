@@ -45,7 +45,7 @@ class DWHHTSDataFetcher
         $this->dataDwhUrl = 'https://data.kenyahmis.org:9783/api/Dataset?code=HTS&name=HtsTests';
 
         $this->pageNumber = 1;
-        $this->pageSize = 250;
+        $this->pageSize = 50;
 
         $this->getAccessToken();
 
@@ -81,12 +81,15 @@ class DWHHTSDataFetcher
     {
         try {
             $dataDwhUrl = $this->dataDwhUrl;
-            $dataDwhUrl .= '&pageNumber=' . $this->pageNumber . '&pageSize=' . $this->pageSize;
+            $dataDwhUrl .= '&pageNumber=' . $this->pageNumber;
             if ($period) {
                 $period = date('Y-m-01', strtotime($period));
                 $dataDwhUrl .= '&startTestDate=' . $period;
+                // seems to only work with a page size of 50
+                $this->pageSize = 50;
             }
-            echo("DWHHTSDataFetcher->fetchData:: Fetching page $this->pageNumber\n");
+            $dataDwhUrl .= '&pageSize=' . $this->pageSize;
+            // echo("DWHHTSDataFetcher->fetchData:: Fetching page $this->pageNumber\n");
             echo("DWHHTSDataFetcher->fetchData:: url $dataDwhUrl\n");
             $token = Cache::get('oauth2_access_token') ?? $this->accessToken;
             if (!$token) {
@@ -101,7 +104,7 @@ class DWHHTSDataFetcher
             if ($response->successful()) {
                 $dataDwh = $response->json();
                 // $this->pageNumber = $dataDwh['pageNumber'];// + 1;
-                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . " DWH data fetched successfully\n");
+                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
                 if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
                     Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
                     echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
@@ -109,9 +112,10 @@ class DWHHTSDataFetcher
                 }
                 // if $dataDwh['pageNumber'] is not equal to the last page number, recurse
                 $this->saveDataDwh($dataDwh);
-                if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
+                // if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
+                if (count($dataDwh['extract']) > 0) {
                     $this->pageNumber = $dataDwh['pageNumber'] + 1;
-                    $this->fetchData();
+                    $this->fetchData($period);
                 } else {
                     echo("DWHHTSDataFetcher->fetchData:: ALL_PAGES DWH data fetched successfully\n");
                     // DwhDataPullJob->status = 'SUCCESS'
@@ -122,7 +126,7 @@ class DWHHTSDataFetcher
                 if ($response->status() == 401) {
                     Log::error("DWH access token expired. Refreshing token.");
                     $this->getAccessToken();
-                    $this->fetchData();
+                    $this->fetchData($period);
                 }
                 // DwhDataPullJob->status = 'FAILED', page = $this->pageNumber
                 echo("DWH data fetch failed: " . $response->status() . "\n");
