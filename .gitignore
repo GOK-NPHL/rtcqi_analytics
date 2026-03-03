@@ -38,3 +38,8 @@ storage/*.csv
 storage/files/*
 package-lock.json
 public/js/app.js
+.phpactor.json
+.idea/dataSources.xml
+.idea/php.xml
+.idea/phpunit.xml
+.idea/vcs.xml
