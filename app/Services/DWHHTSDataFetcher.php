@@ -110,7 +110,7 @@ class DWHHTSDataFetcher
             if ($response->successful()) {
                 $dataDwh = $response->json();
                 // $this->pageNumber = $dataDwh['pageNumber'];// + 1;
-                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
+                Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber" . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
                 // if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
                 //     Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
                 //     echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
@@ -125,7 +125,7 @@ class DWHHTSDataFetcher
                         $this->fetchData($period);
                     } else {
                         // Last page
-                        Log::info("DWHHTSDataFetcher->fetchData:: Last page reached. Total items: " . $dataDwh['totalItemCount'] . "\n");
+                        Log::info("DWHHTSDataFetcher->fetchData:: Last page reached. Total items in last page: " . $dataDwh['totalItemCount'] . "\n");
                         $this->pageNumber = $dataDwh['pageNumber'];
                     }
                 } else {
