@@ -117,10 +117,17 @@ class DWHHTSDataFetcher
                 //     throw new Exception("DWH data count = 0. Terminating...\n");
                 // }
                 // if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
-                if ($dataDwh['totalItemCount'] > 0 || count($dataDwh['extract']) > 0) {
+                // if ($dataDwh['totalItemCount'] > 0 || count($dataDwh['extract']) > 0) {
+                if ($dataDwh['totalItemCount'] > 0) {
                     $this->saveDataDwh($dataDwh);
-                    $this->pageNumber = $dataDwh['pageNumber'] + 1;
-                    $this->fetchData($period);
+                    if($dataDwh['totalItemCount'] == $dataDwh['pageSize']){
+                        $this->pageNumber = $dataDwh['pageNumber'] + 1;
+                        $this->fetchData($period);
+                    } else {
+                        // Last page
+                        Log::info("DWHHTSDataFetcher->fetchData:: Last page reached. Total items: " . $dataDwh['totalItemCount'] . "\n");
+                        $this->pageNumber = $dataDwh['pageNumber'];
+                    }
                 } else {
                     echo("DWHHTSDataFetcher->fetchData:: ALL_PAGES DWH data fetched successfully\n");
                     // DwhDataPullJob->status = 'SUCCESS'
