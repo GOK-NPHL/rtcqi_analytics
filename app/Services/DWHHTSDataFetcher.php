@@ -84,8 +84,12 @@ class DWHHTSDataFetcher
             $dataDwhUrl .= '&pageNumber=' . $this->pageNumber;
             if ($period) {
                 // $period = date('Y-m-01', strtotime($period));
-                $period = date('Y-m', strtotime($period));
-                $dataDwhUrl .= '&startTestDate=' . $period . '&endTestDate=' . $period;
+                // $period = date('Y-m', strtotime($period));
+                // $dataDwhUrl .= '&startTestDate=' . $period;
+                $periodStart = date('Y-m-01', strtotime($period));
+                $periodEnd = date('Y-m-t', strtotime($period));
+                $dataDwhUrl .= '&startTestDate=' . $periodStart;
+                $dataDwhUrl .= '&endTestDate=' . $periodEnd;
                 // seems to only work with a page size of 50
                 // $this->pageSize = 50;
                 $this->pageSize = 250;
@@ -107,15 +111,14 @@ class DWHHTSDataFetcher
                 $dataDwh = $response->json();
                 // $this->pageNumber = $dataDwh['pageNumber'];// + 1;
                 Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber  / " . $dataDwh['pageCount'] . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
-                if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
-                    Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
-                    echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
-                    throw new Exception("DWH data count = 0. Terminating...\n");
-                }
-                // if $dataDwh['pageNumber'] is not equal to the last page number, recurse
-                $this->saveDataDwh($dataDwh);
+                // if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
+                //     Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
+                //     echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
+                //     throw new Exception("DWH data count = 0. Terminating...\n");
+                // }
                 // if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
-                if (count($dataDwh['extract']) > 0) {
+                if ($dataDwh['totalItemCount'] > 0 || count($dataDwh['extract']) > 0) {
+                    $this->saveDataDwh($dataDwh);
                     $this->pageNumber = $dataDwh['pageNumber'] + 1;
                     $this->fetchData($period);
                 } else {
@@ -128,6 +131,7 @@ class DWHHTSDataFetcher
                 if ($response->status() == 401) {
                     Log::error("DWH access token expired. Refreshing token.");
                     $this->getAccessToken();
+                    sleep(5); // wait for 5 seconds before retrying
                     $this->fetchData($period);
                 }
                 // DwhDataPullJob->status = 'FAILED', page = $this->pageNumber
