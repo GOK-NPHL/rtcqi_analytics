@@ -55,7 +55,7 @@ class FetchDWHHTSData extends Command
             $this->error('Invalid period format. Use yyyy-mm (e.g., 2025-01)');
             return 1;
         }
-        $dwh = new DWHHTSDataFetcher;
+        $dwh = new DWHHTSDataFetcher($period);
         $dwh->fetchData($period);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DwhHtsEncounterData;
+use App\DwhDataPullJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -34,8 +35,11 @@ class DWHHTSDataFetcher
     protected $accessToken;
     protected $tokenExpires;
 
+    protected $job;
+    protected $savedRecords = 0;
 
-    public function __construct()
+
+    public function __construct($period = null)
     {
         $this->client_id = config('app.DWH_CLIENT_ID');
         $this->client_secret = config('app.DWH_CLIENT_SECRET');
@@ -49,7 +53,34 @@ class DWHHTSDataFetcher
 
         $this->getAccessToken();
 
-        // TODO: create a new DwhDataPullJob (model), STATUS = 'PENDING'
+        $this->job = DwhDataPullJob::updateOrCreate(
+            ['period' => $period ?? 'all'],
+            [
+                'status' => 'pending',
+                'meta' => [
+                    'args' => ['period' => $period],
+                    'currentPage' => 0,
+                    'savedRecords' => 0,
+                    'start_time' => null,
+                    'end_time' => null,
+                ],
+            ]
+        );
+    }
+
+    private function updateJob(array $metaUpdates, string $status = null)
+    {
+        if (!$this->job) return;
+
+        $meta = $this->job->meta ?? [];
+        $meta = array_merge($meta, $metaUpdates);
+
+        $updates = ['meta' => $meta];
+        if ($status) {
+            $updates['status'] = $status;
+        }
+
+        $this->job->update($updates);
     }
 
     private function getAccessToken()
@@ -69,7 +100,7 @@ class DWHHTSDataFetcher
             }
 
             $data = $response->json();
-            Log::info("DWH auth response: " . json_encode($data));
+            // Log::info("DWH auth response: " . json_encode($data));
             $this->accessToken = $data['access_token'];
             $this->tokenExpires = $data['expires_in'] - 100;
             $this->scope = $data['scope'];
@@ -79,23 +110,22 @@ class DWHHTSDataFetcher
 
     public function fetchData($period = null)
     {
+        // Set status to running on first call
+        if ($this->job && $this->job->status === 'pending') {
+            $this->updateJob(['start_time' => time()], 'running');
+        }
+
         try {
             $dataDwhUrl = $this->dataDwhUrl;
             $dataDwhUrl .= '&pageNumber=' . $this->pageNumber;
             if ($period) {
-                // $period = date('Y-m-01', strtotime($period));
-                // $period = date('Y-m', strtotime($period));
-                // $dataDwhUrl .= '&startTestDate=' . $period;
                 $periodStart = date('Y-m-01', strtotime($period));
                 $periodEnd = date('Y-m-t', strtotime($period));
                 $dataDwhUrl .= '&startTestDate=' . $periodStart;
                 $dataDwhUrl .= '&endTestDate=' . $periodEnd;
-                // seems to only work with a page size of 50
-                // $this->pageSize = 50;
                 $this->pageSize = 250;
             }
             $dataDwhUrl .= '&pageSize=' . $this->pageSize;
-            // echo("DWHHTSDataFetcher->fetchData:: Fetching page $this->pageNumber\n");
             echo("DWHHTSDataFetcher->fetchData:: url $dataDwhUrl\n");
             $token = Cache::get('oauth2_access_token') ?? $this->accessToken;
             if (!$token) {
@@ -109,28 +139,32 @@ class DWHHTSDataFetcher
             ])->get($dataDwhUrl);
             if ($response->successful()) {
                 $dataDwh = $response->json();
-                // $this->pageNumber = $dataDwh['pageNumber'];// + 1;
                 Log::info("DWHHTSDataFetcher->fetchData:: Page $this->pageNumber" . ", extractCount: " . count($dataDwh['extract']) . ". DWH data fetched successfully\n");
-                // if (!is_array($dataDwh['extract']) || empty($dataDwh['extract'])) {
-                //     Log::error("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
-                //     echo("DWHHTSDataFetcher->fetchData:: DWH data count = 0. Terminating...\n");
-                //     throw new Exception("DWH data count = 0. Terminating...\n");
-                // }
-                // if ($dataDwh['pageNumber'] < $dataDwh['pageCount']) {
-                // if ($dataDwh['totalItemCount'] > 0 || count($dataDwh['extract']) > 0) {
                 if ($dataDwh['totalItemCount'] > 0) {
                     $this->saveDataDwh($dataDwh);
-                    if($dataDwh['totalItemCount'] == $dataDwh['pageSize']){
+                    $this->savedRecords += count($dataDwh['extract'] ?? []);
+                    if ($dataDwh['totalItemCount'] == $dataDwh['pageSize']) {
                         $this->pageNumber = $dataDwh['pageNumber'] + 1;
+                        $this->updateJob([
+                            'currentPage' => $dataDwh['pageNumber'],
+                            'savedRecords' => $this->savedRecords,
+                        ]);
                         $this->fetchData($period);
                     } else {
                         // Last page
                         Log::info("DWHHTSDataFetcher->fetchData:: Last page reached. Total items in last page: " . $dataDwh['totalItemCount'] . "\n");
                         $this->pageNumber = $dataDwh['pageNumber'];
+                        $this->updateJob([
+                            'currentPage' => $dataDwh['pageNumber'],
+                            'savedRecords' => $this->savedRecords,
+                            'end_time' => time(),
+                        ], 'completed');
+                        echo("DWHHTSDataFetcher->fetchData:: ALL_PAGES DWH data fetched successfully\n");
                     }
                 } else {
+                    // No records on this page — all pages done
                     echo("DWHHTSDataFetcher->fetchData:: ALL_PAGES DWH data fetched successfully\n");
-                    // DwhDataPullJob->status = 'SUCCESS'
+                    $this->updateJob(['end_time' => time()], 'completed');
                 }
 
             } else {
@@ -140,16 +174,18 @@ class DWHHTSDataFetcher
                     $this->getAccessToken();
                     sleep(5); // wait for 5 seconds before retrying
                     $this->fetchData($period);
+                    return;
                 }
-                // DwhDataPullJob->status = 'FAILED', page = $this->pageNumber
                 echo("DWH data fetch failed: " . $response->status() . "\n");
                 Log::error("DWH data fetch failed");
+                $this->updateJob(['end_time' => time()], 'failed');
                 throw new Exception("DWH data fetch failed: " . json_encode($response->body()));
             }
         } catch (Exception $ex) {
             echo("DWHHTSDataFetcher->fetchData() failed: " . $ex->getMessage() . "\n");
             Log::error("<DWHHTSDataFetcher->fetchData()> Error fetching DWH data: " . $ex->getMessage());
             Log::error($ex);
+            $this->updateJob(['end_time' => time()], 'failed');
             // throw new Exception("<DWHHTSDataFetcher->fetchData()> Error fetching DWH data: " . $ex->getMessage());
         }
     }
