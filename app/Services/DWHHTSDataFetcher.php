@@ -46,7 +46,7 @@ class DWHHTSDataFetcher
         $this->scope = config('app.DWH_SCOPE');
         $this->authDwhUrl = 'https://auth2.kenyahmis.org:8443/connect/token';
         $this->tokenExpires = 3500;
-        $this->dataDwhUrl = 'https://data.kenyahmis.org:9783/api/Dataset?code=HTS&name=HtsTests/v1';
+        $this->dataDwhUrl = 'https://data.kenyahmis.org:9783/api/Dataset/v1?code=HTS&name=HtsTests';
 
         $this->pageNumber = 1;
         $this->pageSize = 250;
