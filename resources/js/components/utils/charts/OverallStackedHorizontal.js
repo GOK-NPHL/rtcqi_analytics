@@ -44,14 +44,15 @@ class OverallStackedHorizontal extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({
+        this.setState(prevState => ({
             option: {
+                ...prevState.option,
                 series: this.props.series,
                 yAxis: {
                     data: this.props.category
                 }
             }
-        });
+        }));
     }
 
     componentDidUpdate(prevProps) {
@@ -59,16 +60,15 @@ class OverallStackedHorizontal extends React.Component {
             ||
             this.props.series != prevProps.series
         ) {
-            //console.log("load data 1");
-            //console.log(this.props.series);
-            this.setState({
+            this.setState(prevState => ({
                 option: {
+                    ...prevState.option,
                     series: this.props.series,
                     yAxis: {
                         data: this.props.category
                     }
                 }
-            });
+            }));
         }
 
     }

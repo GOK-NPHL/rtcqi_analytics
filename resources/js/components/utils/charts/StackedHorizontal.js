@@ -46,17 +46,15 @@ class StackedHorizontal extends React.Component {
     }
 
     componentDidMount() {
-        //console.log("load data 2");
-            //console.log(this.props.minHeight);
-            //console.log(this.props.series);
-        this.setState({
+        this.setState(prevState => ({
             option: {
+                ...prevState.option,
                 series: this.props.series,
                 yAxis: {
                     data: this.props.category
                 }
             }
-        });
+        }));
     }
 
     componentDidUpdate(prevProps) {
@@ -64,16 +62,15 @@ class StackedHorizontal extends React.Component {
             ||
             this.props.series != prevProps.series
         ) {
-            //console.log("load data 1");
-            //console.log(this.props.series);
-            this.setState({
+            this.setState(prevState => ({
                 option: {
+                    ...prevState.option,
                     series: this.props.series,
                     yAxis: {
                         data: this.props.category
                     }
                 }
-            });
+            }));
         }
 
     }

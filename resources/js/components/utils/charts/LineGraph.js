@@ -22,25 +22,27 @@ class LineGraph extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({
+        this.setState(prevState => ({
             option: {
+                ...prevState.option,
                 dataset: this.props.dataset,
                 series: this.props.series
             }
-        });
+        }));
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.dataset != prevProps.dataset 
-            || 
+        if (this.props.dataset != prevProps.dataset
+            ||
             this.props.series != prevProps.series
             ) {
-            this.setState({
+            this.setState(prevState => ({
                 option: {
+                    ...prevState.option,
                     dataset: this.props.dataset1,
                     series: this.props.series
                 }
-            });
+            }));
         }
 
     }
