@@ -30,6 +30,7 @@ class DWHHTSDataAggregator
     private $siteType = null;
     private $startDate = null;
     private $endDate = null;
+    private $rawDataCache = null;
 
 
     public function __construct()
@@ -818,17 +819,37 @@ class DWHHTSDataAggregator
 
     public function getRawData($limit = null)
     {
-        $data = DwhHtsEncounterData::orderBy('test_date', 'desc')
-            // ->limit($limit)
-            ->get();
-        return $this->standardizeData($data);
+        if ($this->rawDataCache !== null) {
+            return $this->rawDataCache;
+        }
+        $columns = [
+            'test_date', 'county', 'sub_county', 'facility_code', 'facility_name',
+            'entry_point', 'emr',
+            'test_result1', 'test_kit_name1', 'test_kit_lot_number1', 'test_kit_expiry1',
+            'test_result2', 'test_kit_name2', 'test_kit_lot_number2', 'test_kit_expiry2',
+            'test_result3', 'test_kit_name3', 'test_kit_lot_number3', 'test_kit_expiry3',
+            'final_test_result',
+        ];
+        $query = DwhHtsEncounterData::select($columns)->orderBy('test_date', 'desc');
+        if ($this->startDate) {
+            $query->where('test_date', '>=', $this->startDate);
+        }
+        if ($this->endDate) {
+            $query->where('test_date', '<=', $this->endDate);
+        }
+        if ($limit) {
+            $query->limit($limit);
+        }
+        $this->rawDataCache = $this->standardizeData($query->get()->toArray());
+        return $this->rawDataCache;
     }
 
     private function standardizeData($records)
     {
         $siteTypes = ['CCC', 'PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PAEDIATRIC', 'COMMUNITY_TESTING'];
         foreach ($records as $key => $row) {
-            $row['Site'] = trim(strtoupper($row['entry_point']));
+            $records[$key]['Site'] = trim(strtoupper($row['entry_point']));
+            $row['Site'] = $records[$key]['Site'];
             if (!in_array($row['Site'], $siteTypes)) {
                 if (str_contains($row['Site'], 'PMTCT')) {
                     $records[$key]['Site'] = 'PMTCT';
