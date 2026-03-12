@@ -779,11 +779,27 @@ class DWHHTSDataAggregator
                 }
                 $combinedRecords = array_filter($data, function ($record) use ($ou_name) {
                     // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
-                    $a = strtolower($record['county']); $b = strtolower($ou_name);
-                    similar_text($a, $b, $percent);
-                    if ($percent >= 70) return true;
-                    $lev = levenshtein($a, $b);
-                    return $lev < 4;
+                    $a = strtolower(trim($record['county']));
+                    $b = strtolower(trim($ou_name));
+                    // replace underscore with space and apostrophes with empty in both strings before comparing
+                    // $a = str_replace('_', ' ', $a);
+                    // $b = str_replace('_', ' ', $b);
+                    $a = str_replace("'", '', $a);
+                    $b = str_replace("'", '', $b);
+
+                    // direct string comparison
+                    $cond = $a == $b;
+
+                    if ($cond == false) {
+                        // levenshtein distance and similar text
+                        similar_text($a, $b, $percent);
+                        if ($percent >= 70) return true;
+                        $lev = levenshtein($a, $b);
+                        // return $lev < 4;
+                        $cond = $lev < 4;
+                    }
+                    
+                    return $cond;
                 });
             } catch (Exception $ex) {
                 Log::error("getFormRecords: level 2 error: " . $ex->getMessage());
