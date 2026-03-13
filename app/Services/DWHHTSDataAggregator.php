@@ -618,7 +618,6 @@ class DWHHTSDataAggregator
             // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
                 if (!empty($orgUnit['mysites_sub_county'])) {
                     if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
-
                         if (!empty($orgUnit['mysites_facility'])) {
                             $record_mfl = trim($record['facility_code']);
                             $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
