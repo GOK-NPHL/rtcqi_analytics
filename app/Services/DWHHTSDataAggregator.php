@@ -846,7 +846,9 @@ class DWHHTSDataAggregator
             'test_result3', 'test_kit_name3', 'test_kit_lot_number3', 'test_kit_expiry3',
             'final_test_result',
         ];
-        $query = DwhHtsEncounterData::select($columns)->orderBy('test_date', 'desc');
+        // Use DB::table() instead of Eloquent to avoid instantiating model objects and
+        // triggering casts (Carbon, JSON decode) for every row — significantly lower memory.
+        $query = DB::table('dwh_hts_encounter_data')->select($columns)->orderBy('test_date', 'desc');
         if ($this->startDate) {
             $query->where('test_date', '>=', $this->startDate);
         }
@@ -856,11 +858,17 @@ class DWHHTSDataAggregator
         if ($limit) {
             $query->limit($limit);
         }
-        $this->rawDataCache = $this->standardizeData($query->get()->toArray());
+        // Fetch as stdClass objects, cast to plain arrays, then free the collection
+        // before standardization to avoid holding two full copies in memory at once.
+        $collection = $query->get();
+        $rawData = array_map(fn($r) => (array) $r, $collection->all());
+        unset($collection);
+        $this->standardizeData($rawData);
+        $this->rawDataCache = $rawData;
         return $this->rawDataCache;
     }
 
-    private function standardizeData($records)
+    private function standardizeData(array &$records)
     {
         $siteTypes = ['CCC', 'PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PAEDIATRIC', 'COMMUNITY_TESTING'];
         foreach ($records as $key => $row) {
