@@ -461,7 +461,7 @@ class DWHHTSDataAggregator
                         // Log::info("getDataLoopOrgs: records: " . count($records) . " orgUnitId: " . json_encode($orgUnit));
                         $recordsReadData[$orgUnit['org_unit_id']] = $records;
                     }
-                    Log::info("getDataLoopOrgs: orgUnitName: $orgUnitName, orgUnitId: " . $orgUnit['org_unit_id'] . " recordsCount: " . count($records) . " existsInCache: " . (array_key_exists($orgUnit['org_unit_id'], $recordsReadData) ? 'Yes' : 'No'));
+                    // Log::info("getDataLoopOrgs: orgUnitName: $orgUnitName, orgUnitId: " . $orgUnit['org_unit_id'] . " recordsCount: " . count($records) . " existsInCache: " . (array_key_exists($orgUnit['org_unit_id'], $recordsReadData) ? 'Yes' : 'No'));
 
                     $results = array();
                     $results["orgName"] = $orgUnitName;
@@ -600,17 +600,13 @@ class DWHHTSDataAggregator
         }
     }
 
+
     private function processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section)
     {
         // $record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $score, $rowCounter, $section
-        // Log::info("processRecord: orgUnit: " . json_encode($orgUnit) . " record: " . json_encode($record) . " section: " . $section);
 
-        if (
-            empty($orgUnit['mysites_county']) ||
-            (isset($orgUnit['mysites_county']) && ($orgUnit['mysites_county'] == 'kenya')) ||
-            (isset($orgUnit['level']) && $orgUnit['level'] == 1) ||
-            (isset($orgUnit['level']) && $orgUnit['level'] == 2)
-        ) {
+        if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
+            // Log::info("processing kenya");
             $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
 
             $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
@@ -618,92 +614,17 @@ class DWHHTSDataAggregator
             $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
             //$score =  $this->callFunctionBysecition($section, $record);
         } else {
-            if($orgUnit['level'] == 2){
-                $a = strtolower(trim($record['sub_county'] ?? ''));
-                $b = strtolower(trim($orgUnit['mysites_county'] ?? ''));
-                $a = str_replace('_', ' ', $a);
-                $b = str_replace('_', ' ', $b);
-                $a = str_replace("'", '', $a);
-                $b = str_replace("'", '', $b);
-
-                $cond = $a == $b;
-                if ($cond == false) {
-                    // levenshtein distance and similar text
-                    similar_text($a, $b, $percent);
-                    if ($percent >= 70) {
-                        $cond = true;
-                    } else {
-                        $lev = levenshtein($a, $b);
-                        $cond = $lev < 4;
-                    }
-                }
-                // county
-                if ($cond == true) {
-                    $rowCounter = $rowCounter + 1;
-                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                    $monthScoreMap = $valueAccumulations[0];
-                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                }
-            } else if($orgUnit['level'] == 3){
-                $a = strtolower(trim($record['sub_county'] ?? ''));
-                $b = strtolower(trim($orgUnit['mysites_subcounty'] ?? ''));
-                $a = str_replace('_', ' ', $a);
-                $b = str_replace('_', ' ', $b);
-                $a = str_replace("'", '', $a);
-                $b = str_replace("'", '', $b);
-
-                $cond = $a == $b;
-                if ($cond == false) {
-                    // levenshtein distance and similar text
-                    similar_text($a, $b, $percent);
-                    if ($percent >= 70) {
-                        $cond = true;
-                    } else {
-                        $lev = levenshtein($a, $b);
-                        $cond = $lev < 4;
-                    }
-                }
-                // sub county
-                // if (trim(strtolower($record['sub_county']) == trim(strtolower($orgUnit['mysites_sub_county'])))) {
-                if ($cond == true) {
-                    $rowCounter = $rowCounter + 1;
-                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                    $monthScoreMap = $valueAccumulations[0];
-                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                }
-            } else if($orgUnit['level'] == 4){
-                // facility
-                $record_mfl = trim($record['facility_code'] ?? '');
-                $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'] ?? '_')[0];
-                if ($record_mfl == $orgUnit_mfl) {
-                    $rowCounter = $rowCounter + 1;
-                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                    $monthScoreMap = $valueAccumulations[0];
-                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                }
-            } else if($orgUnit['level'] == 5){
-                // site
-                // TODO
-                if ($this->stringMatches(strtolower($record['entry_point']), strtolower($orgUnit['mysites']))) {
-                    $rowCounter = $rowCounter + 1;
-                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                    $monthScoreMap = $valueAccumulations[0];
-                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                }
-            }
-            /* 000000000
-            // if ($this->stringMatches(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
-            if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
-                // Log::info("facility 1 " . $orgUnit['mysites_county']);
+            if ($this->ouNameCompare(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
+            // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
                 if (!empty($orgUnit['mysites_sub_county'])) {
-                    if($this->stringMatches(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
+                    if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
 
                         if (!empty($orgUnit['mysites_facility'])) {
                             $record_mfl = trim($record['facility_code']);
                             $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
                             if ($record_mfl == $orgUnit_mfl) {
                                 if (!empty($orgUnit['mysites'])) {
-                                    if ($this->stringMatches(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
+                                    if ($this->ouNameCompare(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
                                         $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
 
                                         $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
@@ -738,7 +659,6 @@ class DWHHTSDataAggregator
                     //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                 }
             }
-            000000000 */
         }
 
         return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
@@ -1088,10 +1008,39 @@ class DWHHTSDataAggregator
 
 
     public function stringMatches($a, $b, $threshold = 70) {
+        $cond = $a === $b;
+        if ($cond) return true;
+
         similar_text(strtolower($a), strtolower($b), $percent);
         if ($percent >= $threshold) return true;
 
         $lev = levenshtein(strtolower($a), strtolower($b));
         return $lev < 4; // small edit distance
+    }
+
+    private function ouNameCompare($a, $b) {
+        $a = strtolower(trim($a));
+        $b = strtolower(trim($b));
+        $a = str_replace('_', ' ', $a);
+        $b = str_replace('_', ' ', $b);
+        $a = str_replace("'", '', $a);
+        $b = str_replace("'", '', $b);
+
+        // replace multiple spaces with single space
+        $a = preg_replace('/\s+/', ' ', $a);
+        $b = preg_replace('/\s+/', ' ', $b);
+
+        $cond = $a == $b;
+        // if ($cond == false) {
+        //     // levenshtein distance and similar text
+        //     similar_text($a, $b, $percent);
+        //     if ($percent >= 70) {
+        //         $cond = true;
+        //     } else {
+        //         $lev = levenshtein($a, $b);
+        //         $cond = $lev < 4;
+        //     }
+        // }
+        return $cond;
     }
 }
