@@ -64,14 +64,14 @@ class DWHHTSDataAggregator
                 [$orgUnit,  $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
                 $orgUnit['org_unit_id'] = $orgUnitIds[$x]['id'];
 
-                $records = $this->getFormRecords($orgUnitIds[$x]) ?? [];
+                $records = $this->getFormRecords($orgUnitIds[$x], $startDate, $endDate) ?? [];
 
-                if(isset($startDate) && isset($endDate)) {
-                    $records = array_filter($records, function ($record) use ($startDate, $endDate) {
-                        $date = new DateTime($record['test_date']);
-                        return $date >= new DateTime($startDate) && $date <= new DateTime($endDate);
-                    });
-                }
+                // if(isset($startDate) && isset($endDate)) {
+                //     $records = array_filter($records, function ($record) use ($startDate, $endDate) {
+                //         $date = new DateTime($record['test_date']);
+                //         return $date >= new DateTime($startDate) && $date <= new DateTime($endDate);
+                //     });
+                // }
 
                 if (array_key_exists($orgUnit['org_unit_id'], $formSubmissions)) {
                     // $records = $formSubmissions[$orgUnit['org_unit_id']];
@@ -92,8 +92,8 @@ class DWHHTSDataAggregator
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
         try {
+            // Log::info("<DWHHTSDataAggregator->getData() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteTypes) . " startDate: " . $startDate . " endDate: " . $endDate);
             $currentDate = new DateTime('now');
-
             $this->startDate = empty($startDate) ?  $currentDate->modify('-5 months')->format("Y-m-d") : $startDate;
             $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
 
@@ -115,7 +115,7 @@ class DWHHTSDataAggregator
                 $payload[] = $payld;
             }
             // Log::info("totals ======>>");
-            // Log::info($payload);
+            // Log::info(json_encode($payload));
             $payload = $this->aggregateAgreementRates($payload);
 
             return $payload;
@@ -449,6 +449,7 @@ class DWHHTSDataAggregator
 
 
                     $orgUnit['org_unit_id'] = $orgUnitIds[$x];
+                    $orgUnit['level'] = $level;
 
                     $records = null;
 
@@ -456,10 +457,12 @@ class DWHHTSDataAggregator
                         // Log::info("getDataLoopOrgs: recordsReadData: " . json_encode(array_slice($recordsReadData, 0, 3)));
                         $records = $recordsReadData[$orgUnit['org_unit_id']];
                     } else {
-                        $records = $this->getFormRecords($orgUnit) ?? [];
-                        // Log::info("getDataLoopOrgs: records: " . count($records) . " orgUnit: " . json_encode($orgUnit));
+                        $records = $this->getFormRecords($orgUnit, null, null) ?? [];
+                        // Log::info("getDataLoopOrgs: records: " . count($records) . " orgUnitId: " . json_encode($orgUnit));
                         $recordsReadData[$orgUnit['org_unit_id']] = $records;
                     }
+                    // Log::info("getDataLoopOrgs: orgUnitName: $orgUnitName, orgUnitId: " . $orgUnit['org_unit_id'] . " recordsCount: " . count($records) . " existsInCache: " . (array_key_exists($orgUnit['org_unit_id'], $recordsReadData) ? 'Yes' : 'No'));
+
                     $results = array();
                     $results["orgName"] = $orgUnitName;
                     $results["emrs"] = $this->emrs;
@@ -482,9 +485,10 @@ class DWHHTSDataAggregator
 
     private function sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section)
     {
+        // Log::info("sumValues: record: " . json_encode($record) . " section: " . $section);
 
         try {
-            $dateValue = strtotime($record['test_date']);
+            $dateValue = strtotime($record['test_month'] ?? $record['test_date']);
 
             $yr = date("Y", $dateValue);
             $mon = date("m", $dateValue);
@@ -493,6 +497,10 @@ class DWHHTSDataAggregator
             $siteConcatName = str_replace(' ', '_', $siteConcatName);
             $siteConcatName = strtolower($siteConcatName);
             // Log::info("siteConcatName: " . $siteConcatName);
+
+            if (!isset($monthScoreMap[$yr . '-' . $mon])) {
+                return [$monthScoreMap, $rowsPerMonthAndScoreCounter];
+            }
 
             if (!array_key_exists($siteConcatName, $monthScoreMap[$yr . '-' . $mon])) {
                 // Log::info($record);
@@ -588,10 +596,10 @@ class DWHHTSDataAggregator
             Log::error('<DWHHTSDataAggregator->sumValues() Error: ' . $ex->getMessage());
             Log::error($ex);
             Log::error('</DWHHTSDataAggregator->sumValues()');
-            // return [null, null];
-            return null;
+            return [$monthScoreMap, $rowsPerMonthAndScoreCounter];
         }
     }
+
 
     private function processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section)
     {
@@ -606,18 +614,17 @@ class DWHHTSDataAggregator
             $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
             //$score =  $this->callFunctionBysecition($section, $record);
         } else {
-            // if ($this->stringMatches(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
-            if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
-                // Log::info("facility 1 " . $orgUnit['mysites_county']);
+            if ($this->ouNameCompare(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
+            // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
                 if (!empty($orgUnit['mysites_sub_county'])) {
-                    if($this->stringMatches(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
+                    if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
 
                         if (!empty($orgUnit['mysites_facility'])) {
                             $record_mfl = trim($record['facility_code']);
                             $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
                             if ($record_mfl == $orgUnit_mfl) {
                                 if (!empty($orgUnit['mysites'])) {
-                                    if ($this->stringMatches(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
+                                    if ($this->ouNameCompare(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
                                         $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
 
                                         $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
@@ -687,17 +694,12 @@ class DWHHTSDataAggregator
                 foreach ($records as $record) {
                     $shouldProcessRecord = true; //filter out period of data not to be processed in the data loop
 
-                    $recordDate = strtotime($record['test_date']);
-                    $newRecordformat = date('Y-m-d', $recordDate);
+                    $recordMonth = date('Y-m', strtotime($record['test_month'] ?? $record['test_date'] ?? ''));
 
-                    $userStartDate = strtotime($this->startDate);
-                    $newUserStartDate = date('Y-m-d', $userStartDate);
+                    $userStartMonth = date('Y-m', strtotime($this->startDate));
+                    $userEndMonth   = date('Y-m', strtotime($this->endDate));
 
-                    $userEndDate = strtotime($this->endDate);
-                    $newUserEndDate = date('Y-m-d', $userEndDate);
-
-                    if ($newUserStartDate > $newRecordformat ||  $newRecordformat > $newUserEndDate) {
-
+                    if ($userStartMonth > $recordMonth || $recordMonth > $userEndMonth) {
                         $shouldProcessRecord = false;
                     }
 
@@ -731,7 +733,7 @@ class DWHHTSDataAggregator
         }
     }
 
-    private function getFormRecords($orgUnit)
+    private function getFormRecords($orgUnit, $startDate = null, $endDate = null)
     {
         // Filter for subnational levels (county, sub_county, partner, etc.)
         $data = $this->getRawData();
@@ -766,12 +768,8 @@ class DWHHTSDataAggregator
             $combinedRecords = $data;
             /////////////
         } else if ($level == 2) {
-            // $odkUtils = new ODKUtils();
-            // [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "hts%");
-            // $fileName = $this->getFileToProcess($projectId, $formId);
-            // return $this->getSingleFileRecords($fileName, $formId);
-
-            /////////////
+            
+            ///////////// county
             try {
                 // convert $data (object) to array
                 if (is_object($data)) {
@@ -781,9 +779,9 @@ class DWHHTSDataAggregator
                     // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
                     $a = strtolower(trim($record['county']));
                     $b = strtolower(trim($ou_name));
-                    // replace underscore with space and apostrophes with empty in both strings before comparing
-                    // $a = str_replace('_', ' ', $a);
-                    // $b = str_replace('_', ' ', $b);
+                    
+                    $a = str_replace('_', ' ', $a);
+                    $b = str_replace('_', ' ', $b);
                     $a = str_replace("'", '', $a);
                     $b = str_replace("'", '', $b);
 
@@ -800,36 +798,81 @@ class DWHHTSDataAggregator
                     }
                     
                     return $cond;
+
+                    // $a = strtolower(trim($record['county']));
+                    // $b = strtolower(trim($ou_name));
+                    // return $a == $b;
                 });
+                // Log::info("getFormRecords: ($level) countyFilter: " . $ou_name . " records found: " . count($combinedRecords));
             } catch (Exception $ex) {
                 Log::error("getFormRecords: level 2 error: " . $ex->getMessage());
                 Log::error($ex);
                 return [];
             }
             // Log::info("getFormRecords: level 2: $ou_name = " . count($combinedRecords));
-            /////////////
         } else {
-            // $odkUtils = new ODKUtils();
-            // [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "hts%");
-            // $fileName = $this->getFileToProcess($projectId, $formId);
-            // return $this->getSingleFileRecords($fileName, $formId);
+            if(str_replace('+', '', $level) == 3) {
+                ///////////// sub county
+                try {
+                    if (is_object($data)) {
+                        $data = get_object_vars($data);
+                    }
+                    $combinedRecords = array_filter($data, function ($record) use ($ou_name) {
+                        // return trim(strtolower($record['sub_county'])) == trim(strtolower($ou_name));
+                        $a = strtolower(trim($record['sub_county']));
+                        $b = strtolower(trim($ou_name));
+                        $a = str_replace('_', ' ', $a);
+                        $b = str_replace('_', ' ', $b);
+                        $a = str_replace("'", '', $a);
+                        $b = str_replace("'", '', $b);
 
-            /////////////
-            $combinedRecords = array_filter($data, function ($record) use ($ou_name) {
-                // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
-                $a = strtolower(trim($record['facility_code'] . "_" . $record['facility_name']));
-                $a = str_replace('/', '_', $a);
-                $a = str_replace(' ', '_', $a);
-                $b = strtolower($ou_name);
-                similar_text($a, $b, $percent);
-                if ($percent >= 70) return true;
-                $lev = levenshtein($a, $b);
-                return $lev < 4;
-            });
-            /////////////
-            Log::info("getFormRecords: level 3+: $ou_name = " . count($combinedRecords));
+                        // direct string comparison
+                        $cond = $a == $b;
+
+                        if ($cond == false) {
+                            // levenshtein distance and similar text
+                            similar_text($a, $b, $percent);
+                            if ($percent >= 70) return true;
+                            $lev = levenshtein($a, $b);
+                            $cond = $lev < 4;
+                        }
+                        
+                        return $cond;
+                    });
+                    // Log::info("getFormRecords: ($level) subCountyFilter: " . $ou_name . " records found: " . count($combinedRecords));
+                } catch (Exception $ex) {
+                    Log::error("getFormRecords: level 3 error: " . $ex->getMessage());
+                    Log::error($ex);
+                    return [];
+                }
+            } else {
+                // TODO
+                ///////////// facility
+                $combinedRecords = array_filter($data, function ($record) use ($ou_name) {
+                    // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
+                    $a = strtolower(trim($record['facility_code'] . "_" . $record['facility_name']));
+                    $a = str_replace('/', '_', $a);
+                    $a = str_replace(' ', '_', $a);
+                    $b = strtolower($ou_name);
+                    similar_text($a, $b, $percent);
+                    if ($percent >= 70) return true;
+                    $lev = levenshtein($a, $b);
+                    return $lev < 4;
+                });
+            }
         }
 
+        // date filter for the combined records
+        if ($startDate) {
+            $combinedRecords = array_filter($combinedRecords, function ($record) use ($startDate) {
+                return strtotime($record['test_date']) >= strtotime($startDate);
+            });
+        }
+        if ($endDate) {
+            $combinedRecords = array_filter($combinedRecords, function ($record) use ($endDate) {
+                return strtotime($record['test_date']) <= strtotime($endDate);
+            });
+        }
         return $combinedRecords;
     }
 
@@ -839,7 +882,7 @@ class DWHHTSDataAggregator
             return $this->rawDataCache;
         }
         $columns = [
-            'test_date', 'county', 'sub_county', 'facility_code', 'facility_name',
+            'test_date', 'test_month', 'county', 'sub_county', 'facility_code', 'facility_name',
             'entry_point', 'emr',
             'test_result1', 'test_kit_name1', 'test_kit_lot_number1', 'test_kit_expiry1',
             'test_result2', 'test_kit_name2', 'test_kit_lot_number2', 'test_kit_expiry2',
@@ -850,10 +893,10 @@ class DWHHTSDataAggregator
         // triggering casts (Carbon, JSON decode) for every row — significantly lower memory.
         $query = DB::table('dwh_hts_encounter_data')->select($columns)->orderBy('test_date', 'desc');
         if ($this->startDate) {
-            $query->where('test_date', '>=', $this->startDate);
+            $query->where('test_month', '>=', date('Y-m-01', strtotime($this->startDate)));
         }
         if ($this->endDate) {
-            $query->where('test_date', '<=', $this->endDate);
+            $query->where('test_month', '<=', date('Y-m-01', strtotime($this->endDate)));
         }
         if ($limit) {
             $query->limit($limit);
@@ -943,12 +986,12 @@ class DWHHTSDataAggregator
     private function getOverallAgreementsRate($orgUnit, $records)
     {
         // Log::info("getOverallAgreementsRate: recordstype: " . gettype($records));
-        // Log::info("getOverallAgreementsRate: records: " . json_encode(array_slice($records, 0, 3)));
+        // Log::info(PHP_EOL . "getOverallAgreementsRate: orgUnitId: " . $orgUnit['org_unit_id'] . " records: " . json_encode(array_slice($records, 0, 3)));
 
         try {
             $summationValues = $this->getSummationValues($records, $orgUnit, $this->reportSections["agreement_rate"]);
-            $monthScoreMap = $summationValues['monthScoreMap'];
-            $rowsPerMonthAndScoreCounter = $summationValues['rowsPerMonthAndScoreCounter'];
+            $monthScoreMap = $summationValues['monthScoreMap'] ?? [];
+            $rowsPerMonthAndScoreCounter = $summationValues['rowsPerMonthAndScoreCounter'] ?? [];
             return $monthScoreMap;
         } catch (Exception $e) {
             Log::error("getOverallAgreementsRate: " . $e->getMessage());
@@ -965,10 +1008,39 @@ class DWHHTSDataAggregator
 
 
     public function stringMatches($a, $b, $threshold = 70) {
+        $cond = $a === $b;
+        if ($cond) return true;
+
         similar_text(strtolower($a), strtolower($b), $percent);
         if ($percent >= $threshold) return true;
 
         $lev = levenshtein(strtolower($a), strtolower($b));
         return $lev < 4; // small edit distance
+    }
+
+    private function ouNameCompare($a, $b) {
+        $a = strtolower(trim($a));
+        $b = strtolower(trim($b));
+        $a = str_replace('_', ' ', $a);
+        $b = str_replace('_', ' ', $b);
+        $a = str_replace("'", '', $a);
+        $b = str_replace("'", '', $b);
+
+        // replace multiple spaces with single space
+        $a = preg_replace('/\s+/', ' ', $a);
+        $b = preg_replace('/\s+/', ' ', $b);
+
+        $cond = $a == $b;
+        // if ($cond == false) {
+        //     // levenshtein distance and similar text
+        //     similar_text($a, $b, $percent);
+        //     if ($percent >= 70) {
+        //         $cond = true;
+        //     } else {
+        //         $lev = levenshtein($a, $b);
+        //         $cond = $lev < 4;
+        //     }
+        // }
+        return $cond;
     }
 }
