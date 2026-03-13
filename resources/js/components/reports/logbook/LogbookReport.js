@@ -405,7 +405,7 @@ class LogbookReport extends React.Component {
         // positive agreement data loop - t3/t1
         // console.log(dataToParse);
         let range_ = ['>98', '95-98', '<95'];
-        console.log('dataToParse', dataToParse);
+        // console.log('dataToParse', dataToParse);
         let overallDataObject = dataToParse.overall_agreement_rate;
         for (let [period, dataObjectT3T1] of Object.entries(dataToParse.positive_agreement_rate_t3_t1)) {
             let dataObjectT3T2 = dataToParse.positive_agreement_rate_t3_t2[period];

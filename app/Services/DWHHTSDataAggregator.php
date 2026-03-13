@@ -779,11 +779,27 @@ class DWHHTSDataAggregator
                 }
                 $combinedRecords = array_filter($data, function ($record) use ($ou_name) {
                     // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
-                    $a = strtolower($record['county']); $b = strtolower($ou_name);
-                    similar_text($a, $b, $percent);
-                    if ($percent >= 70) return true;
-                    $lev = levenshtein($a, $b);
-                    return $lev < 4;
+                    $a = strtolower(trim($record['county']));
+                    $b = strtolower(trim($ou_name));
+                    // replace underscore with space and apostrophes with empty in both strings before comparing
+                    // $a = str_replace('_', ' ', $a);
+                    // $b = str_replace('_', ' ', $b);
+                    $a = str_replace("'", '', $a);
+                    $b = str_replace("'", '', $b);
+
+                    // direct string comparison
+                    $cond = $a == $b;
+
+                    if ($cond == false) {
+                        // levenshtein distance and similar text
+                        similar_text($a, $b, $percent);
+                        if ($percent >= 70) return true;
+                        $lev = levenshtein($a, $b);
+                        // return $lev < 4;
+                        $cond = $lev < 4;
+                    }
+                    
+                    return $cond;
                 });
             } catch (Exception $ex) {
                 Log::error("getFormRecords: level 2 error: " . $ex->getMessage());
@@ -830,7 +846,9 @@ class DWHHTSDataAggregator
             'test_result3', 'test_kit_name3', 'test_kit_lot_number3', 'test_kit_expiry3',
             'final_test_result',
         ];
-        $query = DwhHtsEncounterData::select($columns)->orderBy('test_date', 'desc');
+        // Use DB::table() instead of Eloquent to avoid instantiating model objects and
+        // triggering casts (Carbon, JSON decode) for every row — significantly lower memory.
+        $query = DB::table('dwh_hts_encounter_data')->select($columns)->orderBy('test_date', 'desc');
         if ($this->startDate) {
             $query->where('test_date', '>=', $this->startDate);
         }
@@ -840,11 +858,17 @@ class DWHHTSDataAggregator
         if ($limit) {
             $query->limit($limit);
         }
-        $this->rawDataCache = $this->standardizeData($query->get()->toArray());
+        // Fetch as stdClass objects, cast to plain arrays, then free the collection
+        // before standardization to avoid holding two full copies in memory at once.
+        $collection = $query->get();
+        $rawData = array_map(fn($r) => (array) $r, $collection->all());
+        unset($collection);
+        $this->standardizeData($rawData);
+        $this->rawDataCache = $rawData;
         return $this->rawDataCache;
     }
 
-    private function standardizeData($records)
+    private function standardizeData(array &$records)
     {
         $siteTypes = ['CCC', 'PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PAEDIATRIC', 'COMMUNITY_TESTING'];
         foreach ($records as $key => $row) {
