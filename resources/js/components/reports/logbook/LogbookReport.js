@@ -305,6 +305,13 @@ class LogbookReport extends React.Component {
                     exportData.push(dataToParse['OrgUniType']);
                 }
             }
+
+            // overall agreement rate = (test_3_positive + test_1_negative) / (test_1_positive + test_1_negative) * 100
+            let overallAgreementRate = (
+                (Number(totals['totals']['total_t3_positive']) + Number(totals['totals']['total_t1_negative'])) /
+                (Number(totals['totals']['total_t1_positive']) + Number(totals['totals']['total_t1_negative'])) * 100
+            ) || 0;
+
             let percent1 = ((Number(totals['totals']["<95"]) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
             let percent2 = ((Number(totals['totals']["95-98"]) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
             let percent3 = ((Number(totals['totals'][">98"]) / Number(totals['totals']["total_sites"])) * 100).toFixed(1);
@@ -315,28 +322,57 @@ class LogbookReport extends React.Component {
 
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</span>
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
-                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</span>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals']["<95_tests"] > 0 ? ((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
+                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</span> */}
+                    
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
+
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
+                        ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})
+                    </small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                        {totals['totals']["<95_tests"] > 0 ? ((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
+                    </span> */}
                 </div>
             </td>);
             exportData.push(percent1);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals']["95-98_tests"] > 0 ? ((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small> */}
+                    
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
+
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
+                        ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})
+                    </small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                        {totals['totals']["95-98_tests"] > 0 ? ((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
+                    </span> */}
                 </div>
             </td>);
             exportData.push(percent2);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals'][">98_tests"] > 0 ? ((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small> */}
+                    
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
+
+                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
+                        ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})
+                    </small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                        {totals['totals'][">98_tests"] > 0 ? ((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
+                    </span> */}
+                </div>
+            </td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <span style={{ fontWeight: 'bold', color: 'black'}}>{overallAgreementRate.toFixed(1)}%</span>
                 </div>
             </td>);
             exportData.push(percent3);
@@ -597,6 +633,8 @@ class LogbookReport extends React.Component {
 
         // invalid rate data loop
         for (let [period, totals] of Object.entries(dataToParse.invalid_rates)) {
+            let total_invalid_count = dataToParse?.invalid_count[period] || 0;
+            // console.log('total_invalid_count', total_invalid_count);
 
             let invalidRateRow = [];
             let invalidRateExportTableData = [];
@@ -613,7 +651,9 @@ class LogbookReport extends React.Component {
                 }
             }
 
+            invalidRateRow.push(<td key={uuidv4()} scope="row">{total_invalid_count}</td>);
             invalidRateRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            invalidRateExportTableData.push(total_invalid_count);
             invalidRateExportTableData.push(totals);
 
             invalidRateTableData.push(<tr key={uuidv4()}>{invalidRateRow}</tr>);
@@ -815,12 +855,13 @@ class LogbookReport extends React.Component {
             <th scope="col">&#60;95%</th>
             <th scope="col">95-98%</th>
             <th scope="col">&#62;98%</th>
+            <th scope="col">Overall</th>
 
         </tr>;
 
         let tableDataExport = [];
 
-        tableDataExport.push(['___', '<95%', '95%-98%', '>98%'
+        tableDataExport.push(['___', '<95%', '95%-98%', '>98%', 'Overall'
         ]);
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
@@ -831,10 +872,11 @@ class LogbookReport extends React.Component {
                     <th scope="col">&#60;95%</th>
                     <th scope="col">95%-98%</th>
                     <th scope="col">&#62;98%</th>
+                    <th scope="col">Overall</th>
 
                 </tr>;
                 tableDataExport = [];
-                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%'
+                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%', 'Overall'
                 ]);
             }
 
@@ -938,6 +980,7 @@ class LogbookReport extends React.Component {
         let invalidRateTableDataHeaders = <tr>
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
+            <th scope="col"># Invalid tests</th>
             <th scope="col">Invalid rate</th>
 
         </tr>;
@@ -952,11 +995,12 @@ class LogbookReport extends React.Component {
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
+        <           th scope="col"># Invalid tests</th>
                     <th scope="col">Invalid rate</th>
 
                 </tr>;
                 invalidRateExportData = [];
-                invalidRateExportData.push(['___', 'Programme', 'Invalid rate']);
+                invalidRateExportData.push(['___', 'Programme', 'Count', 'Invalid rate']);
             }
         }
         // end invalid rate
@@ -1170,6 +1214,7 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                                        <small className="text-muted">Percentage of sites where T1 (screening) and T3 (tie-breaker) results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
@@ -1204,6 +1249,7 @@ class LogbookReport extends React.Component {
                                         {/* Begin Positive concordance rate  */}
                                         <div className="col-sm-9">
                                             <p style={{ fontWeight: "900" }}>Positive concordance rates</p>
+                                            <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>: tie-breaker vs. screening; <strong>T3/T2</strong>: tie-breaker vs. confirmatory; <strong>T2/T1</strong>: confirmatory vs. screening. High concordance indicates consistent test performance.</small>
                                         </div>
                                         <table id="positiveConcordanceRates" className="table">
                                             <thead className="thead-dark">
@@ -1266,6 +1312,7 @@ class LogbookReport extends React.Component {
                                     {/* Begin completeness rate  */}
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Completeness rate</p>
+                                        <small className="text-muted">Proportion of expected HTS logbook registers submitted for the reporting period. Low completeness may indicate missing data or non-submission of registers.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
@@ -1297,7 +1344,7 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Consistency rate</p>
-
+                                        <small className="text-muted">Proportion of testing sessions where results follow the expected algorithm sequence without contradictory or out-of-order outcomes. Low consistency may signal procedural errors or transcription mistakes.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
@@ -1333,7 +1380,7 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
-
+                                        <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3 tie-breaker. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
@@ -1365,7 +1412,7 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Invalid rate</p>
-
+                                        <small className="text-muted">Proportion of HIV tests that returned an invalid result due to test kit failure, inadequate sample volume, or procedural error. High invalid rates warrant investigation into cold-chain management and tester competency.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
@@ -1429,7 +1476,7 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
-
+                                        <small className="text-muted">Proportion of testing sessions where the HIV 3-test algorithm sequence (T1 → T2 → T3) was correctly applied as per national guidelines. Deviations may result in misclassification of HIV status.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
@@ -1456,6 +1503,7 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-12">
                                         <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
+                                        <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS) vs. paper-based (hardcopy). Tracks progress towards digital register adoption across testing sites.</small>
                                     </div>
                                     <div className="col-sm-2">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
