@@ -31,8 +31,8 @@ class LogbookReport extends React.Component {
             emrs: [],
             echartsMinHeight: '',
             orgUnitIndicators: [
-                'Site agreement Rates',
                 'Positive concordance rate',
+                'Site agreement Rates',
                 'Completeness rate',
                 'Consistency rate',
                 'Invalid rate',
@@ -449,9 +449,30 @@ class LogbookReport extends React.Component {
                 // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1[range]?.totals}</td>);
                 // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2[range]?.totals}</td>);
                 // row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1[range]?.totals}</td>);
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1?.avg}</td>);
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2?.avg}</td>);
-                row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1?.avg}</td>);
+                row.push(<td key={uuidv4()} scope="row">
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T1?.avg}%</span> */}
+                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
+                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
+                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T1,null,1)}</pre> */}
+                    </div>
+                </td>);
+                row.push(<td key={uuidv4()} scope="row">
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T2?.avg}%</span> */}
+                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT2Reactive).toFixed(2) + '%' : '0%'}</span>
+                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT2Reactive})</small>
+                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T2,null,1)}</pre> */}
+                    </div>
+                </td>);
+                row.push(<td key={uuidv4()} scope="row">
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT2T1?.avg}%</span> */}
+                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT2Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
+                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT2Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
+                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT2T1,null,1)}</pre> */}
+                    </div>
+                </td>);
                 positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()}
                     onClick={() => {
                         this.setState({
