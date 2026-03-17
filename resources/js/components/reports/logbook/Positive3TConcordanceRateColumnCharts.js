@@ -18,7 +18,7 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
     prepareOverallLevelSiteData(dataObject) {
         // Mapping of keys in the JSON to Display Names
         let levelsMap = {
-            'Positive_Concordance': 'Overall',
+            // 'Positive_Concordance': 'Overall',
             'T3T1': 'T3 / T1',
             'T3T2': 'T3 / T2',
             'T2T1': 'T2 / T1',
@@ -55,51 +55,32 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
         // 3. Prepare Series Data
         let seriesData = [];
 
-        // Helper function to calculate percentage from the nested T3/T2/T1 objects
-        const calculatePercentage = (periodData) => {
-            if (!periodData) return 0;
-
-            // Sum totals from all buckets (>98, 95-98, <95)
-            let totalSites = 0;
-            let passingSites = 0; // Assuming Concordance means >98 bucket, or >98 + 95-98
-
-            // Loop through buckets provided in JSON (e.g., ">98", "<95")
-            Object.keys(periodData).forEach(bucketKey => {
-                let val = periodData[bucketKey]?.totals || 0;
-                totalSites += val;
-
-                // Logic: What counts as "Concordant"? usually >98.
-                // Adjust if you need to include "95-98"
-                if(bucketKey === '>98') {
-                    passingSites += val;
-                }
-            });
-
-            if (totalSites === 0) return 0;
-            return ((passingSites / totalSites) * 100).toFixed(1);
-        };
-
         // Iterate through our 4 Metrics (Overall, T3T1, etc)
-        // console.log(levelsMap);
-        Object.keys(levelsMap).forEach(key => {
+        Object.keys(levelsMap)?.filter(k=>{
+            // skip overall concordance for now
+            return k.toLocaleLowerCase() != 'positive_concordance';
+        })?.forEach(key => {
             let dataArray = [];
 
             periods.forEach(period => {
                 let value = 0;
 
-                if (key === 'Positive_Concordance') {
-                    // Overall is already a percentage string in the JSON
-                    value = parseFloat(overallDataObject[period] || 0);
-                } else {
-                    // For T3T1, T3T2, T2T1, we need to dig into the objects
-                    let lookupKey = '';
-                    if (key === 'T3T1') lookupKey = 'positive_agreement_rate_t3_t1';
-                    if (key === 'T3T2') lookupKey = 'positive_agreement_rate_t3_t2';
-                    if (key === 'T2T1') lookupKey = 'positive_agreement_rate_t2_t1';
-
-                    let periodData = dataObject[lookupKey] ? dataObject[lookupKey][period] : null;
-                    value = calculatePercentage(periodData);
-                }
+                // if (key === 'Positive_Concordance') {
+                //     // Overall is already a percentage string in the JSON
+                //     value = parseFloat(overallDataObject[period] || 0);
+                // } else {
+                    // All three ratios are derived from the t3_t1 data object (matching table calculation)
+                    let t3t1Data = dataObject['positive_agreement_rate_t3_t1']?.[period];
+                    if (t3t1Data?.totalTests > 0) {
+                        if (key === 'T3T1') {
+                            value = parseFloat(((t3t1Data.totalT3Reactive * 100) / t3t1Data.totalT1Reactive).toFixed(2));
+                        } else if (key === 'T3T2') {
+                            value = parseFloat(((t3t1Data.totalT3Reactive * 100) / t3t1Data.totalT2Reactive).toFixed(2));
+                        } else if (key === 'T2T1') {
+                            value = parseFloat(((t3t1Data.totalT2Reactive * 100) / t3t1Data.totalT1Reactive).toFixed(2));
+                        }
+                    }
+                // }
                 dataArray.push(value);
             });
 
@@ -126,7 +107,9 @@ class Positive3TConcordanceRateColumnCharts extends React.Component {
                     yAxisName="Concordance %"
                     formatter="%"
                     // formatter="{value} %"
-                    color={['#58bc77', '#8c3070', '#ba5899', '#ea87ac', '#fc8452',  '#d19f71', '#8fa840']}
+                    // color={['#58bc77', '#8c3070', '#ba5899', '#ea87ac', '#fc8452',  '#d19f71', '#8fa840']}
+                    // 4 distinct colors for the 4 metrics
+                    color={['#4caf50', '#2196f3', '#ff9800', '#9c27b0']}
                     minHeight={this.props.minHeight}
                     legend={Object.values(levelsMap)}
                     category={category}
