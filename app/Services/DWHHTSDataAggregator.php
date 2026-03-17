@@ -284,15 +284,15 @@ class DWHHTSDataAggregator
                                     if ($agreementRate > 98) {
                                         $monthlySites['totals']['>98'] += 1;
                                         $monthlySites['totals']['>98_tests'] += $site['t1_totals_tests'];
-                                        // $monthlySites['sitenames']['>98'][] = $indicator;    ///
+                                        $monthlySites['sitenames']['>98'][] = $indicator;    ///
                                     } else if ($agreementRate >= 95 && $agreementRate <= 98) {
                                         $monthlySites['totals']['95-98'] += 1;
                                         $monthlySites['totals']['95-98_tests'] += $site['t1_totals_tests'];
-                                        // $monthlySites['sitenames']['95-98'][] = $indicator;  ///
+                                        $monthlySites['sitenames']['95-98'][] = $indicator;  ///
                                     } else if ($agreementRate < 95) {
                                         $monthlySites['totals']['<95'] += 1;
                                         $monthlySites['totals']['<95_tests'] += $site['t1_totals_tests'];
-                                        // $monthlySites['sitenames']['<95'][] = $indicator;    ///
+                                        $monthlySites['sitenames']['<95'][] = $indicator;    ///
                                     }
 
 
@@ -308,39 +308,39 @@ class DWHHTSDataAggregator
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalT1Reactive'] += $site['t1_reactive'];
                                     if ($t3_t1_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['>98']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t3_t1_pos_agreement >= 95 && $t3_t1_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t1']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t3_t1_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
                                     }
                                     $t3_t2_pos_agreement = $site['t3_reactive'] *100 / $site['t2_reactive'];
                                     // Log::info("t3_t2_pos_agreement: " . $t3_t2_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t3_t2_pos_agreement;
                                     if ($t3_t2_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['>98']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t3_t2_pos_agreement >= 95 && $t3_t2_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t2']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t3_t2_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
                                     }
                                     $t2_t1_pos_agreement = $site['t2_reactive'] *100 / $site['t1_reactive'];
                                     // Log::info("t2_t1_pos_agreement: " . $t2_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t2_t1_pos_agreement;
                                     if ($t2_t1_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['>98']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t2_t1_pos_agreement >= 95 && $t2_t1_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t2_t1']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t2_t1_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['<95']['totals'] += 1;
-                                        // $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
+                                        $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
                                     }
 
                                     // $monthlySites['overall-positive-test-agreement'] = [
