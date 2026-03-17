@@ -18,6 +18,7 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { CSVLink, CSVDownload } from "react-csv";
 import OrgUnitIndicator from '../../utils/orgunit/OrgUnitIndicator';
+import { over } from 'lodash';
 
 
 class LogbookReport extends React.Component {
@@ -32,13 +33,14 @@ class LogbookReport extends React.Component {
             echartsMinHeight: '',
             orgUnitIndicators: [
                 'Site agreement Rates',
+                'Overall Agreement Rates',
                 'Positive concordance rate',
-                'Completeness rate',
+                // 'Completeness rate',
                 'Consistency rate',
                 'Invalid rate',
                 'Inconclusive rate',
                 // 'Supervisory Signature rate',
-                'Algorithm Followed rate',
+                // 'Algorithm Followed rate',
                 // 'Sites using eHTS register',
                 'eHTS Distribution',
             ],
@@ -160,7 +162,9 @@ class LogbookReport extends React.Component {
 
     }
 
-    addTableRows(tableData, dataToParse, tableDataExport,
+    addTableRows(
+        overallTableData, overallTableDataExport,
+        tableData, dataToParse, tableDataExport,
         positiveConcordanceTableData, positiveConcordanceTableDataExport,
         completenessTableData, completenessExportData,
         consistencyTableData, consistencyExportData,
@@ -178,6 +182,19 @@ class LogbookReport extends React.Component {
 
         try {
             // overall agreement
+            overallTableData.push(
+                <tr key={uuidv4()}>
+                    <td colSpan={4} scope="row">
+                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                    </td>
+                </tr>);
+            overallTableDataExport.push([dataToParse.orgName.toUpperCase()]);
+        } catch (err) {
+
+        }
+
+        try {
+            // site agreement
             tableData.push(
                 <tr key={uuidv4()}>
                     <td colSpan={4} scope="row">
@@ -292,15 +309,24 @@ class LogbookReport extends React.Component {
         // overall agreement data loop
         for (let [period, totals] of Object.entries(dataToParse.overall_agreement_rate)) {
 
+            let overallRow = [];
+            let overallExportData = [];
+
             let row = [];
             let exportData = [];
             const d = new Date(period);
 
+            overallRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']})</td>);
+            overallExportData.push(sting);
+            
             row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']})</td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + totals['totals']['total_sites'] + ", T=" + totals['totals']['total_tests'] + ")"
             exportData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
+                    overallRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                    overallExportData.push(dataToParse['OrgUniType']);
+
                     row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     exportData.push(dataToParse['OrgUniType']);
                 }
@@ -322,61 +348,50 @@ class LogbookReport extends React.Component {
 
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
-                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</span> */}
-                    
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
 
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
-                        ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})
-                    </small>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>
                         {totals['totals']["<95_tests"] > 0 ? ((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
-                    </span> */}
+                    </span>
                 </div>
             </td>);
             exportData.push(percent1);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small> */}
-                    
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
 
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
-                        ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})
-                    </small>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>
                         {totals['totals']["95-98_tests"] > 0 ? ((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
-                    </span> */}
+                    </span>
                 </div>
             </td>);
             exportData.push(percent2);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small> */}
-                    
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
 
-                    {/* <small style={{fontSize: '0.7em', color: 'gray'}}>
-                        ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})
-                    </small>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small>
                     <span style={{ fontWeight: 'semibold', color: 'black'}}>
                         {totals['totals'][">98_tests"] > 0 ? ((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
-                    </span> */}
-                </div>
-            </td>);
-            row.push(<td key={uuidv4()} scope="row">
-                <div style={{display:'flex', flexDirection:'column'}}>
-                    <span style={{ fontWeight: 'bold', color: 'black'}}>{overallAgreementRate.toFixed(1)}%</span>
+                    </span>
                 </div>
             </td>);
             exportData.push(percent3);
 
+            overallRow.push(<td key={uuidv4()} scope="row">
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <span style={{ fontWeight: 'bold', color: 'black'}}>{overallAgreementRate.toFixed(1)}%</span>
+                </div>
+            </td>);
+            overallExportData.push(overallAgreementRate.toFixed(1));
+
+            overallTableData.push(<tr key={uuidv4()} scope="row">{overallRow}</tr>);
+            overallTableDataExport.push(overallExportData);
             tableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
                 this.setState({
                     nModal: {
@@ -436,6 +451,11 @@ class LogbookReport extends React.Component {
             tableDataExport.push(exportData);
         }
         // end overall agreement data loop
+
+
+
+
+
 
         // positive concordance data loop
         // for (let [period, totals] of Object.entries(dataToParse.overall_concordance_totals)) {
@@ -663,6 +683,7 @@ class LogbookReport extends React.Component {
 
         // inconclusive rate data loop
         for (let [period, totals] of Object.entries(dataToParse.inconclusive_rates)) {
+            let inconclusives_count = dataToParse?.inconclusives_count[period] || 0;
 
             let inconclusiveRateRow = [];
             let inconclusiveRateExportTableData = [];
@@ -679,7 +700,9 @@ class LogbookReport extends React.Component {
                 }
             }
 
+            inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{inconclusives_count}</td>);
             inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{totals}</td>);
+            inconclusiveRateExportTableData.push(inconclusives_count);
             inconclusiveRateExportTableData.push(totals);
 
             inconclusiveRateTableData.push(<tr key={uuidv4()}>{inconclusiveRateRow}</tr>);
@@ -803,7 +826,7 @@ class LogbookReport extends React.Component {
                 let rate = (curr / month_emr_totals) * 100;
                 if (!rate) rate = 0;
                 rate = Math.round(rate * 10) / 10; //round off to one decimal place
-                htsTypeRow.push(<td key={uuidv4()} scope="row">{rate}<sub>%</sub></td>);
+                htsTypeRow.push(<td key={uuidv4()} scope="row">{rate}%</td>);
                 htsTypeExportTableData.push(rate);
             });
 
@@ -815,6 +838,8 @@ class LogbookReport extends React.Component {
 
 
         return [
+            overallTableData, overallTableDataExport,
+
             tableData, tableDataExport,
             positiveConcordanceTableData, positiveConcordanceTableDataExport,
             completenessTableData, completenessExportData,
@@ -825,6 +850,12 @@ class LogbookReport extends React.Component {
             algorithmFollowedTableData, algorithmFollowedExportData,
             htsTypeTableData, htsTypeExportData
         ];
+    }
+
+    exportOverallAgreementsRatesPDFData() {
+        const doc = new jsPDF();
+        doc.autoTable({ html: '#overallAgreementRates' });
+        doc.save('overall_agreement_rates.pdf')
     }
 
     exportAgreementsRatesPDFData() {
@@ -848,6 +879,14 @@ class LogbookReport extends React.Component {
             marginBottom: "10px"
         };
         // Site agreement Rates
+        let overallTableData = [];
+        let overallTableHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            {/* <th scope="col">Overall</th> */}
+        </tr>;
+        let overallTableDataExport = [];
+
         let tableData = [];
         let tableHeaders = <tr>
             {/* <th scope="col">#</th> */}
@@ -855,16 +894,25 @@ class LogbookReport extends React.Component {
             <th scope="col">&#60;95%</th>
             <th scope="col">95-98%</th>
             <th scope="col">&#62;98%</th>
-            <th scope="col">Overall</th>
-
+            {/* <th scope="col">Overall</th> */}
         </tr>;
 
         let tableDataExport = [];
 
-        tableDataExport.push(['___', '<95%', '95%-98%', '>98%', 'Overall'
+        tableDataExport.push(['___', '<95%', '95%-98%', '>98%' //, 'Overall'
         ]);
         if (this.state.siteType != null) {
             if (this.state.siteType.length != 0) {
+                overallTableHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    {/* <th scope="col">Overall</th> */}
+                </tr>;
+                overallTableDataExport = [];
+                overallTableDataExport.push(['___', 'Programme', 'Overall'
+                ]);
+
                 tableHeaders = <tr>
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
@@ -872,11 +920,11 @@ class LogbookReport extends React.Component {
                     <th scope="col">&#60;95%</th>
                     <th scope="col">95%-98%</th>
                     <th scope="col">&#62;98%</th>
-                    <th scope="col">Overall</th>
+                    {/* <th scope="col">Overall</th> */}
 
                 </tr>;
                 tableDataExport = [];
-                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%', 'Overall'
+                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%' //, 'Overall'
                 ]);
             }
 
@@ -1011,6 +1059,7 @@ class LogbookReport extends React.Component {
         let inconclusiveRateTableDataHeaders = <tr>
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
+            <th scope="col"># Sites</th>
             <th scope="col">Inconclusive rate</th>
 
         </tr>;
@@ -1025,6 +1074,7 @@ class LogbookReport extends React.Component {
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
+                    <th scope="col"># Sites</th>
                     <th scope="col">Inconclusive rate</th>
 
                 </tr>;
@@ -1159,6 +1209,7 @@ class LogbookReport extends React.Component {
                         }
 
                         [
+                            overallTableData, overallTableDataExport,
                             tableData,
                             tableDataExport,
                             positiveConcordanceTableData, positiveConcordanceTableDataExport,
@@ -1170,7 +1221,9 @@ class LogbookReport extends React.Component {
                             algorithmFollowedTableData, algorithmFollowedExportData,
                             htsTypeTableData, htsTypeExportData
                         ]
-                            = this.addTableRows(tableData,
+                            = this.addTableRows(
+                                overallTableData, overallTableDataExport,
+                                tableData,
                                 payload,
                                 tableDataExport,
                                 positiveConcordanceTableData, positiveConcordanceTableDataExport,
@@ -1207,6 +1260,34 @@ class LogbookReport extends React.Component {
             <div className="row">
 
                 {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Agreement Rates' ?
+                        <React.Fragment>
+                            {/* overall agreement rates */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+                                
+                                <div className="row">
+                                    <div className="col-sm-6  col-xm-5 col-md-5">
+                                        <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
+                                        <small className="text-muted">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={overallTableDataExport}> Csv</CSVLink>
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportOverallAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                    </div>
+
+                                    <table id="overallAgreementRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {overallTableHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {overallTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* end overall agreement rates */}
+                        </React.Fragment> : ''}
+                {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
                         <React.Fragment>
                             {/* Site agreement rates */}
@@ -1214,7 +1295,7 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                        <small className="text-muted">Percentage of sites where T1 (screening) and T3 (tie-breaker) results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
+                                        <small className="text-muted">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
@@ -1249,7 +1330,7 @@ class LogbookReport extends React.Component {
                                         {/* Begin Positive concordance rate  */}
                                         <div className="col-sm-9">
                                             <p style={{ fontWeight: "900" }}>Positive concordance rates</p>
-                                            <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>: tie-breaker vs. screening; <strong>T3/T2</strong>: tie-breaker vs. confirmatory; <strong>T2/T1</strong>: confirmatory vs. screening. High concordance indicates consistent test performance.</small>
+                                            <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>; <strong>T3/T2</strong>; <strong>T2/T1</strong>. High concordance indicates consistent test performance.</small>
                                         </div>
                                         <table id="positiveConcordanceRates" className="table">
                                             <thead className="thead-dark">
@@ -1380,7 +1461,7 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
-                                        <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3 tie-breaker. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
+                                        <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
@@ -1503,7 +1584,7 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-12">
                                         <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
-                                        <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS) vs. paper-based (hardcopy). Tracks progress towards digital register adoption across testing sites.</small>
+                                        <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS): distribution of EMR / HMIS systems. Tracks progress towards digital register adoption across testing sites.</small>
                                     </div>
                                     <div className="col-sm-2">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
@@ -1633,7 +1714,8 @@ class LogbookReport extends React.Component {
                             <li className="nav-item" role="presentation">
                                 <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
                                     {/* <i className="fa fa-table" aria-hidden="true"></i>  */}
-                                    <i className="fas fa-chart-bar"></i> Data View</a>
+                                    {/* <i className="fas fa-chart-bar"></i> Data View */}
+                                </a>
                             </li>
 
 
