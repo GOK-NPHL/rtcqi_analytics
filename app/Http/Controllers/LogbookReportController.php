@@ -101,7 +101,7 @@ class LogbookReportController extends Controller
             $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
             // Log::info('Cache ID: ' . $cacheId);
             if (config('app.skip_cache')) {
-                Log::info("Skipping cache for $cacheId");
+                Log::info(PHP_EOL . PHP_EOL . PHP_EOL . "Skipping cache for $cacheId");
             } else {
                 if (Cache::has($cacheId)) {
                     // Log::info('Cache hit for ' . $cacheId);
