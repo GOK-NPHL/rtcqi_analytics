@@ -1293,15 +1293,15 @@ class LogbookReport extends React.Component {
                             {/* Site agreement rates */}
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
                                 <div className="row">
-                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                    <div className="col-sm-6  col-xm-5 col-md-5">
                                         <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
                                         <small className="text-muted">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
-                                        <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
                                     </div>
 
                                     <table id="agreementRates" className="table table-responsive">
