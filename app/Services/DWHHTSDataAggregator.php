@@ -425,6 +425,7 @@ class DWHHTSDataAggregator
                                 Log::error($ex);
                             }
                             $orgUnitArray['inconclusive_rates'][$monthlyDate] = number_format((float)$inconclusiveRate, 3, '.', '');
+                            $orgUnitArray['inconclusives_count'][$monthlyDate] = $invalidScores['inconclusives'];
 
                             //invalid rates
                             $invlidRate = 0;
@@ -604,13 +605,35 @@ class DWHHTSDataAggregator
                 $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['incompleteness'] = 1;
             }
 
+
             //check if supervisor signed or not signed
                 array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
             //end
 
-            //check if supervisor signed or not signed
+
+            //check if algorithm was followed or not followed
+                /*
+                FINAL_POSITIVE = T1_KIT=trinscreen AND T1_RESULT='positive' AND T2_KIT=determine AND T2_RESULT=positive AND T3_KIT='first response' AND T3_RESULT='positive' AND FINAL_TEST_RESULT='positive'
+                ||
+                FINAL_NEGATIVE = T1_KIT=trinscreen AND T1_RESULT='negative' AND FINAL_TEST_RESULT='negative'
+                ||
+                FINAL_INCONCLUSIVE = T1_KIT=trinscreen AND T1_RESULT='invalid' AND FINAL_TEST_RESULT='inconclusive'
+                */
+                // if(
+                //     // positive
+                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'positive' && trim(strtolower($record['test_kit_name2'])) == 'determine' && trim(strtolower($record['test_result2'])) == 'positive' && trim(strtolower($record['test_kit_name3'])) == 'first response' && trim(strtolower($record['test_result3'])) == 'positive' && trim(strtolower($record['final_test_result'])) == 'positive')
+                //     ||
+                //     // negative
+                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'negative' && trim(strtolower($record['final_test_result'])) == 'negative')
+                //     ||
+                //     // inconclusive
+                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'invalid' && trim(strtolower($record['final_test_result'])) == 'inconclusive')
+                // ) {
+
+                // }
                 array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
             //end
+
 
             $rowsPerMonthAndScoreCounter[$yr . '-' . $mon] += 1;
 
