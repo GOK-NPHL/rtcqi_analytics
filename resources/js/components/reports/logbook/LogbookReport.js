@@ -316,27 +316,27 @@ class LogbookReport extends React.Component {
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
                     <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</span>
-                    <span>{percent1}</span>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
                     <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</span>
-                    <span>{((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals']["<95_tests"] > 0 ? ((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
                 </div>
             </td>);
             exportData.push(percent1);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</span>
-                    <span>{percent2}</span>
-                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</span>
-                    <span>{((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals']["95-98_tests"] > 0 ? ((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
                 </div>
             </td>);
             exportData.push(percent2);
             row.push(<td key={uuidv4()} scope="row">
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</span>
-                    <span>{percent3}</span>
-                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</span>
-                    <span>{((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
+                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{totals['totals'][">98_tests"] > 0 ? ((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}</span>
                 </div>
             </td>);
             exportData.push(percent3);
@@ -1166,7 +1166,7 @@ class LogbookReport extends React.Component {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
                         <React.Fragment>
                             {/* Site agreement rates */}
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 pr-md-5 pr-lg-5">
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
                                 <div className="row">
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
@@ -1189,7 +1189,7 @@ class LogbookReport extends React.Component {
                                 </div>
                             </div>
                             {/* chart */}
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
                                 <p style={{ fontWeight: "900" }}>Site agreement Rate Chart:</p>
                                 {agreementRateColumnCharts}
                             </div>
