@@ -31,8 +31,8 @@ class LogbookReport extends React.Component {
             emrs: [],
             echartsMinHeight: '',
             orgUnitIndicators: [
-                'Positive concordance rate',
                 'Site agreement Rates',
+                'Positive concordance rate',
                 'Completeness rate',
                 'Consistency rate',
                 'Invalid rate',
