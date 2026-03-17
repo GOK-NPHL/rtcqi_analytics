@@ -142,6 +142,10 @@ class DWHHTSDataAggregator
                             $scores['95-98_tests'] = 0;
                             $scores['<95'] = 0;
                             $scores['<95_tests'] = 0;
+                            $scores['total_t1_positive'] = 0;
+                            $scores['total_t1_negative'] = 0;
+                            $scores['total_t2_positive'] = 0;
+                            $scores['total_t3_positive'] = 0;
 
                             $signedSites = array();
                             $signedSites['signed'] = 0;
@@ -272,18 +276,23 @@ class DWHHTSDataAggregator
                                     $invalidScores['invalids'] += $site['t1_invalids'];
                                     $invalidScores['inconclusives'] += $site['inconclusives'];
 
+                                    $monthlySites['totals']['total_t1_positive'] += $site['t1_reactive'];
+                                    $monthlySites['totals']['total_t1_negative'] += $site['t1_non_reactive'];
+                                    $monthlySites['totals']['total_t2_positive'] += $site['t2_reactive'];
+                                    $monthlySites['totals']['total_t3_positive'] += $site['t3_reactive'];
+
                                     if ($agreementRate > 98) {
                                         $monthlySites['totals']['>98'] += 1;
-                                        $monthlySites['sitenames']['>98'][] = $indicator;    ///
                                         $monthlySites['totals']['>98_tests'] += $site['t1_totals_tests'];
+                                        // $monthlySites['sitenames']['>98'][] = $indicator;    ///
                                     } else if ($agreementRate >= 95 && $agreementRate <= 98) {
                                         $monthlySites['totals']['95-98'] += 1;
-                                        $monthlySites['sitenames']['95-98'][] = $indicator;  ///
                                         $monthlySites['totals']['95-98_tests'] += $site['t1_totals_tests'];
+                                        // $monthlySites['sitenames']['95-98'][] = $indicator;  ///
                                     } else if ($agreementRate < 95) {
                                         $monthlySites['totals']['<95'] += 1;
-                                        $monthlySites['sitenames']['<95'][] = $indicator;    ///
                                         $monthlySites['totals']['<95_tests'] += $site['t1_totals_tests'];
+                                        // $monthlySites['sitenames']['<95'][] = $indicator;    ///
                                     }
 
 
@@ -299,39 +308,39 @@ class DWHHTSDataAggregator
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalT1Reactive'] += $site['t1_reactive'];
                                     if ($t3_t1_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t3_t1_pos_agreement >= 95 && $t3_t1_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t1']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t3_t1_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
                                     }
                                     $t3_t2_pos_agreement = $site['t3_reactive'] *100 / $site['t2_reactive'];
                                     // Log::info("t3_t2_pos_agreement: " . $t3_t2_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t3_t2_pos_agreement;
                                     if ($t3_t2_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t3_t2_pos_agreement >= 95 && $t3_t2_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t2']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t3_t2_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
                                     }
                                     $t2_t1_pos_agreement = $site['t2_reactive'] *100 / $site['t1_reactive'];
                                     // Log::info("t2_t1_pos_agreement: " . $t2_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t2_t1_pos_agreement;
                                     if ($t2_t1_pos_agreement > 98) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
                                     } else if ($t2_t1_pos_agreement >= 95 && $t2_t1_pos_agreement <= 98) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['95-98']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t2_t1']['95-98']['sites'][] = $indicator; ///
                                     } else if ($t2_t1_pos_agreement < 95) {
                                         $monthlySites['positive-agreement-rate-t2_t1']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
+                                        // $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
                                     }
 
                                     // $monthlySites['overall-positive-test-agreement'] = [
@@ -427,6 +436,7 @@ class DWHHTSDataAggregator
                                 Log::error($ex);
                             }
                             $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 3, '.', '');
+                            $orgUnitArray['invalid_count'][$monthlyDate] = $invalidScores['invalids'];
 
                         }
                     } catch (Exception $ex) {
