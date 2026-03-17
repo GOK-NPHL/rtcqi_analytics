@@ -137,8 +137,11 @@ class DWHHTSDataAggregator
                         foreach ($orgUnitArray['overall_agreement_rate'] as $monthlyDate => $monthlySites) { //summations for each org per month
                             $scores = array();
                             $scores['>98'] = 0;
+                            $scores['>98_tests'] = 0;
                             $scores['95-98'] = 0;
+                            $scores['95-98_tests'] = 0;
                             $scores['<95'] = 0;
+                            $scores['<95_tests'] = 0;
 
                             $signedSites = array();
                             $signedSites['signed'] = 0;
@@ -170,6 +173,7 @@ class DWHHTSDataAggregator
                             $scores['total_sites'] = 0;
                             $scores['total_tests'] = 0;
                             $monthlySites['totals'] = $scores;
+                            $monthlySites['agreement-rate-formula'] = '';
                             $monthlySites['sitenames'] = [
                                 '>98' => [],
                                 '95-98' => [],
@@ -267,12 +271,15 @@ class DWHHTSDataAggregator
 
                                     if ($agreementRate > 98) {
                                         $monthlySites['totals']['>98'] += 1;
+                                        $monthlySites['totals']['>98_tests'] += $site['t1_totals_tests'];   ///
                                         $monthlySites['sitenames']['>98'][] = $indicator;
                                     } else if ($agreementRate >= 95 && $agreementRate <= 98) {
                                         $monthlySites['totals']['95-98'] += 1;
+                                        $monthlySites['totals']['95-98_tests'] += $site['t1_totals_tests'];   ///
                                         $monthlySites['sitenames']['95-98'][] = $indicator;
                                     } else if ($agreementRate < 95) {
                                         $monthlySites['totals']['<95'] += 1;
+                                        $monthlySites['totals']['<95_tests'] += $site['t1_totals_tests'];   ///
                                         $monthlySites['sitenames']['<95'][] = $indicator;
                                     }
 
@@ -595,7 +602,7 @@ class DWHHTSDataAggregator
             Log::error($ex);
             Log::error('<DWHHTSDataAggregator->sumValues() Error: ' . $ex->getMessage());
             Log::error($ex);
-            Log::error('</DWHHTSDataAggregator->sumValues()');
+            // Log::error('</DWHHTSDataAggregator->sumValues()');
             return [$monthScoreMap, $rowsPerMonthAndScoreCounter];
         }
     }
@@ -604,63 +611,76 @@ class DWHHTSDataAggregator
     private function processRecord($record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section)
     {
         // $record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $score, $rowCounter, $section
+        try {
+            if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
+                // Log::info("processing kenya");
+                $rowCounter = $rowCounter + 1;
 
-        if ($orgUnit['mysites_county'] == 'kenya' || empty($orgUnit['mysites_county'])) {
-            // Log::info("processing kenya");
-            $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
+                $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
+                $monthScoreMap = $valueAccumulations[0];
+                $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
+                //$score =  $this->callFunctionBysecition($section, $record);
+            } else {
+                if ($this->ouNameCompare(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
+                    // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
+                    if (!empty($orgUnit['mysites_subcounty']) /* || (isset($orgUnit['level']) && $orgUnit['level'] ==
+                            3) */) {
+                        if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_subcounty']))) {
+                            if (!empty($orgUnit['mysites_facility'])) {
+                                $record_mfl = trim($record['facility_code']);
+                                $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
+                                if ($record_mfl == $orgUnit_mfl) {
+                                    if (!empty($orgUnit['mysites'])) {
+                                        // Log::info("processing site: " . json_encode($orgUnit));
+                                        /// Site
+                                        if ($this->ouNameCompare(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
+                                            $rowCounter = $rowCounter + 1;
 
-            $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-            $monthScoreMap = $valueAccumulations[0];
-            $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-            //$score =  $this->callFunctionBysecition($section, $record);
-        } else {
-            if ($this->ouNameCompare(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
-            // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
-                if (!empty($orgUnit['mysites_sub_county'])) {
-                    if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
-                        if (!empty($orgUnit['mysites_facility'])) {
-                            $record_mfl = trim($record['facility_code']);
-                            $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
-                            if ($record_mfl == $orgUnit_mfl) {
-                                if (!empty($orgUnit['mysites'])) {
-                                    if ($this->ouNameCompare(strtolower($record['Site']), strtolower($orgUnit['mysites']))) {
-                                        $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
-
+                                            $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
+                                            $monthScoreMap = $valueAccumulations[0];
+                                            $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
+                                            // $score =  $this->callFunctionBysecition($section, $record) ;
+                                        }
+                                    } else {
+                                        // Log::info("processing facility: " . json_encode($orgUnit));
+                                        /// Facility
+                                        $rowCounter = $rowCounter + 1;
                                         $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
                                         $monthScoreMap = $valueAccumulations[0];
                                         $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                                        // $score =  $this->callFunctionBysecition($section, $record) ;
+                                        // $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                     }
-                                } else {
-                                    $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
-
-                                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                                    $monthScoreMap = $valueAccumulations[0];
-                                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                                    // $score =  $this->callFunctionBysecition($section, $record)  + $score;
                                 }
+                            } else {
+                                // Log::info("processing subcounty: " . json_encode($orgUnit));
+                                /// Subcounty
+                                $rowCounter = $rowCounter + 1;
+                                $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
+                                $monthScoreMap = $valueAccumulations[0];
+                                $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
+                                //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                             }
-                        } else {
-                            $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
-
-                            $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                            $monthScoreMap = $valueAccumulations[0];
-                            $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                            //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                         }
+                    } else {
+                        // Log::info("processing county: " . json_encode($orgUnit));
+                        /// County
+                        $rowCounter = $rowCounter + 1;
+                        $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
+                        $monthScoreMap = $valueAccumulations[0];
+                        $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
+                        //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                     }
-                } else {
-                    $rowCounter = $rowCounter + 1; //no or rows processed/mathced for an org unit or units below it.
-
-                    $valueAccumulations = $this->sumValues($record, $monthScoreMap, $rowsPerMonthAndScoreCounter, $section);
-                    $monthScoreMap = $valueAccumulations[0];
-                    $rowsPerMonthAndScoreCounter = $valueAccumulations[1];
-                    //$score =  $this->callFunctionBysecition($section, $record)  + $score;
                 }
             }
+
+            return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
+        } catch (Exception $ex) {
+            Log::error($ex);
+            Log::error('<DWHHTSDataAggregator->processRecord() Error: ' . $ex->getMessage() . " orgUnit: " . json_encode($orgUnit));
+            Log::error($ex);
+            return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
         }
 
-        return [$record, $monthScoreMap, $orgUnit, $rowsPerMonthAndScoreCounter, $rowCounter, $section];
     }
 
     //$orgUnit assotiave array with the orunit level to process matching hts csv file columns as keys
@@ -767,7 +787,7 @@ class DWHHTSDataAggregator
             $combinedRecords = $data;
             /////////////
         } else if ($level == 2) {
-            
+
             ///////////// county
             try {
                 // convert $data (object) to array
@@ -778,7 +798,7 @@ class DWHHTSDataAggregator
                     // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
                     $a = strtolower(trim($record['county']));
                     $b = strtolower(trim($ou_name));
-                    
+
                     $a = str_replace('_', ' ', $a);
                     $b = str_replace('_', ' ', $b);
                     $a = str_replace("'", '', $a);
@@ -795,7 +815,7 @@ class DWHHTSDataAggregator
                         // return $lev < 4;
                         $cond = $lev < 4;
                     }
-                    
+
                     return $cond;
 
                     // $a = strtolower(trim($record['county']));
@@ -835,7 +855,7 @@ class DWHHTSDataAggregator
                             $lev = levenshtein($a, $b);
                             $cond = $lev < 4;
                         }
-                        
+
                         return $cond;
                     });
                     // Log::info("getFormRecords: ($level) subCountyFilter: " . $ou_name . " records found: " . count($combinedRecords));

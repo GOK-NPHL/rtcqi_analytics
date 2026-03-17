@@ -313,11 +313,32 @@ class LogbookReport extends React.Component {
             if (isNaN(percent2)) percent2 = 0;
             if (isNaN(percent3)) percent3 = 0;
 
-            row.push(<td key={uuidv4()} scope="row">{percent1}</td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</span>
+                    <span>{percent1}</span>
+                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</span>
+                    <span>{((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                </div>
+            </td>);
             exportData.push(percent1);
-            row.push(<td key={uuidv4()} scope="row">{percent2}</td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</span>
+                    <span>{percent2}</span>
+                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</span>
+                    <span>{((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                </div>
+            </td>);
             exportData.push(percent2);
-            row.push(<td key={uuidv4()} scope="row">{percent3}</td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <span style={{fontSize: '0.8em'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</span>
+                    <span>{percent3}</span>
+                    <span style={{fontSize: '0.8em'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</span>
+                    <span>{((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1)}</span>
+                </div>
+            </td>);
             exportData.push(percent3);
 
             tableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
