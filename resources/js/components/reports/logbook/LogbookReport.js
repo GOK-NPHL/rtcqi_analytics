@@ -171,8 +171,8 @@ class LogbookReport extends React.Component {
                             ];
                             const data = returnedData.data.map((item) => {
                                 return [
-                                    Intl.NumberFormat().format(item?.org_unit),
-                                    Intl.NumberFormat().format(item?.test_month),
+                                    item?.org_unit_name,
+                                    item?.test_month,
                                     Intl.NumberFormat().format(item?.total_tests),
                                     Intl.NumberFormat().format(item?.total_sites),
 
