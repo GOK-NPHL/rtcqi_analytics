@@ -225,6 +225,7 @@ class LogbookReport extends React.Component {
                                 document.querySelector('.tbltab').classList.add('active');
                                 document.querySelector('#tablesTabBtn').classList.remove('active');
                                 document.querySelector('#linelistTabBtn').classList.add('active');
+                                datatable.style.setStyle('.data-table-cell', {color: '#000', backgroundColor: '#fff'});
                                 datatable.refresh(data);
                             }, 100);
                         } else {
