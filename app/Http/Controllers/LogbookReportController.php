@@ -90,6 +90,49 @@ class LogbookReportController extends Controller
         }
     }
 
+    public function getDwhSummaryLinelist(Request $request)
+    {
+        if (!Gate::allows(SystemAuthorities::$authorities['view_log_book_report'])) {
+            return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
+        }
+        try {
+            $cache_unique_uid = md5($request->path() . json_encode($request->all()));
+            $cacheId = strtolower($request->method()) . ':' . $request->path() . ':' . $cache_unique_uid;
+            if (config('app.skip_cache')) {
+                Log::info(PHP_EOL . PHP_EOL . PHP_EOL . "Skipping cache for $cacheId");
+            } else {
+                if (Cache::has($cacheId)) {
+                    $data = Cache::get($cacheId);
+                    return response()->json($data);
+                } else {
+                    Log::info('Cache miss for ' . $cacheId);
+                }
+            }
+
+            $dwhObj = new DWHHTSDataAggregator;
+            $orgUnitIds = $request->orgUnitIds;
+            $siteType   = $request->siteType;
+            $startDate  = $request->startDate;
+            $endDate    = $request->endDate;
+
+            Log::info("<LogbookReportController->getDwhSummaryLinelist() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteType) . " startDate: " . $startDate . " endDate: " . $endDate);
+
+            $result = $dwhObj->getDwhSummaryLinelist($orgUnitIds, $siteType, $startDate, $endDate);
+            if ($result !== null && !config('app.skip_cache')) {
+                $cached = Cache::put($cacheId, $result, now()->addHours(4));
+                if (!$cached) {
+                    Log::error('<LogbookReportController->getDwhSummaryLinelist(): Could not cache data');
+                }
+            }
+            return response()->json($result);
+        } catch (Exception $ex) {
+            Log::error('<LogbookReportController->getDwhSummaryLinelist(): Could not fetch data: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</LogbookReportController->getDwhSummaryLinelist()');
+            return response()->json(['Message' => 'Could not fetch data: ' . $ex->getMessage()], 500);
+        }
+    }
+
     public function getDwhData(Request $request)
     {
         if (!Gate::allows(SystemAuthorities::$authorities['view_log_book_report'])) {
@@ -117,6 +160,8 @@ class LogbookReportController extends Controller
             $siteType = $request->siteType;
             $startDate = $request->startDate;
             $endDate = $request->endDate;
+
+            Log::info("<LogbookReportController->getDwhData() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteType) . " startDate: " . $startDate . " endDate: " . $endDate);
 
             $result = $dwhObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
             // cache the result; expires in 4 hours

@@ -88,6 +88,220 @@ class DWHHTSDataAggregator
         return $formSubmissions;
     }
 
+    public function getDwhSummaryLinelist($orgUnitIds, $siteTypes, $startDate, $endDate)
+    {
+        try {
+            $summaries = [];
+            $currentDate = new DateTime('now');
+            $this->startDate = empty($startDate) ? $currentDate->modify('-5 months')->format("Y-m-d") : $startDate;
+            $this->endDate   = empty($endDate)   ? date("Y-m-d") : $endDate;
+
+            if (empty($orgUnitIds)) {
+                return $summaries;
+            }
+
+            $siteTypeFilters = [];
+            if (isset($siteTypes) && !empty($siteTypes)) {
+                $siteTypeFilters = array_map('strtolower', (array) $siteTypes);
+            }
+
+            $recordsReadData = [];
+
+            foreach ((array) $orgUnitIds as $orgUnitId) {
+                try {
+                    $odkUtils   = new ODKUtils();
+                    $orgMeta    = $odkUtils->getOrgsByLevel($orgUnitId);
+                    $orgToProcess = $orgMeta[0];
+                    $level      = $orgMeta[1];
+                    [$orgUnit, $orgUnitName] = $odkUtils->getOrgUnitHierachyNames($orgToProcess, $level);
+                    $orgUnit['org_unit_id'] = $orgUnitId;
+                    $orgUnit['level']       = $level;
+
+                    if (array_key_exists($orgUnitId, $recordsReadData)) {
+                        $records = $recordsReadData[$orgUnitId];
+                    } else {
+                        $records = $this->getFormRecords($orgUnit) ?? [];
+                        $recordsReadData[$orgUnitId] = $records;
+                    }
+
+                    // Apply site-type filter (same prefix logic as processRecord)
+                    if (!empty($siteTypeFilters)) {
+                        $records = array_filter($records, function ($record) use ($siteTypeFilters) {
+                            $site = strtolower(trim($record['Site'] ?? $record['entry_point'] ?? ''));
+                            foreach ($siteTypeFilters as $filter) {
+                                if (substr($site, 0, strlen($filter)) === $filter) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
+                    }
+
+                    // Aggregate records grouped by test_month
+                    $monthlyData = [];
+                    foreach ($records as $record) {
+                        $month = $record['test_month'] ?? date('Y-m-01', strtotime($record['test_date']));
+                        if (!isset($monthlyData[$month])) {
+                            $monthlyData[$month] = $this->emptyMonthSummary();
+                        }
+                        $this->accumulateSummaryRecord($monthlyData[$month], $record);
+                    }
+
+                    foreach ($monthlyData as $month => $aggregates) {
+                        unset($aggregates['_sites']);
+                        $summaries[] = array_merge([
+                            'org_unit_id'   => $orgUnitId,
+                            'org_unit_name' => $orgUnitName,
+                            'level'         => $level,
+                            'test_month'    => $month,
+                        ], $aggregates);
+                    }
+                } catch (Exception $ex) {
+                    Log::error('<DWHHTSDataAggregator->getDwhSummaryLinelist() org loop error: ' . $ex->getMessage());
+                    Log::error($ex);
+                }
+            }
+
+            usort($summaries, fn($a, $b) => strcmp($b['test_month'], $a['test_month']));
+
+            return $summaries;
+        } catch (Exception $ex) {
+            Log::error('<DWHHTSDataAggregator->getDwhSummaryLinelist() Error: ' . $ex->getMessage());
+            Log::error($ex);
+            Log::error('</DWHHTSDataAggregator->getDwhSummaryLinelist()');
+            return null;
+        }
+    }
+
+    private function emptyMonthSummary(): array
+    {
+        return [
+            'total_tests'       => 0,
+            'total_sites'       => 0,
+            't1_reactive'       => 0,
+            't1_non_reactive'   => 0,
+            't1_invalid'        => 0,
+            't1_null'        => 0,
+            't2_reactive'       => 0,
+            't2_non_reactive'   => 0,
+            't2_invalid'        => 0,
+            't2_null'        => 0,
+            't3_reactive'       => 0,
+            't3_non_reactive'   => 0,
+            't3_invalid'        => 0,
+            't3_null'        => 0,
+            'final_positive'    => 0,
+            'final_negative'    => 0,
+            'final_null'    => 0,
+            'final_inconclusive' => 0,
+            'kit1_trinscreen'    => 0,
+            'kit1_standardq'     => 0,
+            'kit1_dualkit'       => 0,
+            'kit1_firstresponse' => 0,
+            'kit1_bioline'       => 0,
+            'kit1_other'         => 0,
+            'kit2_trinscreen'    => 0,
+            'kit2_standardq'     => 0,
+            'kit2_dualkit'       => 0,
+            'kit2_firstresponse' => 0,
+            'kit2_bioline'       => 0,
+            'kit2_other'         => 0,
+            'kit3_trinscreen'    => 0,
+            'kit3_standardq'     => 0,
+            'kit3_dualkit'       => 0,
+            'kit3_firstresponse' => 0,
+            'kit3_bioline'       => 0,
+            'kit3_other'         => 0,
+            '_sites'             => [],
+        ];
+    }
+
+    private function accumulateSummaryRecord(array &$summary, array $record): void
+    {
+        $r1    = strtolower(trim($record['test_result1']    ?? ''));
+        $r2    = strtolower(trim($record['test_result2']    ?? ''));
+        $r3    = strtolower(trim($record['test_result3']    ?? ''));
+        $final = strtolower(trim($record['final_test_result'] ?? ''));
+
+        if ($r1 === 'positive' || $r1 === 'negative' || $r1 === 'invalid') {
+            $summary['total_tests']++;
+        }
+
+        $summary['t1_reactive']     += ($r1 === 'positive')     ? 1 : 0;
+        $summary['t1_non_reactive'] += ($r1 === 'negative')     ? 1 : 0;
+        $summary['t1_invalid']      += ($r1 === 'invalid')      ? 1 : 0;
+        $summary['t2_reactive']     += ($r2 === 'positive')     ? 1 : 0;
+        $summary['t2_non_reactive'] += ($r2 === 'negative')     ? 1 : 0;
+        $summary['t2_invalid']      += ($r2 === 'invalid')      ? 1 : 0;
+        $summary['t3_reactive']     += ($r3 === 'positive')     ? 1 : 0;
+        $summary['t3_non_reactive'] += ($r3 === 'negative')     ? 1 : 0;
+        $summary['t3_invalid']      += ($r3 === 'invalid')      ? 1 : 0;
+        $summary['final_positive']     += ($final === 'positive')     ? 1 : 0;
+        $summary['final_negative']     += ($final === 'negative')     ? 1 : 0;
+        $summary['final_inconclusive'] += ($final === 'inconclusive') ? 1 : 0;
+
+        $summary['t1_null'] += ($r1 === 'null' || $r1 === '' || $r1 === 'empty') ? 1 : 0;
+        $summary['t2_null'] += ($r2 === 'null' || $r2 === '' || $r2 === 'empty') ? 1 : 0;
+        $summary['t3_null'] += ($r3 === 'null' || $r3 === '' || $r3 === 'empty') ? 1 : 0;
+        $summary['final_null'] += ($final === 'null' || $final === '' || $final == 'empty') ? 1 : 0;
+
+        ////
+        $summary['kit1_trinscreen']    += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'trinscreen')) ? 1 : 0;
+        $summary['kit1_standardq']     += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard')) ? 1 : 0;
+        $summary['kit1_dualkit']       += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'dual')) ? 1 : 0;
+        $summary['kit1_firstresponse'] += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'first')) ? 1 : 0;
+        $summary['kit1_bioline']       += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'bioline')) ? 1 : 0;
+        $summary['kit1_other']         += !$record['test_kit_name1'] || (!str_contains(strtolower($record['test_kit_name1'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name1'] ?? ''))) ? 1 : 0;
+
+        $summary['kit2_trinscreen']    += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'trinscreen')) ? 1 : 0;
+        $summary['kit2_standardq']     += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard')) ? 1 : 0;
+        $summary['kit2_dualkit']       += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'dual')) ? 1 : 0;
+        $summary['kit2_firstresponse'] += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'first')) ? 1 : 0;
+        $summary['kit2_bioline']       += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'bioline')) ? 1 : 0;
+        $summary['kit2_other']         += !$record['test_kit_name2'] || (!str_contains(strtolower($record['test_kit_name2'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name2'] ?? ''))) ? 1 : 0;
+
+        $summary['kit3_trinscreen']    += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'trinscreen')) ? 1 : 0;
+        $summary['kit3_standardq']     += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard')) ? 1 : 0;
+        $summary['kit3_dualkit']       += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'dual')) ? 1 : 0;
+        $summary['kit3_firstresponse'] += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'first')) ? 1 : 0;
+        $summary['kit3_bioline']       += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'bioline')) ? 1 : 0;
+        $summary['kit3_other']         += !$record['test_kit_name3'] || (!str_contains(strtolower($record['test_kit_name3'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name3'] ?? ''))) ? 1 : 0;
+        ////
+
+
+        $this->accumulateKitCount($summary, 'kit1_', $record['test_kit_name1'] ?? '');
+        $this->accumulateKitCount($summary, 'kit2_', $record['test_kit_name2'] ?? '');
+        $this->accumulateKitCount($summary, 'kit3_', $record['test_kit_name3'] ?? '');
+
+        // Count unique facilities
+        $siteKey = trim(strtolower(($record['facility_code'] ?? '') . '_' . ($record['facility_name'] ?? '')));
+        if (!isset($summary['_sites'][$siteKey])) {
+            $summary['_sites'][$siteKey] = true;
+            $summary['total_sites']++;
+        }
+    }
+
+    private function accumulateKitCount(array &$summary, string $prefix, string $kitName): void
+    {
+        $kit = strtolower(trim($kitName));
+        if (empty($kit)) {
+            return;
+        }
+        if (str_contains($kit, 'trinscreen')) {
+            $summary[$prefix . 'trinscreen']++;
+        } elseif (str_contains($kit, 'standard q') || str_contains($kit, 'standardq')) {
+            $summary[$prefix . 'standardq']++;
+        } elseif (str_contains($kit, 'dual')) {
+            $summary[$prefix . 'dualkit']++;
+        } elseif (str_contains($kit, 'first response')) {
+            $summary[$prefix . 'firstresponse']++;
+        } elseif (str_contains($kit, 'bioline')) {
+            $summary[$prefix . 'bioline']++;
+        } else {
+            $summary[$prefix . 'other']++;
+        }
+    }
+
 
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
@@ -158,7 +372,7 @@ class DWHHTSDataAggregator
                             $monthlySites['algorithm_followed'] =  $algorithmFollowedSites;
 
                             $htsRegister = array();
-                            foreach($this->emrs as $emr) {
+                            foreach ($this->emrs as $emr) {
                                 $htsRegister[$emr] = 0;
                             }
                             // $htsRegister['ehts'] = 0;
@@ -299,7 +513,7 @@ class DWHHTSDataAggregator
                                     // Log::info(json_encode($site) . " site['t3_reactive'] = " . $site['t3_reactive'] );
 
                                     // 3-test positive agreement rates
-                                    $t3_t1_pos_agreement = $site['t3_reactive'] *100 / $site['t1_reactive'];
+                                    $t3_t1_pos_agreement = $site['t3_reactive'] * 100 / $site['t1_reactive'];
                                     // Log::info("t3_t1_pos_agreement: " . $t3_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t1']['avg'] = $t3_t1_pos_agreement;
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalTests'] += $site['t1_totals_tests'];
@@ -316,7 +530,7 @@ class DWHHTSDataAggregator
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
                                     }
-                                    $t3_t2_pos_agreement = $site['t3_reactive'] *100 / $site['t2_reactive'];
+                                    $t3_t2_pos_agreement = $site['t3_reactive'] * 100 / $site['t2_reactive'];
                                     // Log::info("t3_t2_pos_agreement: " . $t3_t2_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t3_t2_pos_agreement;
                                     if ($t3_t2_pos_agreement > 98) {
@@ -329,7 +543,7 @@ class DWHHTSDataAggregator
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
                                     }
-                                    $t2_t1_pos_agreement = $site['t2_reactive'] *100 / $site['t1_reactive'];
+                                    $t2_t1_pos_agreement = $site['t2_reactive'] * 100 / $site['t1_reactive'];
                                     // Log::info("t2_t1_pos_agreement: " . $t2_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t2_t1_pos_agreement;
                                     if ($t2_t1_pos_agreement > 98) {
@@ -377,12 +591,12 @@ class DWHHTSDataAggregator
                                     // $monthlySites['hts_type']['hardcopy'] += $site['register']['hardcopy'];
 
                                     ///
-                                    if($site['emr'] == null || $site['emr'] == '') {
+                                    if ($site['emr'] == null || $site['emr'] == '') {
                                         $site['emr'] = 'Unknown';
                                     }
-                                    foreach($this->emrs as $emr) {
-                                        if(strtolower($site['emr']) == strtolower($emr)) {
-                                            if(!array_key_exists($emr, $monthlySites['hts_type'])) {
+                                    foreach ($this->emrs as $emr) {
+                                        if (strtolower($site['emr']) == strtolower($emr)) {
+                                            if (!array_key_exists($emr, $monthlySites['hts_type'])) {
                                                 $monthlySites['hts_type'][$emr] = 0;
                                             }
                                             $monthlySites['hts_type'][$emr] += 1;
@@ -418,9 +632,9 @@ class DWHHTSDataAggregator
                             //inconclusives
                             // $orgUnitArray['inconclusives'][$monthlyDate] = $invalidScores['inconclusives'];
                             $inconclusiveRate = 0;
-                            try{
+                            try {
                                 $den = $monthlySites['totals']['total_tests'] ?? $invalidScores['totalTests'];
-                                if($den) $inconclusiveRate = ($invalidScores['inconclusives'] * 100) / $den;
+                                if ($den) $inconclusiveRate = ($invalidScores['inconclusives'] * 100) / $den;
                             } catch (Exception $ex) {
                                 Log::error($ex);
                             }
@@ -431,14 +645,13 @@ class DWHHTSDataAggregator
                             $invlidRate = 0;
                             try {
                                 $den = $monthlySites['totals']['total_tests'] ?? $invalidScores['totalTests'];
-                                if($den) $invlidRate = ($invalidScores['invalids'] * 100) / $den;
+                                if ($den) $invlidRate = ($invalidScores['invalids'] * 100) / $den;
                                 // $invlidRate = number_format((float)$invlidRate, 1, '.', '');
                             } catch (Exception $ex) {
                                 Log::error($ex);
                             }
                             $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 3, '.', '');
                             $orgUnitArray['invalid_count'][$monthlyDate] = $invalidScores['invalids'];
-
                         }
                     } catch (Exception $ex) {
                         Log::error($ex);
@@ -560,7 +773,7 @@ class DWHHTSDataAggregator
 
             // final_inconclusive
             // $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['inconclusives'] += (strtolower(trim($record['final_test_result'])) == 'inconclusive') ? 1 : 0;
-            if(strtolower(trim($record['final_test_result'])) == 'inconclusive'){
+            if (strtolower(trim($record['final_test_result'])) == 'inconclusive') {
                 $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['inconclusives'] += 1;
             }
 
@@ -607,31 +820,32 @@ class DWHHTSDataAggregator
 
 
             //check if supervisor signed or not signed
-                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['supervisory_signature'], 1);
             //end
 
 
             //check if algorithm was followed or not followed
-                /*
-                FINAL_POSITIVE = T1_KIT=trinscreen AND T1_RESULT='positive' AND T2_KIT=determine AND T2_RESULT=positive AND T3_KIT='first response' AND T3_RESULT='positive' AND FINAL_TEST_RESULT='positive'
-                ||
-                FINAL_NEGATIVE = T1_KIT=trinscreen AND T1_RESULT='negative' AND FINAL_TEST_RESULT='negative'
-                ||
-                FINAL_INCONCLUSIVE = T1_KIT=trinscreen AND T1_RESULT='invalid' AND FINAL_TEST_RESULT='inconclusive'
+            /*
+                    FINAL_POSITIVE = T1_KIT=trinscreen AND T1_RESULT='reactive' AND T2_KIT=determine AND
+                    T2_RESULT='reactive'
+                    AND T3_KIT='first response' AND T3_RESULT='reactive' AND FINAL_TEST_RESULT='reactive'
+                    ||
+                    FINAL_NEGATIVE = T1_KIT=trinscreen AND T1_RESULT='non reactive' AND FINAL_TEST_RESULT='negative'
+                    ||
+                    FINAL_INCONCLUSIVE = T1_KIT=trinscreen AND T1_RESULT='invalid' AND FINAL_TEST_RESULT='inconclusive'
                 */
-                // if(
-                //     // positive
-                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'positive' && trim(strtolower($record['test_kit_name2'])) == 'determine' && trim(strtolower($record['test_result2'])) == 'positive' && trim(strtolower($record['test_kit_name3'])) == 'first response' && trim(strtolower($record['test_result3'])) == 'positive' && trim(strtolower($record['final_test_result'])) == 'positive')
-                //     ||
-                //     // negative
-                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'negative' && trim(strtolower($record['final_test_result'])) == 'negative')
-                //     ||
-                //     // inconclusive
-                //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'invalid' && trim(strtolower($record['final_test_result'])) == 'inconclusive')
-                // ) {
-
-                // }
-                array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
+            // if(
+            //     // positive
+            //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'positive' && trim(strtolower($record['test_kit_name2'])) == 'determine' && trim(strtolower($record['test_result2'])) == 'positive' && trim(strtolower($record['test_kit_name3'])) == 'first response' && trim(strtolower($record['test_result3'])) == 'positive' && trim(strtolower($record['final_test_result'])) == 'positive')
+            //     ||
+            //     // negative
+            //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'negative' && trim(strtolower($record['final_test_result'])) == 'negative')
+            //     ||
+            //     // inconclusive
+            //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'invalid' && trim(strtolower($record['final_test_result'])) == 'inconclusive')
+            // ) {
+            // }
+            array_push($monthScoreMap[$yr . '-' . $mon][$siteConcatName]['algorithm_followed'], 1);
             //end
 
 
@@ -662,9 +876,9 @@ class DWHHTSDataAggregator
             //$score =  $this->callFunctionBysecition($section, $record);
         } else {
             if ($this->ouNameCompare(strtolower($record['county']), strtolower($orgUnit['mysites_county']))) {
-            // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
+                // if (trim(strtolower($record['county']) == trim(strtolower($orgUnit['mysites_county'])))) {
                 if (!empty($orgUnit['mysites_sub_county'])) {
-                    if($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
+                    if ($this->ouNameCompare(strtolower($record['sub_county']), strtolower($orgUnit['mysites_sub_county']))) {
                         if (!empty($orgUnit['mysites_facility'])) {
                             $record_mfl = trim($record['facility_code']);
                             $orgUnit_mfl = explode("_", $orgUnit['mysites_facility'])[0];
@@ -814,7 +1028,7 @@ class DWHHTSDataAggregator
             $combinedRecords = $data;
             /////////////
         } else if ($level == 2) {
-            
+
             ///////////// county
             try {
                 // convert $data (object) to array
@@ -825,7 +1039,7 @@ class DWHHTSDataAggregator
                     // return trim(strtolower($record['county'])) == trim(strtolower($ou_name));
                     $a = strtolower(trim($record['county']));
                     $b = strtolower(trim($ou_name));
-                    
+
                     $a = str_replace('_', ' ', $a);
                     $b = str_replace('_', ' ', $b);
                     $a = str_replace("'", '', $a);
@@ -842,7 +1056,7 @@ class DWHHTSDataAggregator
                         // return $lev < 4;
                         $cond = $lev < 4;
                     }
-                    
+
                     return $cond;
 
                     // $a = strtolower(trim($record['county']));
@@ -857,7 +1071,7 @@ class DWHHTSDataAggregator
             }
             // Log::info("getFormRecords: level 2: $ou_name = " . count($combinedRecords));
         } else {
-            if(str_replace('+', '', $level) == 3) {
+            if (str_replace('+', '', $level) == 3) {
                 ///////////// sub county
                 try {
                     if (is_object($data)) {
@@ -882,7 +1096,7 @@ class DWHHTSDataAggregator
                             $lev = levenshtein($a, $b);
                             $cond = $lev < 4;
                         }
-                        
+
                         return $cond;
                     });
                     // Log::info("getFormRecords: ($level) subCountyFilter: " . $ou_name . " records found: " . count($combinedRecords));
@@ -928,11 +1142,26 @@ class DWHHTSDataAggregator
             return $this->rawDataCache;
         }
         $columns = [
-            'test_date', 'test_month', 'county', 'sub_county', 'facility_code', 'facility_name',
-            'entry_point', 'emr',
-            'test_result1', 'test_kit_name1', 'test_kit_lot_number1', 'test_kit_expiry1',
-            'test_result2', 'test_kit_name2', 'test_kit_lot_number2', 'test_kit_expiry2',
-            'test_result3', 'test_kit_name3', 'test_kit_lot_number3', 'test_kit_expiry3',
+            'test_date',
+            'test_month',
+            'county',
+            'sub_county',
+            'facility_code',
+            'facility_name',
+            'entry_point',
+            'emr',
+            'test_result1',
+            'test_kit_name1',
+            'test_kit_lot_number1',
+            'test_kit_expiry1',
+            'test_result2',
+            'test_kit_name2',
+            'test_kit_lot_number2',
+            'test_kit_expiry2',
+            'test_result3',
+            'test_kit_name3',
+            'test_kit_lot_number3',
+            'test_kit_expiry3',
             'final_test_result',
         ];
         // Use DB::table() instead of Eloquent to avoid instantiating model objects and
@@ -1053,7 +1282,8 @@ class DWHHTSDataAggregator
     }
 
 
-    public function stringMatches($a, $b, $threshold = 70) {
+    public function stringMatches($a, $b, $threshold = 70)
+    {
         $cond = $a === $b;
         if ($cond) return true;
 
@@ -1064,7 +1294,8 @@ class DWHHTSDataAggregator
         return $lev < 4; // small edit distance
     }
 
-    private function ouNameCompare($a, $b) {
+    private function ouNameCompare($a, $b)
+    {
         $a = strtolower(trim($a));
         $b = strtolower(trim($b));
         $a = str_replace('_', ' ', $a);

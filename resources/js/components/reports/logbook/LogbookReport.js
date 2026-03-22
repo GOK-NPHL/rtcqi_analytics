@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+// import DataTable from 'frappe-datatable';
 import LineGraph from '../../utils/charts/LineGraph';
 import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
-import { FetchOrgunits, FetchOdkHTSData, separateOrgUnitAndSite, exportToExcel } from '../../utils/Helpers'
+import { FetchOrgunits, FetchOdkHTSData, FetchDwhSummaryLinelist, separateOrgUnitAndSite, exportToExcel } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,6 +49,7 @@ class LogbookReport extends React.Component {
             isLoading: false,
         }
         this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
+        this.fetchLinelistData = this.fetchLinelistData.bind(this);
         this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
         this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
         this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
@@ -75,7 +77,9 @@ class LogbookReport extends React.Component {
                 orgId: 1,
                 orgUnitDataIds: [defaultOrg[0]],
                 startDate: '',
-                endDate: ''
+                endDate: '',
+                linelistMode: false,
+                linelistData: null,
             });
 
             this.fetchOdkDataServer(defaultOrg,
@@ -92,7 +96,7 @@ class LogbookReport extends React.Component {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    // this.setState({ isLoading: true });
+                    this.setState({ isLoading: true });
                     let returnedData = await FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate);
                     if (returnedData.status == 200) {
                         this.setState({
@@ -106,7 +110,135 @@ class LogbookReport extends React.Component {
                 })();
             }
         }
+    }
 
+    fetchLinelistData(orgUnitIds, siteType, startDate, endDate) {
+        try {
+            if (orgUnitIds) {
+                if (orgUnitIds.length != 0) {
+                    (async () => {
+                        this.setState({ isLoading: true });
+                        let returnedData = await FetchDwhSummaryLinelist(orgUnitIds, siteType, startDate, endDate);
+                        if (returnedData.status == 200) {
+                            this.setState({
+                                linelistData: returnedData,
+                                isLoading: false,
+                                linelistMode: true,
+                            });
+                            const cols = [
+                                "Org unit",
+                                "Test Month",
+                                "Total Tests",
+                                "Total Sites",
+                                "Total T1 Reactive",
+                                "Total T1 Non-reactive",
+                                "Total T1 Invalid",
+                                "Total T1 No_Result",
+
+                                "Total T2 Reactive",
+                                "Total T2 Non-reactive",
+                                "Total T2 Invalid",
+                                // "Total T2 No_Result",
+
+                                "Total T3 Reactive",
+                                "Total T3 Non-reactive",
+                                "Total T3 Invalid",
+                                // "Total T3 No_Result",
+
+                                "Total Final Positive",
+                                "Total Final Negative",
+                                "Total Final No_Result",
+
+                                "Total Final Inconclusive",
+                                "Test Kit 1 Trinscreen",
+                                "Test Kit 1 Standard Q",
+                                "Test Kit 1 Dual Kit",
+                                "Test Kit 1 First Response",
+                                "Test Kit 1 Bioline Dio",
+                                "Test Kit 1 Other",
+                                "Test Kit 2 Trinscreen",
+                                "Test Kit 2 Standard Q",
+                                "Test Kit 2 Dual Kit",
+                                "Test Kit 2 First Response",
+                                "Test Kit 2 Bioline Duo",
+                                "Test Kit 2 Other",
+                                "Test Kit 3 Trinscreen",
+                                "Test Kit 3 Standard Q",
+                                "Test Kit 3 Dual Kit",
+                                "Test Kit 3 First Response",
+                                "Test Kit 3 Bioline Duo",
+                                "Test Kit 3 Other"
+                            ];
+                            const data = returnedData.data.map((item) => {
+                                return [
+                                    Intl.NumberFormat().format(item?.org_unit),
+                                    Intl.NumberFormat().format(item?.test_month),
+                                    Intl.NumberFormat().format(item?.total_tests),
+                                    Intl.NumberFormat().format(item?.total_sites),
+
+                                    Intl.NumberFormat().format(item?.t1_reactive),
+                                    Intl.NumberFormat().format(item?.t1_non_reactive),
+                                    Intl.NumberFormat().format(item?.t1_invalid),
+                                    Intl.NumberFormat().format(item?.t1_null),
+
+                                    Intl.NumberFormat().format(item?.t2_reactive),
+                                    Intl.NumberFormat().format(item?.t2_non_reactive),
+                                    Intl.NumberFormat().format(item?.t2_invalid),
+                                    // Intl.NumberFormat().format(item?.t2_null),
+
+                                    Intl.NumberFormat().format(item?.t3_reactive),
+                                    Intl.NumberFormat().format(item?.t3_non_reactive),
+                                    Intl.NumberFormat().format(item?.t3_invalid),
+                                    // Intl.NumberFormat().format(item?.t3_null),
+
+                                    Intl.NumberFormat().format(item?.final_positive),
+                                    Intl.NumberFormat().format(item?.final_negative),
+                                    Intl.NumberFormat().format(item?.final_null),
+
+                                    Intl.NumberFormat().format(item?.final_inconclusive),
+                                    Intl.NumberFormat().format(item?.kit1_trinscreen),
+                                    Intl.NumberFormat().format(item?.kit1_standardq),
+                                    Intl.NumberFormat().format(item?.kit1_dualkit),
+                                    Intl.NumberFormat().format(item?.kit1_firstresponse),
+                                    Intl.NumberFormat().format(item?.kit1_bioline),
+                                    Intl.NumberFormat().format(item?.kit1_other),
+                                    Intl.NumberFormat().format(item?.kit2_trinscreen),
+                                    Intl.NumberFormat().format(item?.kit2_standardq),
+                                    Intl.NumberFormat().format(item?.kit2_dualkit),
+                                    Intl.NumberFormat().format(item?.kit2_firstresponse),
+                                    Intl.NumberFormat().format(item?.kit2_bioline),
+                                    Intl.NumberFormat().format(item?.kit2_other),
+                                    Intl.NumberFormat().format(item?.kit3_trinscreen),
+                                    Intl.NumberFormat().format(item?.kit3_standardq),
+                                    Intl.NumberFormat().format(item?.kit3_dualkit),
+                                    Intl.NumberFormat().format(item?.kit3_firstresponse),
+                                    Intl.NumberFormat().format(item?.kit3_bioline),
+                                    Intl.NumberFormat().format(item?.kit3_other),
+                                ];
+                            }) || [];
+                            const datatable = new DataTable('#linelist-table', {
+                                columns: cols,
+                                // data: data
+                            });
+                            setTimeout(() => {
+                                document.querySelector('.graphstab').classList.remove('active');
+                                document.querySelector('.tbltab').classList.add('active');
+                                document.querySelector('#tablesTabBtn').classList.remove('active');
+                                document.querySelector('#linelistTabBtn').classList.add('active');
+                                datatable.refresh(data);
+                            }, 100);
+                        } else {
+                            this.setState({ isLoading: false, });
+                        }
+
+                    })();
+                }
+            }
+
+
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     orgUnitChangeHandler(orgUnitIds) {
@@ -130,12 +262,20 @@ class LogbookReport extends React.Component {
 
     onFilterButtonClickEvent() {
         // this.setState({ isLoading: true });
-        this.fetchOdkDataServer(
-            this.state.orgUnitDataIds,
-            this.state.siteType,
-            this.state.startDate,
-            this.state.endDate
-        );
+        if (this.state.linelistMode) {
+            this.fetchLinelistData(defaultOrg,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
+            );
+        } else {
+            this.fetchOdkDataServer(
+                this.state.orgUnitDataIds,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
+            );
+        }
     }
 
     filterDisplayedIndicator(indicatorIndex) {
@@ -296,7 +436,7 @@ class LogbookReport extends React.Component {
             // hts Type rates
             htsTypeTableData.push(
                 <tr key={uuidv4()}>
-                    <td colSpan={dataToParse?.emrs?.length+1} scope="row">
+                    <td colSpan={dataToParse?.emrs?.length + 1} scope="row">
                         <strong>{dataToParse.orgName.toUpperCase()}</strong>
                     </td>
                 </tr>);
@@ -316,10 +456,14 @@ class LogbookReport extends React.Component {
             let exportData = [];
             const d = new Date(period);
 
-            overallRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']})</td>);
+            overallRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']}) */}
+            </td>);
             overallExportData.push(sting);
-            
-            row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']})</td>);
+
+            row.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={totals['totals']['total_sites']}, T={totals['totals']['total_tests']}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + totals['totals']['total_sites'] + ", T=" + totals['totals']['total_tests'] + ")"
             exportData.push(sting);
             if (this.state.siteType != null) {
@@ -347,36 +491,36 @@ class LogbookReport extends React.Component {
             if (isNaN(percent3)) percent3 = 0;
 
             row.push(<td key={uuidv4()} scope="row">
-                <div style={{display:'flex', flexDirection:'column'}}>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent1}%</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>SitesRate: ({totals['totals']["<95"]}/{totals['totals']["total_sites"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>{percent1}%</span>
 
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>TestsRate: ({totals['totals']["<95_tests"]}/{totals['totals']["total_tests"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>
                         {totals['totals']["<95_tests"] > 0 ? ((Number(totals['totals']["<95_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
                     </span>
                 </div>
             </td>);
             exportData.push(percent1);
             row.push(<td key={uuidv4()} scope="row">
-                <div style={{display:'flex', flexDirection:'column'}}>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent2}%</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>SitesRate: ({totals['totals']["95-98"]}/{totals['totals']["total_sites"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>{percent2}%</span>
 
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>TestsRate: ({totals['totals']["95-98_tests"]}/{totals['totals']["total_tests"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>
                         {totals['totals']["95-98_tests"] > 0 ? ((Number(totals['totals']["95-98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
                     </span>
                 </div>
             </td>);
             exportData.push(percent2);
             row.push(<td key={uuidv4()} scope="row">
-                <div style={{display:'flex', flexDirection:'column'}}>
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>{percent3}%</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>SitesRate: ({totals['totals'][">98"]}/{totals['totals']["total_sites"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>{percent3}%</span>
 
-                    <small style={{fontSize: '0.7em', color: 'gray'}}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small>
-                    <span style={{ fontWeight: 'semibold', color: 'black'}}>
+                    <small style={{ fontSize: '0.7em', color: 'gray' }}>TestsRate: ({totals['totals'][">98_tests"]}/{totals['totals']["total_tests"]})</small>
+                    <span style={{ fontWeight: 'semibold', color: 'black' }}>
                         {totals['totals'][">98_tests"] > 0 ? ((Number(totals['totals'][">98_tests"]) / Number(totals['totals']["total_tests"])) * 100).toFixed(1) + "%" : "0%"}
                     </span>
                 </div>
@@ -384,8 +528,8 @@ class LogbookReport extends React.Component {
             exportData.push(percent3);
 
             overallRow.push(<td key={uuidv4()} scope="row">
-                <div style={{display:'flex', flexDirection:'column'}}>
-                    <span style={{ fontWeight: 'bold', color: 'black'}}>{overallAgreementRate.toFixed(1)}%</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 'bold', color: 'black' }}>{overallAgreementRate.toFixed(1)}%</span>
                 </div>
             </td>);
             overallExportData.push(overallAgreementRate.toFixed(1));
@@ -488,104 +632,104 @@ class LogbookReport extends React.Component {
             let dataObjectT3T2 = dataToParse.positive_agreement_rate_t3_t2[period];
             let dataObjectT2T1 = dataToParse.positive_agreement_rate_t2_t1[period];
             // range_.map((range, index) => {
-                let row = [];
-                const d = new Date(period);
-                row.push(<td key={uuidv4()} scope="row">{
-                    monthNames[d.getMonth()]} {d.getFullYear()}
-                    {/* <b>({range})</b> */}
-                    {/* (N={dataObjectT3T1['totals']['total_sites']}) */}
-                    {" (S=" + overallDataObject[period]['totals']['total_sites'] + ", T=" + overallDataObject[period]['totals']['total_tests'] + ")"}
-                </td>);
-                if (this.state.siteType != null) {
-                    if (this.state.siteType.length != 0) {
-                        row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
-                    }
+            let row = [];
+            const d = new Date(period);
+            row.push(<td key={uuidv4()} scope="row">{
+                monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* <b>({range})</b> */}
+                {/* (N={dataObjectT3T1['totals']['total_sites']}) */}
+                {" (S=" + overallDataObject[period]['totals']['total_sites'] + ", T=" + overallDataObject[period]['totals']['total_tests'] + ")"}
+            </td>);
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
+                    row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                 }
-                let ttl = monthNames[d.getMonth()] + "-" + d.getFullYear() + ")";
-                // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1[range]?.totals}</td>);
-                // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2[range]?.totals}</td>);
-                // row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1[range]?.totals}</td>);
-                row.push(<td key={uuidv4()} scope="row">
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T1?.avg}%</span> */}
-                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
-                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
-                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T1,null,1)}</pre> */}
-                    </div>
-                </td>);
-                row.push(<td key={uuidv4()} scope="row">
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T2?.avg}%</span> */}
-                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT2Reactive).toFixed(2) + '%' : '0%'}</span>
-                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT2Reactive})</small>
-                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T2,null,1)}</pre> */}
-                    </div>
-                </td>);
-                row.push(<td key={uuidv4()} scope="row">
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
-                        {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT2T1?.avg}%</span> */}
-                        <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT2Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
-                        <small style={{color: 'gray'}}>({dataObjectT3T1?.totalT2Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
-                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT2T1,null,1)}</pre> */}
-                    </div>
-                </td>);
-                positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()}
-                    onClick={() => {
-                        this.setState({
-                            nModal: {
-                                title: <>
-                                    <h5>{ttl || "Details"}</h5>
-                                    {/* Add export button here */}
-                                </>,
-                                content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
-                                    <table className='table table-condensed table-striped'>
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Indicator</th>
-                                                <th>MFL Code</th>
-                                                <th>Site</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {dataObjectT3T1[range]?.sites.map((siteName, index) => {
-                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                                let mfl = siteName.split('___')[1]?.split('_')[0];
-                                                return (<tr key={uuidv4()}>
-                                                    <td>{index + 1}.</td>
-                                                    <td>T3/T1</td>
-                                                    <td>{mfl}</td>
-                                                    <td>{site}</td>
-                                                </tr>);
-                                            })}
-                                            {dataObjectT3T2[range]?.sites.map((siteName, index) => {
-                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                                let mfl = siteName.split('___')[1]?.split('_')[0];
-                                                return (<tr key={uuidv4()}>
-                                                    <td>{index + 1}.</td>
-                                                    <td>T3/T2</td>
-                                                    <td>{mfl}</td>
-                                                    <td>{site}</td>
-                                                </tr>);
-                                            })}
-                                            {dataObjectT2T1[range]?.sites.map((siteName, index) => {
-                                                let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                                let mfl = siteName.split('___')[1]?.split('_')[0];
-                                                return (<tr key={uuidv4()}>
-                                                    <td>{index + 1}.</td>
-                                                    <td>T2/T1</td>
-                                                    <td>{mfl}</td>
-                                                    <td>{site}</td>
-                                                </tr>);
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>)
-                            }
-                        });
-                        $('#nModal').modal('toggle');
-                    }}
-                >{row}</tr>);
+            }
+            let ttl = monthNames[d.getMonth()] + "-" + d.getFullYear() + ")";
+            // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T1[range]?.totals}</td>);
+            // row.push(<td key={uuidv4()} scope="row">{dataObjectT3T2[range]?.totals}</td>);
+            // row.push(<td key={uuidv4()} scope="row">{dataObjectT2T1[range]?.totals}</td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T1?.avg}%</span> */}
+                    <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
+                    <small style={{ color: 'gray' }}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
+                    {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T1,null,1)}</pre> */}
+                </div>
+            </td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT3T2?.avg}%</span> */}
+                    <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT3Reactive * 100) / dataObjectT3T1?.totalT2Reactive).toFixed(2) + '%' : '0%'}</span>
+                    <small style={{ color: 'gray' }}>({dataObjectT3T1?.totalT3Reactive} / {dataObjectT3T1?.totalT2Reactive})</small>
+                    {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT3T2,null,1)}</pre> */}
+                </div>
+            </td>);
+            row.push(<td key={uuidv4()} scope="row">
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {/* <span style={{textDecoration: 'line-through', color: '#ff6d6d'}}>{dataObjectT2T1?.avg}%</span> */}
+                    <span>{dataObjectT3T1?.totalTests > 0 ? ((dataObjectT3T1?.totalT2Reactive * 100) / dataObjectT3T1?.totalT1Reactive).toFixed(2) + '%' : '0%'}</span>
+                    <small style={{ color: 'gray' }}>({dataObjectT3T1?.totalT2Reactive} / {dataObjectT3T1?.totalT1Reactive})</small>
+                    {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood'}}>{JSON.stringify(dataObjectT2T1,null,1)}</pre> */}
+                </div>
+            </td>);
+            positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()}
+                onClick={() => {
+                    this.setState({
+                        nModal: {
+                            title: <>
+                                <h5>{ttl || "Details"}</h5>
+                                {/* Add export button here */}
+                            </>,
+                            content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                                <table className='table table-condensed table-striped'>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Indicator</th>
+                                            <th>MFL Code</th>
+                                            <th>Site</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dataObjectT3T1[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T3/T1</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                        {dataObjectT3T2[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T3/T2</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                        {dataObjectT2T1[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T2/T1</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>)
+                        }
+                    });
+                    $('#nModal').modal('toggle');
+                }}
+            >{row}</tr>);
             // });
         }
 
@@ -597,7 +741,9 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            completenessRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            completenessRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             completenessExportTableData.push(sting);
             if (this.state.siteType != null) {
@@ -628,7 +774,9 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             consistencyExportTableData.push(sting);
             if (this.state.siteType != null) {
@@ -661,8 +809,10 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            invalidRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T="+tsts + ")"
+            invalidRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             invalidRateExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -690,8 +840,10 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T="+tsts + ")"
+            inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
+            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             inconclusiveRateExportTableData.push(sting);
             if (this.state.siteType != null) {
                 if (this.state.siteType.length != 0) {
@@ -719,7 +871,9 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             supervisorySignatureExportTableData.push(sting);
             if (this.state.siteType != null) {
@@ -758,7 +912,9 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             algorithmFollowedExportTableData.push(sting);
             if (this.state.siteType != null) {
@@ -795,7 +951,9 @@ class LogbookReport extends React.Component {
             const d = new Date(period);
             let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
             let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            htsTypeRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (S={no}, T={tsts})</td>);
+            htsTypeRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
+                {/* (S={no}, T={tsts}) */}
+            </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             htsTypeExportTableData.push(sting);
             if (this.state.siteType != null) {
@@ -1043,7 +1201,7 @@ class LogbookReport extends React.Component {
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
-        <           th scope="col"># Invalid tests</th>
+                    <           th scope="col"># Invalid tests</th>
                     <th scope="col">Invalid rate</th>
 
                 </tr>;
@@ -1174,7 +1332,7 @@ class LogbookReport extends React.Component {
         // end hts Type  rate
 
         //process data tables with values and prepare export objects with data
-        if (this.state.odkData) {
+        if (this.state.odkData && this.state.odkData.length) {
             // console.log('this.state.odkData', this.state.odkData);
             this.state.odkData.map(displayData => {
                 for (let [key, payload] of Object.entries(displayData)) {
@@ -1264,7 +1422,7 @@ class LogbookReport extends React.Component {
                         <React.Fragment>
                             {/* overall agreement rates */}
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
-                                
+
                                 <div className="row">
                                     <div className="col-sm-6  col-xm-5 col-md-5">
                                         <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
@@ -1543,11 +1701,9 @@ class LogbookReport extends React.Component {
                             {/* End Supervisory Signature  rate  */}
                         </React.Fragment> : ''
                 }
-
             </div>
 
             <div className="row">
-
                 {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Algorithm Followed rate' ?
                         <React.Fragment>
@@ -1606,13 +1762,11 @@ class LogbookReport extends React.Component {
                             {/* End hts type  rate  */}
                         </React.Fragment> : ''
                 }
-
-
             </div>
         </div>;
         // End  Data Tables for all the indicators
 
-        if(this.state.isLoading){
+        if (this.state.isLoading) {
             return (
                 <React.Fragment>
                     <div className="d-sm-flex align-items-center justify-content-between mb-4">
@@ -1620,7 +1774,7 @@ class LogbookReport extends React.Component {
                             this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
                         }</h1>
                     </div>
-                    <div style={{textAlign: 'center'}}>
+                    <div style={{ textAlign: 'center' }}>
                         <div className="spinner-border" role="status">
                             <span className="sr-only">Loading...</span>
                         </div>
@@ -1712,80 +1866,106 @@ class LogbookReport extends React.Component {
                     <div className="col-sm-12  col-xm-12 col-md-12">
                         <ul className="nav nav-tabs" id="myTab" role="tablist">
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
-                                    {/* <i className="fa fa-table" aria-hidden="true"></i>  */}
-                                    {/* <i className="fas fa-chart-bar"></i> Data View */}
+                                <a className="nav-link active" id="tablesTabBtn" data-toggle="tab" href="#tables" role="tab" aria-controls="tables" aria-selected="true" onClick={() => {
+                                    console.log('linelist mode OFF');
+                                    this.setState({
+                                        linelistMode: false
+                                    })
+                                }}>
+                                    <i className="fas fa-chart-bar"></i> Analytics
                                 </a>
                             </li>
-
-
-                            {/* <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="SiteColumnsTab" data-toggle="tab"
-                                    href="#sitecolumns" role="tab" aria-controls="profile"
-                                    aria-selected="false"
-                                    onClick={() => {
-                                        this.setState({
-                                            echartsMinHeight: ""
-                                        })
-                                    }}
-                                >
-                                    <i className="fas fa-chart-bar"></i> Agreement rates bar</a>
-                            </li>
-
                             <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="positiveConcordanceColumnsTab" data-toggle="tab"
-                                    href="#positiveConcordance" role="tab" aria-controls="profile"
-                                    aria-selected="false"
-                                >
-                                    <i className="fas fa-chart-bar"></i> Positive Concordance rates bar</a>
-                            </li> */}
-
+                                <a className="nav-link" id="linelistTabBtn" data-toggle="tab" href="#linelist" role="tab" aria-controls="linelist" aria-selected="false" onClick={() => {
+                                    console.log('linelist mode ON');
+                                    this.setState({
+                                        linelistMode: false
+                                    })
+                                    this.fetchLinelistData(this.state.orgUnitDataIds,
+                                        this.state.siteType,
+                                        this.state.startDate,
+                                        this.state.endDate
+                                    );
+                                }}>
+                                    <i className="fas fa-list"></i> Aggregates
+                                </a>
+                            </li>
                         </ul>
                         {/* end tab headers */}
 
                         <div className="tab-content" id="myTabContent">
-
-
                             {/* Site agreement rates */}
-                            <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
+                            <div className="tab-pane graphstab active" id="tables" role="tabpanel" aria-labelledby="tables">
                                 <br />
                                 {tablesTab}
                             </div>
+                            <div className="tab-pane tbltab" id="linelist" role="tabpanel" aria-labelledby="linelist">
+                                <br />
+                                <h4>Linelist</h4>
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div id="linelist-table">
+                                            {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood', padding: '1em'}}>
+                                                {JSON.stringify(this.state.linelistData, null, 2)}
+                                            </pre> */}
+                                        </div>
+                                        {/*
+                                            <div className="table-responsive">
+                                                <table className="table table-striped">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Org unit</th>
+                                                        <th>Test Month</th>
 
-                            {
-                                // this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
-                                //     <React.Fragment>
-                                //         <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="sitecolumns-tab">
-                                //             <br />
-                                //             <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                //             {agreementRateColumnCharts}
-                                //         </div>
-                                //         {/* end site agreement rates */}
-                                //     </React.Fragment> :
-                                //     ''
-                            }
+                                                        <th># Total Tests</th>
 
-                            {
-                                // this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
-                                //     <React.Fragment>
-                                //         {/* positive concordance */}
-                                //         <div className="tab-pane fade" id="positiveConcordance" role="positiveConcordanceColumnsTab" aria-labelledby="positiveConcordance-tab">
-                                //             <br />
-                                //             <p style={{ fontWeight: "900" }}>Positive Concordance Rates</p>
-                                //             {positiveConcordanceRateColumnCharts}
-                                //         </div>
-                                //         {/* end positive concordance */}
-                                //     </React.Fragment> :
-                                //     ''
-                            }
+                                                        <th># Total T1 Reactive</th>
+                                                        <th># Total T1 Non-reactive</th>
+                                                        <th># Total T1 Invalid/Empty</th>
 
+                                                        <th># Total T2 Reactive</th>
+                                                        <th># Total T2 Non-reactive</th>
+                                                        <th># Total T2 Invalid/Empty</th>
+
+                                                        <th># Total T3 Reactive</th>
+                                                        <th># Total T3 Non-reactive</th>
+                                                        <th># Total T3 Invalid/Empty</th>
+
+                                                        <th># Total Final Positive</th>
+                                                        <th># Total Final Negative</th>
+
+                                                        <th># Test Kit 1 Trinscreen</th>
+                                                        <th># Test Kit 1 Standard Q</th>
+                                                        <th># Test Kit 1 Dual Kit</th>
+                                                        <th># Test Kit 1 First Response</th>
+                                                        <th># Test Kit 1 Bioline Dio</th>
+                                                        <th># Test Kit 1 Empty/Null</th>
+
+                                                        <th># Test Kit 2 Trinscreen</th>
+                                                        <th># Test Kit 2 Standard Q</th>
+                                                        <th># Test Kit 2 Dual Kit</th>
+                                                        <th># Test Kit 2 First Response</th>
+                                                        <th># Test Kit 2 Bioline Dio</th>
+                                                        <th># Test Kit 2 Empty/Null</th>
+
+                                                        <th># Test Kit 3 Trinscreen</th>
+                                                        <th># Test Kit 3 Standard Q</th>
+                                                        <th># Test Kit 3 Dual Kit</th>
+                                                        <th># Test Kit 3 First Response</th>
+                                                        <th># Test Kit 3 Bioline Dio</th>
+                                                        <th># Test Kit 3 Empty/Null</th>
+                                                    </tr>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        */}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
 
                 </div>
-
-
 
 
 
