@@ -30,6 +30,7 @@
         "datatables.net-bs4": "^1.10.24",
         "echarts": "^5.1.0",
         "echarts-for-react": "^3.0.1",
+        "frappe-datatable": "^1.19.0",
         "highcharts": "^10.3.3",
         "highcharts-react-official": "^3.1.0",
         "jquery.easing": "^1.4.1",

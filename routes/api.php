@@ -26,6 +26,8 @@ Route::post('/odk_hts_data', 'LogbookReportController@getDwhData');
 // Route::get('/dwh_hts_data_raw', 'LogbookReportController@getDwhDataRaw');
 // Route::post('/dwh_hts_data', 'LogbookReportController@getDwhData');
 
+Route::post('/dwh_hts_summary_linelist', 'LogbookReportController@getDwhSummaryLinelist');
+
 Route::get('/odk_submissions', 'SubmissionsController@getData');
 Route::post('/hts_submissions', 'SubmissionsController@getData');
 Route::post('/spi_submissions', 'SubmissionsController@getSPIData');

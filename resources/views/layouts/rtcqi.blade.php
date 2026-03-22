@@ -49,6 +49,14 @@ use Illuminate\Support\Facades\Gate;
         <script src="/jq/buttons.html5.min.js"></script>
     @endif
 
+
+    <!-- Datatable -->
+    <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
+    <script src="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.js"></script>
+    <!-- Datatable -->
+
 </head>
 
 <body>

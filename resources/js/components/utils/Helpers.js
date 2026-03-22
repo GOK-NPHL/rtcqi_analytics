@@ -141,6 +141,27 @@ export async function FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate) 
     }
 
 }
+export async function FetchDwhSummaryLinelist(orgUnitIds, siteType, startDate, endDate, page, perPage) {
+    // console.log('Fetching Submissions page: ' + page + ' perPage: ' + perPage);
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${settings.rtcqiBaseApi}/dwh_hts_summary_linelist`,
+            data: {
+                orgUnitIds: orgUnitIds,
+                siteType: siteType,
+                startDate: startDate,
+                endDate: endDate,
+                page: page || 1,
+                perPage: perPage || 50
+            }
+        });
+        return response;
+    } catch (err) {
+        return err.response
+    }
+}
+
 export async function FetchHTSSubmissions(orgUnitIds, siteType, startDate, endDate, page, perPage) {
     // console.log('Fetching Submissions page: ' + page + ' perPage: ' + perPage);
     try {
