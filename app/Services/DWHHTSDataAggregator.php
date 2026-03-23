@@ -380,6 +380,15 @@ class DWHHTSDataAggregator
                             // $monthlySites['emrs'] =   $this->emrs;
                             $monthlySites['hts_type'] =   $htsRegister;
 
+                            $kitDistTotals = [
+                                'kit1_trinscreen' => 0, 'kit1_standardq' => 0, 'kit1_dualkit' => 0,
+                                'kit1_firstresponse' => 0, 'kit1_bioline' => 0, 'kit1_other' => 0,
+                                'kit2_trinscreen' => 0, 'kit2_standardq' => 0, 'kit2_dualkit' => 0,
+                                'kit2_firstresponse' => 0, 'kit2_bioline' => 0, 'kit2_other' => 0,
+                                'kit3_trinscreen' => 0, 'kit3_standardq' => 0, 'kit3_dualkit' => 0,
+                                'kit3_firstresponse' => 0, 'kit3_bioline' => 0, 'kit3_other' => 0,
+                            ];
+
                             $completnesScores = ['completness' => 0];
                             $consistencyScores = ['consistent' => 0];
                             $invalidRateScores = ['invalid_results_rate' => 0];
@@ -603,6 +612,14 @@ class DWHHTSDataAggregator
                                         }
                                     }
                                     ///
+
+                                    // Accumulate kit distribution totals
+                                    foreach (['kit1_', 'kit2_', 'kit3_'] as $kprefix) {
+                                        foreach (['trinscreen', 'standardq', 'dualkit', 'firstresponse', 'bioline', 'other'] as $ktype) {
+                                            $kkey = $kprefix . $ktype;
+                                            $kitDistTotals[$kkey] += $site[$kkey] ?? 0;
+                                        }
+                                    }
                                 } catch (Exception $ex) {
                                     //  Log::error($ex);
                                 }
@@ -652,6 +669,8 @@ class DWHHTSDataAggregator
                             }
                             $orgUnitArray['invalid_rates'][$monthlyDate] = number_format((float)$invlidRate, 3, '.', '');
                             $orgUnitArray['invalid_count'][$monthlyDate] = $invalidScores['invalids'];
+
+                            $orgUnitArray['kit_distribution'][$monthlyDate] = $kitDistTotals;
                         }
                     } catch (Exception $ex) {
                         Log::error($ex);
@@ -758,7 +777,12 @@ class DWHHTSDataAggregator
                         // 'hardcopy' => 0
                     ),
                     'emr' => $record['emr'] ?? null,
-
+                    'kit1_trinscreen' => 0, 'kit1_standardq' => 0, 'kit1_dualkit' => 0,
+                    'kit1_firstresponse' => 0, 'kit1_bioline' => 0, 'kit1_other' => 0,
+                    'kit2_trinscreen' => 0, 'kit2_standardq' => 0, 'kit2_dualkit' => 0,
+                    'kit2_firstresponse' => 0, 'kit2_bioline' => 0, 'kit2_other' => 0,
+                    'kit3_trinscreen' => 0, 'kit3_standardq' => 0, 'kit3_dualkit' => 0,
+                    'kit3_firstresponse' => 0, 'kit3_bioline' => 0, 'kit3_other' => 0,
                 );
             }
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += (trim(strtolower($record['test_result1'])) == 'positive') ? 1 : 0;
@@ -784,6 +808,11 @@ class DWHHTSDataAggregator
             } catch (Exception $ex) {
             }
             // Log::info($siteConcatName . json_encode($monthScoreMap[$yr . '-' . $mon][$siteConcatName]) . PHP_EOL);
+
+            // Accumulate kit counts per site
+            $this->accumulateKitCount($monthScoreMap[$yr . '-' . $mon][$siteConcatName], 'kit1_', $record['test_kit_name1'] ?? '');
+            $this->accumulateKitCount($monthScoreMap[$yr . '-' . $mon][$siteConcatName], 'kit2_', $record['test_kit_name2'] ?? '');
+            $this->accumulateKitCount($monthScoreMap[$yr . '-' . $mon][$siteConcatName], 'kit3_', $record['test_kit_name3'] ?? '');
 
             //check if this site uses eHTS of Hardcopy
             // try {
