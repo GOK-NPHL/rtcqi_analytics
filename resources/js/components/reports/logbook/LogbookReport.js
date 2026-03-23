@@ -264,7 +264,8 @@ class LogbookReport extends React.Component {
     onFilterButtonClickEvent() {
         // this.setState({ isLoading: true });
         if (this.state.linelistMode) {
-            this.fetchLinelistData(defaultOrg,
+            this.fetchLinelistData(
+                this.state.orgUnitDataIds,
                 this.state.siteType,
                 this.state.startDate,
                 this.state.endDate
