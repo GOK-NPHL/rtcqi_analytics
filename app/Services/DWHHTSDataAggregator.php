@@ -868,7 +868,7 @@ class DWHHTSDataAggregator
             //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'positive' && trim(strtolower($record['test_kit_name2'])) == 'determine' && trim(strtolower($record['test_result2'])) == 'positive' && trim(strtolower($record['test_kit_name3'])) == 'first response' && trim(strtolower($record['test_result3'])) == 'positive' && trim(strtolower($record['final_test_result'])) == 'positive')
             //     ||
             //     // negative
-            //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'negative' && trim(strtolower($record['final_test_result'])) == 'negative')
+            //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'non reactive' && trim(strtolower($record['final_test_result'])) == 'negative')
             //     ||
             //     // inconclusive
             //     (trim(strtolower($record['test_kit_name1'])) == 'trinscreen' && trim(strtolower($record['test_result1'])) == 'invalid' && trim(strtolower($record['final_test_result'])) == 'inconclusive')
