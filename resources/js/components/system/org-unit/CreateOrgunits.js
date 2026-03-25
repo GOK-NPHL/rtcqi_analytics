@@ -1,245 +1,148 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState } from 'react';
 import { SaveOrgUnits, updateUploadOrgUnits } from '../../utils/Helpers';
-import DualListBox from 'react-dual-listbox';
-import XLSX from "xlsx";
+import XLSX from 'xlsx';
 import SheetSelect from './SheetSelect';
 import LevelSelect from './LevelSelect';
 import OrgunitStructureCreate from './OrgunitStructureCreate';
 
-class OrgunitCreate extends React.Component {
+function OrgunitCreate({ setShowOrgunitLanding, triggerOrgUnitsFetch, isUpdateOrgunits }) {
+    const [fileName, setFileName] = useState('Choose orgunit excel');
+    const [sheetWithOrgs, setSheetWithOrgs] = useState('');
+    const [workbook, setWorkbook] = useState([]);
+    const [pageNo, setPageNo] = useState(1);
+    const [isSaveOrgs, setIsSaveOrgs] = useState(false);
+    const [orgunitFileHierachy, setOrgunitFileHierachy] = useState({});
 
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            fileName: "Choose orgunit excel",
-            sheetWithOrgs: '',
-            workbook: [],
-            pageNo: 1,
-            isSaveOrgs: false,
-            orgunitFileHierachy: {}
+    const handleFile = (e) => {
+        const files = e.target.files;
+        setFileName(files[0].name);
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const data = new Uint8Array(ev.target.result);
+            setWorkbook(XLSX.read(data, { type: 'array' }));
         };
-        this.handleFile = this.handleFile.bind(this);
-        this.setSheetWithOrgs = this.setSheetWithOrgs.bind(this);
-        this.setOrgunitExcelFileHierachy = this.setOrgunitExcelFileHierachy.bind(this);
-        this.incrementDecrementOrgUnitStep = this.incrementDecrementOrgUnitStep.bind(this);
-        this.saveOrgUnits = this.saveOrgUnits.bind(this);
-        this.updateUploadOrgs = this.updateUploadOrgs.bind(this);
-    }
+        reader.readAsArrayBuffer(files[0]);
+    };
 
-    componentDidMount() {
+    const setSheetHandler = (event) => setSheetWithOrgs(event.target.value);
 
-    }
+    const incrementDecrementOrgUnitStep = (isIncrement) => {
+        const next = isIncrement ? pageNo + 1 : pageNo - 1;
+        if (next === 0) setShowOrgunitLanding(true);
+        setPageNo(next);
+    };
 
-    handleFile(e) {
-
-        var files = e.target.files, f = files[0];
-        this.setState({ fileName: files[0].name });
-        var reader = new FileReader();
-        reader.onload = (e) => {
-            var data = new Uint8Array(e.target.result);
-            var workbook = XLSX.read(data, { type: 'array' });
-            this.setState({
-                workbook: workbook
-            });
-        };
-        reader.readAsArrayBuffer(f);
-    }
-
-    setSheetWithOrgs(event) {
-        this.setState({
-            sheetWithOrgs: event.target.value,
-        });
-    }
-
-    setOrgunitExcelFileHierachy(orgunitFileHierachy) {
-        this.setState({
-            orgunitFileHierachy: orgunitFileHierachy
-        });
-    }
-
-    incrementDecrementOrgUnitStep(isIncrement) {
-        let pageNo = this.state.pageNo;
-        if (isIncrement) {
-            pageNo = pageNo + 1;
-        } else {
-            pageNo = pageNo - 1;
+    const saveOrgUnits = async (orgUnits) => {
+        const orgunitMetadata = Object.entries(orgunitFileHierachy).map(([column, level]) => ({
+            sheet: sheetWithOrgs, column, level,
+        }));
+        const response = await SaveOrgUnits(orgUnits, orgunitMetadata);
+        if (response['status'] === 200) {
+            setShowOrgunitLanding(true);
+            triggerOrgUnitsFetch();
         }
-        if (pageNo == 0) {
-            this.props.setShowOrgunitLanding(true);
+    };
+
+    const updateUploadOrgs = async (orgUnits) => {
+        const orgunitMetadata = Object.entries(orgunitFileHierachy).map(([column, level]) => ({
+            sheet: sheetWithOrgs, column, level,
+        }));
+        const response = await updateUploadOrgUnits(orgUnits, orgunitMetadata);
+        if (response['status'] === 200) {
+            setShowOrgunitLanding(true);
+            triggerOrgUnitsFetch();
         }
-        this.setState({
-            pageNo: pageNo
-        });
-    }
+    };
 
-    saveOrgUnits(orgUnits) {
-        let orgunitMetadata = [];
-        //console.log(this.state.orgunitFileHierachy);
-        for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
-            let orgMeta = {
-                'sheet': this.state.sheetWithOrgs,
-                'column': column,
-                'level': level,
-            };
-            orgunitMetadata.push(orgMeta);
-        }
-
-        (async () => {
-            let response = await SaveOrgUnits(orgUnits, orgunitMetadata);
-            //console.log(response);
-            if (response['status'] == 200) {
-                this.props.setShowOrgunitLanding(true);
-                this.props.triggerOrgUnitsFetch();
-            }
-
-        })();
-
-    }
-
-
-    updateUploadOrgs(orgUnits) {
-
-        let orgunitMetadata = [];
-        //console.log(this.state.orgunitFileHierachy);
-        for (const [column, level] of Object.entries(this.state.orgunitFileHierachy)) {
-            let orgMeta = {
-                'sheet': this.state.sheetWithOrgs,
-                'column': column,
-                'level': level,
-            };
-            orgunitMetadata.push(orgMeta);
-        }
-
-        (async () => {
-            let response = await updateUploadOrgUnits(orgUnits, orgunitMetadata);
-            //console.log(response);
-            if (response['status'] == 200) {
-                this.props.setShowOrgunitLanding(true);
-                this.props.triggerOrgUnitsFetch();
-            }
-
-        })();
-
-    }
-
-
-    render() {
-
-        let selectSheetElement = <React.Fragment></React.Fragment>;
-
-        if (this.state.workbook.length != 0 && this.state.pageNo == 1) {
-            selectSheetElement = <SheetSelect workbook={this.state.workbook} setSheetWithOrgs={this.setSheetWithOrgs} />
-        }
-
-        let selectLevelElement = <React.Fragment></React.Fragment>;
-        if (this.state.pageNo == 2) {
-            selectLevelElement = <React.Fragment>
-                <hr />
-                <LevelSelect setOrgunitExcelFileHierachy={this.setOrgunitExcelFileHierachy} workbook={this.state.workbook} sheetWithOrgs={this.state.sheetWithOrgs} />
-            </React.Fragment>;
-        }
-
-        let orgunitStructureElement = <React.Fragment></React.Fragment>;
-
-        let nextSaveButton = <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} onClick={() => this.incrementDecrementOrgUnitStep(true)}>
-            <button id="nextButton" type="button" className="btn btn-primary">Next <i className="fa fa-arrow-right" aria-hidden="true"></i>
-            </button></div>;
-
-        if (this.state.pageNo == 3) {
-            orgunitStructureElement = <React.Fragment>
-                <hr />
-                <OrgunitStructureCreate
-                    isUpdateOrgunits={this.props.isUpdateOrgunits}
-                    orgunitExcelFileHierachy={this.state.orgunitFileHierachy}
-                    workbook={this.state.workbook}
-                    sheetWithOrgs={this.state.sheetWithOrgs}
-                    saveOrgUnits={this.saveOrgUnits}
-                    updateUploadOrgs={this.updateUploadOrgs}
-                    isSaveOrgs={this.state.isSaveOrgs}
-                />
-            </React.Fragment>;
-
-            nextSaveButton = !this.props.isUpdateOrgunits ?
-                <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >
-                    <button
-                        id="saveButton"
-                        type="button"
-                        onClick={
-                            (event) => {
-                                this.setState({ isSaveOrgs: true })
-                                localStorage.removeItem('orgunitList');
-                                localStorage.removeItem('treeStruc');
-                                localStorage.removeItem("orgunitTableStruc");
-                                $("#saveButton").prop('disabled', true);
-                            }
-                        }
-                        className="btn btn-primary"> Save & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
-                    </button></div>
-                :
-                <div className="col-sm-4 .float-right" style={{ "textAlign": "right" }} >
-                    <button
-                        id="updateButton"
-                        type="button"
-                        onClick={
-                            (event) => {
-                                this.setState({ isSaveOrgs: true })
-                                localStorage.removeItem('orgunitList');
-                                localStorage.removeItem('treeStruc');
-                                localStorage.removeItem("orgunitTableStruc");
-                                $("#updateButton").prop('disabled', true);
-                            }
-                        }
-                        className="btn btn-primary"> Update & Exit <i className="fa fa-floppy-o" aria-hidden="true"></i>
-                    </button></div>
-        }
-
-        let nextBar = <div className="row">
-            <div className="col-sm-4 .float-left" style={{ "textAlign": "left" }}>
-                <button id="previousButton" type="button" className="btn btn-primary" onClick={() => this.incrementDecrementOrgUnitStep(false)}><i className="fa fa-arrow-left" aria-hidden="true">
-                </i> Prev</button>
+    const nextSaveButton = pageNo === 3
+        ? (
+            <div className="col-sm-4 .float-right" style={{ textAlign: 'right' }}>
+                <button
+                    id={isUpdateOrgunits ? 'updateButton' : 'saveButton'}
+                    type="button"
+                    onClick={() => {
+                        setIsSaveOrgs(true);
+                        localStorage.removeItem('orgunitList');
+                        localStorage.removeItem('treeStruc');
+                        localStorage.removeItem('orgunitTableStruc');
+                        document.getElementById(isUpdateOrgunits ? 'updateButton' : 'saveButton').disabled = true;
+                    }}
+                    className="btn btn-primary"
+                >
+                    {isUpdateOrgunits ? 'Update & Exit' : 'Save & Exit'} <i className="fa fa-floppy-o" aria-hidden="true"></i>
+                </button>
             </div>
-            <div className="col-sm-4" style={{ "textAlign": "center" }}>Step {this.state.pageNo} of 3</div>
-            {nextSaveButton}
-        </div>;
+        )
+        : (
+            <div className="col-sm-4 .float-right" style={{ textAlign: 'right' }} onClick={() => incrementDecrementOrgUnitStep(true)}>
+                <button id="nextButton" type="button" className="btn btn-primary">
+                    Next <i className="fa fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        );
 
-        let createOrgsLanding = <>
-            <br />
+    return (
+        <React.Fragment>
             <div className="row">
-                <div className="col-sm-12"><p style={{ "fontWeight": "700" }}>Upload Excel file with ODK central organisation units cascade</p></div>
-                <br />
-                <div className="col-sm-4">
-                    <div className="input-group mb-3">
-                        <div className="custom-file">
-                            <input
-                                onChange={() => this.handleFile(event)}
-                                type="file"
-                                className="custom-file-input"
-                                accept=".xls,.xlsx" id="inputGroupFile01"
-                                aria-describedby="inputGroupFileAddon01" />
-                            <label className="custom-file-label" htmlFor="inputGroupFile01">{this.state.fileName}</label>
+                <div className="col-sm-4 .float-left" style={{ textAlign: 'left' }}>
+                    <button type="button" className="btn btn-primary" onClick={() => incrementDecrementOrgUnitStep(false)}>
+                        <i className="fa fa-arrow-left" aria-hidden="true"></i> Prev
+                    </button>
+                </div>
+                <div className="col-sm-4" style={{ textAlign: 'center' }}>Step {pageNo} of 3</div>
+                {nextSaveButton}
+            </div>
+
+            {pageNo === 1 && (
+                <>
+                    <br />
+                    <div className="row">
+                        <div className="col-sm-12">
+                            <p style={{ fontWeight: '700' }}>Upload Excel file with ODK central organisation units cascade</p>
+                        </div>
+                        <div className="col-sm-4">
+                            <div className="input-group mb-3">
+                                <div className="custom-file">
+                                    <input
+                                        onChange={handleFile}
+                                        type="file"
+                                        className="custom-file-input"
+                                        accept=".xls,.xlsx"
+                                        id="inputGroupFile01"
+                                        aria-describedby="inputGroupFileAddon01"
+                                    />
+                                    <label className="custom-file-label" htmlFor="inputGroupFile01">{fileName}</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </>;
+                    {workbook.length !== 0 && <SheetSelect workbook={workbook} setSheetWithOrgs={setSheetHandler} />}
+                </>
+            )}
 
-        if (this.state.pageNo != 1) {
-            createOrgsLanding = <></>
-        }
-        //console.log(this.state.pageNo);
-        return (
-            <React.Fragment>
-                {nextBar}
-                {createOrgsLanding}
-                {selectSheetElement}
-                {selectLevelElement}
-                {orgunitStructureElement}
-            </React.Fragment>
-        );
-    }
+            {pageNo === 2 && (
+                <>
+                    <hr />
+                    <LevelSelect setOrgunitExcelFileHierachy={setOrgunitFileHierachy} workbook={workbook} sheetWithOrgs={sheetWithOrgs} />
+                </>
+            )}
 
+            {pageNo === 3 && (
+                <>
+                    <hr />
+                    <OrgunitStructureCreate
+                        isUpdateOrgunits={isUpdateOrgunits}
+                        orgunitExcelFileHierachy={orgunitFileHierachy}
+                        workbook={workbook}
+                        sheetWithOrgs={sheetWithOrgs}
+                        saveOrgUnits={saveOrgUnits}
+                        updateUploadOrgs={updateUploadOrgs}
+                        isSaveOrgs={isSaveOrgs}
+                    />
+                </>
+            )}
+        </React.Fragment>
+    );
 }
 
 export default OrgunitCreate;

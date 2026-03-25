@@ -3,36 +3,9 @@ import RTCard from '../../utils/RTCard'
 import StackedVertical from '../../utils/charts/StackedVertical'
 import { v4 as uuidv4 } from 'uuid';
 
-class PositiveConcordanceRateColumnCharts extends React.Component {
+function PositiveConcordanceRateColumnCharts(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            series2: [
-                {
-                    name: 'Level 0 (<40%)',
-                    type: 'bar',
-                    stack: 'total',
-                    label: {
-                        show: true
-                    },
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    data: [24, 23, 56, 34, 32]
-                }
-            ]
-        };
-        this.addGraphsToArray = this.addGraphsToArray.bind(this);
-        this.prepareOverallLevelSiteData = this.prepareOverallLevelSiteData.bind(this);
-
-    }
-
-    componentDidMount() {
-
-    }
-
-    prepareOverallLevelSiteData(dataObject) {
+    function prepareOverallLevelSiteData(dataObject) {
         //console.log(dataObject);
         let overallSiteGraphsData = {};
         let levelsMap = {
@@ -90,15 +63,15 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
 
         overallSiteGraphsData[orgName] = [category, seriesData];
 
-        return <RTCard header={orgName} minHeight={this.props.minHeight}>
+        return <RTCard header={orgName} minHeight={props.minHeight}>
             <StackedVertical
                 yAxisGap={35}
                 yAxisName="concordance" formatter="" color={['#004dc9', '#ffc100']}
-                minHeight={this.props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
+                minHeight={props.minHeight} legend={['Positive Concordance']} category={category} series={seriesData} />
         </RTCard>
     }
 
-    addGraphsToArray(counter, row, columns, overLay, singChart) {
+    function addGraphsToArray(counter, row, columns, overLay, singChart) {
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -113,58 +86,55 @@ class PositiveConcordanceRateColumnCharts extends React.Component {
         return [counter, row, columns, overLay];
     }
 
-    render() {
-        let overLay = [];
-        let counter = 0;
-        let columns = [];
-        let row = <div key={uuidv4()} className="row">
-            {columns}
-        </div>;
-        if (this.props.serverData) {
+    let overLay = [];
+    let counter = 0;
+    let columns = [];
+    let row = <div key={uuidv4()} className="row">
+        {columns}
+    </div>;
+    if (props.serverData) {
 
-            if (this.props.siteType != null && this.props.siteType.length != 0) {
+        if (props.siteType != null && props.siteType.length != 0) {
 
-                this.props.serverData.map((dataObjectParent) => {
-                    for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                        try {
-                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
-                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
-                        } catch (err) {
-
-                        }
-
-                    }
-                });
-                if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
-                }
-
-            } else {
-                for (let [key, dataObject] of Object.entries(this.props.serverData[0])) {
+            props.serverData.map((dataObjectParent) => {
+                for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
                     try {
-                        let singChart = this.prepareOverallLevelSiteData(dataObject);
-                        [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        let singChart = prepareOverallLevelSiteData(orgUnitDataObject);
+                        [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
                     } catch (err) {
 
                     }
 
                 }
-                if (columns.length > 0) {
-                    overLay.push(row); //push remaining graphs in display
-                }
+            });
+            if (columns.length > 0) {
+                overLay.push(row); //push remaining graphs in display
             }
 
         } else {
+            for (let [key, dataObject] of Object.entries(props.serverData[0])) {
+                try {
+                    let singChart = prepareOverallLevelSiteData(dataObject);
+                    [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
+                } catch (err) {
 
+                }
+
+            }
+            if (columns.length > 0) {
+                overLay.push(row); //push remaining graphs in display
+            }
         }
 
-        return (
-            <React.Fragment>
-                {this.props.singleItem ? columns : overLay}
-            </React.Fragment>
-        );
+    } else {
+
     }
 
+    return (
+        <React.Fragment>
+            {props.singleItem ? columns : overLay}
+        </React.Fragment>
+    );
 }
 
 export default PositiveConcordanceRateColumnCharts;

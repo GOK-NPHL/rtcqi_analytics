@@ -586,7 +586,10 @@ class ODKDataAggregator
         try {
             foreach ($score as $key => $value) {
                 try {
-                    $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator
+                    // $score[$key] = ($value / ($rowCounter[$key] * $multiplier)) * 100; //get denominator
+                    // avoid d/0 error by checking if row counter is 0, if it is set to 1 to avoid error but this will not affect the score as it will be multiplied by 0 in the numerator
+                    $denominator = ($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier);
+                    $score[$key] = ($value / $denominator) * 100;
                     // $score[$key] = ($value / (($rowCounter[$key] * $multiplier) == 0 ? 1 : ($rowCounter[$key] * $multiplier))) * 100; //get denominator
                     $score[$key] = number_format((float)$score[$key], 0, '.', ',');
                 } catch (Exception $ex) {
@@ -1191,7 +1194,10 @@ class ODKDataAggregator
         foreach ($score as $key => $value) {
             try {
                 // $score[$key] = ($value / ($rowCounter[$key] == 0 ? 1 : $rowCounter[$key])); //get denominator
-                $score[$key] = ($value / $rowCounter[$key]); //get denominator
+                // $score[$key] = ($value / $rowCounter[$key]); //get denominator
+                // avoid d/0 error by checking if row counter is 0, if it is set to 1 to avoid error but this will not affect the score as it will be multiplied by 0 in the numerator
+                $denominator = $rowCounter[$key] == 0 ? 1 : $rowCounter[$key];
+                $score[$key] = ($value / $denominator);
                 $score[$key] = number_format((float)$score[$key], 0, '.', ',');
             } catch (Exception $ex) {
                 $score[$key] = 0;
@@ -1228,7 +1234,10 @@ class ODKDataAggregator
                 if ($key != 'counter' && $key != 'sites') {
                     try {
                         // $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / ($timeLineData["counter"] == 0 ? 1 : $timeLineData["counter"])) * 100, 0, '.', ',');
-                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
+                        // $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $timeLineData["counter"]) * 100, 0, '.', ',');
+                        // avoid d/0 error by checking if counter is 0, if it is set to 1 to avoid error but this will not affect the score as it will be multiplied by 0 in the numerator
+                        $denominator = $timeLineData["counter"] == 0 ? 1 : $timeLineData["counter"];
+                        $overallSitesLevel[$timeLine][$key] = number_format((float)($timeLineData[$key] / $denominator) * 100, 0, '.', ',');
                     } catch (Exception $ex) {
                         $timeLineData[$key] = '';
                     }

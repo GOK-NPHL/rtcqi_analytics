@@ -1,31 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-class OrgUnitType extends React.Component {
+function OrgUnitType(props) {
+    const [orgUnitType, setOrgUnitType] = useState([]);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            orgUnitType: []
-        };
-        this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        if (
-            this.state.orgUnitType !== nextState.orgUnitType
-        ) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    orgUnitTypeChangeHandler(event) {
+    function orgUnitTypeChangeHandler(event) {
         let orgUnitTypeId = event.target.dataset.id;
         $(event.target).find('.fa-check').toggle();
-        let orgUnitType = this.state.orgUnitType;
         let newOrgTypeIds = [];
         if (orgUnitType.length == 0) {
             newOrgTypeIds.push(orgUnitTypeId);
@@ -41,54 +22,49 @@ class OrgUnitType extends React.Component {
             if (!idInList) newOrgTypeIds.push(orgUnitTypeId);
         }
 
-        this.setState({ orgUnitType: newOrgTypeIds });
-        this.props.orgUnitTypeChangeHandler(newOrgTypeIds);
+        setOrgUnitType(newOrgTypeIds);
+        props.orgUnitTypeChangeHandler(newOrgTypeIds);
     }
 
-    render() {
+    //stops menu options from closing until user clicks outside (in the window)
+    $(document).delegate(".dropdown-menu", "click", function (e) {
+        e.stopPropagation();
+    });
 
-        //stops menu options from closing until user clicks outside (in the window)
-        $(document).delegate(".dropdown-menu", "click", function (e) {
-            e.stopPropagation();
-        });
+    const marginLeft = {};
+    let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC'];
+    let orgTypesSelect = [];
+    orgUnitTypes.map((orgType) => {
+        orgTypesSelect.push(
+            <a
+                key={uuidv4()}
+                className="dropdown-item"
+                href="#"
+                data-id={orgType}
+                onClick={(event) => {
+                    orgUnitTypeChangeHandler(event);
+                }}
+            >
+                {orgType}
+                <i className="fa fa-check"
+                    style={{ "display": orgUnitType.includes(orgType) ? "" : "none", "color": "green" }}
+                    aria-hidden="true"></i>
+            </a>);
+    });
 
-        const marginLeft = {
-            // marginLeft: "16px",
-        };
-        let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC'];
-        let orgTypesSelect = [];
-        orgUnitTypes.map((orgType) => {
-            orgTypesSelect.push(
-                <a
-                    key={uuidv4()}
-                    className="dropdown-item"
-                    href="#"
-                    data-id={orgType}
-                    onClick={(event) => {
-                        this.orgUnitTypeChangeHandler(event);
-                    }}
-                >
-                    {orgType}
-                    <i className="fa fa-check"
-                        style={{ "display": this.state.orgUnitType.includes(orgType) ? "" : "none", "color": "green" }}
-                        aria-hidden="true"></i>
-                </a>);
-        });
-        return (
-            <React.Fragment>
-                <div style={marginLeft} className="btn-group">
-                    <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Select Programme
-                    </button>
-                    <div className="dropdown-menu">
-                        {orgTypesSelect}
-                    </div>
+    return (
+        <React.Fragment>
+            <div style={marginLeft} className="btn-group">
+                <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle "
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select Programme
+                </button>
+                <div className="dropdown-menu">
+                    {orgTypesSelect}
                 </div>
-            </React.Fragment>
-        );
-    }
-
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default OrgUnitType;

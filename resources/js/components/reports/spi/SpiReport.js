@@ -1,9 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import LineGraph from '../../utils/charts/LineGraph';
-import StackedHorizontal from '../../utils/charts/StackedHorizontal'
-
-import { FetchOrgunits, FetchOdkData, exportToExcel, FetchPartners } from '../../utils/Helpers'
+import React, { useState, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom/client';
+import { FetchOrgunits, FetchOdkData, exportToExcel, FetchPartners } from '../../utils/Helpers';
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
 import OrgDate from '../../utils/orgunit/OrgDate';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,234 +8,85 @@ import OrgTimeline from '../../utils/orgunit/OrgTimeline';
 import OrgUnitType from '../../utils/orgunit/OrgUnitType';
 import SiteLevelBarColumnCharts from './SiteLevelBarColumnCharts';
 import OverallPerformanceRadar from './OverallPerformanceRadar';
-import { CSVLink, CSVDownload } from "react-csv";
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { CSVLink } from "react-csv";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import SpiOrgUnitIndicator from '../../utils/orgunit/SpiOrgUnitIndicator';
 
-class SpiReport extends React.Component {
+const orgUnitIndicators = [
+    'Average Performance per QA element',
+    'Overall Site Levels during Assessment',
+];
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            orgUnits: [],
-            orgUnitDataIds: [0],
-            partners: [],
-            aggregate_partners: false,
-            orgUnitTimeline: [],
-            siteType: [],
-            echartsMinHeight: '',
-            orgUnitIndicators: [
-                'Average Performance per QA element',
-                'Overall Site Levels during Assessment',
-            ],
-            indicatorIndexToDisplay: 0,
-            allPartners: [],
-        }
-        this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
-        this.onOrgTimelineChange = this.onOrgTimelineChange.bind(this);
-        this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
-        this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
-        this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
-        this.getTimelineAndOrgunits = this.getTimelineAndOrgunits.bind(this);
-        this.addTableRows = this.addTableRows.bind(this);
-        this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
-        this.exportAveragePerformancePDFData = this.exportAveragePerformancePDFData.bind(this);
-        this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
-        this.fetchAllPartners = this.fetchAllPartners.bind(this);
-
-        this.aggregateDataForPartners = this.aggregateDataForPartners.bind(this);
-    }
-
-    // componentDidMount() {
-    //     //fetch counties
-
-    // }
-
-
-    fetchAllPartners() {
-        (async () => {
-            let returnedData = await FetchPartners();
-            this.setState({
-                allPartners: returnedData,
-            });
-        })();
-    }
-
-    componentDidMount() {
-        (async () => {
-            let returnedData = await FetchOrgunits();
-
-            let subCountyList = [];
-            // returnedData.forEach((val) => {
-            // });
-            console.log("returnedData.payload[0][0]['org_unit_id']", returnedData.payload[0][0]['org_unit_id'])
-            let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
-            this.setState({
-                unfilteredOrgUnits: returnedData,
-                orgUnits: returnedData.payload[0],
-                odkData: {},
-                orgLevel: 1,
-                partners: [],
-                aggregate_partners: false,
-                orgId: 1,
-                orgUnitDataIds: [defaultOrg[0]],
-                orgUnitTimeline: [],
-                startDate: '',
-                endDate: ''
-            });
-
-            this.fetchOdkDataServer(defaultOrg,
-                this.state.orgUnitTimeline,
-                this.state.siteType,
-                this.state.startDate,
-                this.state.endDate,
-                this.state.partners,
-                // this.state.aggregate_partners
-            );
-            this.fetchAllPartners();
-
-
-        })();
-
-
-        //change echarts layout to allow graph to fit for spider charts only.
-
-        // let div = $("#spiders");
-
-        // let observer = new MutationObserver(function (mutations) {
-        //     mutations.forEach(function (mutation) {
-        //         if (mutation.attributeName === "class") {
-        //             let attributeValue = $(mutation.target).prop(mutation.attributeName);
-
-        //             if (attributeValue.includes("show")) {
-
-        //                 $(".echarts-for-react").css('min-height', '500px');
-        //             } else {
-        //                 // alert(currMinHeightValue);
-        //                 $(".echarts-for-react").css('min-height', '');
-        //                 // $(".echarts-for-react").css('min-height', '');
-        //             }
-        //         }
-        //     });
-        // });
-
-        // observer.observe(div[0], {
-        //     attributes: true
-        // });
-
-    }
-
-    fetchOdkDataServer(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners
-        // , aggregate_partners
-    ) {
-        if (orgUnitIds) {
-            if (orgUnitIds.length != 0) {
-                (async () => {
-                    let returnedData = await FetchOdkData(orgUnitIds, orgTimeline, siteType, startDate, endDate, partners, aggregate_partners);
-                    if (returnedData.status == 200) {
-                        // aggregate for partners
-                        if (this.state.aggregate_partners) {
-                            this.aggregateDataForPartners(returnedData.data);
-                        } else {
-                            this.setState({
-                                odkData: returnedData.data,
-                            });
-                        }
-                    }
-                })();
+function getTimelineAndOrgunits(orgUnitSpiData) {
+    let timeLines = [];
+    let orgunitName = '';
+    for (let [key, val] of Object.entries(orgUnitSpiData)) {
+        if (key !== 'OverallSitesLevel' && key !== 'orgName' && key !== 'OrgUniType') {
+            for (let [timeline] of Object.entries(val)) {
+                if (!timeLines.includes(timeline)) timeLines.push(timeline);
             }
+        } else if (key === 'orgName') {
+            orgunitName = val.toUpperCase();
         }
-
     }
+    return [timeLines, orgunitName];
+}
 
-    onOrgTimelineChange(orgTimeline) {
-        this.setState({
-            orgUnitTimeline: orgTimeline
-        });
-    }
+function SpiReport() {
+    const [orgUnitDataIds, setOrgUnitDataIds] = useState([0]);
+    const [partners, setPartners] = useState([]);
+    const [aggregatePartners, setAggregatePartners] = useState(false);
+    const [orgUnitTimeline, setOrgUnitTimeline] = useState([]);
+    const [siteType, setSiteType] = useState([]);
+    const [echartsMinHeight, setEchartsMinHeight] = useState('');
+    const [indicatorIndexToDisplay, setIndicatorIndexToDisplay] = useState(0);
+    const [allPartners, setAllPartners] = useState([]);
+    const [odkData, setOdkData] = useState({});
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [nModal, setNModal] = useState(null);
 
-    orgUnitChangeHandler(orgUnitIds) {
-        this.setState({
-            orgUnitDataIds: orgUnitIds
-        });
-    }
-
-    orgUnitTypeChangeHandler(siteType) {
-        this.setState({
-            siteType: siteType
-        });
-    }
-
-    filterDisplayedIndicator(indicatorIndex) {
-        this.setState({ indicatorIndexToDisplay: indicatorIndex });
-    }
-
-    orgDateChangeHandler(startDate, endDate) {
-        this.setState({
-            startDate: startDate,
-            endDate: endDate
-        });
-    }
-
-    onFilterButtonClickEvent() {
-        this.fetchOdkDataServer(
-            this.state.orgUnitDataIds,
-            this.state.orgUnitTimeline,
-            this.state.siteType,
-            this.state.startDate,
-            this.state.endDate,
-            this.state.partners,
-            // this.state.aggregate_partners
-        );
-    }
-
-    aggregateDataForPartners(data) {
-        if (this.state.partners && this.state.partners.length > 0) {
+    const aggregateDataForPartners = useCallback((data, currentPartners, currentAllPartners) => {
+        if (currentPartners && currentPartners.length > 0) {
             let partner_name = '';
-            if (this.state.allPartners.length > 0) partner_name = this.state.allPartners.find(p => p.id == this.state.partners[0])?.name || '';
-            // let data = this.state.odkData
-            let aggregated_data = {
-                "orgName": partner_name,
-            };
+            if (currentAllPartners.length > 0) {
+                partner_name = currentAllPartners.find(p => p.id == currentPartners[0])?.name || '';
+            }
+            let aggregated_data = { "orgName": partner_name };
             let org_count = Object.keys(data).length || 1;
             Object.keys(data).forEach((orgId, ky) => {
                 let org_data = data[orgId];
                 Object.keys(org_data).forEach((indicator) => {
-                    if (indicator == 'orgName') return;
+                    if (indicator === 'orgName') return;
                     let indicator_data = org_data[indicator];
-
-                    if (aggregated_data[indicator] == undefined) {
+                    if (aggregated_data[indicator] === undefined) {
                         aggregated_data[indicator] = indicator_data;
                     } else {
-                        // aggregate
-                        // if obj
-                        if (typeof indicator_data == 'object') {
+                        if (typeof indicator_data === 'object') {
                             Object.keys(indicator_data).forEach((key) => {
-                                if (aggregated_data[indicator][key] == undefined) {
+                                if (aggregated_data[indicator][key] === undefined) {
                                     aggregated_data[indicator][key] = indicator_data[key];
                                 } else {
-                                    if (typeof aggregated_data[indicator][key] == 'number') {
+                                    if (typeof aggregated_data[indicator][key] === 'number') {
                                         aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
-                                        if (org_count == ky + 1) {
+                                        if (org_count === ky + 1) {
                                             aggregated_data[indicator][key] = aggregated_data[indicator][key] / org_count;
                                         }
-                                    } else if (typeof aggregated_data[indicator][key] == 'string') {
+                                    } else if (typeof aggregated_data[indicator][key] === 'string') {
                                         if (isNaN(aggregated_data[indicator][key])) {
                                             aggregated_data[indicator][key] = aggregated_data[indicator][key] + ', ' + indicator_data[key];
                                         } else {
                                             aggregated_data[indicator][key] = parseInt(aggregated_data[indicator][key]) + parseInt(indicator_data[key]);
-                                            if (org_count == ky + 1) {
+                                            if (org_count === ky + 1) {
                                                 aggregated_data[indicator][key] = aggregated_data[indicator][key] / org_count;
                                             }
                                         }
-                                    } else if (typeof aggregated_data[indicator][key] == 'object') {
-                                        // console.log('2nd level obj traversal: Org', orgId, ' Indicator: ', indicator, ' Key: ', key);
-                                        // aggregate values, todo avg
+                                    } else if (typeof aggregated_data[indicator][key] === 'object') {
                                         let new_val = {};
                                         Object.keys(aggregated_data[indicator][key]).forEach((k) => {
                                             new_val[k] = parseInt(aggregated_data[indicator][key][k]) + parseInt(indicator_data[key][k]);
-                                            if (org_count == ky + 1) {
+                                            if (org_count === ky + 1) {
                                                 new_val[k] = new_val[k] / org_count;
                                             }
                                         });
@@ -246,105 +94,74 @@ class SpiReport extends React.Component {
                                     }
                                 }
                             });
-                        } else if (typeof indicator_data == 'number') {
+                        } else if (typeof indicator_data === 'number') {
                             aggregated_data[indicator] = parseInt(aggregated_data[indicator]) + parseInt(indicator_data);
-                            if (org_count == ky + 1) {
+                            if (org_count === ky + 1) {
                                 aggregated_data[indicator] = aggregated_data[indicator] / org_count;
                             }
                         }
                     }
                 });
             });
-            // console.log("aggregated_data:: ", aggregated_data);
-            this.setState({
-                odkData: {
-                    [this.state.partners[0] || 'partner_' + Math.floor(Math.random() * 80)]: aggregated_data
-                }
+            setOdkData({
+                [currentPartners[0] || 'partner_' + Math.floor(Math.random() * 80)]: aggregated_data
             });
-            // this.setState({ odkData: data });
         }
-    }
+    }, []);
 
-    aggregateIndicatorData(indicator_data1, indicator_data2) {
-        // if object traverse through the indicator data and aggregate the values (if numbers)
-        if (typeof indicator_data1 == 'object') {
-            Object.keys(indicator_data1).forEach((key) => {
-                indicator_data1[key] = this.aggregateIndicatorData(indicator_data1[key], indicator_data2[key]);
-            });
-            return indicator_data1;
-        } else {
-            return indicator_data1 + indicator_data2;
-        }
-    }
-
-    resetFilters() {
-        location.reload();
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        if (
-            this.state.orgUnitDataIds != nextState.orgUnitDataIds ||
-            this.state.orgUnitTimeline != nextState.orgUnitTimeline ||
-            this.state.siteType != nextState.siteType ||
-            this.state.startDate != nextState.startDate ||
-            this.state.endDate != nextState.endDate ||
-            this.state.echartsMinHeight !== nextState.echartsMinHeight
-        ) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    getTimelineAndOrgunits(orgUnitSpiData) {
-        let timeLines = [];
-        let orgunitName = '';
-        for (let [key, val] of Object.entries(orgUnitSpiData)) {
-            if (key != "OverallSitesLevel" && key != 'orgName' && key != 'OrgUniType') {
-                for (let [timeline, value] of Object.entries(val)) {
-                    if (!timeLines.includes(timeline)) timeLines.push(timeline);
-                }
-            } else if (key == 'orgName') {
-                orgunitName = val.toUpperCase();
+    const fetchOdkDataServer = useCallback(async (orgUnitIds, orgTimeline, stType, sd, ed, currentPartners, currentAggregatePartners, currentAllPartners) => {
+        if (!orgUnitIds || orgUnitIds.length === 0) return;
+        const returnedData = await FetchOdkData(orgUnitIds, orgTimeline, stType, sd, ed, currentPartners, currentAggregatePartners);
+        if (returnedData.status === 200) {
+            if (currentAggregatePartners) {
+                aggregateDataForPartners(returnedData.data, currentPartners, currentAllPartners);
+            } else {
+                setOdkData(returnedData.data);
             }
         }
-        return [timeLines, orgunitName];
-    }
+    }, [aggregateDataForPartners]);
 
-    addTableRows(tableData, overaRowllSiteLevels, dataToParse, tableDataExport, tableOverallDataExport) {
-        for (let [orgUnitId, orgUnitSpiData] of Object.entries(dataToParse)) {
+    useEffect(() => {
+        (async () => {
+            const [returnedData, fetchedPartners] = await Promise.all([FetchOrgunits(), FetchPartners()]);
+            const defaultOrg = [returnedData.payload[0][0]['org_unit_id']];
+            setOrgUnitDataIds(defaultOrg);
+            setAllPartners(fetchedPartners);
+            fetchOdkDataServer(defaultOrg, [], [], '', '', [], false, fetchedPartners);
+        })();
+    }, []);
 
-            let [timeLines, orgunitName] = this.getTimelineAndOrgunits(orgUnitSpiData);
+    const onFilterButtonClick = () => {
+        fetchOdkDataServer(orgUnitDataIds, orgUnitTimeline, siteType, startDate, endDate, partners, aggregatePartners, allPartners);
+    };
+
+    const addTableRows = useCallback((tableData, overaRowllSiteLevels, dataToParse, tableDataExport, tableOverallDataExport) => {
+        for (let [, orgUnitSpiData] of Object.entries(dataToParse)) {
+            let [timeLines, orgunitName] = getTimelineAndOrgunits(orgUnitSpiData);
             tableData.push(
                 <tr key={uuidv4()}>
                     <td colSpan={4} scope="row">
-                        <strong>{orgunitName} {this.state.partners && this.state.partners.length == 1 && this.state.aggregate_partners && " (Aggregate)"}</strong>
+                        <strong>{orgunitName} {partners && partners.length === 1 && aggregatePartners && " (Aggregate)"}</strong>
                     </td>
-                </tr>);
-
+                </tr>
+            );
             tableDataExport.push([orgunitName, "", "", ""]);
 
-            timeLines.map((timeline) => {
+            timeLines.forEach((timeline) => {
                 let row = [];
                 let exportRow = [];
                 row.push(<td key={uuidv4()} scope="row">{timeline}</td>);
                 exportRow.push(timeline);
 
-                if (this.state.siteType != null) {
-                    if (this.state.siteType.length != 0) {
-                        try {
-                            row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
-                            exportRow.push(orgUnitSpiData['OrgUniType']);
-                        } catch (err) {
-
-                        }
-
-                    }
+                if (siteType != null && siteType.length !== 0) {
+                    try {
+                        row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                        exportRow.push(orgUnitSpiData['OrgUniType']);
+                    } catch {}
                 }
 
                 for (let [indicator, data] of Object.entries(orgUnitSpiData)) {
-                    if (indicator != 'orgName' && indicator != "OverallSitesLevel") {
-
+                    if (indicator !== 'orgName' && indicator !== 'OverallSitesLevel') {
                         row.push(<td key={uuidv4()} scope="row">{data[timeline]}</td>);
                         exportRow.push(data[timeline]);
                     }
@@ -353,154 +170,124 @@ class SpiReport extends React.Component {
                 tableData.push(<tr key={uuidv4()}>{row}</tr>);
             });
 
-            //======= Add  overaRowllSiteLevels table data =====//
-
+            // Overall site levels rows
             try {
                 overaRowllSiteLevels.push(
                     <tr key={uuidv4()}>
-                        <td colSpan={5} style={{ "wordWrap": "break-word", "maxWidth": "150px" }}>
-
-                            <strong>{
-                                orgUnitSpiData['orgName'].toUpperCase()
-                            }</strong>
-
+                        <td colSpan={5} style={{ wordWrap: "break-word", maxWidth: "150px" }}>
+                            <strong>{orgUnitSpiData['orgName'].toUpperCase()}</strong>
                         </td>
-                    </tr>);
-            } catch (err) {
-
-            }
+                    </tr>
+                );
+            } catch {}
 
             try {
                 tableOverallDataExport.push([orgUnitSpiData['orgName'].toUpperCase(), "", "", ""]);
-            } catch (err) {
+            } catch {}
 
-            }
-
-
-            timeLines.map((timeline) => {
+            timeLines.forEach((timeline) => {
                 let row = [];
                 let tableOverallDataExportRow = [];
-                row.push(<td key={uuidv4()}>{timeline} (N={orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})</td>);
-                let sting = `${timeline} (N=${orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})`
+                const sting = `${timeline} (N=${orgUnitSpiData["OverallSitesLevel"][timeline]['counter']})`;
+                row.push(<td key={uuidv4()}>{sting}</td>);
                 tableOverallDataExportRow.push(timeline);
 
-                if (this.state.siteType != null) {
-                    if (this.state.siteType.length != 0) {
-                        row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
-                        tableOverallDataExportRow.push(orgUnitSpiData['OrgUniType']);
-                    }
+                if (siteType != null && siteType.length !== 0) {
+                    row.push(<td key={uuidv4()} scope="row">{orgUnitSpiData['OrgUniType']}</td>);
+                    tableOverallDataExportRow.push(orgUnitSpiData['OrgUniType']);
                 }
-                for (let [key, val] of Object.entries(orgUnitSpiData)) {
-                    if (key == "OverallSitesLevel") {
 
-                        let level0 = orgUnitSpiData["OverallSitesLevel"][timeline]['level0'];
-                        let level1 = orgUnitSpiData["OverallSitesLevel"][timeline]['level1'];
-                        let level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
-                        let level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
-                        let level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
-
+                for (let [key] of Object.entries(orgUnitSpiData)) {
+                    if (key === "OverallSitesLevel") {
+                        const level0 = orgUnitSpiData["OverallSitesLevel"][timeline]['level0'];
+                        const level1 = orgUnitSpiData["OverallSitesLevel"][timeline]['level1'];
+                        const level2 = orgUnitSpiData["OverallSitesLevel"][timeline]['level2'];
+                        const level3 = orgUnitSpiData["OverallSitesLevel"][timeline]['level3'];
+                        const level4 = orgUnitSpiData["OverallSitesLevel"][timeline]['level4'];
                         row.push(<td key={uuidv4()}>{level0}</td>);
                         row.push(<td key={uuidv4()}>{level1}</td>);
                         row.push(<td key={uuidv4()}>{level2}</td>);
                         row.push(<td key={uuidv4()}>{level3}</td>);
                         row.push(<td key={uuidv4()}>{level4}</td>);
-
-                        tableOverallDataExportRow.push(level0);
-                        tableOverallDataExportRow.push(level1);
-                        tableOverallDataExportRow.push(level2);
-                        tableOverallDataExportRow.push(level3);
-                        tableOverallDataExportRow.push(level4);
+                        tableOverallDataExportRow.push(level0, level1, level2, level3, level4);
                     }
-
                 }
                 tableOverallDataExport.push(tableOverallDataExportRow);
-                overaRowllSiteLevels.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
-                    this.setState({
-                        nModal: {
+                overaRowllSiteLevels.push(
+                    <tr className='hover-pointer' key={uuidv4()} onClick={() => {
+                        setNModal({
                             title: <>
                                 <h5>{sting || "Details"}</h5>
                                 <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
                                     if (orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].length > 0) {
                                         exportToExcel(
-                                            Array.from(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], sp => {
-                                                return {
-                                                    "mfl": sp.mfl.toUpperCase(),
-                                                    "facility": sp.facility.toUpperCase(),
-                                                    "site": sp.site.toUpperCase(),
-                                                }
-                                            }),
+                                            Array.from(orgUnitSpiData["OverallSitesLevel"][timeline]['sites'], sp => ({
+                                                "mfl": sp.mfl.toUpperCase(),
+                                                "facility": sp.facility.toUpperCase(),
+                                                "site": sp.site.toUpperCase(),
+                                            })),
                                             'Sites - ' + sting
                                         );
                                     } else {
-                                        console.error('No data to export');
-                                        alert('No data to export')
+                                        alert('No data to export');
                                     }
                                 }}>
-                                    <i className='fa fa-download'></i>&nbsp;
-                                    Excel/CSV
+                                    <i className='fa fa-download'></i>&nbsp;Excel/CSV
                                 </button>
                             </>,
-                            content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
-                                <table className='table table-condensed table-striped'>
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>MFL Code</th>
-                                            <th>Site</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].map((st, indx) => {
-                                            return (<tr key={uuidv4()}>
-                                                <td>{indx + 1}.</td>
-                                                <td>{st.mfl || ''}</td>
-                                                <td>{(st.facility + ' - ' + st.site).toUpperCase() || ''}</td>
-                                            </tr>);
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>)
-                        }
-                    });
-                    $('#nModal').modal('toggle');
-                }}>{row}</tr>);
+                            content: (
+                                <div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                                    <table className='table table-condensed table-striped'>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>MFL Code</th>
+                                                <th>Site</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {orgUnitSpiData["OverallSitesLevel"][timeline]['sites'].map((st, indx) => (
+                                                <tr key={uuidv4()}>
+                                                    <td>{indx + 1}.</td>
+                                                    <td>{st.mfl || ''}</td>
+                                                    <td>{(st.facility + ' - ' + st.site).toUpperCase() || ''}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )
+                        });
+                        $('#nModal').modal('toggle');
+                    }}>{row}</tr>
+                );
             });
-
         }
         return [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport];
-    }
+    }, [siteType, partners, aggregatePartners]);
 
-    exportAveragePerformancePDFData() {
+    const exportAveragePerformancePDFData = () => {
         const doc = new jsPDF();
         doc.autoTable({ html: '#averagePerformance' });
-        doc.save('Average_performance.pdf')
-    }
+        doc.save('Average_performance.pdf');
+    };
 
-    exportOverallSiteLevelsPDFData() {
+    const exportOverallSiteLevelsPDFData = () => {
         const doc = new jsPDF();
         doc.autoTable({ html: '#overallSiteLevelPerformance' });
-        doc.save('Overall_Site_Levels.pdf')
-    }
+        doc.save('Overall_Site_Levels.pdf');
+    };
 
-    render() {
+    // Build table data
+    let overaRowllSiteLevels = [];
+    let tableData = [];
+    let tableDataExport = [];
+    let tableOverallDataExport = [];
 
-        const imgStyle = {
-            width: "100%"
-        };
-
-        const rowStle = {
-            marginBottom: "10px"
-        };
-
-        // var overallSiteLevels = [];
-        let overaRowllSiteLevels = [];
-        let tableData = [];
-        let tableDataExport = [];
-        let tableOverallDataExport = [];
-        let tableHeaders = <tr>
-            {/* <th scope="col">#</th> */}
+    let tableHeaders = (
+        <tr>
             <th scope="col">___</th>
-            <th scope="col">Personnel Training & Certification</th>
+            <th scope="col">Personnel Training &amp; Certification</th>
             <th scope="col">QA in Counselling</th>
             <th scope="col">Physical Facility</th>
             <th scope="col">Safety</th>
@@ -509,392 +296,240 @@ class SpiReport extends React.Component {
             <th scope="col">Post-testing Phase</th>
             <th scope="col">External Quality Assessment</th>
             <th scope="col">Overall Performance</th>
-        </tr>;
-        tableDataExport.push(['___', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
-            'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
-        ]);
-        let overallSitesHeaders = <tr>
+        </tr>
+    );
+    tableDataExport.push(['___', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
+        'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
+    ]);
+    let overallSitesHeaders = (
+        <tr>
             <th scope="col">___</th>
             <th scope="col">Level 0 (&lt;40%)</th>
             <th scope="col">Level 1 (40-59%)</th>
             <th scope="col">Level 2 (60-79%)</th>
             <th scope="col">Level 3 (80-89%)</th>
             <th scope="col">Level 4 (&gt;90%)</th>
-        </tr>;
-        tableOverallDataExport.push(['___', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)',
-            'Level 3 (80-89%)', 'Level 4 (>90%)'
-        ]);
+        </tr>
+    );
+    tableOverallDataExport.push(['___', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)', 'Level 3 (80-89%)', 'Level 4 (>90%)']);
 
-        if (this.state.siteType != null) {
-            if (this.state.siteType.length != 0) {
-                tableHeaders = <tr>
-                    {/* <th scope="col">#</th> */}
-                    <th scope="col">___</th>
-                    <th scope="col">Programme</th>
-                    <th scope="col">Personnel Training & Certification</th>
-                    <th scope="col">QA in Counselling</th>
-                    <th scope="col">Physical Facility</th>
-                    <th scope="col">Safety</th>
-                    <th scope="col">Pre-testing phase</th>
-                    <th scope="col">Testing Phase</th>
-                    <th scope="col">Post-testing Phase</th>
-                    <th scope="col">External Quality Assessment</th>
-                    <th scope="col">Overall Performance</th>
-                </tr>;
-                tableDataExport = [];
-                tableDataExport.push(['___', 'Programme', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
-                    'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
-                ]);
-                overallSitesHeaders = <tr>
-                    <th scope="col">___</th>
-                    <th scope="col">Programme</th>
-                    <th scope="col">Level 0 (&lt;40%)</th>
-                    <th scope="col">Level 1 (40-59%)</th>
-                    <th scope="col">Level 2 (60-79%)</th>
-                    <th scope="col">Level 3 (80-89%)</th>
-                    <th scope="col">Level 4 (&gt;90%)</th>
-                </tr>
-                tableOverallDataExport = [];
-                tableOverallDataExport.push(['___', 'Programme', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)',
-                    'Level 3 (80-89%)', 'Level 4 (>90%)'
-                ]);
-            }
-        }
-
-        if (this.state.odkData) {
-            //if (this.state.siteType != null) {
-            if (this.state.siteType.length != 0) { //return data comes in different form. list od data
-                this.state.odkData.map((displayData) => {
-                    [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = this.addTableRows(tableData, overaRowllSiteLevels, displayData, tableDataExport, tableOverallDataExport);
-                });
-            } else {
-                [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = this.addTableRows(tableData, overaRowllSiteLevels, this.state.odkData, tableDataExport, tableOverallDataExport);
-            }
-        }
-
-        let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
-
-            {
-                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Average Performance per QA element' ?
-                    <React.Fragment>
-                        <div className="row">
-                            <div className="col-sm-6  col-xm-6 col-md-6">
-                                <p style={{ fontWeight: "900" }}>Average Performance  per QA element</p>
-
-                            </div>
-                            <div className="col-sm-3  col-xm-3 col-md-3">
-                                <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
-                            </div>
-                            <div className="col-sm-3  col-xm-3 col-md-3">
-                                <a style={{ "color": "blue" }} onClick={() => this.exportAveragePerformancePDFData()}><i className="fas fa-download"></i> PDF </a>
-                            </div>
-                        </div>
-
-                        <table id="averagePerformance" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {tableHeaders}
-                            </thead>
-                            <tbody>
-                                {tableData}
-                            </tbody>
-                        </table>
-                    </React.Fragment> : ''
-            }
-
-            {
-                this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Site Levels during Assessment' ?
-                    <React.Fragment>
-                        <div className="row">
-                            <div className="col-sm-6  col-xm-6 col-md-6">
-                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-
-                            </div>
-                            <div className="col-sm-3  col-xm-3 col-md-3">
-                                <span><i className="fas fa-download"></i></span><CSVLink data={tableOverallDataExport}> Csv</CSVLink>
-                            </div>
-                            <div className="col-sm-3  col-xm-3 col-md-3">
-                                <a style={{ "color": "blue" }} onClick={() => this.exportOverallSiteLevelsPDFData()}><i className="fas fa-download"></i> PDF </a>
-                            </div>
-                        </div>
-
-                        <table id="overallSiteLevelPerformance" className="table table-responsive">
-                            <thead className="thead-dark">
-                                {overallSitesHeaders}
-                            </thead>
-                            <tbody>
-                                {overaRowllSiteLevels}
-                            </tbody>
-                        </table>
-                    </React.Fragment> : ''
-            }
-        </div>;
-
-        let siteLevelBarColumnCharts = <SiteLevelBarColumnCharts singleItem={false} minHeight={510} serverData={this.state.odkData} siteType={this.state.siteType} />
-        let overallPerformanceRadar = <OverallPerformanceRadar minHeight={this.state.echartsMinHeight} setMinHeight={true} serverData={this.state.odkData} siteType={this.state.siteType} />
-
-
-        return (
-            <React.Fragment>
-
-                {/* Page Heading */}
-                <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">SPI REPORT: {
-                        this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
-                    }
-                    </h1>
-                    {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                        className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
-                </div>
-
-                <div className="row">
-
-                    {/* <div className="col-sm-12 mb-sm-1 mb-1">
-                        <details>
-                            <summary>odkData</summary>
-                            <pre style={{ padding: '4px', backgroundColor: 'wheat', border: '1px solid #a9ab89', maxHeight: '400px', overflowY: 'auto' }}>{JSON.stringify(this.state.odkData, null, 2)}</pre>
-                        </details>
-                    </div> */}
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <SpiOrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
-                            orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
-                            filterDisplayedIndicator={this.filterDisplayedIndicator}
-                        ></SpiOrgUnitIndicator>
-                    </div>
-
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
-                    </div>
-                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <OrgTimeline onOrgTimelineChange={this.onOrgTimelineChange}></OrgTimeline>
-                    </div>
-
-                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
-                    </div>
-
-                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
-                        <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
-                    </div>
-                    <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <div className="btn-group">
-                            <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {this.state.partners && this.state.partners.length > 0 ? (
-                                    // this.state.partners.length + " partner(s)"
-                                    this.state.allPartners.find(p => p.id == this.state.partners[0]).name
-                                ) : "Select Partner"}
-                            </button>
-                            <div className="dropdown-menu">
-                                <div>
-                                    <div className="form-check" style={{ padding: '3px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
-                                        <input className="ml-2" type="checkbox" value={this.state.aggregate_partners} id="aggregate_partners" onClick={ev => {
-                                            let agg = ev.target.checked;
-                                            this.setState({ aggregate_partners: agg });
-                                        }} />
-                                        <label className="mb-0 ml-1" htmlFor="aggregate_partners">
-                                            Aggregate?
-                                        </label>
-                                    </div>
-                                </div>
-                                <hr />
-                                <a key={uuidv4()} className="dropdown-item text-center" href="#" onClick={(event) => { this.setState({ partners: [] }) }}>
-                                    &mdash; None &mdash; <i className="fa fa-check" style={{ "display": this.state.partners.length == 0 ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
-                                </a>
-                                {this.state.allPartners.map((partner, index) => {
-                                    return (
-                                        <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
-                                            onClick={(event) => {
-                                                if (this.state.partners.indexOf(partner.id) == -1) {
-                                                    this.setState({
-                                                        partners: [
-                                                            // ...this.state.partners,
-                                                            partner.id
-                                                        ]
-                                                    })
-                                                } else {
-                                                    // remove the partner
-                                                    let partners = this.state.partners;
-                                                    partners = partners.filter((item) => {
-                                                        return item != partner.id
-                                                    })
-                                                    this.setState({ partners: partners })
-                                                }
-                                            }}
-                                        >
-                                            {partner.name} <i className="fa fa-check" style={{ "display": this.state.partners.includes(partner.id) ? "inline" : "none", "color": "green" }} aria-hidden="true"></i>
-                                        </a>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                        <button
-                            onClick={() => this.onFilterButtonClickEvent()}
-                            type="button"
-                            style={{ "display": "inlineBlock" }}
-                            className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
-                            {/* <i className="fa fa-search" aria-hidden="true"></i> */}
-                        </button>
-                        <button
-                            onClick={() => {
-                                this.resetFilters();
-                            }}
-                            type="button"
-                            style={{ "display": "inlineBlock" }}
-                            className="btn btn-sm btn-secondary font-weight-bold">Reset
-                        </button>
-                    </div>
-
-                </div>
-                <br />
-                <div style={rowStle} className="row">
-
-                    <div className="col-sm-12  col-xm-12 col-md-12">
-                        <ul className="nav nav-tabs" id="myTab" role="tablist">
-                            <li className="nav-item" role="presentation">
-                                <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
-                                    {/* <i className="fa fa-table" aria-hidden="true"></i>  */}
-                                    <i className="fas fa-chart-bar"></i>  Data View </a>
-                            </li>
-
-                            {/* <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="SiteColumnsTab" data-toggle="tab"
-                                    href="#sitecolumns" role="tab" aria-controls="profile"
-                                    aria-selected="false"
-                                    onClick={() => {
-                                        this.setState({
-                                            echartsMinHeight: ""
-                                        })
-                                    }}
-                                >
-                                    <i className="fas fa-chart-bar"></i> Site Level Columns</a>
-                            </li>
-
-                            <li className="nav-item" role="presentation">
-                                <a className="nav-link" id="spidersTab"
-                                    data-toggle="tab" href="#spiders" role="tab"
-                                    aria-controls="contact" aria-selected="false"
-                                    onClick={() => {
-                                        this.setState({
-                                            echartsMinHeight: "500px"
-                                        })
-                                    }}
-                                >
-                                    <i className="fas fa-atom"></i> Average Performance Spider</a>
-                            </li> */}
-
-                        </ul>
-                        <div className="tab-content" id="myTabContent">
-                            <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
-                                <br />
-                                {tablesTab}
-                                {
-                                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Average Performance per QA element' ?
-                                        <React.Fragment>
-                                            <div >
-                                                <br />
-                                                <p style={{ fontWeight: "900" }}>Average Performance per QA element spider chart(s)</p>
-                                                {overallPerformanceRadar}
-                                            </div>
-                                        </React.Fragment> : ''
-                                }
-                                {
-                                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Site Levels during Assessment' ?
-                                        <React.Fragment>
-                                            <div >
-                                                <br />
-                                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment charts(s)</p>
-                                                {siteLevelBarColumnCharts}
-                                            </div>
-                                        </React.Fragment> : ''
-                                }
-                            </div>
-
-                            {/* <div className="tab-pane fade" id="sitecolumns" role="SiteColumnsTab" aria-labelledby="profile-tab">
-                                <br />
-                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
-                                {siteLevelBarColumnCharts}
-                            </div> */}
-                            {/* <div className="tab-pane fade" id="averagecolumns" role="averagecolumns" aria-labelledby="profile-tab">
-                                <br />
-                            </div>
-                            <div className="tab-pane fade" id="spiders" role="tabpanel" aria-labelledby="contact-tab">
-                                <br />
-                                <p style={{ fontWeight: "900" }}>Average Performance per QA element</p>
-                                {overallPerformanceRadar}
-                            </div> */}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-
-
-                <React.Fragment>
-                    <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true" >
-                        <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <div className="modal-title" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%' }} id="nModalTitle">
-                                        {this.state.nModal?.title || <h5>Details</h5>}
-                                    </div>
-                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    {
-                                        this.state.nModal?.content ? this.state.nModal?.content : ''
-                                    }
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div >
-                </React.Fragment>
-            </React.Fragment>
+    if (siteType != null && siteType.length !== 0) {
+        tableHeaders = (
+            <tr>
+                <th scope="col">___</th>
+                <th scope="col">Programme</th>
+                <th scope="col">Personnel Training &amp; Certification</th>
+                <th scope="col">QA in Counselling</th>
+                <th scope="col">Physical Facility</th>
+                <th scope="col">Safety</th>
+                <th scope="col">Pre-testing phase</th>
+                <th scope="col">Testing Phase</th>
+                <th scope="col">Post-testing Phase</th>
+                <th scope="col">External Quality Assessment</th>
+                <th scope="col">Overall Performance</th>
+            </tr>
         );
+        tableDataExport = [['___', 'Programme', 'Personnel Training & Certification', 'QA in Counselling', 'Physical Facility',
+            'Safety', 'Pre-testing phase', 'Testing Phase', 'Post-testing Phase', 'External Quality Assessment', 'Overall Performance'
+        ]];
+        overallSitesHeaders = (
+            <tr>
+                <th scope="col">___</th>
+                <th scope="col">Programme</th>
+                <th scope="col">Level 0 (&lt;40%)</th>
+                <th scope="col">Level 1 (40-59%)</th>
+                <th scope="col">Level 2 (60-79%)</th>
+                <th scope="col">Level 3 (80-89%)</th>
+                <th scope="col">Level 4 (&gt;90%)</th>
+            </tr>
+        );
+        tableOverallDataExport = [['___', 'Programme', 'Level 0 (<40%)', 'Level 1 (40-59%)', 'Level 2 (60-79%)', 'Level 3 (80-89%)', 'Level 4 (>90%)']];
     }
 
+    if (odkData && Object.keys(odkData).length > 0) {
+        if (siteType.length !== 0) {
+            (Array.isArray(odkData) ? odkData : [odkData]).forEach((displayData) => {
+                [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = addTableRows(tableData, overaRowllSiteLevels, displayData, tableDataExport, tableOverallDataExport);
+            });
+        } else {
+            [tableData, overaRowllSiteLevels, tableDataExport, tableOverallDataExport] = addTableRows(tableData, overaRowllSiteLevels, odkData, tableDataExport, tableOverallDataExport);
+        }
+    }
+
+    const currentIndicator = orgUnitIndicators[indicatorIndexToDisplay];
+
+    return (
+        <React.Fragment>
+            <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 className="h4 mb-0 text-gray-500">SPI REPORT: {currentIndicator}</h1>
+            </div>
+
+            <div className="row">
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <SpiOrgUnitIndicator
+                        orgUnitIndicators={orgUnitIndicators}
+                        orgUnitTypeChangeHandler={setSiteType}
+                        filterDisplayedIndicator={setIndicatorIndexToDisplay}
+                    />
+                </div>
+
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <OrgUnitButton orgUnitChangeHandler={setOrgUnitDataIds} />
+                </div>
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <OrgTimeline onOrgTimelineChange={setOrgUnitTimeline} />
+                </div>
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <OrgUnitType orgUnitTypeChangeHandler={setSiteType} />
+                </div>
+                <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
+                    <OrgDate orgDateChangeHandler={(sd, ed) => { setStartDate(sd); setEndDate(ed); }} />
+                </div>
+
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <div className="btn-group">
+                        <button type="button" className="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {partners && partners.length > 0
+                                ? (allPartners.find(p => p.id == partners[0])?.name || 'Partner')
+                                : "Select Partner"}
+                        </button>
+                        <div className="dropdown-menu">
+                            <div>
+                                <div className="form-check" style={{ padding: '3px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '4px' }}>
+                                    <input className="ml-2" type="checkbox" checked={aggregatePartners} id="aggregate_partners" onChange={ev => setAggregatePartners(ev.target.checked)} />
+                                    <label className="mb-0 ml-1" htmlFor="aggregate_partners">Aggregate?</label>
+                                </div>
+                            </div>
+                            <hr />
+                            <a key={uuidv4()} className="dropdown-item text-center" href="#" onClick={() => setPartners([])}>
+                                &mdash; None &mdash; <i className="fa fa-check" style={{ display: partners.length === 0 ? "inline" : "none", color: "green" }} />
+                            </a>
+                            {allPartners.map((partner) => (
+                                <a key={uuidv4()} className="dropdown-item" href="#" data-id={partner.id}
+                                    onClick={() => {
+                                        if (!partners.includes(partner.id)) {
+                                            setPartners([partner.id]);
+                                        } else {
+                                            setPartners(partners.filter(item => item !== partner.id));
+                                        }
+                                    }}
+                                >
+                                    {partner.name} <i className="fa fa-check" style={{ display: partners.includes(partner.id) ? "inline" : "none", color: "green" }} />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-sm-12 col-lg-2 col-md-4 mb-sm-1 mb-1">
+                    <button onClick={onFilterButtonClick} type="button" style={{ display: "inlineBlock" }} className="btn btn-sm btn-primary font-weight-bold mr-2">Filter</button>
+                    <button onClick={() => location.reload()} type="button" style={{ display: "inlineBlock" }} className="btn btn-sm btn-secondary font-weight-bold">Reset</button>
+                </div>
+            </div>
+
+            <br />
+            <div style={{ marginBottom: "10px" }} className="row">
+                <div className="col-sm-12 col-xm-12 col-md-12">
+                    <ul className="nav nav-tabs" id="myTab" role="tablist">
+                        <li className="nav-item" role="presentation">
+                            <a className="nav-link active" id="tablesTab" data-toggle="tab" href="#tables" role="tab" aria-controls="home" aria-selected="true">
+                                <i className="fas fa-chart-bar"></i> Data View
+                            </a>
+                        </li>
+                    </ul>
+                    <div className="tab-content" id="myTabContent">
+                        <div className="tab-pane fade show active" id="tables" role="tablesTab" aria-labelledby="home-tab">
+                            <br />
+                            <div className="col-sm-12 col-xm-12 col-md-12">
+                                {currentIndicator === 'Average Performance per QA element' && (
+                                    <React.Fragment>
+                                        <div className="row">
+                                            <div className="col-sm-6 col-xm-6 col-md-6">
+                                                <p style={{ fontWeight: "900" }}>Average Performance per QA element</p>
+                                            </div>
+                                            <div className="col-sm-3 col-xm-3 col-md-3">
+                                                <span style={{ color: "blue" }}><i className="fas fa-download"></i></span>
+                                                <CSVLink data={tableDataExport}> Csv</CSVLink>
+                                            </div>
+                                            <div className="col-sm-3 col-xm-3 col-md-3">
+                                                <a style={{ color: "blue" }} onClick={exportAveragePerformancePDFData}><i className="fas fa-download"></i> PDF</a>
+                                            </div>
+                                        </div>
+                                        <table id="averagePerformance" className="table table-responsive">
+                                            <thead className="thead-dark">{tableHeaders}</thead>
+                                            <tbody>{tableData}</tbody>
+                                        </table>
+                                    </React.Fragment>
+                                )}
+
+                                {currentIndicator === 'Overall Site Levels during Assessment' && (
+                                    <React.Fragment>
+                                        <div className="row">
+                                            <div className="col-sm-6 col-xm-6 col-md-6">
+                                                <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment</p>
+                                            </div>
+                                            <div className="col-sm-3 col-xm-3 col-md-3">
+                                                <span><i className="fas fa-download"></i></span>
+                                                <CSVLink data={tableOverallDataExport}> Csv</CSVLink>
+                                            </div>
+                                            <div className="col-sm-3 col-xm-3 col-md-3">
+                                                <a style={{ color: "blue" }} onClick={exportOverallSiteLevelsPDFData}><i className="fas fa-download"></i> PDF</a>
+                                            </div>
+                                        </div>
+                                        <table id="overallSiteLevelPerformance" className="table table-responsive">
+                                            <thead className="thead-dark">{overallSitesHeaders}</thead>
+                                            <tbody>{overaRowllSiteLevels}</tbody>
+                                        </table>
+                                    </React.Fragment>
+                                )}
+                            </div>
+
+                            {currentIndicator === 'Average Performance per QA element' && (
+                                <div>
+                                    <br />
+                                    <p style={{ fontWeight: "900" }}>Average Performance per QA element spider chart(s)</p>
+                                    <OverallPerformanceRadar minHeight={echartsMinHeight} setMinHeight={true} serverData={odkData} siteType={siteType} />
+                                </div>
+                            )}
+                            {currentIndicator === 'Overall Site Levels during Assessment' && (
+                                <div>
+                                    <br />
+                                    <p style={{ fontWeight: "900" }}>Overall Site Levels during Assessment charts(s)</p>
+                                    <SiteLevelBarColumnCharts singleItem={false} minHeight={510} serverData={odkData} siteType={siteType} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <React.Fragment>
+                <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <div className="modal-title" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%' }} id="nModalTitle">
+                                    {nModal?.title || <h5>Details</h5>}
+                                </div>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                {nModal?.content || ''}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </React.Fragment>
+        </React.Fragment>
+    );
 }
 
 export default SpiReport;
 
-if (document.getElementById('SpiReport')) {
-    // find element by id
-    let domValues = [];
-    let domValuesMap = {};
-    const dataChart1 = document.getElementById('data-chart1');
-    const dataChart2 = document.getElementById('data-chart2');
-    const dataChart3 = document.getElementById('data-chart3');
-    const dataChart4 = document.getElementById('data-chart4');
-    const dataChart5 = document.getElementById('data-chart5');
-    const dataChart6 = document.getElementById('data-chart6');
-    const dataChart7 = document.getElementById('data-chart7');
-    const dataChart8 = document.getElementById('data-chart8');
-    // create new props object with element's data-attributes
-    // result: {chart1: "data"}
-    domValues.push(dataChart1.dataset);
-    domValues.push(dataChart2.dataset);
-    domValues.push(dataChart3.dataset);
-    domValues.push(dataChart4.dataset);
-    domValues.push(dataChart5.dataset);
-    domValues.push(dataChart6.dataset);
-    domValues.push(dataChart7.dataset);
-    domValues.push(dataChart8.dataset);
-    // domValues.push({'f':10})
-    domValues.forEach(element => {
-        for (const property in element) {
-            domValuesMap[property] = element[property];
-        }
-    });
-
-    const props = Object.assign({}, domValuesMap);
-    ReactDOM.render(<SpiReport {...props} />, document.getElementById('SpiReport'));
-}
+const el = document.getElementById('SpiReport');
+if (el) ReactDOM.createRoot(el).render(<SpiReport />);

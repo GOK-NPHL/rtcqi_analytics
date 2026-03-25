@@ -5,14 +5,7 @@
 @import 'variables';
 
 // Bootstrap
-@import '~bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap';
 
-//font awesome
 
-@import '~@fortawesome/fontawesome-free/scss/brands';
-@import '~@fortawesome/fontawesome-free/scss/regular';
-@import '~@fortawesome/fontawesome-free/scss/solid';
-@import '~@fortawesome/fontawesome-free/scss/fontawesome';
-
-@import '~react-dual-listbox/src/scss/react-dual-listbox';
-// node_modules/rc-pagination/assets
+@import 'react-dual-listbox/src/scss/react-dual-listbox';

@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactJson from 'react-json-view';
 import { exportToExcel } from '../../utils/Helpers';
 
 function CompletenessSummary({ data }) {

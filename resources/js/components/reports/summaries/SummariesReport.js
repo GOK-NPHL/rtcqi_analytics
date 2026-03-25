@@ -1,66 +1,48 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import LineGraph from '../../utils/charts/LineGraph';
-import StackedHorizontal from '../../utils/charts/StackedHorizontal'
+import StackedHorizontal from '../../utils/charts/StackedHorizontal';
 
-class SummariesReport extends React.Component {
+function SummariesReport(props) {
+    const imgStyle = {
+        width: "100%"
+    };
 
-    constructor(props) {
-        super(props);
-        this.state = {
+    const rowStle = {
+        marginBottom: "10px"
+    };
 
-        }
-    }
+    return (
+        <React.Fragment>
 
-    render() {
-        const imgStyle = {
-            width: "100%"
-        };
+            {/* Page Heading */}
+            <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 className="h4 mb-0 text-gray-500">Summaries REPORT</h1>
+                {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                    className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
+            </div>
 
-        const rowStle = {
-            marginBottom: "10px"
-        };
-        //console.log(this.props)
-        return (
-            <React.Fragment>
+            {/* <OrguntiDrillDown /> */}
 
-                {/* Page Heading */}
-                <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 className="h4 mb-0 text-gray-500">Summaries REPORT</h1>
-                    {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                        className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
+            <div style={rowStle} className="row">
+                <div className="col-sm-12  col-xm-12 col-md-12">
+                    <img style={imgStyle} src={props.chart1}></img>
                 </div>
+            </div>
 
-                {/* <OrguntiDrillDown /> */}
-
-                <div style={rowStle} className="row">
-                    <div className="col-sm-12  col-xm-12 col-md-12">
-                        <img style={imgStyle} src={this.props.chart1}></img>
-                    </div>
-
-                </div>
-
-
-
-            </React.Fragment>
-        );
-    }
-
+        </React.Fragment>
+    );
 }
 
 export default SummariesReport;
 
-if (document.getElementById('SummariesReport')) {
-    // find element by id
+const el = document.getElementById('SummariesReport');
+if (el) {
     let domValues = [];
     let domValuesMap = {};
     const dataChart1 = document.getElementById('data-chart1');
-
-    // create new props object with element's data-attributes
-    // result: {chart1: "data"}
     domValues.push(dataChart1.dataset);
 
-    // domValues.push({'f':10})
     domValues.forEach(element => {
         for (const property in element) {
             domValuesMap[property] = element[property];
@@ -68,5 +50,5 @@ if (document.getElementById('SummariesReport')) {
     });
 
     const props = Object.assign({}, domValuesMap);
-    ReactDOM.render(<SummariesReport {...props} />, document.getElementById('SummariesReport'));
+    createRoot(el).render(<SummariesReport {...props} />);
 }

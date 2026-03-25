@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import '../../../css/TreeView.css';
 import { AddSubOrg, FetchUserAuthorities, DeleteOrg } from './Helpers';
@@ -6,207 +6,126 @@ import { v4 as uuidv4 } from 'uuid';
 import TreeModal from './TreeModal';
 import Tree from './Tree';
 
-class TreeView extends React.Component {
+function TreeView(props) {
+    const [orgUnitAction, setOrgUnitAction] = useState('Add');
+    const [currentSelectedOrg, setCurrentSelectedOrgState] = useState(null);
+    const [newOrgUnitName, setNewOrgUnitNameState] = useState(null);
+    const [newEditOrgUnitName, setNewEditOrgUnitNameState] = useState('');
+    const [allowedPermissions, setAllowedPermissions] = useState([]);
+    const [alertMessage, setAlertMessage] = useState(null);
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            orgUnitAction: 'Add',
-            currentSelectedOrg: null,
-            newOrgUnitName: null,
-            newEditOrgUnitName: '',
-            allowedPermissions: []
-        }
-        this.getXYCoordinates = this.getXYCoordinates.bind(this);
-        this.updateOrgActionStatus = this.updateOrgActionStatus.bind(this);
-        this.saveOrgUnitAction = this.saveOrgUnitAction.bind(this);
-        this.setNewOrgUnitName = this.setNewOrgUnitName.bind(this);
-        this.setNewEditOrgUnitName = this.setNewEditOrgUnitName.bind(this);
-        this.setcurrentSelectedOrg = this.setcurrentSelectedOrg.bind(this);
-    }
-
-    componentDidMount() {
+    useEffect(() => {
         (async () => {
-            let allowedPermissions = await FetchUserAuthorities();
-            this.setState({
-                allowedPermissions: allowedPermissions
-            });
+            let perms = await FetchUserAuthorities();
+            setAllowedPermissions(perms);
 
-            if (!allowedPermissions.includes('add_orgunit')) {
-                this.setState({
-                    orgUnitAction: 'Edit'
-                });
+            if (!perms.includes('add_orgunit')) {
+                setOrgUnitAction('Edit');
             }
-
         })();
+    }, []);
+
+    function updateOrgActionStatus(status) {
+        setOrgUnitAction(status);
     }
 
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     if (
-    //         nextProps.orgUnitAction !== nextProps.orgUnitAction ||
-    //         nextProps.alertMessage !== nextProps.alertMessage ||
-    //         nextState.newOrgUnitName != this.state.newOrgUnitName ||
-    //         nextState.currentSelectedOrg != this.state.currentSelectedOrg ||
-    //         this.state.newOrgUnitName != null ||
-    //         this.state.currentSelectedOrg != null
-    //     ) {
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
-    // }
-
-    organisationUnitOnclick(event) {
-        // event.stopPropagation();
-
-        let el = event.target.nextElementSibling;
-        while (el) {
-            el.classList.toggle("nested");
-            el = el.nextElementSibling;
-        }
-        event.target.classList.toggle("caret-down");
-    }
-
-    getXYCoordinates(event) {
-        event.preventDefault();
-        this.setState({
-            xPos: event.clientX,
-            yPos: event.clientY,
-            showMenu: true
-        });
-
-    }
-
-    updateOrgActionStatus(status) {
-        this.setState({
-            orgUnitAction: status
-        });
-    }
-
-    saveOrgUnitAction() {
-        if (this.state.orgUnitAction == 'Add') {
+    function saveOrgUnitAction() {
+        if (orgUnitAction == 'Add') {
             (async () => {
-                let response = await AddSubOrg(this.state.currentSelectedOrg, this.state.newOrgUnitName);
-                this.setState({
-                    alertMessage: response.data.Message
-                });
+                let response = await AddSubOrg(currentSelectedOrg, newOrgUnitName);
+                setAlertMessage(response.data.Message);
                 $('#alertMessageModal').modal('toggle');
             })();
-        } else if (this.state.orgUnitAction == 'Edit') {
-            this.props.updateOrg(
-                this.state.currentSelectedOrg['id'],
-                this.state.newEditOrgUnitName);
-        } else if (this.state.orgUnitAction == 'Delete') {
-
+        } else if (orgUnitAction == 'Edit') {
+            props.updateOrg(
+                currentSelectedOrg['id'],
+                newEditOrgUnitName);
+        } else if (orgUnitAction == 'Delete') {
             (async () => {
-                //console.log(this.state.currentSelectedOrg);
-                let orgUnitToDelete = this.state.currentSelectedOrg;
-                orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id']
+                let orgUnitToDelete = currentSelectedOrg;
+                orgUnitToDelete['org_unit_id'] = orgUnitToDelete['id'];
                 let returnedData = await DeleteOrg(orgUnitToDelete);
                 localStorage.removeItem('orgunitList');
                 localStorage.removeItem("treeStruc");
                 localStorage.removeItem("orgunitTableStruc");
                 let message = returnedData.data.Message + ". Your brower might freeze as the tree is refreshed";
-                this.setState({ alertMessage: message });
+                setAlertMessage(message);
                 $('#alertMessageModal').modal('toggle');
-
             })();
         }
-        // localStorage.removeItem('orgunitList');
     }
 
-    setNewOrgUnitName(newOrgUnitName) { //for new sub org unit
-        this.setState({
-            newOrgUnitName: newOrgUnitName
-        });
+    function setNewOrgUnitName(name) {
+        setNewOrgUnitNameState(name);
     }
 
-    setNewEditOrgUnitName(newEditOrgUnitName) { //for update
-        this.setState({
-            newEditOrgUnitName: newEditOrgUnitName
-        });
+    function setNewEditOrgUnitName(name) {
+        setNewEditOrgUnitNameState(name);
     }
 
-    setcurrentSelectedOrg(currentSelectedOrg) {
-
-        this.setState({
-            currentSelectedOrg: currentSelectedOrg
-        });
+    function setcurrentSelectedOrg(org) {
+        setCurrentSelectedOrgState(org);
         try {
-            this.props.setcurrentSelectedOrg(currentSelectedOrg);
+            props.setcurrentSelectedOrg(org);
         } catch (err) {
-
         }
-
     }
 
-    render() {
+    return (
+        <React.Fragment>
+            <Tree
+                assignedOrgUnits={props.assignedOrgUnits ? props.assignedOrgUnits : []}
+                addCheckBox={props.addCheckBox}
+                clickHandler={props.clickHandler}
+                orgUnits={props.orgUnits}
+                isHooks={props.isHooks ? true : false}
+                setcurrentSelectedOrg={setcurrentSelectedOrg}
+                setNewEditOrgUnitName={setNewEditOrgUnitName}
+            ></Tree>
 
-        let index = 0;
-        return (
+            {(allowedPermissions.length > 0) &&
+                (allowedPermissions.includes('edit_orgunit') ||
+                    allowedPermissions.includes('add_orgunit')
+                ) ?
+                <TreeModal
+                    allowedPermissions={allowedPermissions}
+                    setNewOrgUnitName={setNewOrgUnitName}
+                    currentSelectedOrg={currentSelectedOrg}
+                    setNewEditOrgUnitName={setNewEditOrgUnitName}
+                    newEditOrgUnitName={newEditOrgUnitName}
+                    saveOrgUnitAction={saveOrgUnitAction}
+                    updateOrgActionStatus={updateOrgActionStatus}
+                >
+                </TreeModal>
+                : undefined
+            }
 
-            <React.Fragment>
-
-                {/* {treeStruc} */}
-                <Tree
-                    assignedOrgUnits={this.props.assignedOrgUnits ? this.props.assignedOrgUnits : []}
-                    addCheckBox={this.props.addCheckBox}
-                    clickHandler={this.props.clickHandler}
-                    orgUnits={this.props.orgUnits}
-                    isHooks={this.props.isHooks ? true : false}
-                    setcurrentSelectedOrg={this.setcurrentSelectedOrg}
-                    setNewEditOrgUnitName={this.setNewEditOrgUnitName}
-                ></Tree>
-
-
-                {(this.state.allowedPermissions.length > 0) &&
-                    (this.state.allowedPermissions.includes('edit_orgunit') ||
-                        this.state.allowedPermissions.includes('add_orgunit')
-                    ) ?
-                    <TreeModal
-                        allowedPermissions={this.state.allowedPermissions}
-                        setNewOrgUnitName={this.setNewOrgUnitName}
-                        currentSelectedOrg={this.state.currentSelectedOrg}
-                        setNewEditOrgUnitName={this.setNewEditOrgUnitName}
-                        newEditOrgUnitName={this.state.newEditOrgUnitName}
-                        saveOrgUnitAction={this.saveOrgUnitAction}
-                        updateOrgActionStatus={this.updateOrgActionStatus}
-                    >
-                    </TreeModal>
-
-                    : undefined //else if not permssions undefined
-                }
-
-                {/* Alert message modal*/}
-                <div className="modal fade" id="alertMessageModal" tabIndex="-1" role="dialog" aria-labelledby="alertMessageModalTitle" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <p>{this.state.alertMessage}</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button"
-                                    onClick={() => {
-                                        $('#alertMessageModal').modal('toggle');
-                                        this.setState({
-                                            alertMessage: null
-                                        });
-                                    }}
-                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
+            {/* Alert message modal*/}
+            <div className="modal fade" id="alertMessageModal" tabIndex="-1" role="dialog" aria-labelledby="alertMessageModalTitle" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p>{alertMessage}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button"
+                                onClick={() => {
+                                    $('#alertMessageModal').modal('toggle');
+                                    setAlertMessage(null);
+                                }}
+                                className="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
-            </React.Fragment>
-
-        );
-    }
+            </div>
+        </React.Fragment>
+    );
 }
 
 export default TreeView;

@@ -16,15 +16,13 @@ use Illuminate\Support\Facades\Gate;
 
     <title>{{ config('app.name', 'RTCQI Analytics') }}</title>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
     <link rel="shortcut icon" href="{{ asset('images/favicon/favicon.ico') }}">
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/sb-admin-2.css') }}" rel="stylesheet">
     <link href="{{ asset('css/buttons.dataTables.min.css') }}" rel="stylesheet">
 
@@ -50,12 +48,12 @@ use Illuminate\Support\Facades\Gate;
     @endif
 
 
-    <!-- Datatable -->
+    <!-- Datatable --
     <link href="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.css" rel="stylesheet">
     <script src="https://unpkg.com/sortablejs@1.7.0/Sortable.min.js"></script>
     <script src="https://unpkg.com/clusterize.js@0.18.0/clusterize.min.js"></script>
     <script src="https://unpkg.com/frappe-datatable@0.0.5/dist/frappe-datatable.min.js"></script>
-    <!-- Datatable -->
+    -- Datatable -->
 
 </head>
 

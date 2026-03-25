@@ -1,6 +1,6 @@
 import { settings } from './Settings'
 
-const axios = require('axios');
+import axios from 'axios';
 
 let cache = {
     orgunitList: null,
