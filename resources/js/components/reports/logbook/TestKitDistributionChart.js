@@ -14,9 +14,14 @@ const KIT_LABELS = {
 
 const KIT_COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272'];
 
-function TestKitDistributionChart(props) {
+class TestKitDistributionChart extends React.Component {
 
-    function prepareOrgData(dataObject) {
+    constructor(props) {
+        super(props);
+        this.prepareOrgData = this.prepareOrgData.bind(this);
+    }
+
+    prepareOrgData(dataObject) {
         const orgName = (dataObject.orgName || '').toUpperCase();
         if (dataObject['OrgUniType']) {
             // orgName already set
@@ -65,7 +70,7 @@ function TestKitDistributionChart(props) {
         ];
 
         return (
-            <RTCard header={orgName} minHeight={props.minHeight || 400}>
+            <RTCard header={orgName} minHeight={this.props.minHeight || 400}>
                 <div className="row">
                     {tests.map(({ label, kitKey }) => {
                         const pieData = makePieData(totals[kitKey]);
@@ -85,45 +90,47 @@ function TestKitDistributionChart(props) {
         );
     }
 
-    let charts = [];
+    render() {
+        let charts = [];
 
-    if (props.serverData) {
-        if (props.siteType != null && props.siteType.length != 0) {
-            props.serverData.forEach(dataObjectParent => {
-                for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                    try {
-                        charts.push(
-                            <div key={uuidv4()} className="row">
-                                <div className="col-sm-12">{prepareOrgData(orgUnitDataObject)}</div>
-                            </div>
-                        );
-                    } catch (err) {
-                        console.error(err);
+        if (this.props.serverData) {
+            if (this.props.siteType != null && this.props.siteType.length != 0) {
+                this.props.serverData.forEach(dataObjectParent => {
+                    for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
+                        try {
+                            charts.push(
+                                <div key={uuidv4()} className="row">
+                                    <div className="col-sm-12">{this.prepareOrgData(orgUnitDataObject)}</div>
+                                </div>
+                            );
+                        } catch (err) {
+                            console.error(err);
+                        }
                     }
-                }
-            });
-        } else {
-            const dataSrc = Array.isArray(props.serverData) && props.serverData.length > 0
-                ? props.serverData[0]
-                : props.serverData;
+                });
+            } else {
+                const dataSrc = Array.isArray(this.props.serverData) && this.props.serverData.length > 0
+                    ? this.props.serverData[0]
+                    : this.props.serverData;
 
-            if (dataSrc) {
-                for (let [key, dataObject] of Object.entries(dataSrc)) {
-                    try {
-                        charts.push(
-                            <div key={uuidv4()} className="row">
-                                <div className="col-sm-12">{prepareOrgData(dataObject)}</div>
-                            </div>
-                        );
-                    } catch (err) {
-                        console.error(err);
+                if (dataSrc) {
+                    for (let [key, dataObject] of Object.entries(dataSrc)) {
+                        try {
+                            charts.push(
+                                <div key={uuidv4()} className="row">
+                                    <div className="col-sm-12">{this.prepareOrgData(dataObject)}</div>
+                                </div>
+                            );
+                        } catch (err) {
+                            console.error(err);
+                        }
                     }
                 }
             }
         }
-    }
 
-    return <React.Fragment>{charts}</React.Fragment>;
+        return <React.Fragment>{charts}</React.Fragment>;
+    }
 }
 
 export default TestKitDistributionChart;

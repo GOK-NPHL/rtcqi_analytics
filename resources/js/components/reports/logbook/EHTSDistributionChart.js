@@ -3,9 +3,19 @@ import RTCard from '../../utils/RTCard'
 import StackedVertical from '../../utils/charts/StackedVertical'
 import { v4 as uuidv4 } from 'uuid';
 
-function EHTSDistributionChart(props) {
+class EHTSDistributionChart extends React.Component {
 
-    function prepareOverallLevelSiteData(dataObject) {
+    constructor(props) {
+        super(props);
+        this.state = {};
+        this.addGraphsToArray = this.addGraphsToArray.bind(this);
+        this.prepareOverallLevelSiteData = this.prepareOverallLevelSiteData.bind(this);
+    }
+
+    componentDidMount() {
+    }
+
+    prepareOverallLevelSiteData(dataObject) {
         const monthNames = [
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -65,13 +75,13 @@ function EHTSDistributionChart(props) {
         }));
 
         return (
-            <RTCard header={orgName} minHeight={props.minHeight}>
+            <RTCard header={orgName} minHeight={this.props.minHeight}>
                 <StackedVertical
                     yAxisGap={43}
                     yAxisName="eHTS Distribution %"
                     formatter="%"
                     color={['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']}
-                    minHeight={props.minHeight}
+                    minHeight={this.props.minHeight}
                     legend={emrs}
                     category={category}
                     series={seriesData}
@@ -80,7 +90,7 @@ function EHTSDistributionChart(props) {
         );
     }
 
-    function addGraphsToArray(counter, row, columns, overLay, singChart) {
+    addGraphsToArray(counter, row, columns, overLay, singChart) {
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -95,59 +105,61 @@ function EHTSDistributionChart(props) {
         return [counter, row, columns, overLay];
     }
 
-    let overLay = [];
-    let counter = 0;
-    let columns = [];
-    let row = <div key={uuidv4()} className="row">
-        {columns}
-    </div>;
-    if (props.serverData) {
+    render() {
+        let overLay = [];
+        let counter = 0;
+        let columns = [];
+        let row = <div key={uuidv4()} className="row">
+            {columns}
+        </div>;
+        if (this.props.serverData) {
 
-        if (props.siteType != null && props.siteType.length != 0) {
-            props.serverData.map((dataObjectParent) => {
-                for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                    try {
-                        let singChart = prepareOverallLevelSiteData(orgUnitDataObject);
-                        [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
-                    } catch (err) {
-                        console.error(err);
+            if (this.props.siteType != null && this.props.siteType.length != 0) {
+                this.props.serverData.map((dataObjectParent) => {
+                    for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                });
+                if (columns.length > 0) {
+                    overLay.push(row);
+                }
+
+            } else {
+                let dataSrc = Array.isArray(this.props.serverData) ? this.props.serverData[0] : this.props.serverData;
+
+                if (Array.isArray(this.props.serverData) && this.props.serverData.length > 0) {
+                    dataSrc = this.props.serverData[0];
+                }
+
+                if (dataSrc) {
+                    for (let [key, dataObject] of Object.entries(dataSrc)) {
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(dataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+                            console.error(err);
+                        }
                     }
                 }
-            });
-            if (columns.length > 0) {
-                overLay.push(row);
-            }
 
-        } else {
-            let dataSrc = Array.isArray(props.serverData) ? props.serverData[0] : props.serverData;
-
-            if (Array.isArray(props.serverData) && props.serverData.length > 0) {
-                dataSrc = props.serverData[0];
-            }
-
-            if (dataSrc) {
-                for (let [key, dataObject] of Object.entries(dataSrc)) {
-                    try {
-                        let singChart = prepareOverallLevelSiteData(dataObject);
-                        [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
-                    } catch (err) {
-                        console.error(err);
-                    }
+                if (columns.length > 0) {
+                    overLay.push(row);
                 }
             }
 
-            if (columns.length > 0) {
-                overLay.push(row);
-            }
         }
 
+        return (
+            <React.Fragment>
+                {this.props.singleItem ? columns : overLay}
+            </React.Fragment>
+        );
     }
-
-    return (
-        <React.Fragment>
-            {props.singleItem ? columns : overLay}
-        </React.Fragment>
-    );
 }
 
 export default EHTSDistributionChart;

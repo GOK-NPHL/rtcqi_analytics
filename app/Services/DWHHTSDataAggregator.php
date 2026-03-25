@@ -306,7 +306,7 @@ class DWHHTSDataAggregator
     public function getData($orgUnitIds, $siteTypes, $startDate, $endDate)
     {
         try {
-            Log::info("<DWHHTSDataAggregator->getData() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteTypes) . " startDate: " . $startDate . " endDate: " . $endDate);
+            // Log::info("<DWHHTSDataAggregator->getData() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteTypes) . " startDate: " . $startDate . " endDate: " . $endDate);
             $currentDate = new DateTime('now');
             $this->startDate = empty($startDate) ?  $currentDate->modify('-5 months')->format("Y-m-d") : $startDate;
             $this->endDate = empty($endDate) ? date("Y-m-d") : $endDate;
@@ -475,12 +475,8 @@ class DWHHTSDataAggregator
                             foreach ($monthlySites as $indicator => $site) { //sites per month -- sites in a month
                                 try {
                                     //3-test = (t3_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
-                                    if (($site['t1_reactive'] + $site['t1_non_reactive']) == 0) {
-                                        // continue;
-                                        $agreement = 0;
-                                    } else {
-                                        $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
-                                    }
+                                    $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+
                                     $monthlySites['totals']['total_sites'] += 1;
                                     $monthlySites['totals']['total_tests'] += $site['t1_totals_tests'];
                                     $agreementRate = $agreement * 100;
@@ -526,12 +522,7 @@ class DWHHTSDataAggregator
                                     // Log::info(json_encode($site) . " site['t3_reactive'] = " . $site['t3_reactive'] );
 
                                     // 3-test positive agreement rates
-                                    if($site['t1_reactive'] == 0) {
-                                        // continue;
-                                        $t3_t1_pos_agreement = 0;
-                                    } else {
-                                        $t3_t1_pos_agreement = $site['t3_reactive'] * 100 / $site['t1_reactive'];
-                                    }
+                                    $t3_t1_pos_agreement = $site['t3_reactive'] * 100 / $site['t1_reactive'];
                                     // Log::info("t3_t1_pos_agreement: " . $t3_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t1']['avg'] = $t3_t1_pos_agreement;
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalTests'] += $site['t1_totals_tests'];
@@ -548,12 +539,7 @@ class DWHHTSDataAggregator
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
                                     }
-                                    if($site['t2_reactive'] == 0) {
-                                        // continue;
-                                        $t3_t2_pos_agreement = 0;
-                                    } else {
-                                        $t3_t2_pos_agreement = $site['t3_reactive'] * 100 / $site['t2_reactive'];
-                                    }
+                                    $t3_t2_pos_agreement = $site['t3_reactive'] * 100 / $site['t2_reactive'];
                                     // Log::info("t3_t2_pos_agreement: " . $t3_t2_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t3_t2_pos_agreement;
                                     if ($t3_t2_pos_agreement > 98) {
@@ -566,12 +552,7 @@ class DWHHTSDataAggregator
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
                                         $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
                                     }
-                                    if($site['t1_reactive'] == 0) {
-                                        // continue;
-                                        $t2_t1_pos_agreement = 0;
-                                    } else {
-                                        $t2_t1_pos_agreement = $site['t2_reactive'] * 100 / $site['t1_reactive'];
-                                    }
+                                    $t2_t1_pos_agreement = $site['t2_reactive'] * 100 / $site['t1_reactive'];
                                     // Log::info("t2_t1_pos_agreement: " . $t2_t1_pos_agreement);
                                     $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t2_t1_pos_agreement;
                                     if ($t2_t1_pos_agreement > 98) {
@@ -645,11 +626,7 @@ class DWHHTSDataAggregator
                             }
                             $totalConcordance = 0;
                             try {
-                                if ($monthlySites['concordance_t1_reactive'] > 0) {
-                                    $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
-                                } else {
-                                    $totalConcordance = 0;
-                                }
+                                $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
                                 $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
                             } catch (Exception $ex) {
                             }

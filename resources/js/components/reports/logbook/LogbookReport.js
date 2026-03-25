@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import ReactDOM from 'react-dom/client';
-import DataTable from 'frappe-datatable';
-// import LineGraph from '../../utils/charts/LineGraph';
-// import StackedHorizontal from '../../utils/charts/StackedHorizontal'
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import DataTable from 'frappe-datatable';
+import LineGraph from '../../utils/charts/LineGraph';
+import StackedHorizontal from '../../utils/charts/StackedHorizontal'
 
 import { FetchOrgunits, FetchOdkHTSData, FetchDwhSummaryLinelist, separateOrgUnitAndSite, exportToExcel } from '../../utils/Helpers'
 import OrgUnitButton from '../../utils/orgunit/orgunit_button';
@@ -23,90 +23,110 @@ import OrgUnitIndicator from '../../utils/orgunit/OrgUnitIndicator';
 import { over } from 'lodash';
 
 
-function LogbookReport() {
+class LogbookReport extends React.Component {
 
-    const [orgUnitDataIds, setOrgUnitDataIds] = useState([0]);
-    const [siteType, setSiteType] = useState([]);
-    const [orgUnitIndicators] = useState([
-        // 'Site agreement Rates',
-        'Overall Agreement Rates',
-        'Positive concordance rate',
-        // 'Completeness rate',
-        'Consistency rate',
-        'Invalid rate',
-        'Inconclusive rate',
-        // 'Supervisory Signature rate',
-        // 'Algorithm Followed rate',
-        // 'Sites using eHTS register',
-        'eHTS Distribution',
-        'Test Kit Distribution',
-    ]);
-    const [indicatorIndexToDisplay, setIndicatorIndexToDisplay] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const [, setUnfilteredOrgUnits] = useState(null);
-    const [odkData, setOdkData] = useState({});
-    const [, setOrgUnits] = useState([]);
-    const [, setOrgLevel] = useState(null);
-    const [, setOrgId] = useState(null);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [linelistMode, setLinelistMode] = useState(false);
-    const [, setLinelistData] = useState(null);
-    const [nModal, setNModal] = useState(null);
+    constructor(props) {
+        super(props);
+        this.state = {
+            orgUnits: [],
+            orgUnitDataIds: [0],
+            siteType: [],
+            emrs: [],
+            echartsMinHeight: '',
+            orgUnitIndicators: [
+                // 'Site agreement Rates',
+                'Overall Agreement Rates',
+                'Positive concordance rate',
+                // 'Completeness rate',
+                'Consistency rate',
+                'Invalid rate',
+                'Inconclusive rate',
+                // 'Supervisory Signature rate',
+                // 'Algorithm Followed rate',
+                // 'Sites using eHTS register',
+                'eHTS Distribution',
+                'Test Kit Distribution',
+            ],
+            indicatorIndexToDisplay: 0,
+            isLoading: false,
+        }
+        this.fetchOdkDataServer = this.fetchOdkDataServer.bind(this);
+        this.fetchLinelistData = this.fetchLinelistData.bind(this);
+        this.orgUnitChangeHandler = this.orgUnitChangeHandler.bind(this);
+        this.onFilterButtonClickEvent = this.onFilterButtonClickEvent.bind(this);
+        this.orgUnitTypeChangeHandler = this.orgUnitTypeChangeHandler.bind(this);
+        this.addTableRows = this.addTableRows.bind(this);
+        this.orgDateChangeHandler = this.orgDateChangeHandler.bind(this);
+        this.exportAgreementsRatesPDFData = this.exportAgreementsRatesPDFData.bind(this);
+        this.filterDisplayedIndicator = this.filterDisplayedIndicator.bind(this);
+        this.resetFilters = this.resetFilters.bind(this);
+    }
 
-    useEffect(() => {
+    componentDidMount() {
         (async () => {
-            setIsLoading(true);
+            this.setState({ isLoading: true });
             let returnedData = await FetchOrgunits();
 
             let subCountyList = [];
+            // returnedData.forEach((val) => {
+            // });
             let defaultOrg = [returnedData.payload[0][0]['org_unit_id']];//get first orgunit of in list of authorized orgs
-            setUnfilteredOrgUnits(returnedData);
-            setOrgUnits(returnedData.payload[0]);
-            setOdkData({});
-            setOrgLevel(1);
-            setOrgId(1);
-            setOrgUnitDataIds([defaultOrg[0]]);
-            setStartDate('');
-            setEndDate('');
-            setLinelistMode(false);
-            setLinelistData(null);
+            this.setState({
+                unfilteredOrgUnits: returnedData,
+                orgUnits: returnedData.payload[0],
+                odkData: {},
+                orgLevel: 1,
+                orgId: 1,
+                orgUnitDataIds: [defaultOrg[0]],
+                startDate: '',
+                endDate: '',
+                linelistMode: false,
+                linelistData: null,
+            });
 
-            fetchOdkDataServer(defaultOrg, [], '', '');
+            this.fetchOdkDataServer(defaultOrg,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
+            );
 
         })();
 
-    }, []);
+    }
 
-    const fetchOdkDataServer = useCallback((orgUnitIds, siteTypeVal, startDateVal, endDateVal) => {
+    fetchOdkDataServer(orgUnitIds, siteType, startDate, endDate) {
         if (orgUnitIds) {
             if (orgUnitIds.length != 0) {
                 (async () => {
-                    setIsLoading(true);
-                    let returnedData = await FetchOdkHTSData(orgUnitIds, siteTypeVal, startDateVal, endDateVal);
+                    this.setState({ isLoading: true });
+                    let returnedData = await FetchOdkHTSData(orgUnitIds, siteType, startDate, endDate);
                     if (returnedData.status == 200) {
-                        setOdkData(returnedData.data);
-                        setIsLoading(false);
+                        this.setState({
+                            odkData: returnedData.data,
+                            isLoading: false,
+                        });
                     } else {
-                        setIsLoading(false);
+                        this.setState({ isLoading: false, });
                     }
 
                 })();
             }
         }
-    }, []);
+    }
 
-    const fetchLinelistData = useCallback((orgUnitIds, siteTypeVal, startDateVal, endDateVal) => {
+    fetchLinelistData(orgUnitIds, siteType, startDate, endDate) {
         try {
             if (orgUnitIds) {
                 if (orgUnitIds.length != 0) {
                     (async () => {
-                        setIsLoading(true);
-                        let returnedData = await FetchDwhSummaryLinelist(orgUnitIds, siteTypeVal, startDateVal, endDateVal);
+                        this.setState({ isLoading: true });
+                        let returnedData = await FetchDwhSummaryLinelist(orgUnitIds, siteType, startDate, endDate);
                         if (returnedData.status == 200) {
-                            setLinelistData(returnedData);
-                            setIsLoading(false);
-                            setLinelistMode(true);
+                            this.setState({
+                                linelistData: returnedData,
+                                isLoading: false,
+                                linelistMode: true,
+                            });
                             const cols = [
                                 "Org unit",
                                 "Test Month",
@@ -211,7 +231,7 @@ function LogbookReport() {
                                 datatable.refresh(data);
                             }, 100);
                         } else {
-                            setIsLoading(false);
+                            this.setState({ isLoading: false, });
                         }
 
                     })();
@@ -222,49 +242,71 @@ function LogbookReport() {
         } catch (err) {
             console.error(err);
         }
-    }, []);
+    }
 
-    const orgUnitChangeHandler = useCallback((orgUnitIds) => {
-        setOrgUnitDataIds(orgUnitIds);
-    }, []);
+    orgUnitChangeHandler(orgUnitIds) {
+        this.setState({
+            orgUnitDataIds: orgUnitIds
+        });
+    }
 
-    const orgUnitTypeChangeHandler = useCallback((siteTypeVal) => {
-        setSiteType(siteTypeVal);
-    }, []);
+    orgUnitTypeChangeHandler(siteType) {
+        this.setState({
+            siteType: siteType
+        });
+    }
 
-    const orgDateChangeHandler = useCallback((startDateVal, endDateVal) => {
-        setStartDate(startDateVal);
-        setEndDate(endDateVal);
-    }, []);
+    orgDateChangeHandler(startDate, endDate) {
+        this.setState({
+            startDate: startDate,
+            endDate: endDate
+        });
+    }
 
-    const onFilterButtonClickEvent = useCallback(() => {
-        // use refs to get current values to avoid stale closures
-        if (linelistMode) {
-            fetchLinelistData(
-                orgUnitDataIds,
-                siteType,
-                startDate,
-                endDate
+    onFilterButtonClickEvent() {
+        // this.setState({ isLoading: true });
+        if (this.state.linelistMode) {
+            this.fetchLinelistData(
+                this.state.orgUnitDataIds,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
             );
         } else {
-            fetchOdkDataServer(
-                orgUnitDataIds,
-                siteType,
-                startDate,
-                endDate
+            this.fetchOdkDataServer(
+                this.state.orgUnitDataIds,
+                this.state.siteType,
+                this.state.startDate,
+                this.state.endDate
             );
         }
-    }, [linelistMode, orgUnitDataIds, siteType, startDate, endDate, fetchLinelistData, fetchOdkDataServer]);
+    }
 
-    const filterDisplayedIndicator = useCallback((indicatorIndex) => {
-        setIndicatorIndexToDisplay(indicatorIndex);
-    }, []);
+    filterDisplayedIndicator(indicatorIndex) {
+        this.setState({ indicatorIndexToDisplay: indicatorIndex });
+    }
 
-    const resetFilters = useCallback(() => {
+    resetFilters() {
         location.reload();
-    }, []);
+    }
 
-    const addTableRows = useCallback((
+    shouldComponentUpdate(nextProps, nextState) {
+
+        if (
+            this.state.orgUnitDataIds != nextState.orgUnitDataIds ||
+            this.state.siteType != nextState.siteType ||
+            this.state.startDate != nextState.startDate ||
+            this.state.endDate != nextState.endDate ||
+            this.state.echartsMinHeight !== nextState.echartsMinHeight
+        ) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+    addTableRows(
         overallTableData, overallTableDataExport,
         tableData, dataToParse, tableDataExport,
         positiveConcordanceTableData, positiveConcordanceTableDataExport,
@@ -276,7 +318,7 @@ function LogbookReport() {
         algorithmFollowedTableData, algorithmFollowedExportData,
         htsTypeTableData, htsTypeExportData
 
-    ) => {
+    ) {
 
         const monthNames = ["January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
@@ -428,8 +470,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + totals['totals']['total_sites'] + ", T=" + totals['totals']['total_tests'] + ")"
             exportData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     overallRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     overallExportData.push(dataToParse['OrgUniType']);
 
@@ -499,11 +541,12 @@ function LogbookReport() {
             overallTableData.push(<tr key={uuidv4()} scope="row">{overallRow}</tr>);
             overallTableDataExport.push(overallExportData);
             tableData.push(<tr className='hover-pointer' key={uuidv4()} onClick={() => {
-                setNModal({
-                    title: <>
-                        <h5>{sting || "Details"}</h5>
-                        <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
-                            if (Object.keys(totals.sitenames).length > 0 && totals != null) {
+                this.setState({
+                    nModal: {
+                        title: <>
+                            <h5>{sting || "Details"}</h5>
+                            <button type="button" className="btn btn-success btn-sm mx-1" onClick={() => {
+                                if (Object.keys(totals.sitenames).length > 0 && totals != null) {
                                     let final_data = [];
                                     Object.keys(totals.sitenames).map((dx, indx) => {
                                         return totals.sitenames[dx].map((siteName, index) => {
@@ -549,12 +592,17 @@ function LogbookReport() {
                                 </tbody>
                             </table>
                         </div>)
-                    });
+                    }
+                });
                 $('#nModal').modal('toggle');
             }}>{row}</tr>);
             tableDataExport.push(exportData);
         }
         // end overall agreement data loop
+
+
+
+
 
 
         // positive concordance data loop
@@ -566,8 +614,8 @@ function LogbookReport() {
         //     positiveConcordanceRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()} (N={no})</td>);
         //     let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (N=" + no + ")"
         //     positiveConcordanceExportData.push(sting);
-        //     if (siteType != null) {
-        //         if (siteType.length != 0) {
+        //     if (this.state.siteType != null) {
+        //         if (this.state.siteType.length != 0) {
         //             positiveConcordanceRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
         //             positiveConcordanceExportData.push(dataToParse['OrgUniType']);
         //         }
@@ -596,8 +644,8 @@ function LogbookReport() {
                 {/* (N={dataObjectT3T1['totals']['total_sites']}) */}
                 {" (S=" + overallDataObject[period]['totals']['total_sites'] + ", T=" + overallDataObject[period]['totals']['total_tests'] + ")"}
             </td>);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     row.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                 }
             }
@@ -631,55 +679,57 @@ function LogbookReport() {
             </td>);
             positiveConcordanceTableData.push(<tr className='hover-pointer' key={uuidv4()}
                 onClick={() => {
-                    setNModal({
-                        title: <>
-                            <h5>{ttl || "Details"}</h5>
-                            {/* Add export button here */}
-                        </>,
-                        content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
-                            <table className='table table-condensed table-striped'>
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Indicator</th>
-                                        <th>MFL Code</th>
-                                        <th>Site</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {dataObjectT3T1[range]?.sites.map((siteName, index) => {
-                                        let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                        let mfl = siteName.split('___')[1]?.split('_')[0];
-                                        return (<tr key={uuidv4()}>
-                                            <td>{index + 1}.</td>
-                                            <td>T3/T1</td>
-                                            <td>{mfl}</td>
-                                            <td>{site}</td>
-                                        </tr>);
-                                    })}
-                                    {dataObjectT3T2[range]?.sites.map((siteName, index) => {
-                                        let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                        let mfl = siteName.split('___')[1]?.split('_')[0];
-                                        return (<tr key={uuidv4()}>
-                                            <td>{index + 1}.</td>
-                                            <td>T3/T2</td>
-                                            <td>{mfl}</td>
-                                            <td>{site}</td>
-                                        </tr>);
-                                    })}
-                                    {dataObjectT2T1[range]?.sites.map((siteName, index) => {
-                                        let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
-                                        let mfl = siteName.split('___')[1]?.split('_')[0];
-                                        return (<tr key={uuidv4()}>
-                                            <td>{index + 1}.</td>
-                                            <td>T2/T1</td>
-                                            <td>{mfl}</td>
-                                            <td>{site}</td>
-                                        </tr>);
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>)
+                    this.setState({
+                        nModal: {
+                            title: <>
+                                <h5>{ttl || "Details"}</h5>
+                                {/* Add export button here */}
+                            </>,
+                            content: (<div style={{ maxHeight: '450px', overflowY: 'auto' }}>
+                                <table className='table table-condensed table-striped'>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Indicator</th>
+                                            <th>MFL Code</th>
+                                            <th>Site</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {dataObjectT3T1[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T3/T1</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                        {dataObjectT3T2[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T3/T2</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                        {dataObjectT2T1[range]?.sites.map((siteName, index) => {
+                                            let site = siteName.split('_').slice(1).join(' ').toLocaleUpperCase();
+                                            let mfl = siteName.split('___')[1]?.split('_')[0];
+                                            return (<tr key={uuidv4()}>
+                                                <td>{index + 1}.</td>
+                                                <td>T2/T1</td>
+                                                <td>{mfl}</td>
+                                                <td>{site}</td>
+                                            </tr>);
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>)
+                        }
                     });
                     $('#nModal').modal('toggle');
                 }}
@@ -700,8 +750,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             completenessExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     completenessRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     completenessExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -733,8 +783,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             consistencyExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     consistencyRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     consistencyExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -768,8 +818,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             invalidRateExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     invalidRateRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     invalidRateExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -799,8 +849,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             inconclusiveRateExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     inconclusiveRateRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     inconclusiveRateExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -830,8 +880,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             supervisorySignatureExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     supervisorySignatureRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     supervisorySignatureExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -871,8 +921,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             algorithmFollowedExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     algorithmFollowedRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     algorithmFollowedExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -898,7 +948,6 @@ function LogbookReport() {
         }
         // end algorithm_followed rate data loop
 
-
         // hts_type data loop
         for (let [period, totals] of Object.entries(dataToParse.hts_type)) {
             let htsTypeRow = [];
@@ -911,8 +960,8 @@ function LogbookReport() {
             </td>);
             let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
             htsTypeExportTableData.push(sting);
-            if (siteType != null) {
-                if (siteType.length != 0) {
+            if (this.state.siteType != null) {
+                if (this.state.siteType.length != 0) {
                     htsTypeRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
                     htsTypeExportTableData.push(dataToParse['OrgUniType']);
                 }
@@ -963,381 +1012,367 @@ function LogbookReport() {
             algorithmFollowedTableData, algorithmFollowedExportData,
             htsTypeTableData, htsTypeExportData
         ];
-    }, [siteType, setNModal]);
+    }
 
-    const exportOverallAgreementsRatesPDFData = useCallback(() => {
+    exportOverallAgreementsRatesPDFData() {
         const doc = new jsPDF();
         doc.autoTable({ html: '#overallAgreementRates' });
         doc.save('overall_agreement_rates.pdf')
-    }, []);
+    }
 
-    const exportAgreementsRatesPDFData = useCallback(() => {
+    exportAgreementsRatesPDFData() {
         const doc = new jsPDF();
         doc.autoTable({ html: '#agreementRates' });
         doc.save('agreement_rates.pdf')
-    }, []);
+    }
 
-    const exportPositiveConcordancePDFData = useCallback(() => {
+    exportPositiveConcordancePDFData() {
         const doc = new jsPDF();
         doc.autoTable({ html: '#positiveConcordanceRates' });
         doc.save('positive_concordance_rates.pdf')
-    }, []);
-
-    // --- render ---
-    const imgStyle = {
-        width: "100%"
-    };
-
-    const rowStle = {
-        marginBottom: "10px"
-    };
-    // Site agreement Rates
-    let overallTableData = [];
-    let overallTableHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        {/* <th scope="col">Overall</th> */}
-    </tr>;
-    let overallTableDataExport = [];
-
-    let tableData = [];
-    let tableHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col">&#60;95%</th>
-        <th scope="col">95-98%</th>
-        <th scope="col">&#62;98%</th>
-        {/* <th scope="col">Overall</th> */}
-    </tr>;
-
-    let tableDataExport = [];
-
-    tableDataExport.push(['___', '<95%', '95%-98%', '>98%' //, 'Overall'
-    ]);
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            overallTableHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                {/* <th scope="col">Overall</th> */}
-            </tr>;
-            overallTableDataExport = [];
-            overallTableDataExport.push(['___', 'Programme', 'Overall'
-            ]);
-
-            tableHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">&#60;95%</th>
-                <th scope="col">95%-98%</th>
-                <th scope="col">&#62;98%</th>
-                {/* <th scope="col">Overall</th> */}
-
-            </tr>;
-            tableDataExport = [];
-            tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%' //, 'Overall'
-            ]);
-        }
-
     }
-    // End Site agreement Rates
 
+    render() {
+        const imgStyle = {
+            width: "100%"
+        };
 
-    // Positive concordance rate
-    let positiveConcordanceTableData = [];
-    let positiveConcordanceTableHeaders = <tr>
-        <th scope="col">___</th>
-        <th scope="col">T3/T1</th>
-        <th scope="col">T3/T2</th>
-        <th scope="col">T2/T1</th>
-        {/* <th scope="col">Positive concordance rate</th> */}
-    </tr>;
+        const rowStle = {
+            marginBottom: "10px"
+        };
+        // Site agreement Rates
+        let overallTableData = [];
+        let overallTableHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            {/* <th scope="col">Overall</th> */}
+        </tr>;
+        let overallTableDataExport = [];
 
-    let positiveConcordanceTableDataExport = [];
+        let tableData = [];
+        let tableHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">&#60;95%</th>
+            <th scope="col">95-98%</th>
+            <th scope="col">&#62;98%</th>
+            {/* <th scope="col">Overall</th> */}
+        </tr>;
 
-    positiveConcordanceTableDataExport.push(['___', 'Positive concordance rate']);
+        let tableDataExport = [];
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            positiveConcordanceTableHeaders = <tr>
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">T3/T1</th>
-                <th scope="col">T3/T2</th>
-                <th scope="col">T2/T1</th>
-                {/* <th scope="col">Positive concordance rate</th> */}
+        tableDataExport.push(['___', '<95%', '95%-98%', '>98%' //, 'Overall'
+        ]);
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                overallTableHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    {/* <th scope="col">Overall</th> */}
+                </tr>;
+                overallTableDataExport = [];
+                overallTableDataExport.push(['___', 'Programme', 'Overall'
+                ]);
 
-            </tr>;
-            positiveConcordanceTableDataExport = [];
-            positiveConcordanceTableDataExport.push(['___', 'Programme', 'Positive concordance rate']);
+                tableHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">&#60;95%</th>
+                    <th scope="col">95%-98%</th>
+                    <th scope="col">&#62;98%</th>
+                    {/* <th scope="col">Overall</th> */}
+
+                </tr>;
+                tableDataExport = [];
+                tableDataExport.push(['___', 'Programme', '<95%', '95%-98%', '>98%' //, 'Overall'
+                ]);
+            }
+
         }
-
-    }
-    // end Positive concordance rate
+        // End Site agreement Rates
 
 
-    // completeness rate
-    let completenessTableData = [];
-    let completenessTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col">Completeness rate</th>
+        // Positive concordance rate
+        let positiveConcordanceTableData = [];
+        let positiveConcordanceTableHeaders = <tr>
+            <th scope="col">___</th>
+            <th scope="col">T3/T1</th>
+            <th scope="col">T3/T2</th>
+            <th scope="col">T2/T1</th>
+            {/* <th scope="col">Positive concordance rate</th> */}
+        </tr>;
 
-    </tr>;
+        let positiveConcordanceTableDataExport = [];
 
-    let completenessExportData = [];
+        positiveConcordanceTableDataExport.push(['___', 'Positive concordance rate']);
 
-    completenessExportData.push(['___', 'Completeness rate']);
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                positiveConcordanceTableHeaders = <tr>
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">T3/T1</th>
+                    <th scope="col">T3/T2</th>
+                    <th scope="col">T2/T1</th>
+                    {/* <th scope="col">Positive concordance rate</th> */}
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            completenessTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">Completeness rate</th>
+                </tr>;
+                positiveConcordanceTableDataExport = [];
+                positiveConcordanceTableDataExport.push(['___', 'Programme', 'Positive concordance rate']);
+            }
 
-            </tr>;
-            completenessExportData = [];
-            completenessExportData.push(['___', 'Programme', 'Completeness rate']);
         }
-    }
-    // end completeness rate
+        // end Positive concordance rate
 
 
-    // consistency rate
-    let consistencyTableData = [];
-    let consistencyTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col">Consistency rate</th>
+        // completeness rate
+        let completenessTableData = [];
+        let completenessTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Completeness rate</th>
 
-    </tr>;
+        </tr>;
 
-    let consistencyExportData = [];
+        let completenessExportData = [];
 
-    consistencyExportData.push(['___', 'Consistency rate']);
+        completenessExportData.push(['___', 'Completeness rate']);
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            consistencyTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">Consistency rate</th>
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                completenessTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Completeness rate</th>
 
-            </tr>;
-            consistencyExportData = [];
-            consistencyExportData.push(['___', 'Programme', 'Consistency rate']);
+                </tr>;
+                completenessExportData = [];
+                completenessExportData.push(['___', 'Programme', 'Completeness rate']);
+            }
         }
-    }
-    // end consistency rate
+        // end completeness rate
 
 
-    // invalid rate
-    let invalidRateTableData = [];
-    let invalidRateTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col"># Invalid tests</th>
-        <th scope="col">Invalid rate</th>
+        // consistency rate
+        let consistencyTableData = [];
+        let consistencyTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">Consistency rate</th>
 
-    </tr>;
+        </tr>;
 
-    let invalidRateExportData = [];
+        let consistencyExportData = [];
 
-    invalidRateExportData.push(['___', 'Invalid rate']);
+        consistencyExportData.push(['___', 'Consistency rate']);
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            invalidRateTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <           th scope="col"># Invalid tests</th>
-                <th scope="col">Invalid rate</th>
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                consistencyTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">Consistency rate</th>
 
-            </tr>;
-            invalidRateExportData = [];
-            invalidRateExportData.push(['___', 'Programme', 'Count', 'Invalid rate']);
+                </tr>;
+                consistencyExportData = [];
+                consistencyExportData.push(['___', 'Programme', 'Consistency rate']);
+            }
         }
-    }
-    // end invalid rate
+        // end consistency rate
 
 
-    // inconclusive rate
-    let inconclusiveRateTableData = [];
-    let inconclusiveRateTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col"># Sites</th>
-        <th scope="col">Inconclusive rate</th>
+        // invalid rate
+        let invalidRateTableData = [];
+        let invalidRateTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col"># Invalid tests</th>
+            <th scope="col">Invalid rate</th>
 
-    </tr>;
+        </tr>;
 
-    let inconclusiveRateExportData = [];
+        let invalidRateExportData = [];
 
-    inconclusiveRateExportData.push(['___', 'Inconclusive rate']);
+        invalidRateExportData.push(['___', 'Invalid rate']);
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            inconclusiveRateTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col"># Sites</th>
-                <th scope="col">Inconclusive rate</th>
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                invalidRateTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <           th scope="col"># Invalid tests</th>
+                    <th scope="col">Invalid rate</th>
 
-            </tr>;
-            inconclusiveRateExportData = [];
-            inconclusiveRateExportData.push(['___', 'Programme', 'Inconclusive rate']);
+                </tr>;
+                invalidRateExportData = [];
+                invalidRateExportData.push(['___', 'Programme', 'Count', 'Invalid rate']);
+            }
         }
-    }
-    // end inconclusive rate
+        // end invalid rate
 
-    //  Supervisory Signature rate
-    let supervisorySignatureTableData = [];
-    let supervisorySignatureTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col">signed</th>
-        <th scope="col">not signed</th>
 
-    </tr>;
+        // inconclusive rate
+        let inconclusiveRateTableData = [];
+        let inconclusiveRateTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col"># Sites</th>
+            <th scope="col">Inconclusive rate</th>
 
-    let supervisorySignatureExportData = [];
+        </tr>;
 
-    supervisorySignatureExportData.push(['___', 'signed', 'not signed']);
+        let inconclusiveRateExportData = [];
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            supervisorySignatureTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">signed</th>
-                <th scope="col">not signed</th>
+        inconclusiveRateExportData.push(['___', 'Inconclusive rate']);
 
-            </tr>;
-            supervisorySignatureExportData = [];
-            supervisorySignatureExportData.push(['___', 'Programme', 'signed', 'not signed']);
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                inconclusiveRateTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col"># Sites</th>
+                    <th scope="col">Inconclusive rate</th>
+
+                </tr>;
+                inconclusiveRateExportData = [];
+                inconclusiveRateExportData.push(['___', 'Programme', 'Inconclusive rate']);
+            }
         }
-    }
-    // end Supervisory Signature rate
+        // end inconclusive rate
 
+        //  Supervisory Signature rate
+        let supervisorySignatureTableData = [];
+        let supervisorySignatureTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">signed</th>
+            <th scope="col">not signed</th>
 
-    //  Algorithm followed rate
-    let algorithmFollowedTableData = [];
-    let algorithmFollowedTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        <th scope="col">followed</th>
-        <th scope="col">not followed</th>
+        </tr>;
 
-    </tr>;
+        let supervisorySignatureExportData = [];
 
-    let algorithmFollowedExportData = [];
+        supervisorySignatureExportData.push(['___', 'signed', 'not signed']);
 
-    algorithmFollowedExportData.push(['___', 'followed', 'not followed']);
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                supervisorySignatureTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">signed</th>
+                    <th scope="col">not signed</th>
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            algorithmFollowedTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                <th scope="col">followed</th>
-                <th scope="col">not followed</th>
-            </tr>;
-            algorithmFollowedExportData = [];
-            algorithmFollowedExportData.push(['___', 'Programme', 'followed', 'not followed']);
+                </tr>;
+                supervisorySignatureExportData = [];
+                supervisorySignatureExportData.push(['___', 'Programme', 'signed', 'not signed']);
+            }
         }
-    }
-    // end Algorithm followed rate
+        // end Supervisory Signature rate
 
-    //  hts Type rate
-    let htsTypeTableData = [];
-    let htsTypeTableDataHeaders = <tr>
-        {/* <th scope="col">#</th> */}
-        <th scope="col">___</th>
-        {/* <th scope="col">ehts</th>
-        <th scope="col">hardcopy</th> */}
-    </tr>;
 
-    let htsTypeExportData = [];
+        //  Algorithm followed rate
+        let algorithmFollowedTableData = [];
+        let algorithmFollowedTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            <th scope="col">followed</th>
+            <th scope="col">not followed</th>
 
-    htsTypeExportData.push(['___', 'ehts', 'hardcopy']);
+        </tr>;
 
-    if (siteType != null) {
-        if (siteType.length != 0) {
-            htsTypeTableDataHeaders = <tr>
-                {/* <th scope="col">#</th> */}
-                <th scope="col">___</th>
-                <th scope="col">Programme</th>
-                {/* <th scope="col">ehts</th>
-                <th scope="col">hardcopy</th> */}
+        let algorithmFollowedExportData = [];
 
-            </tr>;
-            htsTypeExportData = [];
-            htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy']);
+        algorithmFollowedExportData.push(['___', 'followed', 'not followed']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                algorithmFollowedTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    <th scope="col">followed</th>
+                    <th scope="col">not followed</th>
+                </tr>;
+                algorithmFollowedExportData = [];
+                algorithmFollowedExportData.push(['___', 'Programme', 'followed', 'not followed']);
+            }
         }
-    }
-    // end hts Type  rate
+        // end Algorithm followed rate
 
-    //process data tables with values and prepare export objects with data
-    if (odkData && odkData.length) {
-        // console.log('odkData', odkData);
-        odkData.map(displayData => {
-            for (let [key, payload] of Object.entries(displayData)) {
-                try {
-                    // //console.log(displayData);
-                    if (key == 0 && payload?.emrs && payload?.emrs.length > 0) {
-                        //////
-                        htsTypeTableDataHeaders = <tr>
-                            <th scope="col">___</th>
-                            {payload?.emrs.map((emr, emrIndex) => {
-                                return <th scope="col" key={uuidv4()}>{emr}</th>
-                            })}
-                        </tr>;
+        //  hts Type rate
+        let htsTypeTableData = [];
+        let htsTypeTableDataHeaders = <tr>
+            {/* <th scope="col">#</th> */}
+            <th scope="col">___</th>
+            {/* <th scope="col">ehts</th>
+            <th scope="col">hardcopy</th> */}
+        </tr>;
 
-                        htsTypeExportData = [];
-                        htsTypeExportData.push(['___', ...payload?.emrs]);
+        let htsTypeExportData = [];
 
-                        if (siteType != null) {
-                            if (siteType.length != 0) {
-                                htsTypeTableDataHeaders = <tr>
-                                    <th scope="col">___</th>
-                                    <th scope="col">Programme</th>
-                                    {payload?.emrs.map((emr, emrIndex) => {
-                                        return <th scope="col" key={uuidv4()}>{emr}</th>
-                                    })}
-                                </tr>;
-                                htsTypeExportData = [];
-                                htsTypeExportData.push(['___', 'Programme', ...payload?.emrs]);
+        htsTypeExportData.push(['___', 'ehts', 'hardcopy']);
+
+        if (this.state.siteType != null) {
+            if (this.state.siteType.length != 0) {
+                htsTypeTableDataHeaders = <tr>
+                    {/* <th scope="col">#</th> */}
+                    <th scope="col">___</th>
+                    <th scope="col">Programme</th>
+                    {/* <th scope="col">ehts</th>
+                    <th scope="col">hardcopy</th> */}
+
+                </tr>;
+                htsTypeExportData = [];
+                htsTypeExportData.push(['___', 'Programme', 'ehts', 'hardcopy']);
+            }
+        }
+        // end hts Type  rate
+
+        //process data tables with values and prepare export objects with data
+        if (this.state.odkData && this.state.odkData.length) {
+            // console.log('this.state.odkData', this.state.odkData);
+            this.state.odkData.map(displayData => {
+                for (let [key, payload] of Object.entries(displayData)) {
+                    try {
+                        // //console.log(displayData);
+                        if (key == 0 && payload?.emrs && payload?.emrs.length > 0) {
+                            //////
+                            htsTypeTableDataHeaders = <tr>
+                                <th scope="col">___</th>
+                                {payload?.emrs.map((emr, emrIndex) => {
+                                    return <th scope="col" key={uuidv4()}>{emr}</th>
+                                })}
+                            </tr>;
+
+                            htsTypeExportData = [];
+                            htsTypeExportData.push(['___', ...payload?.emrs]);
+
+                            if (this.state.siteType != null) {
+                                if (this.state.siteType.length != 0) {
+                                    htsTypeTableDataHeaders = <tr>
+                                        <th scope="col">___</th>
+                                        <th scope="col">Programme</th>
+                                        {payload?.emrs.map((emr, emrIndex) => {
+                                            return <th scope="col" key={uuidv4()}>{emr}</th>
+                                        })}
+                                    </tr>;
+                                    htsTypeExportData = [];
+                                    htsTypeExportData.push(['___', 'Programme', ...payload?.emrs]);
+                                }
                             }
+                            //////
                         }
-                        //////
-                    }
 
-                    [
-                        overallTableData, overallTableDataExport,
-                        tableData,
-                        tableDataExport,
-                        positiveConcordanceTableData, positiveConcordanceTableDataExport,
-                        completenessTableData, completenessExportData,
-                        consistencyTableData, consistencyExportData,
-                        invalidRateTableData, invalidRateExportData,
-                        inconclusiveRateTableData, inconclusiveRateExportData,
-                        supervisorySignatureTableData, supervisorySignatureExportData,
-                        algorithmFollowedTableData, algorithmFollowedExportData,
-                        htsTypeTableData, htsTypeExportData
-                    ]
-                        = addTableRows(
+                        [
                             overallTableData, overallTableDataExport,
                             tableData,
-                            payload,
                             tableDataExport,
                             positiveConcordanceTableData, positiveConcordanceTableDataExport,
                             completenessTableData, completenessExportData,
@@ -1347,698 +1382,717 @@ function LogbookReport() {
                             supervisorySignatureTableData, supervisorySignatureExportData,
                             algorithmFollowedTableData, algorithmFollowedExportData,
                             htsTypeTableData, htsTypeExportData
-                        );
-                } catch (err) {
+                        ]
+                            = this.addTableRows(
+                                overallTableData, overallTableDataExport,
+                                tableData,
+                                payload,
+                                tableDataExport,
+                                positiveConcordanceTableData, positiveConcordanceTableDataExport,
+                                completenessTableData, completenessExportData,
+                                consistencyTableData, consistencyExportData,
+                                invalidRateTableData, invalidRateExportData,
+                                inconclusiveRateTableData, inconclusiveRateExportData,
+                                supervisorySignatureTableData, supervisorySignatureExportData,
+                                algorithmFollowedTableData, algorithmFollowedExportData,
+                                htsTypeTableData, htsTypeExportData
+                            );
+                    } catch (err) {
+
+                    }
 
                 }
+            })
 
-            }
-        })
+        }
+        //End process data tables with values and prepare export objects with data
 
-    }
-    //End process data tables with values and prepare export objects with data
+        let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        // let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let positive3tConcordanceRateColumnCharts = <><Positive3TConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} /></>
 
-    let agreementRateColumnCharts = <AgreementRateColumnCharts minHeight={500} serverData={odkData} siteType={siteType} />
-    // let positiveConcordanceRateColumnCharts = <PositiveConcordanceRateColumnCharts minHeight={500} serverData={odkData} siteType={siteType} />
-    let positive3tConcordanceRateColumnCharts = <><Positive3TConcordanceRateColumnCharts minHeight={500} serverData={odkData} siteType={siteType} /></>
+        let completenessChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="completeness" chartLabel="Completeness Rate %" yAxisName="% completeness rate" isDirect={false} color={['#91cc75']} />
+        let consistencyChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="consistency" chartLabel="Consistency Rate %" yAxisName="% consistency rate" isDirect={false} color={['#5470c6']} />
+        let invalidRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="invalid_rates" chartLabel="Invalid Rate %" yAxisName="% invalid rate" isDirect={true} color={['#ee6666']} />
+        let inconclusiveRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="inconclusive_rates" chartLabel="Inconclusive Rate %" yAxisName="% inconclusive rate" isDirect={true} color={['#fc8452']} />
+        let ehtsDistributionChart = <EHTSDistributionChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let testKitDistributionChart = <TestKitDistributionChart minHeight={400} serverData={this.state.odkData} siteType={this.state.siteType} />
 
-    let completenessChart = <SimpleRateColumnChart minHeight={500} serverData={odkData} siteType={siteType} dataKey="completeness" chartLabel="Completeness Rate %" yAxisName="% completeness rate" isDirect={false} color={['#91cc75']} />
-    let consistencyChart = <SimpleRateColumnChart minHeight={500} serverData={odkData} siteType={siteType} dataKey="consistency" chartLabel="Consistency Rate %" yAxisName="% consistency rate" isDirect={false} color={['#5470c6']} />
-    let invalidRateChart = <SimpleRateColumnChart minHeight={500} serverData={odkData} siteType={siteType} dataKey="invalid_rates" chartLabel="Invalid Rate %" yAxisName="% invalid rate" isDirect={true} color={['#ee6666']} />
-    let inconclusiveRateChart = <SimpleRateColumnChart minHeight={500} serverData={odkData} siteType={siteType} dataKey="inconclusive_rates" chartLabel="Inconclusive Rate %" yAxisName="% inconclusive rate" isDirect={true} color={['#fc8452']} />
-    let ehtsDistributionChart = <EHTSDistributionChart minHeight={500} serverData={odkData} siteType={siteType} />
-    let testKitDistributionChart = <TestKitDistributionChart minHeight={400} serverData={odkData} siteType={siteType} />
+        // Data Tables for all the indicators
+        let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
+            <div className="row">
 
-    // Data Tables for all the indicators
-    let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
-        <div className="row">
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Overall Agreement Rates' ?
-                    <React.Fragment>
-                        {/* overall agreement rates */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
-
-                            <div className="row">
-                                <div className="col-sm-6  col-xm-5 col-md-5">
-                                    <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
-                                    <small className="text-muted">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={overallTableDataExport}> Csv</CSVLink>
-                                    <span style={{ "color": "blue" }} onClick={() => exportOverallAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                                </div>
-
-                                <table id="overallAgreementRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {overallTableHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {overallTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {/* end overall agreement rates */}
-                    </React.Fragment> : ''}
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Site agreement Rates' ?
-                    <React.Fragment>
-                        {/* Site agreement rates */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
-                            <div className="row">
-                                <div className="col-sm-6  col-xm-5 col-md-5">
-                                    <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                    <small className="text-muted">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
-                                    <span style={{ "color": "blue" }} onClick={() => exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                </div>
-
-                                <table id="agreementRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {tableHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {tableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {/* chart */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
-                            <p style={{ fontWeight: "900" }}>Site agreement Rate Chart:</p>
-                            {agreementRateColumnCharts}
-                        </div>
-                        {/* end site agreement rates */}
-                    </React.Fragment> : ''}
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Positive concordance rate' ?
-                    <React.Fragment>
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Overall Agreement Rates' ?
                         <React.Fragment>
+                            {/* overall agreement rates */}
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+
                                 <div className="row">
-                                    {/* Begin Positive concordance rate  */}
-                                    <div className="col-sm-9">
-                                        <p style={{ fontWeight: "900" }}>Positive concordance rates</p>
-                                        <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>; <strong>T3/T2</strong>; <strong>T2/T1</strong>. High concordance indicates consistent test performance.</small>
+                                    <div className="col-sm-6  col-xm-5 col-md-5">
+                                        <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
+                                        <small className="text-muted">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
                                     </div>
-                                    <table id="positiveConcordanceRates" className="table">
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={overallTableDataExport}> Csv</CSVLink>
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportOverallAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                    </div>
+
+                                    <table id="overallAgreementRates" className="table table-responsive">
                                         <thead className="thead-dark">
-                                            {positiveConcordanceTableHeaders}
+                                            {overallTableHeaders}
                                         </thead>
                                         <tbody>
-                                            {positiveConcordanceTableData}
+                                            {overallTableData}
                                         </tbody>
                                     </table>
-                                    {/* End Positive concordance rate  */}
                                 </div>
                             </div>
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
-                                <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
-                                {positive3tConcordanceRateColumnCharts}
-                            </div>
-                        </React.Fragment>
-                        {/*
+                            {/* end overall agreement rates */}
+                        </React.Fragment> : ''}
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Site agreement Rates' ?
                         <React.Fragment>
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                            {/* Site agreement rates */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
                                 <div className="row">
+                                    <div className="col-sm-6  col-xm-5 col-md-5">
+                                        <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
+                                        <small className="text-muted">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
+                                        <span style={{ "color": "blue" }} onClick={() => this.exportAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                    </div>
+
+                                    <table id="agreementRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {tableHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {tableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* chart */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+                                <p style={{ fontWeight: "900" }}>Site agreement Rate Chart:</p>
+                                {agreementRateColumnCharts}
+                            </div>
+                            {/* end site agreement rates */}
+                        </React.Fragment> : ''}
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Positive concordance rate' ?
+                        <React.Fragment>
+                            <React.Fragment>
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+                                    <div className="row">
+                                        {/* Begin Positive concordance rate  */}
+                                        <div className="col-sm-9">
+                                            <p style={{ fontWeight: "900" }}>Positive concordance rates</p>
+                                            <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>; <strong>T3/T2</strong>; <strong>T2/T1</strong>. High concordance indicates consistent test performance.</small>
+                                        </div>
+                                        <table id="positiveConcordanceRates" className="table">
+                                            <thead className="thead-dark">
+                                                {positiveConcordanceTableHeaders}
+                                            </thead>
+                                            <tbody>
+                                                {positiveConcordanceTableData}
+                                            </tbody>
+                                        </table>
+                                        {/* End Positive concordance rate  */}
+                                    </div>
+                                </div>
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
+                                    <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
+                                    {positive3tConcordanceRateColumnCharts}
+                                </div>
+                            </React.Fragment>
+                            {/*
+                            <React.Fragment>
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                    <div className="row">
+                                        <div className="col-sm-6  col-xm-6 col-md-6">
+                                            <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
+
+                                        </div>
+                                        <div className="col-sm-3  col-xm-3 col-md-3">
+                                            <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
+                                        </div>
+                                        <div className="col-sm-3  col-xm-3 col-md-3">
+                                            <span style={{ "color": "blue" }} onClick={() => this.exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
+                                        </div>
+
+                                        <table id="positiveConcordanceRates" className="table table-responsive">
+                                            <thead className="thead-dark">
+                                                {positiveConcordanceTableHeaders}
+                                            </thead>
+                                            <tbody>
+                                                {positiveConcordanceTableData}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
+                                    <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
+                                    {positiveConcordanceRateColumnCharts}
+                                </div>
+                            </React.Fragment>
+                        */}
+                        </React.Fragment> : ''
+                }
+            </div>
+
+            <div className="row">
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Completeness rate' ?
+                        <React.Fragment>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+                                    {/* Begin completeness rate  */}
                                     <div className="col-sm-6  col-xm-6 col-md-6">
-                                        <p style={{ fontWeight: "900" }}>Positive concordance rate</p>
-
+                                        <p style={{ fontWeight: "900" }}>Completeness rate</p>
+                                        <small className="text-muted">Proportion of expected HTS logbook registers submitted for the reporting period. Low completeness may indicate missing data or non-submission of registers.</small>
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
-                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positiveConcordanceTableDataExport}> Csv</CSVLink>
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
                                     </div>
-                                    <div className="col-sm-3  col-xm-3 col-md-3">
-                                        <span style={{ "color": "blue" }} onClick={() => exportPositiveConcordancePDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
-                                    </div>
-
                                     <table id="positiveConcordanceRates" className="table table-responsive">
                                         <thead className="thead-dark">
-                                            {positiveConcordanceTableHeaders}
+                                            {completenessTableDataHeaders}
                                         </thead>
                                         <tbody>
-                                            {positiveConcordanceTableData}
+                                            {completenessTableData}
+                                        </tbody>
+                                    </table>
+                                    {/* End completeness  rate  */}
+                                </div>
+                            </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Completeness Rate Chart:</p>
+                                {completenessChart}
+                            </div>
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Consistency rate' ?
+                        <React.Fragment>
+                            {/* Begin  Consistency rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Consistency rate</p>
+                                        <small className="text-muted">Proportion of testing sessions where results follow the expected algorithm sequence without contradictory or out-of-order outcomes. Low consistency may signal procedural errors or transcription mistakes.</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {consistencyTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {consistencyTableData}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6">
-                                <p style={{ fontWeight: "900" }}>Positive Concordance Rate Chart</p>
-                                {positiveConcordanceRateColumnCharts}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Consistency Rate Chart:</p>
+                                {consistencyChart}
                             </div>
-                        </React.Fragment>
-                    */}
-                    </React.Fragment> : ''
-            }
-        </div>
-
-        <div className="row">
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Completeness rate' ?
-                    <React.Fragment>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
-                                {/* Begin completeness rate  */}
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Completeness rate</p>
-                                    <small className="text-muted">Proportion of expected HTS logbook registers submitted for the reporting period. Low completeness may indicate missing data or non-submission of registers.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {completenessTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {completenessTableData}
-                                    </tbody>
-                                </table>
-                                {/* End completeness  rate  */}
-                            </div>
-                        </div>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <p style={{ fontWeight: "900" }}>Completeness Rate Chart:</p>
-                            {completenessChart}
-                        </div>
-                    </React.Fragment> : ''
-            }
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Consistency rate' ?
-                    <React.Fragment>
-                        {/* Begin  Consistency rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
-
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Consistency rate</p>
-                                    <small className="text-muted">Proportion of testing sessions where results follow the expected algorithm sequence without contradictory or out-of-order outcomes. Low consistency may signal procedural errors or transcription mistakes.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {consistencyTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {consistencyTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <p style={{ fontWeight: "900" }}>Consistency Rate Chart:</p>
-                            {consistencyChart}
-                        </div>
-                        {/* End Consistency  rate  */}
-                    </React.Fragment> : ''
-            }
-        </div>
+                            {/* End Consistency  rate  */}
+                        </React.Fragment> : ''
+                }
+            </div>
 
 
-        <div className="row">
+            <div className="row">
 
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Inconclusive rate' ?
-                    <React.Fragment>
-                        {/* Begin  Inconclusive rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Inconclusive rate' ?
+                        <React.Fragment>
+                            {/* Begin  Inconclusive rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
 
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
-                                    <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {inconclusiveRateTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {inconclusiveRateTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <p style={{ fontWeight: "900" }}>Inconclusive Rate Chart:</p>
-                            {inconclusiveRateChart}
-                        </div>
-                        {/* End Inconclusive  rate  */}
-                    </React.Fragment> : ''
-            }
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Invalid rate' ?
-                    <React.Fragment>
-                        {/* Begin  Invalid rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
-
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Invalid rate</p>
-                                    <small className="text-muted">Proportion of HIV tests that returned an invalid result due to test kit failure, inadequate sample volume, or procedural error. High invalid rates warrant investigation into cold-chain management and tester competency.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {invalidRateTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {invalidRateTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <p style={{ fontWeight: "900" }}>Invalid Rate Chart:</p>
-                            {invalidRateChart}
-                        </div>
-                        {/* End Invalid  rate  */}
-                    </React.Fragment> : ''
-            }
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Supervisory Signature rate' ?
-                    <React.Fragment>
-                        {/* Begin  Supervisory Signature rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
-
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Supervisory Signature rate</p>
-
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={supervisorySignatureExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {supervisorySignatureTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {supervisorySignatureTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {/* End Supervisory Signature  rate  */}
-                    </React.Fragment> : ''
-            }
-        </div>
-
-        <div className="row">
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Algorithm Followed rate' ?
-                    <React.Fragment>
-                        {/* Begin  algorithm followed rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                            <div className="row">
-
-                                <div className="col-sm-6  col-xm-6 col-md-6">
-                                    <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
-                                    <small className="text-muted">Proportion of testing sessions where the HIV 3-test algorithm sequence (T1 → T2 → T3) was correctly applied as per national guidelines. Deviations may result in misclassification of HIV status.</small>
-                                </div>
-                                <div className="col-sm-3  col-xm-3 col-md-3">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRates" className="table table-responsive">
-                                    <thead className="thead-dark">
-                                        {algorithmFollowedTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {algorithmFollowedTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {/* End algorithm followed  rate  */}
-                    </React.Fragment> : ''
-            }
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'eHTS Distribution' /*'Sites using eHTS register'*/ ?
-                    <React.Fragment>
-                        {/* Begin hts type rate  */}
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
-                            <div className="row">
-                                <div className="col-sm-12">
-                                    <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
-                                    <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS): distribution of EMR / HMIS systems. Tracks progress towards digital register adoption across testing sites.</small>
-                                </div>
-                                <div className="col-sm-2">
-                                    <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
-                                </div>
-                                <table id="positiveConcordanceRatesz" className="table">
-                                    <thead className="thead-dark">
-                                        {htsTypeTableDataHeaders}
-                                    </thead>
-                                    <tbody>
-                                        {htsTypeTableData}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
-                            <p style={{ fontWeight: "900" }}>eHTS Distribution Chart:</p>
-                            {ehtsDistributionChart}
-                        </div>
-                        {/* End hts type  rate  */}
-                    </React.Fragment> : ''
-            }
-
-            {
-                orgUnitIndicators[indicatorIndexToDisplay] == 'Test Kit Distribution' ?
-                    <React.Fragment>
-                        {/* Begin Test Kit Distribution */}
-                        <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
-                            <div className="row">
-                                <div className="col-sm-12">
-                                    <p style={{ fontWeight: "900" }}>Test Kit Distribution</p>
-                                    <small className="text-muted">Distribution of test kits used across the three HIV testing rounds (T1, T2, T3). Shows proportion of each kit type (Trinscreen, Standard Q, Dual Kit, First Response, Bioline, Other) per test.</small>
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
+                                        <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {inconclusiveRateTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {inconclusiveRateTableData}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
-                            <p style={{ fontWeight: "900" }}>Test Kit Distribution Charts:</p>
-                            {testKitDistributionChart}
-                        </div>
-                        <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
-                            <p style={{ fontWeight: "900" }}>Test Kit Summary Tables:</p>
-                            {(() => {
-                                const kitTypes = ['trinscreen', 'standardq', 'dualkit', 'firstresponse', 'bioline', 'other'];
-                                const kitLabels = { trinscreen: 'Trinscreen', standardq: 'Standard Q', dualkit: 'Dual Kit', firstresponse: 'First Response', bioline: 'Bioline', other: 'Other' };
-                                const totals = { kit1: {}, kit2: {}, kit3: {} };
-                                kitTypes.forEach(kt => { totals.kit1[kt] = 0; totals.kit2[kt] = 0; totals.kit3[kt] = 0; });
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Inconclusive Rate Chart:</p>
+                                {inconclusiveRateChart}
+                            </div>
+                            {/* End Inconclusive  rate  */}
+                        </React.Fragment> : ''
+                }
 
-                                if (odkData && odkData.length) {
-                                    odkData.forEach(displayData => {
-                                        Object.values(displayData).forEach(payload => {
-                                            try {
-                                                Object.values(payload.kit_distribution || {}).forEach(monthData => {
-                                                    kitTypes.forEach(kt => {
-                                                        totals.kit1[kt] += monthData[`kit1_${kt}`] || 0;
-                                                        totals.kit2[kt] += monthData[`kit2_${kt}`] || 0;
-                                                        totals.kit3[kt] += monthData[`kit3_${kt}`] || 0;
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Invalid rate' ?
+                        <React.Fragment>
+                            {/* Begin  Invalid rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Invalid rate</p>
+                                        <small className="text-muted">Proportion of HIV tests that returned an invalid result due to test kit failure, inadequate sample volume, or procedural error. High invalid rates warrant investigation into cold-chain management and tester competency.</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {invalidRateTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {invalidRateTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <p style={{ fontWeight: "900" }}>Invalid Rate Chart:</p>
+                                {invalidRateChart}
+                            </div>
+                            {/* End Invalid  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Supervisory Signature rate' ?
+                        <React.Fragment>
+                            {/* Begin  Supervisory Signature rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Supervisory Signature rate</p>
+
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={supervisorySignatureExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {supervisorySignatureTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {supervisorySignatureTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End Supervisory Signature  rate  */}
+                        </React.Fragment> : ''
+                }
+            </div>
+
+            <div className="row">
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Algorithm Followed rate' ?
+                        <React.Fragment>
+                            {/* Begin  algorithm followed rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                <div className="row">
+
+                                    <div className="col-sm-6  col-xm-6 col-md-6">
+                                        <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
+                                        <small className="text-muted">Proportion of testing sessions where the HIV 3-test algorithm sequence (T1 → T2 → T3) was correctly applied as per national guidelines. Deviations may result in misclassification of HIV status.</small>
+                                    </div>
+                                    <div className="col-sm-3  col-xm-3 col-md-3">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRates" className="table table-responsive">
+                                        <thead className="thead-dark">
+                                            {algorithmFollowedTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {algorithmFollowedTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {/* End algorithm followed  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'eHTS Distribution' /*'Sites using eHTS register'*/ ?
+                        <React.Fragment>
+                            {/* Begin hts type rate  */}
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
+                                        <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS): distribution of EMR / HMIS systems. Tracks progress towards digital register adoption across testing sites.</small>
+                                    </div>
+                                    <div className="col-sm-2">
+                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
+                                    </div>
+                                    <table id="positiveConcordanceRatesz" className="table">
+                                        <thead className="thead-dark">
+                                            {htsTypeTableDataHeaders}
+                                        </thead>
+                                        <tbody>
+                                            {htsTypeTableData}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>eHTS Distribution Chart:</p>
+                                {ehtsDistributionChart}
+                            </div>
+                            {/* End hts type  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Test Kit Distribution' ?
+                        <React.Fragment>
+                            {/* Begin Test Kit Distribution */}
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <p style={{ fontWeight: "900" }}>Test Kit Distribution</p>
+                                        <small className="text-muted">Distribution of test kits used across the three HIV testing rounds (T1, T2, T3). Shows proportion of each kit type (Trinscreen, Standard Q, Dual Kit, First Response, Bioline, Other) per test.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>Test Kit Distribution Charts:</p>
+                                {testKitDistributionChart}
+                            </div>
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>Test Kit Summary Tables:</p>
+                                {(() => {
+                                    const kitTypes = ['trinscreen', 'standardq', 'dualkit', 'firstresponse', 'bioline', 'other'];
+                                    const kitLabels = { trinscreen: 'Trinscreen', standardq: 'Standard Q', dualkit: 'Dual Kit', firstresponse: 'First Response', bioline: 'Bioline', other: 'Other' };
+                                    const totals = { kit1: {}, kit2: {}, kit3: {} };
+                                    kitTypes.forEach(kt => { totals.kit1[kt] = 0; totals.kit2[kt] = 0; totals.kit3[kt] = 0; });
+
+                                    if (this.state.odkData && this.state.odkData.length) {
+                                        this.state.odkData.forEach(displayData => {
+                                            Object.values(displayData).forEach(payload => {
+                                                try {
+                                                    Object.values(payload.kit_distribution || {}).forEach(monthData => {
+                                                        kitTypes.forEach(kt => {
+                                                            totals.kit1[kt] += monthData[`kit1_${kt}`] || 0;
+                                                            totals.kit2[kt] += monthData[`kit2_${kt}`] || 0;
+                                                            totals.kit3[kt] += monthData[`kit3_${kt}`] || 0;
+                                                        });
                                                     });
-                                                });
-                                            } catch (e) {}
+                                                } catch (e) {}
+                                            });
                                         });
+                                    }
+
+                                    const csvData = [['Kit Type', 'T1 Count', 'T2 Count', 'T3 Count']];
+                                    kitTypes.forEach(kt => {
+                                        csvData.push([kitLabels[kt], totals.kit1[kt], totals.kit2[kt], totals.kit3[kt]]);
                                     });
-                                }
 
-                                const csvData = [['Kit Type', 'T1 Count', 'T2 Count', 'T3 Count']];
-                                kitTypes.forEach(kt => {
-                                    csvData.push([kitLabels[kt], totals.kit1[kt], totals.kit2[kt], totals.kit3[kt]]);
-                                });
-
-                                return (
-                                    <div className="row">
-                                        <div className="col-sm-3">
-                                            <span style={{ color: 'blue' }}><i className="fas fa-download"></i></span>
-                                            <CSVLink data={csvData}> Csv</CSVLink>
-                                        </div>
-                                        <div className="col-sm-12 mt-2">
-                                            <div className="row">
-                                                {[
-                                                    { label: 'Test 1 (T1) Kit Totals', kitKey: 'kit1' },
-                                                    { label: 'Test 2 (T2) Kit Totals', kitKey: 'kit2' },
-                                                    { label: 'Test 3 (T3) Kit Totals', kitKey: 'kit3' },
-                                                ].map(({ label, kitKey }) => (
-                                                    <div key={label} className="col-sm-12 col-md-4">
-                                                        <p style={{ fontWeight: '700', marginBottom: '4px' }}>{label}</p>
-                                                        <table className="table table-sm table-bordered table-striped">
-                                                            <thead className="thead-dark">
-                                                                <tr>
-                                                                    <th>Kit Type</th>
-                                                                    <th>Count</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {kitTypes.map(kt => (
-                                                                    <tr key={kt}>
-                                                                        <td>{kitLabels[kt]}</td>
-                                                                        <td>{Intl.NumberFormat().format(totals[kitKey][kt])}</td>
+                                    return (
+                                        <div className="row">
+                                            <div className="col-sm-3">
+                                                <span style={{ color: 'blue' }}><i className="fas fa-download"></i></span>
+                                                <CSVLink data={csvData}> Csv</CSVLink>
+                                            </div>
+                                            <div className="col-sm-12 mt-2">
+                                                <div className="row">
+                                                    {[
+                                                        { label: 'Test 1 (T1) Kit Totals', kitKey: 'kit1' },
+                                                        { label: 'Test 2 (T2) Kit Totals', kitKey: 'kit2' },
+                                                        { label: 'Test 3 (T3) Kit Totals', kitKey: 'kit3' },
+                                                    ].map(({ label, kitKey }) => (
+                                                        <div key={label} className="col-sm-12 col-md-4">
+                                                            <p style={{ fontWeight: '700', marginBottom: '4px' }}>{label}</p>
+                                                            <table className="table table-sm table-bordered table-striped">
+                                                                <thead className="thead-dark">
+                                                                    <tr>
+                                                                        <th>Kit Type</th>
+                                                                        <th>Count</th>
                                                                     </tr>
-                                                                ))}
-                                                                <tr style={{ fontWeight: 'bold', backgroundColor: '#f8f9fc' }}>
-                                                                    <td>Total</td>
-                                                                    <td>{Intl.NumberFormat().format(kitTypes.reduce((sum, kt) => sum + totals[kitKey][kt], 0))}</td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                ))}
+                                                                </thead>
+                                                                <tbody>
+                                                                    {kitTypes.map(kt => (
+                                                                        <tr key={kt}>
+                                                                            <td>{kitLabels[kt]}</td>
+                                                                            <td>{Intl.NumberFormat().format(totals[kitKey][kt])}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                    <tr style={{ fontWeight: 'bold', backgroundColor: '#f8f9fc' }}>
+                                                                        <td>Total</td>
+                                                                        <td>{Intl.NumberFormat().format(kitTypes.reduce((sum, kt) => sum + totals[kitKey][kt], 0))}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })()}
-                        </div>
-                        {/* End Test Kit Distribution */}
-                    </React.Fragment> : ''
-            }
-        </div>
-    </div>;
-    // End  Data Tables for all the indicators
+                                    );
+                                })()}
+                            </div>
+                            {/* End Test Kit Distribution */}
+                        </React.Fragment> : ''
+                }
+            </div>
+        </div>;
+        // End  Data Tables for all the indicators
 
-    if (isLoading) {
+        if (this.state.isLoading) {
+            return (
+                <React.Fragment>
+                    <div className="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 className="h4 mb-0 text-gray-900">Logbook REPORT: {
+                            this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
+                        }</h1>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <div className="spinner-border" role="status">
+                            <span className="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </React.Fragment>
+            )
+        }
         return (
             <React.Fragment>
+                {/* <details open>
+                    <summary>this.state.odkData</summary>
+                    <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', marginBottom: '3em', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
+                        <pre>
+                            {JSON.stringify(this.state.odkData, null, 1)}
+                        </pre>
+                    </div>
+                </details> */}
+
+                {/* Page Heading */}
                 <div className="d-sm-flex align-items-center justify-content-between mb-4">
                     <h1 className="h4 mb-0 text-gray-900">Logbook REPORT: {
-                        orgUnitIndicators[indicatorIndexToDisplay]
+                        this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay]
                     }</h1>
+
+                    {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                        className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
                 </div>
-                <div style={{ textAlign: 'center' }}>
-                    <div className="spinner-border" role="status">
-                        <span className="sr-only">Loading...</span>
+
+                {/* Filter bar */}
+                <div className="row">
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                        <OrgUnitIndicator orgUnitIndicators={this.state.orgUnitIndicators}
+                            orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}
+                            filterDisplayedIndicator={this.filterDisplayedIndicator}
+                        ></OrgUnitIndicator>
                     </div>
+
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                        <OrgUnitButton orgUnitChangeHandler={this.orgUnitChangeHandler}></OrgUnitButton>
+                    </div>
+
+                    <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
+                        <OrgUnitType orgUnitTypeChangeHandler={this.orgUnitTypeChangeHandler}></OrgUnitType>
+                    </div>
+
+                    <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
+                        <OrgDate orgDateChangeHandler={this.orgDateChangeHandler}></OrgDate>
+                    </div>
+
+                    <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
+                        <button
+                            onClick={() => this.onFilterButtonClickEvent()}
+                            type="button"
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
+                        </button>
+                        <button
+                            onClick={() => {
+                                this.resetFilters();
+                            }}
+                            type="button"
+                            style={{ "display": "inlineBlock" }}
+                            className="btn btn-sm btn-secondary font-weight-bold">Reset
+                        </button>
+                    </div>
+
+
                 </div>
-            </React.Fragment>
-        )
-    }
-    return (
-        <React.Fragment>
-            {/* <details open>
-                <summary>odkData</summary>
-                <div className='p-4' style={{ maxHeight: '500px', overflowY: 'auto', backgroundColor: '#cfffcf', border: '1px solid limegreen', borderRadius: '4px', marginBottom: '3em', fontFamily: 'monospace', color: 'black', fontWeight: 500 }}>
-                    <pre>
-                        {JSON.stringify(odkData, null, 1)}
-                    </pre>
-                </div>
-            </details> */}
+                {/* end filter bar */}
 
-            {/* Page Heading */}
-            <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 className="h4 mb-0 text-gray-900">Logbook REPORT: {
-                    orgUnitIndicators[indicatorIndexToDisplay]
-                }</h1>
-
-                {/* <a href="#" className="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    className="fas fa-download fa-sm text-white-50"></i> Generate Report</a> */}
-            </div>
-
-            {/* Filter bar */}
-            <div className="row">
-                <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                    <OrgUnitIndicator orgUnitIndicators={orgUnitIndicators}
-                        orgUnitTypeChangeHandler={orgUnitTypeChangeHandler}
-                        filterDisplayedIndicator={filterDisplayedIndicator}
-                    ></OrgUnitIndicator>
-                </div>
-
-                <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                    <OrgUnitButton orgUnitChangeHandler={orgUnitChangeHandler}></OrgUnitButton>
-                </div>
-
-                <div className="col-sm-12   col-lg-2  col-md-4 mb-sm-1 mb-1">
-                    <OrgUnitType orgUnitTypeChangeHandler={orgUnitTypeChangeHandler}></OrgUnitType>
-                </div>
-
-                <div className="col-sm-12 col-lg-4 col-md-6 mb-sm-1 mb-1">
-                    <OrgDate orgDateChangeHandler={orgDateChangeHandler}></OrgDate>
-                </div>
-
-                <div className="col-sm-12  col-lg-2 col-md-4 mb-sm-1 mb-1">
-                    <button
-                        onClick={() => onFilterButtonClickEvent()}
-                        type="button"
-                        style={{ "display": "inlineBlock" }}
-                        className="btn btn-sm btn-primary font-weight-bold mr-2">Filter
-                    </button>
-                    <button
-                        onClick={() => {
-                            resetFilters();
-                        }}
-                        type="button"
-                        style={{ "display": "inlineBlock" }}
-                        className="btn btn-sm btn-secondary font-weight-bold">Reset
-                    </button>
-                </div>
-
-
-            </div>
-            {/* end filter bar */}
-
-            {/* loading indicator */}
-            <div className="row">
-                <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 p-0">
-                    <div className="row">
-                        <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 p-1" style={{ textAlign: 'center' }}>
-                            {isLoading ? <div className="spinner-border" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div> : ''}
+                {/* loading indicator */}
+                <div className="row">
+                    <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12 p-0">
+                        <div className="row">
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 p-1" style={{ textAlign: 'center' }}>
+                                {this.state.isLoading ? <div className="spinner-border" role="status">
+                                    <span className="sr-only">Loading...</span>
+                                </div> : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {/* end loading indicator */}
+                {/* end loading indicator */}
 
-            <br />
-            <div style={rowStle} className="row">
+                <br />
+                <div style={rowStle} className="row">
 
-                {/* tab headers */}
-                <div className="col-sm-12  col-xm-12 col-md-12">
-                    <ul className="nav nav-tabs" id="myTab" role="tablist">
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link active" id="tablesTabBtn" data-toggle="tab" href="#tables" role="tab" aria-controls="tables" aria-selected="true" onClick={() => {
-                                console.log('linelist mode OFF');
-                                setLinelistMode(false);
-                            }}>
-                                <i className="fas fa-chart-bar"></i> Analytics
-                            </a>
-                        </li>
-                        <li className="nav-item" role="presentation">
-                            <a className="nav-link" id="linelistTabBtn" data-toggle="tab" href="#linelist" role="tab" aria-controls="linelist" aria-selected="false" onClick={() => {
-                                console.log('linelist mode ON');
-                                setLinelistMode(false);
-                                fetchLinelistData(orgUnitDataIds,
-                                    siteType,
-                                    startDate,
-                                    endDate
-                                );
-                            }}>
-                                <i className="fas fa-list"></i> Aggregates
-                            </a>
-                        </li>
-                    </ul>
-                    {/* end tab headers */}
+                    {/* tab headers */}
+                    <div className="col-sm-12  col-xm-12 col-md-12">
+                        <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link active" id="tablesTabBtn" data-toggle="tab" href="#tables" role="tab" aria-controls="tables" aria-selected="true" onClick={() => {
+                                    console.log('linelist mode OFF');
+                                    this.setState({
+                                        linelistMode: false
+                                    })
+                                }}>
+                                    <i className="fas fa-chart-bar"></i> Analytics
+                                </a>
+                            </li>
+                            <li className="nav-item" role="presentation">
+                                <a className="nav-link" id="linelistTabBtn" data-toggle="tab" href="#linelist" role="tab" aria-controls="linelist" aria-selected="false" onClick={() => {
+                                    console.log('linelist mode ON');
+                                    this.setState({
+                                        linelistMode: false
+                                    })
+                                    this.fetchLinelistData(this.state.orgUnitDataIds,
+                                        this.state.siteType,
+                                        this.state.startDate,
+                                        this.state.endDate
+                                    );
+                                }}>
+                                    <i className="fas fa-list"></i> Aggregates
+                                </a>
+                            </li>
+                        </ul>
+                        {/* end tab headers */}
 
-                    <div className="tab-content" id="myTabContent">
-                        {/* Site agreement rates */}
-                        <div className="tab-pane graphstab active" id="tables" role="tabpanel" aria-labelledby="tables">
-                            <br />
-                            {tablesTab}
-                        </div>
-                        <div className="tab-pane tbltab" id="linelist" role="tabpanel" aria-labelledby="linelist">
-                            <br />
-                            <h4>Linelist</h4>
-                            <div className="row">
-                                <div className="col-md-12">
-                                    <div id="linelist-table">
-                                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood', padding: '1em'}}>
-                                            {JSON.stringify(linelistData, null, 2)}
-                                        </pre> */}
-                                    </div>
-                                    {/*
-                                        <div className="table-responsive">
-                                            <table className="table table-striped">
-                                                <thead>
-                                                <tr>
-                                                    <th>Org unit</th>
-                                                    <th>Test Month</th>
-
-                                                    <th># Total Tests</th>
-
-                                                    <th># Total T1 Reactive</th>
-                                                    <th># Total T1 Non-reactive</th>
-                                                    <th># Total T1 Invalid/Empty</th>
-
-                                                    <th># Total T2 Reactive</th>
-                                                    <th># Total T2 Non-reactive</th>
-                                                    <th># Total T2 Invalid/Empty</th>
-
-                                                    <th># Total T3 Reactive</th>
-                                                    <th># Total T3 Non-reactive</th>
-                                                    <th># Total T3 Invalid/Empty</th>
-
-                                                    <th># Total Final Positive</th>
-                                                    <th># Total Final Negative</th>
-
-                                                    <th># Test Kit 1 Trinscreen</th>
-                                                    <th># Test Kit 1 Standard Q</th>
-                                                    <th># Test Kit 1 Dual Kit</th>
-                                                    <th># Test Kit 1 First Response</th>
-                                                    <th># Test Kit 1 Bioline Dio</th>
-                                                    <th># Test Kit 1 Empty/Null</th>
-
-                                                    <th># Test Kit 2 Trinscreen</th>
-                                                    <th># Test Kit 2 Standard Q</th>
-                                                    <th># Test Kit 2 Dual Kit</th>
-                                                    <th># Test Kit 2 First Response</th>
-                                                    <th># Test Kit 2 Bioline Dio</th>
-                                                    <th># Test Kit 2 Empty/Null</th>
-
-                                                    <th># Test Kit 3 Trinscreen</th>
-                                                    <th># Test Kit 3 Standard Q</th>
-                                                    <th># Test Kit 3 Dual Kit</th>
-                                                    <th># Test Kit 3 First Response</th>
-                                                    <th># Test Kit 3 Bioline Dio</th>
-                                                    <th># Test Kit 3 Empty/Null</th>
-                                                </tr>
-                                                </thead>
-                                            </table>
+                        <div className="tab-content" id="myTabContent">
+                            {/* Site agreement rates */}
+                            <div className="tab-pane graphstab active" id="tables" role="tabpanel" aria-labelledby="tables">
+                                <br />
+                                {tablesTab}
+                            </div>
+                            <div className="tab-pane tbltab" id="linelist" role="tabpanel" aria-labelledby="linelist">
+                                <br />
+                                <h4>Linelist</h4>
+                                <div className="row">
+                                    <div className="col-md-12">
+                                        <div id="linelist-table">
+                                            {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood', padding: '1em'}}>
+                                                {JSON.stringify(this.state.linelistData, null, 2)}
+                                            </pre> */}
                                         </div>
-                                    */}
+                                        {/*
+                                            <div className="table-responsive">
+                                                <table className="table table-striped">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Org unit</th>
+                                                        <th>Test Month</th>
+
+                                                        <th># Total Tests</th>
+
+                                                        <th># Total T1 Reactive</th>
+                                                        <th># Total T1 Non-reactive</th>
+                                                        <th># Total T1 Invalid/Empty</th>
+
+                                                        <th># Total T2 Reactive</th>
+                                                        <th># Total T2 Non-reactive</th>
+                                                        <th># Total T2 Invalid/Empty</th>
+
+                                                        <th># Total T3 Reactive</th>
+                                                        <th># Total T3 Non-reactive</th>
+                                                        <th># Total T3 Invalid/Empty</th>
+
+                                                        <th># Total Final Positive</th>
+                                                        <th># Total Final Negative</th>
+
+                                                        <th># Test Kit 1 Trinscreen</th>
+                                                        <th># Test Kit 1 Standard Q</th>
+                                                        <th># Test Kit 1 Dual Kit</th>
+                                                        <th># Test Kit 1 First Response</th>
+                                                        <th># Test Kit 1 Bioline Dio</th>
+                                                        <th># Test Kit 1 Empty/Null</th>
+
+                                                        <th># Test Kit 2 Trinscreen</th>
+                                                        <th># Test Kit 2 Standard Q</th>
+                                                        <th># Test Kit 2 Dual Kit</th>
+                                                        <th># Test Kit 2 First Response</th>
+                                                        <th># Test Kit 2 Bioline Dio</th>
+                                                        <th># Test Kit 2 Empty/Null</th>
+
+                                                        <th># Test Kit 3 Trinscreen</th>
+                                                        <th># Test Kit 3 Standard Q</th>
+                                                        <th># Test Kit 3 Dual Kit</th>
+                                                        <th># Test Kit 3 First Response</th>
+                                                        <th># Test Kit 3 Bioline Dio</th>
+                                                        <th># Test Kit 3 Empty/Null</th>
+                                                    </tr>
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        */}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-            </div>
 
 
-
-            <React.Fragment>
-                <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true" >
-                    <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <div className="modal-title" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%' }} id="nModalTitle">
-                                    {nModal?.title || <h5>Details</h5>}
+                <React.Fragment>
+                    <div className="modal fade" id="nModal" tabIndex="-1" role="dialog" aria-labelledby="nModalTitle" aria-hidden="true" >
+                        <div className="modal-dialog modal-dialog-centered modal-xl" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <div className="modal-title" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%' }} id="nModalTitle">
+                                        {this.state.nModal?.title || <h5>Details</h5>}
+                                    </div>
+                                    <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                 </div>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                {
-                                    nModal?.content ? nModal?.content : ''
-                                }
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <div className="modal-body">
+                                    {
+                                        this.state.nModal?.content ? this.state.nModal?.content : ''
+                                    }
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div >
+                    </div >
+                </React.Fragment>
             </React.Fragment>
-        </React.Fragment>
-    );
+        );
+    }
 
 }
 
@@ -2071,5 +2125,5 @@ if (document.getElementById('LogbookReport')) {
     });
 
     const props = Object.assign({}, domValuesMap);
-    ReactDOM.createRoot(document.getElementById('LogbookReport')).render(<LogbookReport {...props} />);
+    ReactDOM.render(<LogbookReport {...props} />, document.getElementById('LogbookReport'));
 }

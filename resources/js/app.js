@@ -4,8 +4,7 @@
  * building robust, powerful web applications using React + Laravel.
  */
 
-import './bootstrap';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+require('./bootstrap');
 
 /**
  * Next, we will create a fresh React component instance and attach it to
@@ -13,28 +12,35 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-import './components/dashboard/Dashboard';
+require('./components/dashboard/Dashboard');
 
-import './components/reports/pt/PTReport';
+require('./components/reports/pt/PTReport');
 
-import './components/reports/logbook/LogbookReport';
+require('./components/reports/logbook/LogbookReport');
 
-import './components/reports/spi/SpiReport';
-import './components/reports/submissions/HTSSubmissions';
-import './components/reports/submissions/SPISubmissions';
+require('./components/reports/spi/SpiReport');
+require('./components/reports/submissions/HTSSubmissions');
+require('./components/reports/submissions/SPISubmissions');
 
-import './components/system/resources/Resources';
-import './components/system/partners/Partners';
+require('./components/system/resources/Resources');
+require('./components/system/partners/Partners');
 
-import './components/reports/me/MEReport';
+require('./components/reports/me/MEReport');
 
-import './components/reports/summaries/SummariesReport';
+require('./components/reports/summaries/SummariesReport');
 
 
-//Interface code
-import './components/system/org-unit/OrgUnits';
-import './components/system/org-unit/RequestedOrgUnits';
-import './components/system/role/Roles';
-import './components/system/users/Users';
-import './components/system/users/Profile';
-import './components/system/auth/axios_login';
+//Intrface code
+require('./components/system/org-unit/OrgUnits');
+require('./components/system/org-unit/RequestedOrgUnits');
+require('./components/system/role/Roles');
+require('./components/system/users/Users');
+require('./components/system/users/Profile');
+require('./components/system/auth/axios_login');
+require('xlsx');
+require("uuid/v4");
+require("react-datepicker");
+require("react-js-pagination")
+require('../../node_modules/@fortawesome/fontawesome-free/js/fontawesome.js');
+
+require('../../node_modules/jquery.easing/jquery.easing.min.js');

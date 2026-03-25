@@ -1,207 +1,409 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { FetchRoles, Saveuser, DevelopOrgStructure, FetchOrgunits, FetchUserDetails, Updateuser } from '../../utils/Helpers';
 import TreeView from '../../utils/TreeView';
 import DualListBox from 'react-dual-listbox';
 
-function Register({ userActionState, selectedUser, allowedPermissions, toggleDisplay }) {
-    const [selectedViewableRoles, setSelectedViewableRoles] = useState([]);
-    const [previousSelectedViewableRoles, setPreviousSelectedViewableRoles] = useState([]);
-    const [role, setRole] = useState('');
-    const [roleId, setRoleId] = useState('');
-    const [roles, setRoles] = useState({});
-    const [selectedOrgs, setSelectedOrgs] = useState({});
-    const [rolesOptions, setRolesOptions] = useState([]);
-    const [message, setMessage] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [assignedOrgUnits, setAssignedOrgUnits] = useState([]);
-    const [orgUnits, setOrgUnits] = useState(null);
-    const [closeRegisterPage, setCloseRegisterPage] = useState(true);
-    const [canViewAssignRolesList, setCanViewAssignRolesList] = useState(false);
 
-    useEffect(() => {
+class Register extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedViewableRoles: [],
+            previousSelectedViewableRoles: [],
+            role: '',
+            roles: {},
+            selectedOrgs: {},
+            rolesOptions: [],
+            message: '',
+            first_name: '',
+            last_name: '',
+            email: '',
+            password: '',
+            assignedOrgUnits: [],
+            closeRegisterPage: true,
+            canViewAssignRolesList: false
+        };
+
+        this.saveUser = this.saveUser.bind(this);
+        this.updateCurrentUser = this.updateCurrentUser.bind(this);
+        this.roleOnChange = this.roleOnChange.bind(this);
+        this.selectOrgUnitHandler = this.selectOrgUnitHandler.bind(this);
+        this.viewableRolesOnChange = this.viewableRolesOnChange.bind(this);
+    }
+
+    componentDidMount() {
         (async () => {
-            const fetchedRoles = await FetchRoles();
+            let roles = await FetchRoles();
             let httpOrgUnits = await FetchOrgunits();
-            const assigned = [];
+            let assignedOrgUnits = []
+            if (this.props.userActionState == 'edit') {
 
-            if (userActionState === 'edit' && selectedUser) {
-                const userDetails = await FetchUserDetails(selectedUser.id);
-                const userAssignedOrgs = {};
-                userDetails['org_units'].forEach(ou => {
-                    userAssignedOrgs[ou.org_unit_id] = ou;
-                    assigned.push(ou.org_unit_id);
+                let userDetails = await FetchUserDetails(this.props.selectedUser.id);
+                let userAssignedOrgs = {};
+
+                userDetails['org_units'].map((orgunit) => {
+
+                    userAssignedOrgs[orgunit.org_unit_id] = orgunit;
+                    assignedOrgUnits.push(orgunit.org_unit_id);
+
                 });
 
-                let canView = false;
-                try { canView = fetchedRoles[userDetails['demographics']['role_id']]['authorities']['role'].includes(12); } catch {}
+                let canViewAssignRolesList = false;
+                try {
+                    canViewAssignRolesList = roles[userDetails['demographics']['role_id']]['authorities']['role'].includes(12) // check if has view role option
+                } catch (err) {
+                    //pass
+                }
 
-                setFirstName(userDetails['demographics']['first_name']);
-                setLastName(userDetails['demographics']['last_name'] ?? '');
-                setEmail(userDetails['demographics']['email']);
-                setRole(userDetails['demographics']['role_id']);
-                setRoleId(userDetails['demographics']['role_id']);
-                setSelectedViewableRoles(userDetails['allowed_roles']);
-                setPreviousSelectedViewableRoles(userDetails['allowed_roles']);
-                setSelectedOrgs(userAssignedOrgs);
-                setCanViewAssignRolesList(canView);
+                this.setState({
+                    first_name: userDetails['demographics']['first_name'],
+                    last_name: userDetails['demographics']['last_name'] ? userDetails['demographics']['last_name'] : '',
+                    email: userDetails['demographics']['email'],
+                    role: userDetails['demographics']['role_id'],
+                    roleId: userDetails['demographics']['role_id'],
+                    selectedViewableRoles: userDetails['allowed_roles'],
+                    previousSelectedViewableRoles: userDetails['allowed_roles'],
+                    selectedOrgs: userAssignedOrgs,
+                    canViewAssignRolesList: canViewAssignRolesList
+                });
             }
 
-            setOrgUnits(DevelopOrgStructure(httpOrgUnits));
-            setRoles(fetchedRoles);
-            setAssignedOrgUnits(assigned);
-            setRolesOptions(Object.values(fetchedRoles).map(v => ({ value: v.role_id, label: v.role_name })));
-        })();
-    }, []);
+            httpOrgUnits = DevelopOrgStructure(httpOrgUnits);
 
-    const roleOnChange = (event) => {
-        const rid = event.target.value;
-        let canView = false;
-        try { if (roles[rid].authorities.role.includes(12)) canView = true; } catch {}
-        setRole(rid);
-        setCanViewAssignRolesList(canView);
-        setSelectedViewableRoles(canView ? previousSelectedViewableRoles : []);
+            let rolesOptions = [];
+
+            for (const [key, value] of Object.entries(roles)) {
+                rolesOptions.push({ value: value.role_id, label: value.role_name });
+            }
+
+            this.setState({
+                orgUnits: httpOrgUnits,
+                roles: roles,
+                assignedOrgUnits: assignedOrgUnits,
+                rolesOptions: rolesOptions
+            });
+        })();
+    }
+
+    viewableRolesOnChange(selected) {
+        this.setState({ selectedViewableRoles: selected });
     };
 
-    const selectOrgUnitHandler = (orgunit) => {
-        setSelectedOrgs(prev => {
-            const updated = { ...prev };
-            if (orgunit.id in updated) delete updated[orgunit.id];
-            else updated[orgunit.id] = orgunit;
-            return updated;
+    updateCurrentUser() {
+        if (this.state.first_name.length == 0 ||
+            this.state.email.length == 0 ||
+            this.state.selectedOrgs.length == 0 ||
+            Object.keys(this.state.selectedOrgs).length == 0) {
+
+            this.setState({
+                message: "Kindly fill in the required data marked in *",
+                closeRegisterPage: false
+            });
+            $('#saveUserModal').modal('toggle');
+        } else {
+
+            Updateuser(
+                this.state.first_name,
+                this.state.last_name,
+                this.state.email,
+                this.state.password,
+                this.state.selectedOrgs,
+                this.state.role,
+                this.props.selectedUser.id,
+                this.state.selectedViewableRoles
+            ).then(response => {
+                let message = response.data.Message
+
+                this.setState({
+                    message: message
+                });
+
+                $('#saveUserModal').modal('toggle');
+            });
+
+        }
+    }
+
+    saveUser() {
+
+        (async () => {
+
+            if (
+                this.state.first_name.length == 0 ||
+                this.state.email.length == 0 ||
+                this.state.password.length == 0 ||
+                this.state.role.length == 0 ||
+                Object.keys(this.state.selectedOrgs).length == 0
+            ) {
+                this.setState({
+                    message: "Kindly fill in the required data marked in *",
+                    closeRegisterPage: false
+                });
+                $('#saveUserModal').modal('toggle');
+            } else {
+                let response = await Saveuser(
+                    this.state.first_name,
+                    this.state.last_name,
+                    this.state.email,
+                    this.state.password,
+                    this.state.selectedOrgs,
+                    this.state.role,
+                    this.state.selectedViewableRoles
+                );
+
+                if (response) {
+
+                    this.setState({
+                        message: response.data.Message
+                    });
+
+                    $('#saveUserModal').modal('toggle');
+                }
+
+            }
+
+        })();
+    }
+
+    roleOnChange(event) {
+        // //console.log(event.target.value);
+        let roleId = event.target.value;
+        let canViewAssignRolesList = false;
+
+        try {
+            if (this.state.roles[roleId].authorities.role.includes(12)) {
+                canViewAssignRolesList = true
+            }
+        } catch (err) {
+
+        }
+        let SelectedViewableRoles = [];
+        if (canViewAssignRolesList == false) {
+            SelectedViewableRoles = [];
+        } else {
+            SelectedViewableRoles = this.state.previousSelectedViewableRoles
+        }
+
+        // viewAssignRolesList
+        this.setState({
+            role: roleId,
+            selectedViewableRoles: SelectedViewableRoles,
+            canViewAssignRolesList: canViewAssignRolesList
         });
     };
 
-    const saveUser = async () => {
-        if (!firstName || !email || !password || !role || Object.keys(selectedOrgs).length === 0) {
-            setMessage('Kindly fill in the required data marked in *');
-            setCloseRegisterPage(false);
-            $('#saveUserModal').modal('toggle');
-            return;
+    selectOrgUnitHandler(orgunit) {
+
+        let selectedOrgs = { ...this.state.selectedOrgs };
+        if (orgunit.id in selectedOrgs) {
+            delete selectedOrgs[orgunit.id];
+        } else {
+            selectedOrgs[orgunit.id] = orgunit;
         }
-        const response = await Saveuser(firstName, lastName, email, password, selectedOrgs, role, selectedViewableRoles);
-        if (response) {
-            setMessage(response.data.Message);
-            $('#saveUserModal').modal('toggle');
+        this.setState({
+            selectedOrgs: selectedOrgs
+        });
+    }
+
+    // render
+    render() {
+        let roles = [];
+        let selectedOrgs = [];
+        for (const [key, value] of Object.entries(this.state.roles)) {
+
+            if (this.props.userActionState == 'edit') {
+                if (this.state.roleId == value.role_id) {
+                    roles.push(<option selected key={key} value={key}>{value.role_name}</option>);
+                } else {
+                    roles.push(<option key={key} value={key}>{value.role_name}</option>);
+                }
+
+            } else {
+                roles.push(<option key={key} value={key}>{value.role_name}</option>);
+            }
+
         }
-    };
-
-    const updateCurrentUser = async () => {
-        if (!firstName || !email || Object.keys(selectedOrgs).length === 0) {
-            setMessage('Kindly fill in the required data marked in *');
-            setCloseRegisterPage(false);
-            $('#saveUserModal').modal('toggle');
-            return;
+        let count = 1;
+        for (const [key, value] of Object.entries(this.state.selectedOrgs)) {
+            selectedOrgs.push(<p key={key} data-id={key}>{count}. {value.name}</p>);
+            count += 1;
         }
-        const response = await Updateuser(firstName, lastName, email, password, selectedOrgs, role, selectedUser.id, selectedViewableRoles);
-        setMessage(response.data.Message);
-        $('#saveUserModal').modal('toggle');
-    };
+        return (
+            <React.Fragment>
 
-    const roleOptions = Object.entries(roles).map(([key, value]) => (
-        <option key={key} value={key} selected={userActionState === 'edit' && roleId == value.role_id}>{value.role_name}</option>
-    ));
+                <div id="registration_form" className="card shadow mb-4">
+                    <div className="card-header py-3">
+                        <h6 className="m-0 font-weight-bold text-primary">Registration Form</h6>
+                    </div>
+                    <div className="card-body">
 
-    const selectedOrgsList = Object.entries(selectedOrgs).map(([key, value], i) => (
-        <p key={key} data-id={key}>{i + 1}. {value.name}</p>
-    ));
+                        <div className="card mb-4 py-3 border-left-secondary">
+                            <div className="card-body">
 
-    const resetAndClose = () => {
-        setSelectedViewableRoles([]); setPreviousSelectedViewableRoles([]); setRole(''); setRoles({});
-        setSelectedOrgs({}); setRolesOptions([]); setMessage(''); setFirstName(''); setLastName('');
-        setEmail(''); setPassword(''); setAssignedOrgUnits([]); setCloseRegisterPage(true); setCanViewAssignRolesList(false);
-        toggleDisplay();
-    };
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip01">First name *</label>
+                                        <input type="text"
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    first_name: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.first_name}
+                                            className="form-control"
+                                            id="validationTooltip01" required />
+                                        <div className="valid-tooltip">user first name</div>
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip02">Last name</label>
+                                        <input
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    last_name: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.last_name}
+                                            type="text"
+                                            className="form-control"
+                                            id="validationTooltip02" required />
+                                        <div className="valid-tooltip">user last name</div>
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip03">Email *</label>
+                                        <input
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    email: event.target.value
+                                                });
+                                            }}
+                                            value={this.state.email}
+                                            type="text"
+                                            className="form-control"
+                                            id="validationTooltip03" required />
+                                        <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip05">Role *</label>
+                                        <select onChange={() => this.roleOnChange(event)} className="form-control" id="exampleFormControlSelect1">
+                                            <option defaultValue>--Select user role--</option>
+                                            {roles}
+                                        </select>
+                                    </div>
+                                </div>
 
-    return (
-        <React.Fragment>
-            <div id="registration_form" className="card shadow mb-4">
-                <div className="card-header py-3">
-                    <h6 className="m-0 font-weight-bold text-primary">Registration Form</h6>
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="validationTooltip04">Password {this.props.userActionState != 'edit' ? ' *' : ''}</label>
+                                        <input type="text"
+                                            onChange={(event) => {
+                                                this.setState({
+                                                    password: event.target.value
+                                                });
+                                            }}
+                                            className="form-control"
+                                            id="validationTooltip04"
+                                            required />
+                                        <div className="invalid-tooltip">Please provide a valid Email. </div>
+                                    </div>
+                                </div>
+                                {
+                                    this.state.canViewAssignRolesList || this.state.selectedViewableRoles.length != 0 ?
+                                        <React.Fragment>
+                                            <br />
+                                            <div className="col-md-12 mb-12">
+                                                <label htmlFor="permissions">Assign roles this user will view</label>
+                                                <DualListBox
+                                                    canFilter
+                                                    options={this.state.rolesOptions}
+                                                    selected={this.state.selectedViewableRoles}
+                                                    onChange={this.viewableRolesOnChange}
+                                                />
+                                            </div>
+                                        </React.Fragment> : ''
+                                }
+
+                                <br />
+                                <div className="form-row">
+                                    <div className="col-md-6 mb-6">
+                                        <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                            <p> Select Organisation Unit *</p>
+                                            <TreeView assignedOrgUnits={this.state.assignedOrgUnits} addCheckBox={true} clickHandler={this.selectOrgUnitHandler} orgUnits={this.state.orgUnits} />
+                                        </div>
+                                    </div>
+                                    <div id="selectedOrgs" className="col-md-6 mb-6">
+                                        <div style={{ "overflow": "scroll", "maxHeight": "300px", "minHeight": "300px", "paddingBottom": "6px", "paddingRight": "16px" }} >
+                                            <p> Selected Organisation Units *</p>
+                                            {selectedOrgs}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={this.props.userActionState != 'edit' ? () => this.saveUser() : () => this.updateCurrentUser()}
+                                    style={{ "marginTop": "10px" }}
+                                    className="btn btn-primary mr-2"
+                                > {this.props.userActionState == 'edit' ? 'Update User' : 'Save User'}</button>
+
+                                <button
+                                    style={{ "marginTop": "10px" }}
+                                    onClick={
+                                        () => {
+                                            this.setState({
+                                                selectedViewableRoles: [],
+                                                previousSelectedViewableRoles: [],
+                                                role: '',
+                                                roles: {},
+                                                selectedOrgs: {},
+                                                rolesOptions: [],
+                                                message: '',
+                                                first_name: '',
+                                                last_name: '',
+                                                email: '',
+                                                password: '',
+                                                assignedOrgUnits: [],
+                                                closeRegisterPage: true,
+                                                canViewAssignRolesList: false
+                                            });
+                                            this.props.toggleDisplay()
+                                        }
+                                    } className="btn btn-secondary">Cancel</button>
+
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <div className="card-body">
-                    <div className="card mb-4 py-3 border-left-secondary">
-                        <div className="card-body">
-                            <div className="form-row">
-                                <div className="col-md-6 mb-3">
-                                    <label htmlFor="validationTooltip01">First name *</label>
-                                    <input type="text" onChange={e => setFirstName(e.target.value)} value={firstName} className="form-control" id="validationTooltip01" required />
-                                </div>
-                                <div className="col-md-6 mb-3">
-                                    <label htmlFor="validationTooltip02">Last name</label>
-                                    <input type="text" onChange={e => setLastName(e.target.value)} value={lastName} className="form-control" id="validationTooltip02" />
-                                </div>
+                {/* user persist alert box */}
+                <div className="modal fade" id="saveUserModal" tabIndex="-1" role="dialog" aria-labelledby="saveUserModalTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLongTitle">Notice!</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                            <div className="form-row">
-                                <div className="col-md-6 mb-3">
-                                    <label htmlFor="validationTooltip03">Email *</label>
-                                    <input type="text" onChange={e => setEmail(e.target.value)} value={email} className="form-control" id="validationTooltip03" required />
-                                </div>
-                                <div className="col-md-6 mb-3">
-                                    <label htmlFor="exampleFormControlSelect1">Role *</label>
-                                    <select onChange={roleOnChange} className="form-control" id="exampleFormControlSelect1">
-                                        <option defaultValue>--Select user role--</option>
-                                        {roleOptions}
-                                    </select>
-                                </div>
+                            <div className="modal-body">
+                                <p id="modal-message">{this.state.message}</p>
                             </div>
-                            <div className="form-row">
-                                <div className="col-md-6 mb-3">
-                                    <label htmlFor="validationTooltip04">Password{userActionState !== 'edit' ? ' *' : ''}</label>
-                                    <input type="text" onChange={e => setPassword(e.target.value)} className="form-control" id="validationTooltip04" />
-                                </div>
+                            <div className="modal-footer">
+                                <button type="button"
+                                    onClick={
+                                        this.state.closeRegisterPage ? () => this.props.toggleDisplay() : ''
+                                    }
+                                    className="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
-                            {(canViewAssignRolesList || selectedViewableRoles.length !== 0) && (
-                                <>
-                                    <br />
-                                    <div className="col-md-12 mb-12">
-                                        <label>Assign roles this user will view</label>
-                                        <DualListBox canFilter options={rolesOptions} selected={selectedViewableRoles} onChange={setSelectedViewableRoles} />
-                                    </div>
-                                </>
-                            )}
-                            <br />
-                            <div className="form-row">
-                                <div className="col-md-6 mb-6">
-                                    <div style={{ overflow: 'scroll', maxHeight: '300px', minHeight: '300px', paddingBottom: '6px', paddingRight: '16px' }}>
-                                        <p>Select Organisation Unit *</p>
-                                        <TreeView assignedOrgUnits={assignedOrgUnits} addCheckBox={true} clickHandler={selectOrgUnitHandler} orgUnits={orgUnits} />
-                                    </div>
-                                </div>
-                                <div id="selectedOrgs" className="col-md-6 mb-6">
-                                    <div style={{ overflow: 'scroll', maxHeight: '300px', minHeight: '300px', paddingBottom: '6px', paddingRight: '16px' }}>
-                                        <p>Selected Organisation Units *</p>
-                                        {selectedOrgsList}
-                                    </div>
-                                </div>
-                            </div>
-                            <button onClick={userActionState !== 'edit' ? saveUser : updateCurrentUser} style={{ marginTop: '10px' }} className="btn btn-primary mr-2">
-                                {userActionState === 'edit' ? 'Update User' : 'Save User'}
-                            </button>
-                            <button style={{ marginTop: '10px' }} onClick={resetAndClose} className="btn btn-secondary">Cancel</button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </React.Fragment>
+        );
+    }
 
-            <div className="modal fade" id="saveUserModal" tabIndex="-1" role="dialog" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title">Notice!</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div className="modal-body"><p id="modal-message">{message}</p></div>
-                        <div className="modal-footer">
-                            <button type="button" onClick={closeRegisterPage ? () => toggleDisplay() : undefined} className="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </React.Fragment>
-    );
 }
 
 export default Register;

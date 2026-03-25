@@ -1,37 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EchartsForReact from 'echarts-for-react';
 
-function LineGraph(props) {
-    const [option, setOption] = useState({
-        legend: {},
-        tooltip: {},
-        dataset: '',
-        xAxis: { type: 'category' },
-        yAxis: {},
-        series: ''
-    });
 
-    useEffect(() => {
-        setOption(prevOption => ({
-            ...prevOption,
-            dataset: props.dataset,
-            series: props.series
+class LineGraph extends React.Component {
+
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            option: {
+                legend: {},
+                tooltip: {},
+                dataset: '',
+                xAxis: { type: 'category' },
+                yAxis: {},
+                // Declare several bar series, each will be mapped
+                // to a column of dataset.source by default.
+                series: ''
+            }
+        }
+    }
+
+    componentDidMount() {
+        this.setState(prevState => ({
+            option: {
+                ...prevState.option,
+                dataset: this.props.dataset,
+                series: this.props.series
+            }
         }));
-    }, []);
+    }
 
-    useEffect(() => {
-        setOption(prevOption => ({
-            ...prevOption,
-            dataset: props.dataset1,
-            series: props.series
-        }));
-    }, [props.dataset, props.series]);
+    componentDidUpdate(prevProps) {
+        if (this.props.dataset != prevProps.dataset
+            ||
+            this.props.series != prevProps.series
+            ) {
+            this.setState(prevState => ({
+                option: {
+                    ...prevState.option,
+                    dataset: this.props.dataset1,
+                    series: this.props.series
+                }
+            }));
+        }
 
-    return (
-        <EchartsForReact
-            option={option}
-        />
-    );
+    }
+
+
+    render() {
+        return (
+
+            <EchartsForReact
+                option={this.state.option}
+            />
+
+        );
+    }
 }
 
 export default LineGraph;

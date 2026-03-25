@@ -3,9 +3,19 @@ import RTCard from '../../utils/RTCard'
 import StackedVertical from '../../utils/charts/StackedVertical'
 import { v4 as uuidv4 } from 'uuid';
 
-function Positive3TConcordanceRateColumnCharts(props) {
+class Positive3TConcordanceRateColumnCharts extends React.Component {
 
-    function prepareOverallLevelSiteData(dataObject) {
+    constructor(props) {
+        super(props);
+        this.state = {};
+        this.addGraphsToArray = this.addGraphsToArray.bind(this);
+        this.prepareOverallLevelSiteData = this.prepareOverallLevelSiteData.bind(this);
+    }
+
+    componentDidMount() {
+    }
+
+    prepareOverallLevelSiteData(dataObject) {
         // Mapping of keys in the JSON to Display Names
         let levelsMap = {
             // 'Positive_Concordance': 'Overall',
@@ -91,7 +101,7 @@ function Positive3TConcordanceRateColumnCharts(props) {
         });
 
         return (
-            <RTCard header={orgName} minHeight={props.minHeight}>
+            <RTCard header={orgName} minHeight={this.props.minHeight}>
                 <StackedVertical
                     yAxisGap={35}
                     yAxisName="Concordance %"
@@ -100,7 +110,7 @@ function Positive3TConcordanceRateColumnCharts(props) {
                     // color={['#58bc77', '#8c3070', '#ba5899', '#ea87ac', '#fc8452',  '#d19f71', '#8fa840']}
                     // 4 distinct colors for the 4 metrics
                     color={['#4caf50', '#2196f3', '#ff9800', '#9c27b0']}
-                    minHeight={props.minHeight}
+                    minHeight={this.props.minHeight}
                     legend={Object.values(levelsMap)}
                     category={category}
                     series={seriesData}
@@ -109,7 +119,7 @@ function Positive3TConcordanceRateColumnCharts(props) {
         );
     }
 
-    function addGraphsToArray(counter, row, columns, overLay, singChart) {
+    addGraphsToArray(counter, row, columns, overLay, singChart) {
         if (counter % 2 == 0) {
             overLay.push(row);
             columns = [];
@@ -124,61 +134,63 @@ function Positive3TConcordanceRateColumnCharts(props) {
         return [counter, row, columns, overLay];
     }
 
-    let overLay = [];
-    let counter = 0;
-    let columns = [];
-    let row = <div key={uuidv4()} className="row">
-        {columns}
-    </div>;
-    if (props.serverData) {
+    render() {
+        let overLay = [];
+        let counter = 0;
+        let columns = [];
+        let row = <div key={uuidv4()} className="row">
+            {columns}
+        </div>;
+        if (this.props.serverData) {
 
-        if (props.siteType != null && props.siteType.length != 0) {
-            props.serverData.map((dataObjectParent) => {
-                for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
-                    try {
-                        let singChart = prepareOverallLevelSiteData(orgUnitDataObject);
-                        [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
-                    } catch (err) {
-                        console.error(err);
+            if (this.props.siteType != null && this.props.siteType.length != 0) {
+                this.props.serverData.map((dataObjectParent) => {
+                    for (let [orgId, orgUnitDataObject] of Object.entries(dataObjectParent)) {
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(orgUnitDataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                });
+                if (columns.length > 0) {
+                    overLay.push(row);
+                }
+
+            } else {
+                // Handling for Single Site/Default view
+                let dataSrc = Array.isArray(this.props.serverData) ? this.props.serverData[0] : this.props.serverData;
+
+                // If serverData is an array of objects
+                if(Array.isArray(this.props.serverData) && this.props.serverData.length > 0){
+                     dataSrc = this.props.serverData[0];
+                }
+
+                if(dataSrc){
+                     for (let [key, dataObject] of Object.entries(dataSrc)) {
+                        try {
+                            let singChart = this.prepareOverallLevelSiteData(dataObject);
+                            [counter, row, columns, overLay] = this.addGraphsToArray(counter, row, columns, overLay, singChart);
+                        } catch (err) {
+                            console.error(err);
+                        }
                     }
                 }
-            });
-            if (columns.length > 0) {
-                overLay.push(row);
-            }
 
-        } else {
-            // Handling for Single Site/Default view
-            let dataSrc = Array.isArray(props.serverData) ? props.serverData[0] : props.serverData;
-
-            // If serverData is an array of objects
-            if(Array.isArray(props.serverData) && props.serverData.length > 0){
-                 dataSrc = props.serverData[0];
-            }
-
-            if(dataSrc){
-                 for (let [key, dataObject] of Object.entries(dataSrc)) {
-                    try {
-                        let singChart = prepareOverallLevelSiteData(dataObject);
-                        [counter, row, columns, overLay] = addGraphsToArray(counter, row, columns, overLay, singChart);
-                    } catch (err) {
-                        console.error(err);
-                    }
+                if (columns.length > 0) {
+                    overLay.push(row);
                 }
             }
 
-            if (columns.length > 0) {
-                overLay.push(row);
-            }
         }
 
+        return (
+            <React.Fragment>
+                {this.props.singleItem ? columns : overLay}
+            </React.Fragment>
+        );
     }
-
-    return (
-        <React.Fragment>
-            {props.singleItem ? columns : overLay}
-        </React.Fragment>
-    );
 }
 
 export default Positive3TConcordanceRateColumnCharts;

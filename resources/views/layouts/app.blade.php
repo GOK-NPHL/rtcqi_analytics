@@ -9,7 +9,8 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- Scripts -->
+    <script src="{{ asset('js/app.js') }}" defer></script>
 
     <link rel="shortcut icon" href="{{ asset('images/favicon/favicon.ico') }}">
     <!-- Fonts -->
@@ -17,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Styles -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
 </head>
