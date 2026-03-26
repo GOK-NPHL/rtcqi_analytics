@@ -1064,7 +1064,7 @@ class LogbookReport extends React.Component {
         let overallTableHeaders = <tr>
             {/* <th scope="col">#</th> */}
             <th scope="col">___</th>
-            {/* <th scope="col">Overall</th> */}
+            <th scope="col">Overall</th>
         </tr>;
         let overallTableDataExport = [];
 
@@ -1088,7 +1088,7 @@ class LogbookReport extends React.Component {
                     {/* <th scope="col">#</th> */}
                     <th scope="col">___</th>
                     <th scope="col">Programme</th>
-                    {/* <th scope="col">Overall</th> */}
+                    <th scope="col">Overall</th>
                 </tr>;
                 overallTableDataExport = [];
                 overallTableDataExport.push(['___', 'Programme', 'Overall'
@@ -1448,7 +1448,7 @@ class LogbookReport extends React.Component {
                             <div className="col-sm-12  col-xm-12 col-md-12 col-lg-12">
 
                                 <div className="row">
-                                    <div className="col-sm-6  col-xm-5 col-md-5">
+                                    <div className="col-sm-12  col-xm-8 col-md-8">
                                         <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
                                         <small className="text-muted">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
                                     </div>
@@ -1456,15 +1456,16 @@ class LogbookReport extends React.Component {
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={overallTableDataExport}> Csv</CSVLink>
                                         <span style={{ "color": "blue" }} onClick={() => this.exportOverallAgreementsRatesPDFData()}><i className="fas fa-download"></i><strong> PDF</strong></span>
                                     </div>
-
-                                    <table id="overallAgreementRates" className="table table-responsive">
-                                        <thead className="thead-dark">
-                                            {overallTableHeaders}
-                                        </thead>
-                                        <tbody>
-                                            {overallTableData}
-                                        </tbody>
-                                    </table>
+                                    <div className="col-sm-12">
+                                        <table id="overallAgreementRates" className="table">
+                                            <thead className="thead-dark">
+                                                {overallTableHeaders}
+                                            </thead>
+                                            <tbody>
+                                                {overallTableData}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                             {/* end overall agreement rates */}
