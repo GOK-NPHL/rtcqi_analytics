@@ -145,19 +145,38 @@ use Illuminate\Support\Facades\Gate;
                     Submissions
                 </div>
 
-                <!-- Nav Item - Pages Collapse Menu -->
-                <li class="nav-item">
-                    <?php if (Gate::allows('view_submissions')) { ?>
-                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
-                            <i class="fas fa-fw fa-list-alt"></i>
-                            <span>HTS Submissions</span>
-                        </a>
-                        <a class="nav-link collapsed" onclick="localStorage.setItem('page', 'SPISubmissions');" href="{{ route('spiSubmissions') }}">
-                            <i class="fas fa-fw fa-list-alt"></i>
-                            <span>SPI Submissions</span>
-                        </a>
-                    <?php } ?>
+                                <!-- Nav Item - Pages Collapse Menu -->
+                <li class="nav-item menu-head reports-head">
+                    <!-- change -->
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+                        <i class="fas fa-fw fa-folder"></i>
+                        <span>Submissions</span>
+                    </a>
+                    <!-- change -->
+                    <div id="collapseThree" class="collapse menu-body reports-body" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Reports:</h6>
+                            <?php if (Gate::allows('view_log_book_report')) { ?>
+                                <!-- change -->
+                                <a class="collapse-item" onclick="localStorage.setItem('page', 'Submissions');" href="{{ route('submissionsIndex') }}">
+                                    <i class="fas fa-fw fa-list-alt"></i>
+                                    <span>HTS Submissions</span>
+                                </a>
+                                <a class="collapse-item" onclick="localStorage.setItem('page', 'SPISubmissions');" href="{{ route('spiSubmissions') }}">
+                                    <i class="fas fa-fw fa-list-alt"></i>
+                                    <span>SPI Submissions</span>
+                                </a>
+                            <?php } ?>
+                            <?php if (Gate::allows('view_spi_report')) { ?>
+                                <a class="collapse-item" onclick="localStorage.setItem('page', 'devTimelineCheck');" href="{{ route('devTimelineCheck') }}">
+                                    <i class="fas fa-fw fa-check"></i>
+                                    <span>SPI Timeline Check</span>
+                                </a>
+                            <?php } ?>
+                        </div>
+                    </div>
                 </li>
+
             <?php } ?>
 
             <!--Certificates section (certification_dashboard, cert_approvals_page)  -->
