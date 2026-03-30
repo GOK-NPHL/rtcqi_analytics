@@ -124,6 +124,7 @@ class TimelineCheck extends React.Component {
                                             <th>followup</th>
                                             <th>otherFollowup</th>
                                             <th>Match?</th>
+                                            <th>UUID</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -144,6 +145,7 @@ class TimelineCheck extends React.Component {
                                                         : <span className="text-danger font-weight-bold">✗</span>
                                                     }
                                                 </td>
+                                                <td><code>{row.uuid || '—'}</code></td>
                                             </tr>
                                         ))}
                                     </tbody>

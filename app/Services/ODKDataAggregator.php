@@ -242,7 +242,9 @@ class ODKDataAggregator
             // Sort by start date ascending (earliest visit first)
             usort($group, fn($a, $b) => $a['start'] <=> $b['start']);
             foreach ($group as $position => $entry) {
-                $records[$entry['index']]['_timeline_stage'] = min($position, $maxStage);
+                $stage = min($position, $maxStage);
+                $records[$entry['index']]['_timeline_stage'] = $stage;
+                $records[$entry['index']]['computed_stage'] = $this->timeLines[$stage];
             }
         }
 
@@ -289,6 +291,7 @@ class ODKDataAggregator
                 'reported_baselinefollowup' => $bf,
                 'reported_followup'         => $record['followup'] ?? '',
                 'reported_otherFollowup'    => $record['otherFollowup'] ?? '',
+                'uuid'    => $record['KEY'] ?? '',
                 'match'                     => $computedStage === $reportedStage,
             ];
         }
