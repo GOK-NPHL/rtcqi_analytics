@@ -31,6 +31,9 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+// Dev / bench-check tools
+Route::get('/dev/timeline_check', 'DevController@timelineCheck')->name('devTimelineCheck');
+
 Route::get('/reports/pt', 'PTReportController@index')->name('ptIndex');
 Route::get('/reports/logbook', 'LogbookReportController@index')->name('logbookIndex');
 Route::get('/reports/spi', 'SpiReportController@index')->name('spiIndex');

@@ -223,7 +223,7 @@ class ODKDataAggregator
     }
 
 
-    private function computeTimelineStages(array $records): array
+    public function computeTimelineStages(array $records): array
     {
         // Group record indices by unique site key, collecting start timestamp
         $siteGroups = [];
@@ -247,6 +247,61 @@ class ODKDataAggregator
         }
 
         return $records;
+    }
+
+    public function getFacilityTimeline(string $mfl): array
+    {
+        $national = OdkOrgunit::where('level', 1)->first();
+        if (!$national) return [];
+
+        $raw = $this->getFormRecords($national);
+        $records = is_array($raw) ? $raw : iterator_to_array($raw, true);
+        $records = $this->computeTimelineStages($records);
+
+        $result = [];
+        foreach ($records as $record) {
+            $recordMfl = explode('_', $record['mysites_facility'] ?? '')[0];
+            if ($recordMfl !== $mfl) continue;
+
+            $stageIndex = $record['_timeline_stage'] ?? null;
+            $computedStage = $stageIndex !== null ? ($this->timeLines[$stageIndex] ?? 'other') : null;
+
+            // Resolve reported stage to a single comparable value
+            $bf = $record['baselinefollowup'] ?? '';
+            if ($bf === 'Baseline') {
+                $reportedStage = 'baseline';
+            } elseif ($bf === 'followup') {
+                $reportedStage = $record['followup'] ?? 'follow1';
+            } elseif ($bf === 'other') {
+                $reportedStage = 'other';
+            } else {
+                $reportedStage = $bf;
+            }
+
+            $result[] = [
+                'start'                     => $record['start'] ?? '',
+                'mysites_county'            => $record['mysites_county'] ?? '',
+                'mysites_subcounty'         => $record['mysites_subcounty'] ?? '',
+                'mysites_facility'          => $record['mysites_facility'] ?? '',
+                'mysites'                   => $record['mysites'] ?? '',
+                'computed_stage'            => $computedStage,
+                'reported_stage'            => $reportedStage,
+                'reported_baselinefollowup' => $bf,
+                'reported_followup'         => $record['followup'] ?? '',
+                'reported_otherFollowup'    => $record['otherFollowup'] ?? '',
+                'match'                     => $computedStage === $reportedStage,
+            ];
+        }
+
+        // Sort by site then date for display
+        usort($result, function ($a, $b) {
+            $siteA = $a['mysites_facility'] . '|' . $a['mysites'];
+            $siteB = $b['mysites_facility'] . '|' . $b['mysites'];
+            if ($siteA !== $siteB) return strcmp($siteA, $siteB);
+            return strcmp($a['start'], $b['start']);
+        });
+
+        return $result;
     }
 
     private function sumValues($record, $scores, $rowCounters, $section)
