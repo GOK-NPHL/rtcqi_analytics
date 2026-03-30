@@ -223,25 +223,100 @@ class ODKDataAggregator
     }
 
 
+    public function computeTimelineStages(array $records): array
+    {
+        // Group record indices by unique site key, collecting start timestamp
+        $siteGroups = [];
+        foreach ($records as $i => $record) {
+            $mfl = explode('_', $record['mysites_facility'] ?? '')[0];
+            $siteKey = strtolower($record['mysites_county'] ?? '') . '|'
+                . strtolower($record['mysites_subcounty'] ?? '') . '|'
+                . $mfl . '|'
+                . strtolower($record['mysites'] ?? '');
+            $siteGroups[$siteKey][] = ['index' => $i, 'start' => strtotime($record['start'] ?? '')];
+        }
+
+        $maxStage = count($this->timeLines) - 1;
+
+        foreach ($siteGroups as &$group) {
+            // Sort by start date ascending (earliest visit first)
+            usort($group, fn($a, $b) => $a['start'] <=> $b['start']);
+            foreach ($group as $position => $entry) {
+                $records[$entry['index']]['_timeline_stage'] = min($position, $maxStage);
+            }
+        }
+
+        return $records;
+    }
+
+    public function getFacilityTimeline(string $mfl): array
+    {
+        $national = OdkOrgunit::where('level', 1)->first();
+        if (!$national) return [];
+
+        $raw = $this->getFormRecords($national);
+        $records = is_array($raw) ? $raw : iterator_to_array($raw, true);
+        $records = $this->computeTimelineStages($records);
+
+        $result = [];
+        foreach ($records as $record) {
+            $recordMfl = explode('_', $record['mysites_facility'] ?? '')[0];
+            if ($recordMfl !== $mfl) continue;
+
+            $stageIndex = $record['_timeline_stage'] ?? null;
+            $computedStage = $stageIndex !== null ? ($this->timeLines[$stageIndex] ?? 'other') : null;
+
+            // Resolve reported stage to a single comparable value
+            $bf = $record['baselinefollowup'] ?? '';
+            if ($bf === 'Baseline') {
+                $reportedStage = 'baseline';
+            } elseif ($bf === 'followup') {
+                $reportedStage = $record['followup'] ?? 'follow1';
+            } elseif ($bf === 'other') {
+                $reportedStage = 'other';
+            } else {
+                $reportedStage = $bf;
+            }
+
+            $result[] = [
+                'start'                     => $record['start'] ?? '',
+                'mysites_county'            => $record['mysites_county'] ?? '',
+                'mysites_subcounty'         => $record['mysites_subcounty'] ?? '',
+                'mysites_facility'          => $record['mysites_facility'] ?? '',
+                'mysites'                   => $record['mysites'] ?? '',
+                'computed_stage'            => $computedStage,
+                'reported_stage'            => $reportedStage,
+                'reported_baselinefollowup' => $bf,
+                'reported_followup'         => $record['followup'] ?? '',
+                'reported_otherFollowup'    => $record['otherFollowup'] ?? '',
+                'match'                     => $computedStage === $reportedStage,
+            ];
+        }
+
+        // Sort by site then date for display
+        usort($result, function ($a, $b) {
+            $siteA = $a['mysites_facility'] . '|' . $a['mysites'];
+            $siteB = $b['mysites_facility'] . '|' . $b['mysites'];
+            if ($siteA !== $siteB) return strcmp($siteA, $siteB);
+            return strcmp($a['start'], $b['start']);
+        });
+
+        return $result;
+    }
+
     private function sumValues($record, $scores, $rowCounters, $section)
     {
         try {
-            if ($record["baselinefollowup"] == 'Baseline') {
-                if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                    $scores[$this->timeLines[0]] += $this->callFunctionBysecition($section, $record);
-                    $rowCounters[$this->timeLines[0]] += 1;
-                }
-            } else if ($record["baselinefollowup"] == 'followup') {
-
-                $followupType = $record["followup"] ?? "follow1";
-                for ($x = 0; $x < count($this->timeLines); $x++) {
-                    if (($followupType == $this->timeLines[$x]) || ($followupType == "other" && !empty($record["otherFollowup"]) && "follow" . $record["otherFollowup"] == $this->timeLines[$x])) {
-                        if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                            $rowCounters[$this->timeLines[$x]] += 1;
-                            $scores[$this->timeLines[$x]] += $this->callFunctionBysecition($section, $record);
-                        }
-                    }
-                }
+            if (!isset($record['_timeline_stage'])) {
+                return [$scores, $rowCounters];
+            }
+            $stageName = $this->timeLines[$record['_timeline_stage']] ?? null;
+            if ($stageName === null) {
+                return [$scores, $rowCounters];
+            }
+            if (in_array($stageName, $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+                $scores[$stageName] += $this->callFunctionBysecition($section, $record);
+                $rowCounters[$stageName] += 1;
             }
             return [$scores, $rowCounters];
         } catch (Exception $ex) {
@@ -376,6 +451,7 @@ class ODKDataAggregator
             }
             // Log::info("records === " . json_encode($records));
             if (isset($records) && $records != null && count($records) > 0) {
+                $records = $this->computeTimelineStages(iterator_to_array($records, true));
                 foreach ($records as $record) {
                     // Log::info("Start record traversal =========>>");
                     $shouldProcessRecord = true;
@@ -1257,50 +1333,23 @@ class ODKDataAggregator
 
     private function aggregateOverallSitesLevel($record, $overallSites)
     {
-
-        $val = $record["Section-sec91percentage"];
-        if ($record["baselinefollowup"] == 'Baseline') {
-            if (in_array($this->timeLines[0], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                $overallSites[$this->timeLines[0]]["counter"] = $overallSites[$this->timeLines[0]]["counter"] + 1;
-                $overallSites[$this->timeLines[0]]["sites"][] = [ //$val;
-                    "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
-                    "mfl" => explode("_", $record["mysites_facility"])[0],
-                    "site" => $record["mysites"]
-                ];
-                $overallSites = $this->summTimelineData($this->timeLines[0], $val, $overallSites);
-            }
-        } else if ($record["baselinefollowup"] == 'followup') {
-            $followupType = $record["followup"] ?? "follow1";
-            for ($x = 0; $x < count($this->timeLines); $x++) {
-                if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                    if ($followupType == $this->timeLines[$x]) {
-                        $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
-                        $overallSites[$this->timeLines[$x]]["sites"][] = [ //$val;
-                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
-                            "mfl" => explode("_", $record["mysites_facility"])[0],
-                            "site" => $record["mysites"]
-                        ];
-                        $overallSites = $this->summTimelineData($this->timeLines[$x], $val, $overallSites);
-                    }
-                }
-            }
-        } else if ($record["baselinefollowup"] == 'other') {
-            $followupType = $record["followup"] ?? "other";
-            for ($x = 0; $x < count($this->timeLines); $x++) {
-                if (in_array($this->timeLines[$x], $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
-                    if ($followupType == $this->timeLines[$x]) {
-                        $overallSites[$this->timeLines[$x]]["counter"] = $overallSites[$this->timeLines[$x]]["counter"] + 1;
-                        $overallSites[$this->timeLines[$x]]["sites"][] = [ //$val;
-                            "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
-                            "mfl" => explode("_", $record["mysites_facility"])[0],
-                            "site" => $record["mysites"]
-                        ];
-                        $overallSites = $this->summTimelineData($this->timeLines[$x], $val, $overallSites);
-                    }
-                }
-            }
+        if (!isset($record['_timeline_stage'])) {
+            return $overallSites;
         }
-
+        $stageName = $this->timeLines[$record['_timeline_stage']] ?? null;
+        if ($stageName === null) {
+            return $overallSites;
+        }
+        if (in_array($stageName, $this->userOrgTimelineParams) || empty($this->userOrgTimelineParams)) {
+            $val = $record["Section-sec91percentage"];
+            $overallSites[$stageName]["counter"] = $overallSites[$stageName]["counter"] + 1;
+            $overallSites[$stageName]["sites"][] = [
+                "facility" => join(" ", array_slice(explode("_", $record["mysites_facility"]), 1)),
+                "mfl" => explode("_", $record["mysites_facility"])[0],
+                "site" => $record["mysites"]
+            ];
+            $overallSites = $this->summTimelineData($stageName, $val, $overallSites);
+        }
         return $overallSites;
     }
 

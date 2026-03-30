@@ -21,6 +21,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/odk_data', 'SpiReportController@getData');
+
+// Dev / bench-check tools
+Route::post('/dev/facility_timeline', 'DevController@getFacilityTimeline');
 // Route::post('/odk_hts_data', 'LogbookReportController@getData');
 Route::post('/odk_hts_data', 'LogbookReportController@getDwhData');
 // Route::get('/dwh_hts_data_raw', 'LogbookReportController@getDwhDataRaw');

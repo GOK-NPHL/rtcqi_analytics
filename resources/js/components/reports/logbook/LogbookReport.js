@@ -14,6 +14,7 @@ import PositiveConcordanceRateColumnCharts from './PositiveConcordanceRateColumn
 import Positive3TConcordanceRateColumnCharts from './Positive3TConcordanceRateColumnCharts';
 import SimpleRateColumnChart from './SimpleRateColumnChart';
 import EHTSDistributionChart from './EHTSDistributionChart';
+import TestKitDistributionChart from './TestKitDistributionChart';
 
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
@@ -44,6 +45,7 @@ class LogbookReport extends React.Component {
                 // 'Algorithm Followed rate',
                 // 'Sites using eHTS register',
                 'eHTS Distribution',
+                'Test Kit Distribution',
             ],
             indicatorIndexToDisplay: 0,
             isLoading: false,
@@ -1414,6 +1416,7 @@ class LogbookReport extends React.Component {
         let invalidRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="invalid_rates" chartLabel="Invalid Rate %" yAxisName="% invalid rate" isDirect={true} color={['#ee6666']} />
         let inconclusiveRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="inconclusive_rates" chartLabel="Inconclusive Rate %" yAxisName="% inconclusive rate" isDirect={true} color={['#fc8452']} />
         let ehtsDistributionChart = <EHTSDistributionChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
+        let testKitDistributionChart = <TestKitDistributionChart minHeight={400} serverData={this.state.odkData} siteType={this.state.siteType} />
 
         // Data Tables for all the indicators
         let tablesTab = <div className="col-sm-12  col-xm-12 col-md-12">
@@ -1762,6 +1765,98 @@ class LogbookReport extends React.Component {
                                 {ehtsDistributionChart}
                             </div>
                             {/* End hts type  rate  */}
+                        </React.Fragment> : ''
+                }
+
+                {
+                    this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Test Kit Distribution' ?
+                        <React.Fragment>
+                            {/* Begin Test Kit Distribution */}
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <p style={{ fontWeight: "900" }}>Test Kit Distribution</p>
+                                        <small className="text-muted">Distribution of test kits used across the three HIV testing rounds (T1, T2, T3). Shows proportion of each kit type (Trinscreen, Standard Q, Dual Kit, First Response, Bioline, Other) per test.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>Test Kit Distribution Charts:</p>
+                                {testKitDistributionChart}
+                            </div>
+                            <div className="col-sm-12 col-xm-12 col-md-12 col-lg-12 mt-3">
+                                <p style={{ fontWeight: "900" }}>Test Kit Summary Tables:</p>
+                                {(() => {
+                                    const kitTypes = ['trinscreen', 'standardq', 'dualkit', 'firstresponse', 'bioline', 'other'];
+                                    const kitLabels = { trinscreen: 'Trinscreen', standardq: 'Standard Q', dualkit: 'Dual Kit', firstresponse: 'First Response', bioline: 'Bioline', other: 'Other' };
+                                    const totals = { kit1: {}, kit2: {}, kit3: {} };
+                                    kitTypes.forEach(kt => { totals.kit1[kt] = 0; totals.kit2[kt] = 0; totals.kit3[kt] = 0; });
+
+                                    if (this.state.odkData && this.state.odkData.length) {
+                                        this.state.odkData.forEach(displayData => {
+                                            Object.values(displayData).forEach(payload => {
+                                                try {
+                                                    Object.values(payload.kit_distribution || {}).forEach(monthData => {
+                                                        kitTypes.forEach(kt => {
+                                                            totals.kit1[kt] += monthData[`kit1_${kt}`] || 0;
+                                                            totals.kit2[kt] += monthData[`kit2_${kt}`] || 0;
+                                                            totals.kit3[kt] += monthData[`kit3_${kt}`] || 0;
+                                                        });
+                                                    });
+                                                } catch (e) {}
+                                            });
+                                        });
+                                    }
+
+                                    const csvData = [['Kit Type', 'T1 Count', 'T2 Count', 'T3 Count']];
+                                    kitTypes.forEach(kt => {
+                                        csvData.push([kitLabels[kt], totals.kit1[kt], totals.kit2[kt], totals.kit3[kt]]);
+                                    });
+
+                                    return (
+                                        <div className="row">
+                                            <div className="col-sm-3">
+                                                <span style={{ color: 'blue' }}><i className="fas fa-download"></i></span>
+                                                <CSVLink data={csvData}> Csv</CSVLink>
+                                            </div>
+                                            <div className="col-sm-12 mt-2">
+                                                <div className="row">
+                                                    {[
+                                                        { label: 'Test 1 (T1) Kit Totals', kitKey: 'kit1' },
+                                                        { label: 'Test 2 (T2) Kit Totals', kitKey: 'kit2' },
+                                                        { label: 'Test 3 (T3) Kit Totals', kitKey: 'kit3' },
+                                                    ].map(({ label, kitKey }) => (
+                                                        <div key={label} className="col-sm-12 col-md-4">
+                                                            <p style={{ fontWeight: '700', marginBottom: '4px' }}>{label}</p>
+                                                            <table className="table table-sm table-bordered table-striped">
+                                                                <thead className="thead-dark">
+                                                                    <tr>
+                                                                        <th>Kit Type</th>
+                                                                        <th>Count</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {kitTypes.map(kt => (
+                                                                        <tr key={kt}>
+                                                                            <td>{kitLabels[kt]}</td>
+                                                                            <td>{Intl.NumberFormat().format(totals[kitKey][kt])}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                    <tr style={{ fontWeight: 'bold', backgroundColor: '#f8f9fc' }}>
+                                                                        <td>Total</td>
+                                                                        <td>{Intl.NumberFormat().format(kitTypes.reduce((sum, kt) => sum + totals[kitKey][kt], 0))}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                            {/* End Test Kit Distribution */}
                         </React.Fragment> : ''
                 }
             </div>
