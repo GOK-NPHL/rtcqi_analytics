@@ -296,22 +296,17 @@ class SubmissionsReport extends React.Component {
                                                     isDownloading: true
                                                 })
                                                 if (this.state.countyDl) {
-                                                    FetchHTSSubmissions([this.state.countyDl], [], "", "", 1, 5000).then(returnedData => {
+                                                    FetchHTSSubmissions([this.state.countyDl.org_unit_id], [], '', '', 1, 5000).then(returnedData => {
                                                         if (returnedData.status == 200) {
-                                                            // console.log("Data2DL:: ", Object.keys(returnedData?.data?.result[0]));
                                                             let results = returnedData?.data?.result;
-                                                            if(results && results.length>0) exportToExcel(this.state.odkData, (this.state.countyDl?.odk_unit_name || "RTCQI")+' submissions ' + new Date().toLocaleString())
-                                                        }else{
+                                                            if (results && results.length > 0) exportToExcel(results, (this.state.countyDl?.odk_unit_name || "RTCQI") + ' HTS submissions ' + new Date().toLocaleString())
+                                                        } else {
                                                             console.log("Error:: ", returnedData);
                                                         }
-                                                        this.setState({
-                                                            isDownloading: false
-                                                        })
+                                                        this.setState({ isDownloading: false })
                                                     }).catch(err => {
                                                         console.log("Error:: ", err);
-                                                        this.setState({
-                                                            isDownloading: false
-                                                        })
+                                                        this.setState({ isDownloading: false })
                                                     })
                                                 }
                                             }}>
@@ -409,9 +404,8 @@ class SubmissionsReport extends React.Component {
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
-                                    // FetchHTSSubmissions()
-                                    console.log('fetching page', page)
-                                    this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
+                                    this.fetchOdkDataServer(
+                                        this.state.orgUnitDataIds,
                                         this.state.siteType,
                                         this.state.startDate,
                                         this.state.endDate,

@@ -237,7 +237,7 @@ class SPISubmissions extends React.Component {
                         <button
                             onClick={() => {
                                 console.log('Filter')
-                                this.onFilter();
+                                this.onFilterButtonClickEvent();
                             }}
                             type="button"
                             style={{ "display": "inlineBlock", marginRight: "7px" }}
@@ -322,22 +322,17 @@ class SPISubmissions extends React.Component {
                                                     isDownloading: true
                                                 })
                                                 if (this.state.countyDl) {
-                                                    FetchSPISubmissions([this.state.countyDl], [], "", "", 1, 5000).then(returnedData => {
+                                                    FetchSPISubmissions([this.state.countyDl.org_unit_id], [], [], [], '', '', 1, 5000).then(returnedData => {
                                                         if (returnedData.status == 200) {
-                                                            // console.log("Data2DL:: ", Object.keys(returnedData?.data?.result[0]));
                                                             let results = returnedData?.data?.result;
-                                                            if (results && results.length > 0) exportToExcel(this.state.odkData, (this.state.countyDl?.odk_unit_name || "RTCQI") + ' submissions ' + new Date().toLocaleString())
+                                                            if (results && results.length > 0) exportToExcel(results, (this.state.countyDl?.odk_unit_name || "RTCQI") + ' SPI submissions ' + new Date().toLocaleString())
                                                         } else {
                                                             console.log("Error:: ", returnedData);
                                                         }
-                                                        this.setState({
-                                                            isDownloading: false
-                                                        })
+                                                        this.setState({ isDownloading: false })
                                                     }).catch(err => {
                                                         console.log("Error:: ", err);
-                                                        this.setState({
-                                                            isDownloading: false
-                                                        })
+                                                        this.setState({ isDownloading: false })
                                                     })
                                                 }
                                             }}>
@@ -377,10 +372,11 @@ class SPISubmissions extends React.Component {
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
-                                    // FetchSPISubmissions()
-                                    console.log('fetching page', page)
-                                    this.fetchOdkDataServer(this.state.orgUnitDataIds,
+                                    this.fetchOdkDataServer(
+                                        this.state.orgUnitDataIds,
+                                        this.state.orgUnitTimeline,
                                         this.state.siteType,
+                                        this.state.partners,
                                         this.state.startDate,
                                         this.state.endDate,
                                         page,
@@ -429,10 +425,11 @@ class SPISubmissions extends React.Component {
                                 pageRangeDisplayed={5}
                                 onChange={(page) => {
                                     this.setState({ page: page })
-                                    // FetchSPISubmissions()
-                                    console.log('fetching page', page)
-                                    this.fetchOdkDataServer(returnedData.payload[0].slice(0, 1),
+                                    this.fetchOdkDataServer(
+                                        this.state.orgUnitDataIds,
+                                        this.state.orgUnitTimeline,
                                         this.state.siteType,
+                                        this.state.partners,
                                         this.state.startDate,
                                         this.state.endDate,
                                         page,
