@@ -150,26 +150,31 @@ class LogbookReport extends React.Component {
                                 "Total Final Positive",
                                 "Total Final Negative",
                                 "Total Final No_Result",
-
                                 "Total Final Inconclusive",
+
                                 "Test Kit 1 Trinscreen",
                                 "Test Kit 1 Standard Q",
+                                "Test Kit 1 Determine",
                                 "Test Kit 1 Dual Kit",
-                                "Test Kit 1 First Response",
-                                "Test Kit 1 Bioline Dio",
-                                "Test Kit 1 Other",
+                                // "Test Kit 1 First Response",
+                                "Test Kit 1 Bioline Duo",
+                                "Test Kit 1 Other (+empty)",
+
+                                "Test Kit 2 Onestep",
                                 "Test Kit 2 Trinscreen",
-                                "Test Kit 2 Standard Q",
-                                "Test Kit 2 Dual Kit",
                                 "Test Kit 2 First Response",
-                                "Test Kit 2 Bioline Duo",
-                                "Test Kit 2 Other",
-                                "Test Kit 3 Trinscreen",
-                                "Test Kit 3 Standard Q",
-                                "Test Kit 3 Dual Kit",
+                                // "Test Kit 2 Standard Q",
+                                // "Test Kit 2 Dual Kit",
+                                // "Test Kit 2 Bioline Duo",
+                                "Test Kit 2 Other (+empty)",
+
+                                // "Test Kit 3 Trinscreen",
+                                // "Test Kit 3 Standard Q",
+                                // "Test Kit 3 Dual Kit",
                                 "Test Kit 3 First Response",
-                                "Test Kit 3 Bioline Duo",
-                                "Test Kit 3 Other"
+                                // "Test Kit 3 Bioline Duo",
+                                // "Test Kit 3 Onestep",
+                                "Test Kit 3 Other (+empty)"
                             ];
                             const data = returnedData.data.map((item) => {
                                 return [
@@ -196,31 +201,45 @@ class LogbookReport extends React.Component {
                                     Intl.NumberFormat().format(item?.final_positive),
                                     Intl.NumberFormat().format(item?.final_negative),
                                     Intl.NumberFormat().format(item?.final_null),
-
                                     Intl.NumberFormat().format(item?.final_inconclusive),
+
                                     Intl.NumberFormat().format(item?.kit1_trinscreen),
                                     Intl.NumberFormat().format(item?.kit1_standardq),
+                                    Intl.NumberFormat().format(item?.kit1_determine),
                                     Intl.NumberFormat().format(item?.kit1_dualkit),
-                                    Intl.NumberFormat().format(item?.kit1_firstresponse),
+                                    // Intl.NumberFormat().format(item?.kit1_firstresponse),
                                     Intl.NumberFormat().format(item?.kit1_bioline),
                                     Intl.NumberFormat().format(item?.kit1_other),
+
+                                    Intl.NumberFormat().format(item?.kit2_onestep),
                                     Intl.NumberFormat().format(item?.kit2_trinscreen),
-                                    Intl.NumberFormat().format(item?.kit2_standardq),
-                                    Intl.NumberFormat().format(item?.kit2_dualkit),
                                     Intl.NumberFormat().format(item?.kit2_firstresponse),
-                                    Intl.NumberFormat().format(item?.kit2_bioline),
+                                    // Intl.NumberFormat().format(item?.kit2_standardq),
+                                    // Intl.NumberFormat().format(item?.kit2_dualkit),
+                                    // Intl.NumberFormat().format(item?.kit2_bioline),
                                     Intl.NumberFormat().format(item?.kit2_other),
-                                    Intl.NumberFormat().format(item?.kit3_trinscreen),
-                                    Intl.NumberFormat().format(item?.kit3_standardq),
-                                    Intl.NumberFormat().format(item?.kit3_dualkit),
+
+                                    // Intl.NumberFormat().format(item?.kit3_trinscreen),
+                                    // Intl.NumberFormat().format(item?.kit3_standardq),
+                                    // Intl.NumberFormat().format(item?.kit3_dualkit),
                                     Intl.NumberFormat().format(item?.kit3_firstresponse),
-                                    Intl.NumberFormat().format(item?.kit3_bioline),
+                                    // Intl.NumberFormat().format(item?.kit3_bioline),
+                                    // Intl.NumberFormat().format(item?.kit3_onestep),
                                     Intl.NumberFormat().format(item?.kit3_other),
                                 ];
                             }) || [];
+                            // Transpose: metrics become rows, each org+month becomes a column
+                            const transposedCols = [
+                                "Metric",
+                                ...data.map(row => `${row[0]} — ${row[1]}`),
+                            ];
+                            const transposedData = cols.map((colName, i) => [
+                                colName,
+                                ...data.map(row => row[i]),
+                            ]);
+
                             const datatable = new DataTable('#linelist-table', {
-                                columns: cols,
-                                // data: data
+                                columns: transposedCols,
                             });
                             setTimeout(() => {
                                 document.querySelector('.graphstab').classList.remove('active');
@@ -228,7 +247,7 @@ class LogbookReport extends React.Component {
                                 document.querySelector('#tablesTabBtn').classList.remove('active');
                                 document.querySelector('#linelistTabBtn').classList.add('active');
                                 datatable.style.setStyle('.data-table-cell', {color: '#000', backgroundColor: '#fff'});
-                                datatable.refresh(data);
+                                datatable.refresh(transposedData);
                             }, 100);
                         } else {
                             this.setState({ isLoading: false, });
@@ -2001,61 +2020,11 @@ class LogbookReport extends React.Component {
                                 <h4>Linelist</h4>
                                 <div className="row">
                                     <div className="col-md-12">
+                                        {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood', padding: '1em'}}>
+                                            {JSON.stringify(this.state.linelistData, null, 2)}
+                                        </pre> */}
                                         <div id="linelist-table">
-                                            {/* <pre style={{whiteSpace: 'pre-wrap', backgroundColor: 'burlywood', padding: '1em'}}>
-                                                {JSON.stringify(this.state.linelistData, null, 2)}
-                                            </pre> */}
                                         </div>
-                                        {/*
-                                            <div className="table-responsive">
-                                                <table className="table table-striped">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Org unit</th>
-                                                        <th>Test Month</th>
-
-                                                        <th># Total Tests</th>
-
-                                                        <th># Total T1 Reactive</th>
-                                                        <th># Total T1 Non-reactive</th>
-                                                        <th># Total T1 Invalid/Empty</th>
-
-                                                        <th># Total T2 Reactive</th>
-                                                        <th># Total T2 Non-reactive</th>
-                                                        <th># Total T2 Invalid/Empty</th>
-
-                                                        <th># Total T3 Reactive</th>
-                                                        <th># Total T3 Non-reactive</th>
-                                                        <th># Total T3 Invalid/Empty</th>
-
-                                                        <th># Total Final Positive</th>
-                                                        <th># Total Final Negative</th>
-
-                                                        <th># Test Kit 1 Trinscreen</th>
-                                                        <th># Test Kit 1 Standard Q</th>
-                                                        <th># Test Kit 1 Dual Kit</th>
-                                                        <th># Test Kit 1 First Response</th>
-                                                        <th># Test Kit 1 Bioline Dio</th>
-                                                        <th># Test Kit 1 Empty/Null</th>
-
-                                                        <th># Test Kit 2 Trinscreen</th>
-                                                        <th># Test Kit 2 Standard Q</th>
-                                                        <th># Test Kit 2 Dual Kit</th>
-                                                        <th># Test Kit 2 First Response</th>
-                                                        <th># Test Kit 2 Bioline Dio</th>
-                                                        <th># Test Kit 2 Empty/Null</th>
-
-                                                        <th># Test Kit 3 Trinscreen</th>
-                                                        <th># Test Kit 3 Standard Q</th>
-                                                        <th># Test Kit 3 Dual Kit</th>
-                                                        <th># Test Kit 3 First Response</th>
-                                                        <th># Test Kit 3 Bioline Dio</th>
-                                                        <th># Test Kit 3 Empty/Null</th>
-                                                    </tr>
-                                                    </thead>
-                                                </table>
-                                            </div>
-                                        */}
                                     </div>
                                 </div>
                             </div>
