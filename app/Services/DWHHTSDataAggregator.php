@@ -194,23 +194,30 @@ class DWHHTSDataAggregator
             'final_negative'    => 0,
             'final_null'    => 0,
             'final_inconclusive' => 0,
+
             'kit1_trinscreen'    => 0,
             'kit1_standardq'     => 0,
+            'kit1_determine'     => 0,
             'kit1_dualkit'       => 0,
             'kit1_firstresponse' => 0,
             'kit1_bioline'       => 0,
+            'kit1_onestep'       => 0,
             'kit1_other'         => 0,
+
+            'kit2_onestep'    => 0,
             'kit2_trinscreen'    => 0,
             'kit2_standardq'     => 0,
             'kit2_dualkit'       => 0,
             'kit2_firstresponse' => 0,
             'kit2_bioline'       => 0,
             'kit2_other'         => 0,
+
             'kit3_trinscreen'    => 0,
             'kit3_standardq'     => 0,
             'kit3_dualkit'       => 0,
             'kit3_firstresponse' => 0,
             'kit3_bioline'       => 0,
+            'kit3_onestep'         => 0,
             'kit3_other'         => 0,
             '_sites'             => [],
         ];
@@ -245,30 +252,6 @@ class DWHHTSDataAggregator
         $summary['t3_null'] += ($r3 === 'null' || $r3 === '' || $r3 === 'empty') ? 1 : 0;
         $summary['final_null'] += ($final === 'null' || $final === '' || $final == 'empty') ? 1 : 0;
 
-        ////
-        $summary['kit1_trinscreen']    += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'trinscreen')) ? 1 : 0;
-        $summary['kit1_standardq']     += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard')) ? 1 : 0;
-        $summary['kit1_dualkit']       += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'dual')) ? 1 : 0;
-        $summary['kit1_firstresponse'] += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'first')) ? 1 : 0;
-        $summary['kit1_bioline']       += (str_contains(strtolower($record['test_kit_name1'] ?? ''), 'bioline')) ? 1 : 0;
-        $summary['kit1_other']         += !$record['test_kit_name1'] || (!str_contains(strtolower($record['test_kit_name1'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name1'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name1'] ?? ''))) ? 1 : 0;
-
-        $summary['kit2_trinscreen']    += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'trinscreen')) ? 1 : 0;
-        $summary['kit2_standardq']     += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard')) ? 1 : 0;
-        $summary['kit2_dualkit']       += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'dual')) ? 1 : 0;
-        $summary['kit2_firstresponse'] += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'first')) ? 1 : 0;
-        $summary['kit2_bioline']       += (str_contains(strtolower($record['test_kit_name2'] ?? ''), 'bioline')) ? 1 : 0;
-        $summary['kit2_other']         += !$record['test_kit_name2'] || (!str_contains(strtolower($record['test_kit_name2'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name2'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name2'] ?? ''))) ? 1 : 0;
-
-        $summary['kit3_trinscreen']    += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'trinscreen')) ? 1 : 0;
-        $summary['kit3_standardq']     += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard') || str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard')) ? 1 : 0;
-        $summary['kit3_dualkit']       += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'dual')) ? 1 : 0;
-        $summary['kit3_firstresponse'] += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'first')) ? 1 : 0;
-        $summary['kit3_bioline']       += (str_contains(strtolower($record['test_kit_name3'] ?? ''), 'bioline')) ? 1 : 0;
-        $summary['kit3_other']         += !$record['test_kit_name3'] || (!str_contains(strtolower($record['test_kit_name3'] ?? ''), 'trinscreen') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'standard') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'dual') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'first') && !str_contains(strtolower($record['test_kit_name3'] ?? ''), 'bioline') && !empty(trim($record['test_kit_name3'] ?? ''))) ? 1 : 0;
-        ////
-
-
         $this->accumulateKitCount($summary, 'kit1_', $record['test_kit_name1'] ?? '');
         $this->accumulateKitCount($summary, 'kit2_', $record['test_kit_name2'] ?? '');
         $this->accumulateKitCount($summary, 'kit3_', $record['test_kit_name3'] ?? '');
@@ -284,20 +267,22 @@ class DWHHTSDataAggregator
     private function accumulateKitCount(array &$summary, string $prefix, string $kitName): void
     {
         $kit = strtolower(trim($kitName));
-        if (empty($kit)) {
-            return;
-        }
         if (str_contains($kit, 'trinscreen')) {
             $summary[$prefix . 'trinscreen']++;
-        } elseif (str_contains($kit, 'standard q') || str_contains($kit, 'standardq')) {
+        } elseif (str_contains($kit, 'standard q') || str_contains($kit, 'standardq') || str_contains($kit, 'standard')) {
             $summary[$prefix . 'standardq']++;
+        } elseif (str_contains($kit, 'determine')) {
+            $summary[$prefix . 'determine']++;
         } elseif (str_contains($kit, 'dual')) {
             $summary[$prefix . 'dualkit']++;
-        } elseif (str_contains($kit, 'first response')) {
+        } elseif (str_contains($kit, 'first response') || str_contains($kit, 'first')) {
             $summary[$prefix . 'firstresponse']++;
         } elseif (str_contains($kit, 'bioline')) {
             $summary[$prefix . 'bioline']++;
+        } elseif (str_contains($kit, 'onestep') || str_contains($kit, 'one step')) {
+            $summary[$prefix . 'onestep']++;
         } else {
+            // empty string or unrecognized kit name → "Other (+empty)"
             $summary[$prefix . 'other']++;
         }
     }
@@ -381,12 +366,27 @@ class DWHHTSDataAggregator
                             $monthlySites['hts_type'] =   $htsRegister;
 
                             $kitDistTotals = [
-                                'kit1_trinscreen' => 0, 'kit1_standardq' => 0, 'kit1_dualkit' => 0,
-                                'kit1_firstresponse' => 0, 'kit1_bioline' => 0, 'kit1_other' => 0,
-                                'kit2_trinscreen' => 0, 'kit2_standardq' => 0, 'kit2_dualkit' => 0,
-                                'kit2_firstresponse' => 0, 'kit2_bioline' => 0, 'kit2_other' => 0,
-                                'kit3_trinscreen' => 0, 'kit3_standardq' => 0, 'kit3_dualkit' => 0,
-                                'kit3_firstresponse' => 0, 'kit3_bioline' => 0, 'kit3_other' => 0,
+                                'kit1_trinscreen' => 0,
+                                'kit1_standardq' => 0,
+                                'kit1_dualkit' => 0,
+                                'kit1_firstresponse' => 0,
+                                'kit1_bioline' => 0,
+                                'kit1_determine' => 0,
+                                'kit1_other' => 0,
+
+                                'kit2_trinscreen' => 0,
+                                'kit2_standardq' => 0,
+                                'kit2_dualkit' => 0,
+                                'kit2_firstresponse' => 0,
+                                'kit2_bioline' => 0,
+                                'kit2_other' => 0,
+
+                                'kit3_trinscreen' => 0,
+                                'kit3_standardq' => 0,
+                                'kit3_dualkit' => 0,
+                                'kit3_firstresponse' => 0,
+                                'kit3_bioline' => 0,
+                                'kit3_other' => 0,
                             ];
 
                             $completnesScores = ['completness' => 0];
@@ -777,12 +777,28 @@ class DWHHTSDataAggregator
                         // 'hardcopy' => 0
                     ),
                     'emr' => $record['emr'] ?? null,
-                    'kit1_trinscreen' => 0, 'kit1_standardq' => 0, 'kit1_dualkit' => 0,
-                    'kit1_firstresponse' => 0, 'kit1_bioline' => 0, 'kit1_other' => 0,
-                    'kit2_trinscreen' => 0, 'kit2_standardq' => 0, 'kit2_dualkit' => 0,
-                    'kit2_firstresponse' => 0, 'kit2_bioline' => 0, 'kit2_other' => 0,
-                    'kit3_trinscreen' => 0, 'kit3_standardq' => 0, 'kit3_dualkit' => 0,
-                    'kit3_firstresponse' => 0, 'kit3_bioline' => 0, 'kit3_other' => 0,
+                    'kit1_trinscreen' => 0,
+                    'kit1_standardq' => 0,
+                    'kit1_determine' => 0,
+                    'kit1_dualkit' => 0,
+                    'kit1_firstresponse' => 0,
+                    'kit1_bioline' => 0,
+                    'kit1_other' => 0,
+
+                    'kit2_trinscreen' => 0,
+                    'kit2_onestep' => 0,
+                    'kit2_standardq' => 0,
+                    'kit2_dualkit' => 0,
+                    'kit2_firstresponse' => 0,
+                    'kit2_bioline' => 0,
+                    'kit2_other' => 0,
+
+                    'kit3_trinscreen' => 0,
+                    'kit3_standardq' => 0,
+                    'kit3_dualkit' => 0,
+                    'kit3_firstresponse' => 0,
+                    'kit3_bioline' => 0,
+                    'kit3_other' => 0,
                 );
             }
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += (trim(strtolower($record['test_result1'])) == 'positive') ? 1 : 0;
