@@ -78,6 +78,20 @@ return [
             'sslmode' => 'prefer',
         ],
 
+        'odk_central' => [
+            'driver'         => 'pgsql',
+            'host'           => env('ODK_DB_HOST', '127.0.0.1'),
+            'port'           => env('ODK_DB_PORT', '5432'),
+            'database'       => env('ODK_DB_NAME', ''),
+            'username'       => env('ODK_DB_USER', ''),
+            'password'       => env('ODK_DB_PASS', ''),
+            'charset'        => 'utf8',
+            'prefix'         => '',
+            'prefix_indexes' => true,
+            'schema'         => 'public',
+            'sslmode'        => 'prefer',
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),

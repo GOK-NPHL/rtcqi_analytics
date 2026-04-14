@@ -304,6 +304,24 @@ class ODKDataAggregator
             return strcmp($a['start'], $b['start']);
         });
 
+        // Flag soft-delete candidates: a mismatched record that is < 10 days before
+        // the next record for the same site (keep the later one, delete the earlier).
+        $n = count($result);
+        for ($i = 0; $i < $n; $i++) {
+            $result[$i]['soft_delete_candidate'] = false;
+            if ($result[$i]['match'] || empty($result[$i]['start'])) continue;
+            if ($i + 1 < $n) {
+                $samesite = ($result[$i]['mysites_facility'] . '|' . $result[$i]['mysites'])
+                          === ($result[$i + 1]['mysites_facility'] . '|' . $result[$i + 1]['mysites']);
+                if ($samesite && !empty($result[$i + 1]['start'])) {
+                    $diffDays = (strtotime($result[$i + 1]['start']) - strtotime($result[$i]['start'])) / 86400;
+                    if ($diffDays >= 0 && $diffDays < 10) {
+                        $result[$i]['soft_delete_candidate'] = true;
+                    }
+                }
+            }
+        }
+
         return $result;
     }
 
