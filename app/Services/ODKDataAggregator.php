@@ -454,7 +454,7 @@ class ODKDataAggregator
             }
             // Log::info("records === " . json_encode($records));
             if (isset($records) && $records != null && count($records) > 0) {
-                $records = $this->computeTimelineStages(iterator_to_array($records, true));
+                $records = $this->computeTimelineStages($records);
                 foreach ($records as $record) {
                     // Log::info("Start record traversal =========>>");
                     $shouldProcessRecord = true;
