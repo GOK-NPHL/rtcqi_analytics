@@ -77,11 +77,10 @@ class CertificatesController extends Controller
     {
         // if year isn't passed, use first file in the folder
         $filename = "certificationassessmentdata/submissions.csv";
-        if (Storage::exists($filename)) {
-            $csv_dir_path = Storage::path($filename);
-        } else {
+        if (!Storage::exists($filename)) {
             $this->refreshData();
         }
+        $csv_dir_path = Storage::path($filename);
         $csv = Reader::createFromPath($csv_dir_path, 'r');
         $csv->setHeaderOffset(0); //set the CSV header offset
         $stmt = Statement::create();
