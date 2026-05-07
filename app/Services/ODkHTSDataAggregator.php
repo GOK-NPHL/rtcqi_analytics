@@ -558,6 +558,7 @@ class ODkHTSDataAggregator
             $combinedRecords = [];
             $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
                 ->where('form_id', 'like', "hts%") // for spi data
+                ->distinct()
                 ->get();
             foreach ($submissionOrgUnitmap as $mapping) {
                 $projectId = $mapping->project_id;
