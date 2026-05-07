@@ -555,6 +555,7 @@ class ODKDataAggregator
                 $combinedRecords = [];
                 $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
                     ->where('form_id', 'like', "spi%") // for spi data
+                    ->distinct()
                     ->get();
                 foreach ($submissionOrgUnitmap as $mapping) {
                     $projectId = $mapping->project_id;
