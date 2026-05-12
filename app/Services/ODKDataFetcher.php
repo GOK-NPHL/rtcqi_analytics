@@ -35,8 +35,9 @@ class ODKDataFetcher
         }
     }
 
-    public function fetchData()
-    {   Log::info("start fetching odk files from ". $this->baseOdkUrl);
+    public function fetchData(?string $countyFilter = null, ?string $checklistFilter = null, bool $force = false)
+    {
+        Log::info("start fetching odk files from ". $this->baseOdkUrl);
         $autUrl = $this->baseOdkUrl . "sessions";
         $response = Http::withoutVerifying()->withOptions([
             // 'verify' => false, //'debug' => true
@@ -45,11 +46,30 @@ class ODKDataFetcher
             'password' => config('app.odk_pass'),
         ]);
         $projectList = $this->getProjectLists($response);
+
+        if ($countyFilter !== null) {
+            $projectList = array_values(array_filter($projectList, function ($project) use ($countyFilter) {
+                return stripos($project['name'], $countyFilter) !== false;
+            }));
+            Log::info("County filter \"{$countyFilter}\" matched " . count($projectList) . " project(s)");
+            if (empty($projectList)) {
+                echo("fetchData:: no projects matched county filter \"{$countyFilter}\"\n");
+                return;
+            }
+        }
+
         $projectToFormsMap = array();
         for ($count = 0; $count < count($projectList); $count++) {
             $projectId = $projectList[$count]['id'];
             $projectName = $projectList[$count]['name'];
             $forms = $this->getProjectForm($response, $projectId);
+
+            if ($checklistFilter !== null) {
+                $forms = array_values(array_filter($forms, function ($form) use ($checklistFilter) {
+                    return stripos($form['xmlFormId'], $checklistFilter) === 0;
+                }));
+                Log::info("Checklist filter \"{$checklistFilter}\" matched " . count($forms) . " form(s) in project \"{$projectName}\"");
+            }
 
             $currentNoOfForms = DB::table('odk_project')
                 ->where('project_id', '=', $projectId)
@@ -62,7 +82,17 @@ class ODKDataFetcher
                 $projectToFormsMap["$projectId"]["cur_no"] = $currentNoOfForms;
             }
         }
-        $this->getFormSubmissions($response, $projectToFormsMap);
+        $this->getFormSubmissions($response, $projectToFormsMap, $force);
+    }
+
+    public function listProjects(): array
+    {
+        $autUrl = $this->baseOdkUrl . "sessions";
+        $response = Http::withoutVerifying()->post($autUrl, [
+            'email' => config('app.odk_user'),
+            'password' => config('app.odk_pass'),
+        ]);
+        return $this->getProjectLists($response);
     }
 
     private function updateOdkProjectDetails($value)
@@ -108,32 +138,32 @@ class ODKDataFetcher
     }
 
 
-    private function getFormSubmissions($response, $projectToFormsMap)
+    private function getFormSubmissions($response, $projectToFormsMap, bool $force = false)
     {
         foreach ($projectToFormsMap as $projectId => $arrayValue) {
 
             for ($counter = 0; $counter < count($arrayValue["forms"]); $counter++) {
                 $formSubmissionsUrl = $this->baseOdkUrl . "projects/" . $projectId . "/forms/#formid/submissions.csv";
-                // print_r($arrayValue[$counter]);
                 $formId = $arrayValue["forms"][$counter]['xmlFormId'];
                 $formSubmissionsUrl = str_replace('#formid', $formId, $formSubmissionsUrl);
                 echo("getFormSubmissions:: running getFormSubmissions for formId ".$formId."\n");
                 if ($formId != null) {
-                //if($this->shouldDownloadSubmission($response, $projectId, $formId)) {
-                    $shouldDl = $this->shouldDownloadSubmission($response, $projectId, $formId);
-                    if ($shouldDl == true) {
-                        echo("getFormSubmissions:: shouldDl = true, Downloading form submissions for form id: " . $formId . "\n");
+                    if ($force) {
+                        echo("getFormSubmissions:: force=true, downloading submissions for form id: " . $formId . "\n");
                         $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
-                    }else{
-                        echo("getFormSubmissions:: shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
-                        $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
+                    } else {
+                        $shouldDl = $this->shouldDownloadSubmission($response, $projectId, $formId);
+                        if ($shouldDl == true) {
+                            echo("getFormSubmissions:: shouldDl = true, Downloading form submissions for form id: " . $formId . "\n");
+                            $this->downloadFormSubmissions($response, $projectId, $formId, $formSubmissionsUrl);
+                        } else {
+                            echo("getFormSubmissions:: shouldDl = false, Skipping form submissions for form id: " . $formId . "\n");
+                        }
                     }
-                }else{
+                } else {
                     echo("getFormSubmissions:: this->shouldDownloadSubmission(response, projectId, formId) returned false\n");
                 }
             }
-
-            //return $res;
         }
     }
 
