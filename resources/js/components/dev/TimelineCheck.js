@@ -313,9 +313,9 @@ class TimelineCheck extends React.Component {
                                             <th>Start Date</th>
                                             <th>Computed</th>
                                             <th>Reported</th>
-                                            <th>baselinefollowup</th>
-                                            <th>followup</th>
-                                            <th>otherFollowup</th>
+                                            <th>baselinefollowup (reported)</th>
+                                            <th>followup (reported)</th>
+                                            <th>otherFollowup (reported)</th>
                                             <th>Match?</th>
                                             <th>UUID</th>
                                         </tr>
@@ -345,10 +345,10 @@ class TimelineCheck extends React.Component {
                                                     </td>
                                                     <td>{i + 1}</td>
                                                     <td style={{ whiteSpace: 'nowrap' }}>
-                                                        {row?.SubmissionDate ? row?.SubmissionDate.split('T')[0] : '—'}
+                                                        {row?.submission_date ? row?.submission_date.split('T')[0] : '—'}
                                                     </td>
                                                     <td style={{ whiteSpace: 'nowrap' }}>
-                                                        {row.start ? new Date(row.start).toLocaleTimeString('en-GB') : '—'}
+                                                        {row.start ? row.start?.split('T')[0] : '—'}
                                                     </td>
                                                     <td>{this.renderBadge(row.computed_stage)}</td>
                                                     <td>{this.renderBadge(row.reported_stage)}</td>
