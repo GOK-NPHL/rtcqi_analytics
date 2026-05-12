@@ -78,6 +78,11 @@ class DevController extends Controller
         DB::connection('odk_central')
             ->statement('UPDATE submission_defs SET xml = ? WHERE id = ?', [$newXml, $defId]);
 
+        // Persist the correction locally so re-ingest cannot overwrite it
+        DB::table('spi_submissions')
+            ->where('submission_uuid', $uuid)
+            ->update(['stage_override' => $targetStage, 'updated_at' => now()]);
+
         // Audit log
         DB::table('submission_stage_audit_log')->insert([
             'uuid'             => $uuid,
@@ -125,6 +130,11 @@ class DevController extends Controller
             }
             // Already deleted — treat as success
         }
+
+        // Mirror the soft-delete locally so re-ingest cannot resurrect the record
+        DB::table('spi_submissions')
+            ->where('submission_uuid', $uuid)
+            ->update(['is_soft_deleted' => true, 'updated_at' => now()]);
 
         DB::table('submission_stage_audit_log')->insert([
             'uuid'             => $uuid,

@@ -13,6 +13,7 @@ use App\OdkOrgunit;
 use App\OdkProject;
 use App\Partner;
 use App\PartnerOrgUnits;
+use App\SpiSubmission;
 use Exception;
 use Illuminate\Support\Arr;
 use League\Csv\Reader;
@@ -253,10 +254,63 @@ class ODKDataAggregator
 
     public function getFacilityTimeline(string $mfl): array
     {
+        // Use DB when ingested; fall back to CSV scan for pre-ingest environments
+        $result = SpiSubmission::count() > 0
+            ? $this->getFacilityTimelineFromDB($mfl)
+            : $this->getFacilityTimelineFromCSV($mfl);
+
+        return $this->annotateSoftDeleteCandidates($result);
+    }
+
+    private function getFacilityTimelineFromDB(string $mfl): array
+    {
+        $rows = SpiSubmission::where('mysites_mfl', $mfl)
+            ->where('is_soft_deleted', false)
+            ->orderBy('mysites_facility')
+            ->orderBy('submission_date')
+            ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $effectiveStage = $row->stage_override ?? $row->computed_stage;
+
+            $bf = $row->reported_baselinefollowup ?? '';
+            if ($bf === 'Baseline') {
+                $reportedStage = 'baseline';
+            } elseif ($bf === 'followup') {
+                $reportedStage = $row->reported_followup ?: 'follow1';
+            } elseif ($bf === 'other') {
+                $reportedStage = 'other';
+            } else {
+                $reportedStage = $bf;
+            }
+
+            $result[] = [
+                'start'                     => $row->submission_date ?? '',
+                'mysites_county'            => $row->mysites_county ?? '',
+                'mysites_subcounty'         => $row->mysites_subcounty ?? '',
+                'mysites_facility'          => $row->mysites_facility ?? '',
+                'mysites'                   => $row->mysites_site ?? '',
+                'computed_stage'            => $effectiveStage,
+                'reported_stage'            => $reportedStage,
+                'reported_baselinefollowup' => $bf,
+                'reported_followup'         => $row->reported_followup ?? '',
+                'reported_otherFollowup'    => $row->reported_other_followup ?? '',
+                'uuid'                      => $row->submission_uuid,
+                'match'                     => $effectiveStage === $reportedStage,
+                'has_override'              => $row->stage_override !== null,
+            ];
+        }
+
+        return $result;
+    }
+
+    private function getFacilityTimelineFromCSV(string $mfl): array
+    {
         $national = OdkOrgunit::where('level', 1)->first();
         if (!$national) return [];
 
-        $raw = $this->getFormRecords($national);
+        $raw = $this->getFormRecordsFromCSV($national, 1);
         $records = is_array($raw) ? $raw : iterator_to_array($raw, true);
         $records = $this->computeTimelineStages($records);
 
@@ -265,10 +319,9 @@ class ODKDataAggregator
             $recordMfl = explode('_', $record['mysites_facility'] ?? '')[0];
             if ($recordMfl !== $mfl) continue;
 
-            $stageIndex = $record['_timeline_stage'] ?? null;
+            $stageIndex    = $record['_timeline_stage'] ?? null;
             $computedStage = $stageIndex !== null ? ($this->timeLines[$stageIndex] ?? 'other') : null;
 
-            // Resolve reported stage to a single comparable value
             $bf = $record['baselinefollowup'] ?? '';
             if ($bf === 'Baseline') {
                 $reportedStage = 'baseline';
@@ -292,12 +345,12 @@ class ODKDataAggregator
                 'reported_baselinefollowup' => $bf,
                 'reported_followup'         => $record['followup'] ?? '',
                 'reported_otherFollowup'    => $record['otherFollowup'] ?? '',
-                'uuid'    => $record['KEY'] ?? '',
+                'uuid'                      => $record['KEY'] ?? '',
                 'match'                     => $computedStage === $reportedStage,
+                'has_override'              => false,
             ];
         }
 
-        // Sort by site then date for display
         usort($result, function ($a, $b) {
             $siteA = $a['mysites_facility'] . '|' . $a['mysites'];
             $siteB = $b['mysites_facility'] . '|' . $b['mysites'];
@@ -306,8 +359,12 @@ class ODKDataAggregator
         });
         define('MIN_DAYS_BETWEEN_FOLLOWUPS', 87); // Minimum days between follow-ups to consider them separate stages (e.g., 3 months)
 
-        // Flag soft-delete candidates: a mismatched record that is < 10 days before
-        // the next record for the same site (keep the later one, delete the earlier).
+        return $result;
+    }
+
+    // Flag soft-delete candidates: a mismatched record < 10 days before the next record for the same site
+    private function annotateSoftDeleteCandidates(array $result): array
+    {
         $n = count($result);
         for ($i = 0; $i < $n; $i++) {
             $result[$i]['soft_delete_candidate'] = false;
@@ -323,7 +380,6 @@ class ODKDataAggregator
                 }
             }
         }
-
         return $result;
     }
 
@@ -474,7 +530,10 @@ class ODKDataAggregator
             }
             // Log::info("records === " . json_encode($records));
             if (isset($records) && $records != null && count($records) > 0) {
-                $records = $this->computeTimelineStages($records);
+                $recordsArray = is_array($records) ? $records : iterator_to_array($records, true);
+                // Skip recomputation when records came from spi_submissions (already staged)
+                $alreadyStaged = !empty($recordsArray) && isset(reset($recordsArray)['_timeline_stage']);
+                $records = $alreadyStaged ? $recordsArray : $this->computeTimelineStages($recordsArray);
                 foreach ($records as $record) {
                     // Log::info("Start record traversal =========>>");
                     $shouldProcessRecord = true;
@@ -551,45 +610,82 @@ class ODKDataAggregator
         try {
             $levelObj = OdkOrgunit::select("level")->where('org_unit_id', $orgUnit['org_unit_id'])->first();
             $level = $levelObj->level;
-            $fileName = null;
 
-            if ($level == 1) {
-                $combinedRecords = [];
-                $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
-                    ->where('form_id', 'like', "spi%") // for spi data
-                    ->distinct()
-                    ->get();
-                foreach ($submissionOrgUnitmap as $mapping) {
-                    $projectId = $mapping->project_id;
-                    $formId = $mapping->form_id;
-                    $fileName = $this->getFileToProcess($projectId, $formId);
-                    $perCountyRecords = $this->getSingleFileRecords($fileName);
-                    if ($perCountyRecords) {
-                        $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
-                    }
-                }
-                return $combinedRecords;
-            } else if ($level == 2) { // Form Submissions table maps orgid at county level to form id
-
-                $odkUtils = new ODKUtils();
-                [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
-
-                $fileName = $this->getFileToProcess($projectId, $formId);
-            } else {
-                $odkUtils = new ODKUtils();
-                [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
-                $fileName = $this->getFileToProcess($projectId, $formId);
+            // Use the DB table when data has been ingested (preferred path)
+            $ingested = SpiSubmission::count() > 0;
+            if ($ingested) {
+                return $this->getFormRecordsFromDB($orgUnit, $level);
             }
 
-            if ($level != 1) {
-                return $this->getSingleFileRecords($fileName);
-            }
+            // CSV fallback — used before spi:ingest has been run
+            return $this->getFormRecordsFromCSV($orgUnit, $level);
         } catch (Exception $ex) {
             Log::error('<ODKDataAggregator->getFormRecords() Error: ' . $ex->getMessage());
             Log::error($ex);
             Log::error('</ODKDataAggregator->getFormRecords()');
             return null;
         }
+    }
+
+    private function getFormRecordsFromDB($orgUnit, int $level): array
+    {
+        $query = SpiSubmission::where('is_soft_deleted', false);
+
+        if ($level === 1) {
+            // National — return everything
+        } elseif ($level === 2) {
+            $query->where('mysites_county', strtolower($orgUnit['mysites_county']));
+        } elseif ($level === 3) {
+            $query->where('mysites_county', strtolower($orgUnit['mysites_county']))
+                  ->where('mysites_subcounty', strtolower($orgUnit['mysites_subcounty']));
+        } elseif ($level >= 4) {
+            $mfl = explode('_', $orgUnit['mysites_facility'])[0];
+            $query->where('mysites_mfl', $mfl);
+            if (!empty($orgUnit['mysites'])) {
+                $query->where('mysites_site', strtolower($orgUnit['mysites']));
+            }
+        }
+
+        $timeLines = $this->timeLines;
+
+        return $query->get()->map(function ($row) use ($timeLines) {
+            // Decode the full CSV row so existing aggregation logic works unchanged
+            $record = is_array($row->raw_data) ? $row->raw_data : (json_decode($row->raw_data, true) ?? []);
+
+            // Inject pre-computed stage fields so getSummationValues skips recomputation
+            $stageToUse   = $row->stage_override ?? $row->computed_stage;
+            $stageIndex   = array_search($stageToUse, $timeLines);
+            $record['computed_stage']   = $stageToUse;
+            $record['_timeline_stage']  = $stageIndex !== false ? (int) $stageIndex : null;
+
+            return $record;
+        })->toArray();
+    }
+
+    private function getFormRecordsFromCSV($orgUnit, int $level)
+    {
+        $fileName = null;
+
+        if ($level == 1) {
+            $combinedRecords = [];
+            $submissionOrgUnitmap = FormSubmissions::select("project_id", "form_id")
+                ->where('form_id', 'like', "spi%")
+                ->distinct()
+                ->get();
+            foreach ($submissionOrgUnitmap as $mapping) {
+                $fileName = $this->getFileToProcess($mapping->project_id, $mapping->form_id);
+                $perCountyRecords = $this->getSingleFileRecords($fileName);
+                if ($perCountyRecords) {
+                    $combinedRecords = array_merge($combinedRecords, iterator_to_array($perCountyRecords, true));
+                }
+            }
+            return $combinedRecords;
+        }
+
+        $odkUtils = new ODKUtils();
+        [$projectId, $formId] = $odkUtils->getFormFormdProjectIds($orgUnit, "spi%");
+        $fileName = $this->getFileToProcess($projectId, $formId);
+        return $this->getSingleFileRecords($fileName);
     }
 
     private function getSingleFileRecords($fileName)
