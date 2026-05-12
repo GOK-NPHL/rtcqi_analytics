@@ -146,6 +146,42 @@ class DevController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function triggerOdkFetch(Request $request)
+    {
+        $request->validate([
+            'county'    => 'required|string|max:100',
+            'checklist' => 'required|in:spi,hts',
+        ]);
+
+        $county    = $request->input('county');
+        $checklist = $request->input('checklist');
+
+        $artisan = base_path('artisan');
+        $logFile = storage_path('logs/odk_fetch.log');
+
+        $cmd = PHP_BINARY
+            . ' ' . escapeshellarg($artisan)
+            . ' fetchodkdata'
+            . ' --county=' . escapeshellarg($county)
+            . ' --checklist=' . escapeshellarg($checklist)
+            . ' --force'
+            . ' >> ' . escapeshellarg($logFile)
+            . ' 2>&1 &';
+
+        exec($cmd);
+
+        Log::info('odk_fetch_triggered', [
+            'county'       => $county,
+            'checklist'    => $checklist,
+            'triggered_by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'ok'      => true,
+            'message' => "ODK fetch triggered for county \"{$county}\" (checklist: {$checklist})",
+        ]);
+    }
+
     private function rewriteStageXml(string $xml, string $targetStage): string
     {
         if ($targetStage === 'baseline') {

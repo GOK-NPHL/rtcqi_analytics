@@ -281,6 +281,7 @@ class ODKDataAggregator
             }
 
             $result[] = [
+                'submission_date'                     => $record['SubmissionDate'] ?? '',
                 'start'                     => $record['start'] ?? '',
                 'mysites_county'            => $record['mysites_county'] ?? '',
                 'mysites_subcounty'         => $record['mysites_subcounty'] ?? '',
@@ -303,6 +304,7 @@ class ODKDataAggregator
             if ($siteA !== $siteB) return strcmp($siteA, $siteB);
             return strcmp($a['start'], $b['start']);
         });
+        define('MIN_DAYS_BETWEEN_FOLLOWUPS', 87); // Minimum days between follow-ups to consider them separate stages (e.g., 3 months)
 
         // Flag soft-delete candidates: a mismatched record that is < 10 days before
         // the next record for the same site (keep the later one, delete the earlier).
@@ -315,7 +317,7 @@ class ODKDataAggregator
                           === ($result[$i + 1]['mysites_facility'] . '|' . $result[$i + 1]['mysites']);
                 if ($samesite && !empty($result[$i + 1]['start'])) {
                     $diffDays = (strtotime($result[$i + 1]['start']) - strtotime($result[$i]['start'])) / 86400;
-                    if ($diffDays >= 0 && $diffDays < 10) {
+                    if ($diffDays >= 0 && $diffDays < MIN_DAYS_BETWEEN_FOLLOWUPS) {
                         $result[$i]['soft_delete_candidate'] = true;
                     }
                 }

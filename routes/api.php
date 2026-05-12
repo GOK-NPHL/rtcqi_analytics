@@ -26,6 +26,7 @@ Route::post('/odk_data', 'SpiReportController@getData');
 Route::post('/dev/facility_timeline', 'DevController@getFacilityTimeline');
 Route::post('/dev/fix_submission_stage', 'DevController@fixSubmissionStage');
 Route::post('/dev/soft_delete_submission', 'DevController@softDeleteSubmission');
+Route::post('/dev/trigger_odk_fetch', 'DevController@triggerOdkFetch');
 // Route::post('/odk_hts_data', 'LogbookReportController@getData');
 Route::post('/odk_hts_data', 'LogbookReportController@getDwhData');
 // Route::get('/dwh_hts_data_raw', 'LogbookReportController@getDwhDataRaw');

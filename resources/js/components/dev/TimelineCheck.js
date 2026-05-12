@@ -21,6 +21,7 @@ class TimelineCheck extends React.Component {
             confirmSite: null,
             applying: {},    // site key → true while in-flight
             applyErrors: {}, // uuid → error string
+            fetchStatus: null, // { county, ok, message } or null
         };
     }
 
@@ -113,6 +114,18 @@ class TimelineCheck extends React.Component {
             applying: { ...prev.applying, [siteKey]: false },
             applyErrors: { ...prev.applyErrors, ...errors },
         }));
+
+        const hadSuccesses = (toFix.length + toDelete.length) > Object.keys(errors).length;
+        if (hadSuccesses) {
+            const county = siteRows[0].mysites_county;
+            try {
+                const resp = await axios.post('/api/dev/trigger_odk_fetch', { county, checklist: 'spi' });
+                this.setState({ fetchStatus: { county, ok: true, message: resp.data.message } });
+            } catch (e) {
+                const msg = e.response?.data?.message || e.message;
+                this.setState({ fetchStatus: { county, ok: false, message: msg } });
+            }
+        }
 
         await this.fetchData();
     }
@@ -218,7 +231,7 @@ class TimelineCheck extends React.Component {
     }
 
     render() {
-        const { mfl, rows, count, loading, error, actions, applying, applyErrors, confirmSite } = this.state;
+        const { mfl, rows, count, loading, error, actions, applying, applyErrors, confirmSite, fetchStatus } = this.state;
 
         const siteGroups = {};
         rows.forEach(row => {
@@ -260,6 +273,20 @@ class TimelineCheck extends React.Component {
                 </div>
 
                 {error && <div className="alert alert-danger">{error}</div>}
+
+                {fetchStatus && (
+                    <div className={`alert alert-${fetchStatus.ok ? 'info' : 'warning'} d-flex justify-content-between align-items-center py-2`} style={{ fontSize: 13 }}>
+                        <span>
+                            {fetchStatus.ok
+                                ? <><strong>ODK fetch triggered</strong> — {fetchStatus.message}. Data will refresh in the background.</>
+                                : <><strong>ODK fetch failed to trigger</strong>: {fetchStatus.message}</>
+                            }
+                        </span>
+                        <button type="button" className="close ml-3" style={{ fontSize: 16 }} onClick={() => this.setState({ fetchStatus: null })}>
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                )}
 
                 {count !== null && (
                     <div className="mb-3">
@@ -313,9 +340,9 @@ class TimelineCheck extends React.Component {
                                             <th>Start Date</th>
                                             <th>Computed</th>
                                             <th>Reported</th>
-                                            <th>baselinefollowup</th>
-                                            <th>followup</th>
-                                            <th>otherFollowup</th>
+                                            <th>baselinefollowup (reported)</th>
+                                            <th>followup (reported)</th>
+                                            <th>otherFollowup (reported)</th>
                                             <th>Match?</th>
                                             <th>UUID</th>
                                         </tr>
@@ -345,10 +372,10 @@ class TimelineCheck extends React.Component {
                                                     </td>
                                                     <td>{i + 1}</td>
                                                     <td style={{ whiteSpace: 'nowrap' }}>
-                                                        {row?.SubmissionDate ? row?.SubmissionDate.split('T')[0] : '—'}
+                                                        {row?.submission_date ? row?.submission_date.split('T')[0] : '—'}
                                                     </td>
                                                     <td style={{ whiteSpace: 'nowrap' }}>
-                                                        {row.start ? new Date(row.start).toLocaleTimeString('en-GB') : '—'}
+                                                        {row.start ? row.start?.split('T')[0] : '—'}
                                                     </td>
                                                     <td>{this.renderBadge(row.computed_stage)}</td>
                                                     <td>{this.renderBadge(row.reported_stage)}</td>
