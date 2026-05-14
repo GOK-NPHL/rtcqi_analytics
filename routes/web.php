@@ -33,6 +33,8 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 // Dev / bench-check tools
 Route::get('/dev/timeline_check', 'DevController@timelineCheck')->name('devTimelineCheck');
+Route::get('/dev/mfl_check', 'DevController@mflCheck')->name('devMflCheck');
+Route::get('/dev/bulk_correction', 'DevController@bulkCorrection')->name('devBulkCorrection');
 
 Route::get('/reports/pt', 'PTReportController@index')->name('ptIndex');
 Route::get('/reports/logbook', 'LogbookReportController@index')->name('logbookIndex');

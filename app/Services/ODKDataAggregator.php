@@ -22,6 +22,8 @@ use PhpParser\Node\Stmt\Continue_;
 
 class ODKDataAggregator
 {
+    private const MIN_DAYS_BETWEEN_FOLLOWUPS = 87;
+
     private $reportSections = array();
     private $timeLines = ['baseline', 'follow1', 'follow2', 'follow3', 'follow4', 'follow5', 'follow6', 'follow7', 'follow8', 'follow9', 'follow10', 'other'];
     private $userOrgTimelineParams = array();
@@ -273,6 +275,8 @@ class ODKDataAggregator
         $result = [];
         foreach ($rows as $row) {
             $effectiveStage = $row->stage_override ?? $row->computed_stage;
+            $row->start = $row->raw_data['start'] ?? '';
+            $row->end = $row->raw_data['end'] ?? '';
 
             $bf = $row->reported_baselinefollowup ?? '';
             if ($bf === 'Baseline') {
@@ -286,7 +290,8 @@ class ODKDataAggregator
             }
 
             $result[] = [
-                'start'                     => $row->submission_date ?? '',
+                'start'                     => $row->start ?? '',
+                'end'                     => $row->end ?? '',
                 'mysites_county'            => $row->mysites_county ?? '',
                 'mysites_subcounty'         => $row->mysites_subcounty ?? '',
                 'mysites_facility'          => $row->mysites_facility ?? '',
@@ -357,7 +362,6 @@ class ODKDataAggregator
             if ($siteA !== $siteB) return strcmp($siteA, $siteB);
             return strcmp($a['start'], $b['start']);
         });
-        define('MIN_DAYS_BETWEEN_FOLLOWUPS', 87); // Minimum days between follow-ups to consider them separate stages (e.g., 3 months)
 
         return $result;
     }
@@ -374,7 +378,7 @@ class ODKDataAggregator
                           === ($result[$i + 1]['mysites_facility'] . '|' . $result[$i + 1]['mysites']);
                 if ($samesite && !empty($result[$i + 1]['start'])) {
                     $diffDays = (strtotime($result[$i + 1]['start']) - strtotime($result[$i]['start'])) / 86400;
-                    if ($diffDays >= 0 && $diffDays < MIN_DAYS_BETWEEN_FOLLOWUPS) {
+                    if ($diffDays >= 0 && $diffDays < self::MIN_DAYS_BETWEEN_FOLLOWUPS) {
                         $result[$i]['soft_delete_candidate'] = true;
                     }
                 }
