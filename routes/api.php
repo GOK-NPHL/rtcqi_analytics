@@ -27,6 +27,8 @@ Route::post('/dev/facility_timeline', 'DevController@getFacilityTimeline');
 Route::post('/dev/fix_submission_stage', 'DevController@fixSubmissionStage');
 Route::post('/dev/soft_delete_submission', 'DevController@softDeleteSubmission');
 Route::post('/dev/trigger_odk_fetch', 'DevController@triggerOdkFetch');
+Route::post('/dev/mismatch_summary', 'DevController@getMismatchSummary');
+Route::post('/dev/bulk_apply_fixes', 'DevController@bulkApplyFixes');
 // Route::post('/odk_hts_data', 'LogbookReportController@getData');
 Route::post('/odk_hts_data', 'LogbookReportController@getDwhData');
 // Route::get('/dwh_hts_data_raw', 'LogbookReportController@getDwhDataRaw');

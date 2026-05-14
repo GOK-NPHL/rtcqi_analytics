@@ -338,7 +338,8 @@ class TimelineCheck extends React.Component {
                                             <th>#</th>
                                             <th>Submission Date</th>
                                             <th>Start Date</th>
-                                            <th>Computed</th>
+                                            <th>End Date</th>
+                                            <th>Computed <span className="text-muted font-weight-normal" style={{ fontSize: 10 }}>(effective)</span></th>
                                             <th>Reported</th>
                                             <th>baselinefollowup (reported)</th>
                                             <th>followup (reported)</th>
@@ -377,7 +378,15 @@ class TimelineCheck extends React.Component {
                                                     <td style={{ whiteSpace: 'nowrap' }}>
                                                         {row.start ? row.start?.split('T')[0] : '—'}
                                                     </td>
-                                                    <td>{this.renderBadge(row.computed_stage)}</td>
+                                                    <td style={{ whiteSpace: 'nowrap' }}>
+                                                        {row.end ? row.end?.split('T')[0] : '—'}
+                                                    </td>
+                                                    <td>
+                                                        {this.renderBadge(row.computed_stage)}
+                                                        {row.has_override && (
+                                                            <span className="badge badge-dark ml-1" style={{ fontSize: 9 }} title="Stage was manually overridden via timeline check">override</span>
+                                                        )}
+                                                    </td>
                                                     <td>{this.renderBadge(row.reported_stage)}</td>
                                                     <td><code>{row.reported_baselinefollowup || '—'}</code></td>
                                                     <td><code>{row.reported_followup || '—'}</code></td>

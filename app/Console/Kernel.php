@@ -24,7 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Pull new CSVs from ODK Central, then immediately ingest into spi_submissions
+        $schedule->command('fetchodkdata')->dailyAt('01:00');
+        $schedule->command('spi:ingest')->dailyAt('01:30');
     }
 
     /**

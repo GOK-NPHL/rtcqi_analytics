@@ -32,6 +32,7 @@ require('./components/reports/summaries/SummariesReport');
 
 // Dev tools
 require('./components/dev/TimelineCheck');
+require('./components/dev/BulkCorrection');
 
 //Intrface code
 require('./components/system/org-unit/OrgUnits');
