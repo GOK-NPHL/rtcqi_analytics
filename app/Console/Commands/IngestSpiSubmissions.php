@@ -256,15 +256,16 @@ class IngestSpiSubmissions extends Command
     {
         $bf = $record['baselinefollowup'] ?? '';
         $mfl = explode('_', $record['mysites_facility'] ?? '')[0];
+        $submissionDate = $record['SubmissionDate'];
 
-        $submissionDate = null;
-        $raw = $record['start'] ?? '';
-        if ($raw) {
-            $ts = strtotime($raw);
-            if ($ts !== false) {
-                $submissionDate = date('Y-m-d', $ts);
-            }
-        }
+        // $submissionDate = null;
+        // $raw = $record['start'] ?? '';
+        // if ($raw) {
+        //     $ts = strtotime($raw);
+        //     if ($ts !== false) {
+        //         $submissionDate = date('Y-m-d', $ts);
+        //     }
+        // }
 
         return [
             'project_id'                => $projectId,
