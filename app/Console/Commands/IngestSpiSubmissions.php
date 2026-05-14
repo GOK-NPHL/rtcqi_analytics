@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\FormSubmissions;
 use App\Services\ODKDataAggregator;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -257,6 +258,7 @@ class IngestSpiSubmissions extends Command
         $bf = $record['baselinefollowup'] ?? '';
         $mfl = explode('_', $record['mysites_facility'] ?? '')[0];
         $submissionDate = $record['SubmissionDate'];
+        $submissionDate = Carbon::parse($record['SubmissionDate'])->format('Y-m-d H:i:s');
 
         // $submissionDate = null;
         // $raw = $record['start'] ?? '';
