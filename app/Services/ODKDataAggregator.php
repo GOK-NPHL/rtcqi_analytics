@@ -290,6 +290,7 @@ class ODKDataAggregator
             }
 
             $result[] = [
+                'submission_date'                     => $row->submission_date ?? '',
                 'start'                     => $row->start ?? '',
                 'end'                     => $row->end ?? '',
                 'mysites_county'            => $row->mysites_county ?? '',
