@@ -17,7 +17,7 @@ class CreateSpiSubmissionsTable extends Migration
             $table->string('form_id', 128);
 
             // Org unit hierarchy (normalised at ingest time)
-            $table->datetime('submission_date')->nullable();
+            $table->timestamp('submission_date')->nullable();
             $table->string('mysites_county', 100)->nullable();
             $table->string('mysites_subcounty', 100)->nullable();
             $table->string('mysites_facility', 255)->nullable();
