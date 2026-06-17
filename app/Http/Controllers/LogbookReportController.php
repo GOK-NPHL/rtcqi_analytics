@@ -37,6 +37,11 @@ class LogbookReportController extends Controller
         return view('reports/logbook/index');
     }
 
+    public static function buildCacheKey(string $method, string $path, array $params): string
+    {
+        return strtolower($method) . ':' . $path . ':' . md5($path . json_encode($params));
+    }
+
     public function getDwhDataRaw(Request $request)
     {
         $dwhObj = new DWHHTSDataAggregator;
@@ -51,9 +56,7 @@ class LogbookReportController extends Controller
             return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
         }
         try {
-            // cache key format = 'method:path:uniqueid'
-            $cache_unique_uid = md5($request->path() . json_encode($request->all()));
-            $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
+            $cacheId = self::buildCacheKey($request->method(), $request->path(), $request->all());
             // Log::info('Cache ID: ' . $cacheId);
             if (config('app.skip_cache')) {
                 Log::info('Skipping cache hit');
@@ -74,9 +77,8 @@ class LogbookReportController extends Controller
             $endDate = $request->endDate;
 
             $result = $odkObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
-            // cache the result; expires in 4 hours
             if ($result && !config('app.skip_cache')) {
-                $cached = Cache::put($cacheId, $result, now()->addHours(4));
+                $cached = Cache::put($cacheId, $result, now()->addHours(23));
                 if (!$cached) {
                     Log::error('<LogbookReportController->getData(): Could not cache data');
                 }
@@ -96,8 +98,7 @@ class LogbookReportController extends Controller
             return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
         }
         try {
-            $cache_unique_uid = md5($request->path() . json_encode($request->all()));
-            $cacheId = strtolower($request->method()) . ':' . $request->path() . ':' . $cache_unique_uid;
+            $cacheId = self::buildCacheKey($request->method(), $request->path(), $request->all());
             if (config('app.skip_cache')) {
                 Log::info(PHP_EOL . PHP_EOL . PHP_EOL . "Skipping cache for $cacheId");
             } else {
@@ -119,7 +120,7 @@ class LogbookReportController extends Controller
 
             $result = $dwhObj->getDwhSummaryLinelist($orgUnitIds, $siteType, $startDate, $endDate);
             if ($result !== null && !config('app.skip_cache')) {
-                $cached = Cache::put($cacheId, $result, now()->addHours(4));
+                $cached = Cache::put($cacheId, $result, now()->addHours(23));
                 if (!$cached) {
                     Log::error('<LogbookReportController->getDwhSummaryLinelist(): Could not cache data');
                 }
@@ -139,15 +140,11 @@ class LogbookReportController extends Controller
             return response()->json(['Message' => 'Not allowed to view log book report: '], 500);
         }
         try {
-            // cache key format = 'method:path:uniqueid'
-            $cache_unique_uid = md5($request->path() . json_encode($request->all()));
-            $cacheId = strtolower($request->method()) . ':' . $request->path() .   ':' . $cache_unique_uid;
-            // Log::info('Cache ID: ' . $cacheId);
+            $cacheId = self::buildCacheKey($request->method(), $request->path(), $request->all());
             if (config('app.skip_cache')) {
                 Log::info(PHP_EOL . PHP_EOL . PHP_EOL . "Skipping cache for $cacheId");
             } else {
                 if (Cache::has($cacheId)) {
-                    // Log::info('Cache hit for ' . $cacheId);
                     $data = Cache::get($cacheId);
                     return response()->json($data);
                 } else {
@@ -164,9 +161,8 @@ class LogbookReportController extends Controller
             Log::info("<LogbookReportController->getDwhData() parameters: orgUnitIds: " . json_encode($orgUnitIds) . " siteTypes: " . json_encode($siteType) . " startDate: " . $startDate . " endDate: " . $endDate);
 
             $result = $dwhObj->getData($orgUnitIds, $siteType, $startDate, $endDate);
-            // cache the result; expires in 4 hours
             if ($result && !config('app.skip_cache')) {
-                $cached = Cache::put($cacheId, $result, now()->addHours(4));
+                $cached = Cache::put($cacheId, $result, now()->addHours(23));
                 if (!$cached) {
                     Log::error('<LogbookReportController->getData(): Could not cache data');
                 }
