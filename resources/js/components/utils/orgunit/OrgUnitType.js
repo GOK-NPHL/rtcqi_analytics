@@ -55,7 +55,8 @@ class OrgUnitType extends React.Component {
         const marginLeft = {
             // marginLeft: "16px",
         };
-        let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC'];
+        let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC', 'UNSPECIFIED'];
+        let orgUnitTypeLabels = { 'UNSPECIFIED': 'Unspecified / Other' };
         let orgTypesSelect = [];
         orgUnitTypes.map((orgType) => {
             orgTypesSelect.push(
@@ -68,7 +69,7 @@ class OrgUnitType extends React.Component {
                         this.orgUnitTypeChangeHandler(event);
                     }}
                 >
-                    {orgType}
+                    {orgUnitTypeLabels[orgType] || orgType}
                     <i className="fa fa-check"
                         style={{ "display": this.state.orgUnitType.includes(orgType) ? "" : "none", "color": "green" }}
                         aria-hidden="true"></i>
