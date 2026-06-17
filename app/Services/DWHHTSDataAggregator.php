@@ -1233,7 +1233,7 @@ class DWHHTSDataAggregator
 
     private function standardizeData(array &$records)
     {
-        $siteTypes = ['CCC', 'PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PAEDIATRIC', 'COMMUNITY_TESTING'];
+        $siteTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PAEDIATRIC', 'COMMUNITY_TESTING', 'UNSPECIFIED'];
         foreach ($records as $key => $row) {
             $records[$key]['Site'] = trim(strtoupper($row['entry_point']));
             $row['Site'] = $records[$key]['Site'];
@@ -1283,6 +1283,8 @@ class DWHHTSDataAggregator
                     str_contains($row['Site'], 'HBTC')
                 ) {
                     $records[$key]['Site'] = 'COMMUNITY_TESTING';
+                } else {
+                    $records[$key]['Site'] = 'UNSPECIFIED';
                 }
 
 
