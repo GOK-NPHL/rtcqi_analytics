@@ -55,8 +55,8 @@ class OrgUnitType extends React.Component {
         const marginLeft = {
             // marginLeft: "16px",
         };
-        let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC', 'UNSPECIFIED'];
-        let orgUnitTypeLabels = { 'UNSPECIFIED': 'Unspecified / Other' };
+        let orgUnitTypes = ['PMTCT', 'VCT', 'OPD', 'LAB', 'PITC', 'IPD', 'VMMC', 'PSC/CCC', 'PEDIATRIC', 'COMMUNITY_TESTING', 'UNSPECIFIED'];
+        let orgUnitTypeLabels = { 'COMMUNITY_TESTING': 'Community Testing', 'UNSPECIFIED': 'Unspecified / Other' };
         let orgTypesSelect = [];
         orgUnitTypes.map((orgType) => {
             orgTypesSelect.push(
