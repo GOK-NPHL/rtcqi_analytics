@@ -26,6 +26,70 @@ import { over } from 'lodash';
 // scoreable T1 result and so fall outside every band.
 const bandLabel = (band) => band === 'no_valid_t1' ? 'Invalid / Incomplete' : band + '%';
 
+// Every indicator states its formula on the page, so a number can always be traced back to
+// what it counts without opening the aggregator.
+const FormulaNote = ({ formula }) => (
+    <small className="d-block mt-2" style={{
+        fontFamily: 'monospace',
+        fontSize: '0.72rem',
+        lineHeight: '1.35',
+        background: '#f4f6f9',
+        borderLeft: '3px solid #5470c6',
+        padding: '5px 8px',
+        borderRadius: '3px',
+        color: '#40506b',
+    }}>
+        <strong>Formula:</strong> {formula}
+    </small>
+);
+
+// The three consistency indicators share one shape: of the tests reaching a given final
+// outcome, how many got there by the algorithm's path. Denominator is the final outcome.
+const CONSISTENCY_INDICATORS = [
+    {
+        key: 'negativity',
+        title: 'Negativity Consistency',
+        rateKey: 'consistency',
+        numeratorKey: 'negative_consistent',
+        denominatorKey: 'negative',
+        contradictionKey: 't1_non_reactive_final_positive',
+        numeratorLabel: '# Consistent',
+        denominatorLabel: '# Final Negative',
+        contradictionLabel: '# T1:NR → Final:Positive',
+        formula: 'T1 Non-reactive AND no T2 AND no T3, over all tests with Final = Negative',
+        note: 'A non-reactive T1 ends the algorithm: no confirmatory or tie-breaker test should follow.',
+        color: '#5470c6',
+    },
+    {
+        key: 'positivity',
+        title: 'Positivity Consistency',
+        rateKey: 'positivity_consistency',
+        numeratorKey: 'positive_consistent',
+        denominatorKey: 'positive',
+        contradictionKey: 't1_t2_reactive_final_negative',
+        numeratorLabel: '# Consistent',
+        denominatorLabel: '# Final Positive',
+        contradictionLabel: '# T1:R + T2:R → Final:Negative',
+        formula: 'T1 Reactive AND T2 Reactive AND T3 Reactive, over all tests with Final = Positive',
+        note: 'A positive result must be reactive on all three tests.',
+        color: '#73c0de',
+    },
+    {
+        key: 'inconclusive',
+        title: 'Inconclusive Consistency',
+        rateKey: 'inconclusive_consistency',
+        numeratorKey: 'inconclusive_consistent',
+        denominatorKey: 'inconclusive',
+        contradictionKey: 'discordant_resolved',
+        numeratorLabel: '# Consistent',
+        denominatorLabel: '# Final Inconclusive',
+        contradictionLabel: '# T1:R + T2:NR → resolved',
+        formula: 'T1 Reactive AND T2 Non-reactive, over all tests with Final = Inconclusive',
+        note: 'A reactive T1 with a non-reactive T2 is discordant: the client is referred for retesting, so the outcome must be inconclusive rather than resolved to positive or negative.',
+        color: '#fac858',
+    },
+];
+
 
 class LogbookReport extends React.Component {
 
@@ -340,8 +404,7 @@ class LogbookReport extends React.Component {
         tableData, dataToParse, tableDataExport,
         positiveConcordanceTableData, positiveConcordanceTableDataExport,
         completenessTableData, completenessExportData,
-        consistencyTableData, consistencyExportData,
-        positivityConsistencyTableData, positivityConsistencyExportData,
+        consistencyTables,
         invalidRateTableData, invalidRateExportData,
         inconclusiveRateTableData, inconclusiveRateExportData,
         supervisorySignatureTableData, supervisorySignatureExportData,
@@ -406,26 +469,16 @@ class LogbookReport extends React.Component {
 
         }
         try {
-            // consistency
-            consistencyTableData.push(
-                <tr key={uuidv4()}>
-                    <td colSpan={3} scope="row">
-                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                    </td>
-                </tr>);
-            consistencyExportData.push([dataToParse.orgName.toUpperCase()]);
-        } catch (err) {
-
-        }
-        try {
-            // positivity consistency
-            positivityConsistencyTableData.push(
-                <tr key={uuidv4()}>
-                    <td colSpan={3} scope="row">
-                        <strong>{dataToParse.orgName.toUpperCase()}</strong>
-                    </td>
-                </tr>);
-            positivityConsistencyExportData.push([dataToParse.orgName.toUpperCase()]);
+            // consistency — one org heading per indicator table
+            CONSISTENCY_INDICATORS.forEach((spec) => {
+                consistencyTables[spec.key].rows.push(
+                    <tr key={uuidv4()}>
+                        <td colSpan={5} scope="row">
+                            <strong>{dataToParse.orgName.toUpperCase()}</strong>
+                        </td>
+                    </tr>);
+                consistencyTables[spec.key].exportData.push([dataToParse.orgName.toUpperCase()]);
+            });
         } catch (err) {
 
         }
@@ -832,78 +885,46 @@ class LogbookReport extends React.Component {
         // end completeness data loop
 
 
-        // consistency data
-        for (let [period, totals] of Object.entries(dataToParse.consistency)) {
+        // consistency data — three record-level indicators, all the same shape.
+        // The rate arrives already computed as a percentage: its denominator is the count of
+        // tests with that final outcome, not the site count, so it is not divided again here.
+        for (let spec of CONSISTENCY_INDICATORS) {
+            for (let [period, rate] of Object.entries(dataToParse[spec.rateKey] || {})) {
 
-            let consistencyRow = [];
-            let consistencyExportTableData = [];
-            const d = new Date(period);
-            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
-                {/* (S={no}, T={tsts}) */}
-            </td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
-            consistencyExportTableData.push(sting);
-            if (this.state.siteType != null) {
-                if (this.state.siteType.length != 0) {
-                    consistencyRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
-                    consistencyExportTableData.push(dataToParse['OrgUniType']);
+                let consistencyRow = [];
+                let consistencyExportTableData = [];
+                const d = new Date(period);
+                let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
+                let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
+                consistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}</td>);
+                let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
+                consistencyExportTableData.push(sting);
+                if (this.state.siteType != null) {
+                    if (this.state.siteType.length != 0) {
+                        consistencyRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
+                        consistencyExportTableData.push(dataToParse['OrgUniType']);
+                    }
                 }
+
+                let counts = dataToParse?.consistency_counts?.[period] || {};
+                [
+                    counts[spec.numeratorKey] || 0,
+                    counts[spec.denominatorKey] || 0,
+                    counts[spec.contradictionKey] || 0,
+                ].forEach((value) => {
+                    consistencyRow.push(<td key={uuidv4()} scope="row">{Intl.NumberFormat().format(value)}</td>);
+                    consistencyExportTableData.push(value);
+                });
+
+                consistencyRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
+                consistencyExportTableData.push(rate);
+
+                consistencyTables[spec.key].rows.push(<tr key={uuidv4()}>{consistencyRow}</tr>);
+                consistencyTables[spec.key].exportData.push(consistencyExportTableData);
             }
-            let contradictions = dataToParse?.consistency_contradictions?.[period] || 0;
-            consistencyRow.push(<td key={uuidv4()} scope="row">{contradictions}</td>);
-            consistencyExportTableData.push(contradictions);
-
-            let rate = (totals / no) * 100;
-            if (!rate) rate = 0;
-            rate = Math.round(rate * 10) / 10; //round off to one decimal place
-
-            consistencyRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
-            consistencyExportTableData.push(rate);
-
-            consistencyTableData.push(<tr key={uuidv4()}>{consistencyRow}</tr>);
-
-            consistencyExportData.push(consistencyExportTableData);
         }
 
-        // end consistency data loop
-
-        // positivity consistency data
-        for (let [period, totals] of Object.entries(dataToParse.positivity_consistency || {})) {
-
-            let positivityConsistencyRow = [];
-            let positivityConsistencyExportTableData = [];
-            const d = new Date(period);
-            let no = dataToParse.overall_agreement_rate[period]['totals']['total_sites'];
-            let tsts = dataToParse.overall_agreement_rate[period]['totals']['total_tests'];
-            positivityConsistencyRow.push(<td key={uuidv4()} scope="row">{monthNames[d.getMonth()]} {d.getFullYear()}
-            </td>);
-            let sting = monthNames[d.getMonth()] + "-" + d.getFullYear() + " (S=" + no + ", T=" + tsts + ")"
-            positivityConsistencyExportTableData.push(sting);
-            if (this.state.siteType != null) {
-                if (this.state.siteType.length != 0) {
-                    positivityConsistencyRow.push(<td key={uuidv4()} scope="row">{dataToParse['OrgUniType']}</td>);
-                    positivityConsistencyExportTableData.push(dataToParse['OrgUniType']);
-                }
-            }
-            let contradictions = dataToParse?.positivity_consistency_contradictions?.[period] || 0;
-            positivityConsistencyRow.push(<td key={uuidv4()} scope="row">{contradictions}</td>);
-            positivityConsistencyExportTableData.push(contradictions);
-
-            let rate = (totals / no) * 100;
-            if (!rate) rate = 0;
-            rate = Math.round(rate * 10) / 10; //round off to one decimal place
-
-            positivityConsistencyRow.push(<td key={uuidv4()} scope="row">{rate}</td>);
-            positivityConsistencyExportTableData.push(rate);
-
-            positivityConsistencyTableData.push(<tr key={uuidv4()}>{positivityConsistencyRow}</tr>);
-
-            positivityConsistencyExportData.push(positivityConsistencyExportTableData);
-        }
-
-        // end positivity consistency data loop
+        // end consistency data loops
 
         // invalid rate data loop
         for (let [period, totals] of Object.entries(dataToParse.invalid_rates)) {
@@ -1107,8 +1128,7 @@ class LogbookReport extends React.Component {
             tableData, tableDataExport,
             positiveConcordanceTableData, positiveConcordanceTableDataExport,
             completenessTableData, completenessExportData,
-            consistencyTableData, consistencyExportData,
-            positivityConsistencyTableData, positivityConsistencyExportData,
+            consistencyTables,
             invalidRateTableData, invalidRateExportData,
             inconclusiveRateTableData, inconclusiveRateExportData,
             supervisorySignatureTableData, supervisorySignatureExportData,
@@ -1261,63 +1281,21 @@ class LogbookReport extends React.Component {
         // end completeness rate
 
 
-        // consistency rate
-        let consistencyTableData = [];
-        let consistencyTableDataHeaders = <tr>
-            {/* <th scope="col">#</th> */}
-            <th scope="col">___</th>
-            <th scope="col"># T1:NR &rarr; Final:Positive</th>
-            <th scope="col">Negativity consistency</th>
+        // consistency rates — one table per indicator, all sharing the same columns
+        let withProgramme = this.state.siteType != null && this.state.siteType.length != 0;
+        let consistencyTables = {};
+        CONSISTENCY_INDICATORS.forEach((spec) => {
+            let headerCells = ['___'];
+            if (withProgramme) headerCells.push('Programme');
+            headerCells.push(spec.numeratorLabel, spec.denominatorLabel, spec.contradictionLabel, spec.title);
 
-        </tr>;
-
-        let consistencyExportData = [];
-
-        consistencyExportData.push(['___', '# T1:NR -> Final:Positive', 'Negativity consistency']);
-
-        if (this.state.siteType != null) {
-            if (this.state.siteType.length != 0) {
-                consistencyTableDataHeaders = <tr>
-                    {/* <th scope="col">#</th> */}
-                    <th scope="col">___</th>
-                    <th scope="col">Programme</th>
-                    <th scope="col"># T1:NR &rarr; Final:Positive</th>
-                    <th scope="col">Negativity consistency</th>
-
-                </tr>;
-                consistencyExportData = [];
-                consistencyExportData.push(['___', 'Programme', '# T1:NR -> Final:Positive', 'Negativity consistency']);
-            }
-        }
-        // end consistency rate
-
-        // positivity consistency rate
-        let positivityConsistencyTableData = [];
-        let positivityConsistencyTableDataHeaders = <tr>
-            <th scope="col">___</th>
-            <th scope="col"># T1:R+T2:R &rarr; Final:Negative</th>
-            <th scope="col">Positivity consistency</th>
-
-        </tr>;
-
-        let positivityConsistencyExportData = [];
-
-        positivityConsistencyExportData.push(['___', '# T1:R+T2:R -> Final:Negative', 'Positivity consistency']);
-
-        if (this.state.siteType != null) {
-            if (this.state.siteType.length != 0) {
-                positivityConsistencyTableDataHeaders = <tr>
-                    <th scope="col">___</th>
-                    <th scope="col">Programme</th>
-                    <th scope="col"># T1:R+T2:R &rarr; Final:Negative</th>
-                    <th scope="col">Positivity consistency</th>
-
-                </tr>;
-                positivityConsistencyExportData = [];
-                positivityConsistencyExportData.push(['___', 'Programme', '# T1:R+T2:R -> Final:Negative', 'Positivity consistency']);
-            }
-        }
-        // end positivity consistency rate
+            consistencyTables[spec.key] = {
+                rows: [],
+                exportData: [headerCells.map((h) => h.replace(/→/g, '->'))],
+                headers: <tr>{headerCells.map((h) => <th scope="col" key={uuidv4()}>{h}</th>)}</tr>,
+            };
+        });
+        // end consistency rates
 
 
         // invalid rate
@@ -1511,8 +1489,7 @@ class LogbookReport extends React.Component {
                             tableDataExport,
                             positiveConcordanceTableData, positiveConcordanceTableDataExport,
                             completenessTableData, completenessExportData,
-                            consistencyTableData, consistencyExportData,
-                            positivityConsistencyTableData, positivityConsistencyExportData,
+                            consistencyTables,
                             invalidRateTableData, invalidRateExportData,
                             inconclusiveRateTableData, inconclusiveRateExportData,
                             supervisorySignatureTableData, supervisorySignatureExportData,
@@ -1526,8 +1503,7 @@ class LogbookReport extends React.Component {
                                 tableDataExport,
                                 positiveConcordanceTableData, positiveConcordanceTableDataExport,
                                 completenessTableData, completenessExportData,
-                                consistencyTableData, consistencyExportData,
-                                positivityConsistencyTableData, positivityConsistencyExportData,
+                                consistencyTables,
                                 invalidRateTableData, invalidRateExportData,
                                 inconclusiveRateTableData, inconclusiveRateExportData,
                                 supervisorySignatureTableData, supervisorySignatureExportData,
@@ -1549,8 +1525,12 @@ class LogbookReport extends React.Component {
         let positive3tConcordanceRateColumnCharts = <><Positive3TConcordanceRateColumnCharts minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} /></>
 
         let completenessChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="completeness" chartLabel="Completeness Rate %" yAxisName="% completeness rate" isDirect={false} color={['#91cc75']} />
-        let consistencyChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="consistency" chartLabel="Negativity Consistency %" yAxisName="% negativity consistency" isDirect={false} color={['#5470c6']} />
-        let positivityConsistencyChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="positivity_consistency" chartLabel="Positivity Consistency %" yAxisName="% positivity consistency" isDirect={false} color={['#73c0de']} />
+        // isDirect: the consistency rates arrive as percentages already divided by their own
+        // final-outcome denominator, so the chart must not divide by the site count.
+        let consistencyCharts = {};
+        CONSISTENCY_INDICATORS.forEach((spec) => {
+            consistencyCharts[spec.key] = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey={spec.rateKey} chartLabel={spec.title + ' %'} yAxisName={'% ' + spec.title.toLowerCase()} isDirect={true} color={[spec.color]} />
+        });
         let invalidRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="invalid_rates" chartLabel="Invalid Rate %" yAxisName="% invalid rate" isDirect={true} color={['#ee6666']} />
         let inconclusiveRateChart = <SimpleRateColumnChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} dataKey="inconclusive_rates" chartLabel="Inconclusive Rate %" yAxisName="% inconclusive rate" isDirect={true} color={['#fc8452']} />
         let ehtsDistributionChart = <EHTSDistributionChart minHeight={500} serverData={this.state.odkData} siteType={this.state.siteType} />
@@ -1569,7 +1549,8 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-12  col-xm-8 col-md-8">
                                         <p style={{ fontWeight: "900" }}>Overall Agreement Rates</p>
-                                        <small className="text-muted">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
+                                        <small className="text-muted d-block">Percentage of tests where T1 and T3 results agree (overall concordance).</small>
+                                        <FormulaNote formula="(T3 Reactive + T1 Non-reactive) ÷ (T1 Reactive + T1 Non-reactive) × 100, summed across all sites in the period." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={overallTableDataExport}> Csv</CSVLink>
@@ -1597,7 +1578,8 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-6  col-xm-5 col-md-5">
                                         <p style={{ fontWeight: "900" }}>Site agreement Rates</p>
-                                        <small className="text-muted">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
+                                        <small className="text-muted d-block">Percentage of sites where T1 and T3 results agree, categorised as &lt;95%, 95–98%, and &gt;98%. Sites scoring &lt;95% require targeted supportive supervision.</small>
+                                        <FormulaNote formula="Per site: (T3 Reactive + T1 Non-reactive) ÷ (T1 Reactive + T1 Non-reactive) × 100, then sites counted into each band ÷ total sites × 100. Sites with no reactive and no non-reactive T1 have no rate and are counted under Invalid / Incomplete Results instead; the three bands plus that column account for every site." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={tableDataExport}> Csv</CSVLink>
@@ -1632,7 +1614,8 @@ class LogbookReport extends React.Component {
                                         {/* Begin Positive concordance rate  */}
                                         <div className="col-sm-9">
                                             <p style={{ fontWeight: "900" }}>Positive concordance rates</p>
-                                            <small className="text-muted">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>; <strong>T3/T2</strong>; <strong>T2/T1</strong>. High concordance indicates consistent test performance.</small>
+                                            <small className="text-muted d-block">Agreement between reactive (positive) results across the three tests. <strong>T3/T1</strong>; <strong>T3/T2</strong>; <strong>T2/T1</strong>. High concordance indicates consistent test performance.</small>
+                                            <FormulaNote formula="T3 Reactive ÷ T1 Reactive × 100; T3 Reactive ÷ T2 Reactive × 100; T2 Reactive ÷ T1 Reactive × 100 — each summed across all sites in the period. Sites with no reactive result on the denominator test are excluded from that ratio." />
                                         </div>
                                         <table id="positiveConcordanceRates" className="table">
                                             <thead className="thead-dark">
@@ -1695,7 +1678,8 @@ class LogbookReport extends React.Component {
                                     {/* Begin completeness rate  */}
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Completeness rate</p>
-                                        <small className="text-muted">Proportion of expected HTS logbook registers submitted for the reporting period. Low completeness may indicate missing data or non-submission of registers.</small>
+                                        <small className="text-muted d-block">Proportion of expected HTS logbook registers submitted for the reporting period. Low completeness may indicate missing data or non-submission of registers.</small>
+                                        <FormulaNote formula="Sites where every record carried all required fields (EMR, entry point, kit names, kit lot numbers, kit expiry dates and a final result) ÷ total sites × 100." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={completenessExportData}> Csv</CSVLink>
@@ -1721,59 +1705,35 @@ class LogbookReport extends React.Component {
                 {
                     this.state.orgUnitIndicators[this.state.indicatorIndexToDisplay] == 'Consistency rate' ?
                         <React.Fragment>
-                            {/* Begin  Negativity consistency  */}
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                                <div className="row">
+                            {CONSISTENCY_INDICATORS.map((spec) => (
+                                <React.Fragment key={spec.key}>
+                                    <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                        <div className="row">
 
-                                    <div className="col-sm-6  col-xm-6 col-md-6">
-                                        <p style={{ fontWeight: "900" }}>Negativity Consistency</p>
-                                        <small className="text-muted">Proportion of sites where every non-reactive T1 result was reported with a negative final outcome (T1:NR = Final:Negative). A site is counted as consistent only if none of its non-reactive T1 records disagree with the final outcome.</small>
+                                            <div className="col-sm-6  col-xm-6 col-md-6">
+                                                <p style={{ fontWeight: "900" }}>{spec.title}</p>
+                                                <small className="text-muted d-block">{spec.note}</small>
+                                                <FormulaNote formula={spec.formula} />
+                                            </div>
+                                            <div className="col-sm-3  col-xm-3 col-md-3">
+                                                <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyTables[spec.key].exportData}> Csv</CSVLink>
+                                            </div>
+                                            <table id={spec.key + 'ConsistencyRates'} className="table table-responsive">
+                                                <thead className="thead-dark">
+                                                    {consistencyTables[spec.key].headers}
+                                                </thead>
+                                                <tbody>
+                                                    {consistencyTables[spec.key].rows}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                    <div className="col-sm-3  col-xm-3 col-md-3">
-                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={consistencyExportData}> Csv</CSVLink>
+                                    <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
+                                        <p style={{ fontWeight: "900" }}>{spec.title} Chart:</p>
+                                        {consistencyCharts[spec.key]}
                                     </div>
-                                    <table id="negativityConsistencyRates" className="table table-responsive">
-                                        <thead className="thead-dark">
-                                            {consistencyTableDataHeaders}
-                                        </thead>
-                                        <tbody>
-                                            {consistencyTableData}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                                <p style={{ fontWeight: "900" }}>Negativity Consistency Chart:</p>
-                                {consistencyChart}
-                            </div>
-                            {/* End Negativity consistency  */}
-
-                            {/* Begin  Positivity consistency  */}
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                                <div className="row">
-
-                                    <div className="col-sm-6  col-xm-6 col-md-6">
-                                        <p style={{ fontWeight: "900" }}>Positivity Consistency</p>
-                                        <small className="text-muted">Proportion of sites where every reactive T1 confirmed by a reactive T2 was reported with a positive final outcome (T1:R + T2:R = Final:Positive). A site is counted as consistent only if none of these records disagree with the final outcome.</small>
-                                    </div>
-                                    <div className="col-sm-3  col-xm-3 col-md-3">
-                                        <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={positivityConsistencyExportData}> Csv</CSVLink>
-                                    </div>
-                                    <table id="positivityConsistencyRates" className="table table-responsive">
-                                        <thead className="thead-dark">
-                                            {positivityConsistencyTableDataHeaders}
-                                        </thead>
-                                        <tbody>
-                                            {positivityConsistencyTableData}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div className="col-sm-12  col-xm-12 col-md-12 col-lg-6 mt-3">
-                                <p style={{ fontWeight: "900" }}>Positivity Consistency Chart:</p>
-                                {positivityConsistencyChart}
-                            </div>
-                            {/* End Positivity consistency  */}
+                                </React.Fragment>
+                            ))}
                         </React.Fragment> : ''
                 }
             </div>
@@ -1790,7 +1750,8 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Inconclusive rate</p>
-                                        <small className="text-muted">Proportion of HIV tests with a discordant/inconclusive outcome where T1 and T2 results conflict, requiring a T3. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
+                                        <small className="text-muted d-block">Proportion of HIV tests with an inconclusive outcome — a reactive T1 followed by a non-reactive T2 is discordant, so the client is referred for retesting rather than resolved to positive or negative. Persistently high rates may indicate test kit performance issues or operator technique problems.</small>
+                                        <FormulaNote formula="Tests with Final = Inconclusive ÷ total tests × 100." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={inconclusiveRateExportData}> Csv</CSVLink>
@@ -1822,7 +1783,8 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Invalid rate</p>
-                                        <small className="text-muted">Proportion of HIV tests that returned an invalid result due to test kit failure, inadequate sample volume, or procedural error. High invalid rates warrant investigation into cold-chain management and tester competency.</small>
+                                        <small className="text-muted d-block">Proportion of HIV tests that returned an invalid result due to test kit failure, inadequate sample volume, or procedural error. High invalid rates warrant investigation into cold-chain management and tester competency.</small>
+                                        <FormulaNote formula="Tests with T1 = Invalid ÷ total tests × 100. T1 only: the data warehouse records no invalid results at T2 or T3." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={invalidRateExportData}> Csv</CSVLink>
@@ -1884,7 +1846,8 @@ class LogbookReport extends React.Component {
 
                                     <div className="col-sm-6  col-xm-6 col-md-6">
                                         <p style={{ fontWeight: "900" }}>Algorithm Followed rate</p>
-                                        <small className="text-muted">Proportion of testing sessions where the HIV 3-test algorithm sequence (T1 → T2 → T3) was correctly applied as per national guidelines. Deviations may result in misclassification of HIV status.</small>
+                                        <small className="text-muted d-block">Proportion of testing sessions where the HIV 3-test algorithm sequence (T1 → T2 → T3) was correctly applied as per national guidelines. Deviations may result in misclassification of HIV status.</small>
+                                        <FormulaNote formula="Not computed — the data warehouse carries no algorithm-adherence field, so every record is currently counted as followed. Use the Consistency indicators, which measure algorithm adherence from the test results themselves." />
                                     </div>
                                     <div className="col-sm-3  col-xm-3 col-md-3">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={algorithmFollowedExportData}> Csv</CSVLink>
@@ -1911,7 +1874,8 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-12">
                                         <p style={{ fontWeight: "900" }}>eHTS Distribution</p>
-                                        <small className="text-muted">Breakdown of HTS registers used by sites — Electronic HTS (eHTS): distribution of EMR / HMIS systems. Tracks progress towards digital register adoption across testing sites.</small>
+                                        <small className="text-muted d-block">Breakdown of HTS registers used by sites — Electronic HTS (eHTS): distribution of EMR / HMIS systems. Tracks progress towards digital register adoption across testing sites.</small>
+                                        <FormulaNote formula="Per month: sites reporting each EMR ÷ total sites × 100. Sites with no EMR recorded are grouped as Unknown." />
                                     </div>
                                     <div className="col-sm-2">
                                         <span style={{ "color": "blue" }}><i className="fas fa-download"></i></span><CSVLink data={htsTypeExportData}> Csv</CSVLink>
@@ -1942,7 +1906,8 @@ class LogbookReport extends React.Component {
                                 <div className="row">
                                     <div className="col-sm-12">
                                         <p style={{ fontWeight: "900" }}>Test Kit Distribution</p>
-                                        <small className="text-muted">Distribution of test kits used across the three HIV testing rounds (T1, T2, T3). Shows proportion of each kit type (Trinscreen, Standard Q, Dual Kit, First Response, Bioline, Other) per test.</small>
+                                        <small className="text-muted d-block">Distribution of test kits used across the three HIV testing rounds (T1, T2, T3). Shows proportion of each kit type (Trinscreen, Standard Q, Determine, Dual Kit, First Response, Bioline, One Step, Other) per test.</small>
+                                        <FormulaNote formula="Per test round: records using each kit ÷ records where that round was performed × 100. Records with no kit name for a round are counted as 'not done' — that round did not happen — and are excluded from its denominator." />
                                     </div>
                                 </div>
                             </div>

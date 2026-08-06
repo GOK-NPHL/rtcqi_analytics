@@ -255,6 +255,32 @@ class DWHHTSDataAggregator
         }
     }
 
+    /**
+     * Reduce a raw DWH result to one of: positive, negative, invalid, inconclusive,
+     * not_done, unknown.
+     *
+     * The DWH spells "no result" several different ways and not consistently per column:
+     * test_result2 uses the literal string 'empty', '' and 'N/A'; test_result3 uses SQL
+     * NULL and ''; test_result1 uses 'empty'. Anything unrecognised becomes 'unknown'
+     * and is counted rather than silently treated as absent - a new spelling appearing
+     * upstream must show as a number on the report, not quietly move an indicator.
+     *
+     * Note "not_done" means different things by tier: at T1 it is missing data, at T2/T3
+     * on a negative client it is correct algorithm behaviour. Callers decide.
+     */
+    private function normalizeResult($value): string
+    {
+        $v = strtolower(trim((string) ($value ?? '')));
+
+        if ($v === 'positive' || $v === 'negative' || $v === 'invalid' || $v === 'inconclusive') {
+            return $v;
+        }
+        if ($v === '' || $v === 'empty' || $v === 'null' || $v === 'n/a' || $v === 'na' || $v === 'not applicable') {
+            return 'not_done';
+        }
+        return 'unknown';
+    }
+
     private function emptyKitCounters(): array
     {
         $counters = [];
@@ -383,8 +409,17 @@ class DWHHTSDataAggregator
                             $kitDistTotals = $this->emptyKitCounters();
 
                             $completnesScores = ['completness' => 0];
-                            $consistencyScores = ['consistent' => 0, 'contradictory_records' => 0];
-                            $positivityConsistencyScores = ['consistent' => 0, 'contradictory_records' => 0];
+                            // Consistency numerators/denominators, summed over sites but
+                            // reported as record-level rates.
+                            $consistencyTotals = [
+                                'negative' => 0, 'negative_consistent' => 0,
+                                'positive' => 0, 'positive_consistent' => 0,
+                                'inconclusive' => 0, 'inconclusive_consistent' => 0,
+                                'final_invalid' => 0, 'final_missing' => 0, 'unknown_results' => 0,
+                                't1_non_reactive_final_positive' => 0,
+                                't1_t2_reactive_final_negative' => 0,
+                                'discordant_resolved' => 0,
+                            ];
                             $invalidRateScores = ['invalid_results_rate' => 0];
 
                             $invalidScores['invalids'] = 0;
@@ -495,17 +530,19 @@ class DWHHTSDataAggregator
                                         $completnesScores['completness'] += 1;
                                     }
 
-                                    // Negativity consistency: every non-reactive T1 at this site ended as a negative final outcome.
-                                    if ($site['t1_non_reactive'] == $site['t1_non_reactive_final_negative']) {
-                                        $consistencyScores['consistent'] += 1;
-                                    }
-                                    $consistencyScores['contradictory_records'] += $site['t1_non_reactive_final_positive'];
-
-                                    // Positivity consistency: every T1 reactive + T2 reactive pair ended as a positive final outcome.
-                                    if ($site['t1_t2_reactive'] == $site['t1_t2_reactive_final_positive']) {
-                                        $positivityConsistencyScores['consistent'] += 1;
-                                    }
-                                    $positivityConsistencyScores['contradictory_records'] += $site['t1_t2_reactive_final_negative'];
+                                    // Consistency: accumulate this site's records into the month totals.
+                                    $consistencyTotals['negative'] += $site['final_negative'];
+                                    $consistencyTotals['negative_consistent'] += $site['final_negative_consistent'];
+                                    $consistencyTotals['positive'] += $site['final_positive'];
+                                    $consistencyTotals['positive_consistent'] += $site['final_positive_consistent'];
+                                    $consistencyTotals['inconclusive'] += $site['final_inconclusive'];
+                                    $consistencyTotals['inconclusive_consistent'] += $site['final_inconclusive_consistent'];
+                                    $consistencyTotals['final_invalid'] += $site['final_invalid'];
+                                    $consistencyTotals['final_missing'] += $site['final_missing'];
+                                    $consistencyTotals['unknown_results'] += $site['unknown_results'];
+                                    $consistencyTotals['t1_non_reactive_final_positive'] += $site['t1_non_reactive_final_positive'];
+                                    $consistencyTotals['t1_t2_reactive_final_negative'] += $site['t1_t2_reactive_final_negative'];
+                                    $consistencyTotals['discordant_resolved'] += $site['discordant_resolved'];
 
                                     $invalidScores['totalTests'] += $site['t1_totals_tests'];
                                     $invalidScores['invalids'] += $site['t1_invalids'];
@@ -682,10 +719,21 @@ class DWHHTSDataAggregator
                             $orgUnitArray['positive_agreement_rate_t2_t1'][$monthlyDate] = $monthlySites['positive-agreement-rate-t2_t1'];
                             //////////
                             $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
-                            $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
-                            $orgUnitArray['consistency_contradictions'][$monthlyDate] = $consistencyScores['contradictory_records'];
-                            $orgUnitArray['positivity_consistency'][$monthlyDate] = $positivityConsistencyScores['consistent'];
-                            $orgUnitArray['positivity_consistency_contradictions'][$monthlyDate] = $positivityConsistencyScores['contradictory_records'];
+                            // Consistency rates: record-level, denominator is the final outcome.
+                            $rate = function ($numerator, $denominator) {
+                                return $denominator > 0
+                                    ? number_format(($numerator * 100) / $denominator, 1, '.', '')
+                                    : '0.0';
+                            };
+
+                            $orgUnitArray['consistency'][$monthlyDate] =
+                                $rate($consistencyTotals['negative_consistent'], $consistencyTotals['negative']);
+                            $orgUnitArray['positivity_consistency'][$monthlyDate] =
+                                $rate($consistencyTotals['positive_consistent'], $consistencyTotals['positive']);
+                            $orgUnitArray['inconclusive_consistency'][$monthlyDate] =
+                                $rate($consistencyTotals['inconclusive_consistent'], $consistencyTotals['inconclusive']);
+
+                            $orgUnitArray['consistency_counts'][$monthlyDate] = $consistencyTotals;
                             $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
                             $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
                             $orgUnitArray['hts_type'][$monthlyDate] = $monthlySites['hts_type'];
@@ -810,12 +858,21 @@ class DWHHTSDataAggregator
                     't1_non_reactive' => 0,
                     't2_reactive' => 0,
                     't3_reactive' => 0,
-                    // consistency checks: eligible records vs records whose final outcome agrees
-                    't1_non_reactive_final_negative' => 0,
+                    // consistency: final outcome totals (denominators) and the records
+                    // that reached each outcome by the algorithm's path (numerators)
+                    'final_negative' => 0,
+                    'final_negative_consistent' => 0,
+                    'final_positive' => 0,
+                    'final_positive_consistent' => 0,
+                    'final_inconclusive' => 0,
+                    'final_inconclusive_consistent' => 0,
+                    'final_invalid' => 0,
+                    'final_missing' => 0,
+                    'unknown_results' => 0,
+                    // named contradictions
                     't1_non_reactive_final_positive' => 0,
-                    't1_t2_reactive' => 0,
-                    't1_t2_reactive_final_positive' => 0,
                     't1_t2_reactive_final_negative' => 0,
+                    'discordant_resolved' => 0,
                     't1_invalids' => 0,
                     't1_totals_tests' => 0,
                     'inconclusives' => 0,
@@ -846,30 +903,57 @@ class DWHHTSDataAggregator
 
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += (
                 trim(strtolower($record['test_result1'])) == 'positive' || trim(strtolower($record['test_result1'])) == 'negative' || trim(strtolower($record['test_result1'])) == 'invalid' ? 1 : 0);
-            // Negativity consistency: a non-reactive T1 must end up as a negative final outcome.
-            $r1 = trim(strtolower($record['test_result1'] ?? ''));
-            $r2 = trim(strtolower($record['test_result2'] ?? ''));
-            $final = trim(strtolower($record['final_test_result'] ?? ''));
+            // ---- Consistency: did the tests behind each final outcome follow the algorithm? ----
+            // Denominator is the final outcome, numerator is the records reaching it by the
+            // algorithm's path. See the indicator descriptions in LogbookReport.js.
+            $site = &$monthScoreMap[$yr . '-' . $mon][$siteConcatName];
 
-            if ($r1 == 'negative') {
-                if ($final == 'negative') {
-                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_final_negative'] += 1;
-                } else if ($final == 'positive') {
-                    // contradictory: a non-reactive screening test reported as HIV positive
-                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_final_positive'] += 1;
-                }
+            $r1    = $this->normalizeResult($record['test_result1'] ?? null);
+            $r2    = $this->normalizeResult($record['test_result2'] ?? null);
+            $r3    = $this->normalizeResult($record['test_result3'] ?? null);
+            $final = $this->normalizeResult($record['final_test_result'] ?? null);
+
+            if ($r1 === 'unknown' || $r2 === 'unknown' || $r3 === 'unknown' || $final === 'unknown') {
+                $site['unknown_results'] += 1;
             }
 
-            // Positivity consistency: T1 reactive + T2 reactive must end up as a positive final outcome.
-            if ($r1 == 'positive' && $r2 == 'positive') {
-                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive'] += 1;
-                if ($final == 'positive') {
-                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive_final_positive'] += 1;
-                } else if ($final == 'negative') {
-                    // contradictory: two reactive tests reported as HIV negative
-                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive_final_negative'] += 1;
+            if ($final === 'negative') {
+                $site['final_negative'] += 1;
+                // Negative: T1 non-reactive and no further testing.
+                if ($r1 === 'negative' && $r2 === 'not_done' && $r3 === 'not_done') {
+                    $site['final_negative_consistent'] += 1;
                 }
+            } elseif ($final === 'positive') {
+                $site['final_positive'] += 1;
+                // Positive: reactive on all three tests.
+                if ($r1 === 'positive' && $r2 === 'positive' && $r3 === 'positive') {
+                    $site['final_positive_consistent'] += 1;
+                }
+            } elseif ($final === 'inconclusive') {
+                $site['final_inconclusive'] += 1;
+                // Inconclusive: T1 reactive, T2 non-reactive - client goes for retesting.
+                if ($r1 === 'positive' && $r2 === 'negative') {
+                    $site['final_inconclusive_consistent'] += 1;
+                }
+            } elseif ($final === 'invalid') {
+                $site['final_invalid'] += 1;
+            } elseif ($final === 'not_done') {
+                $site['final_missing'] += 1;
             }
+
+            // Named contradictions, reported as counts beside the rates.
+            if ($r1 === 'negative' && $final === 'positive') {
+                $site['t1_non_reactive_final_positive'] += 1;
+            }
+            if ($r1 === 'positive' && $r2 === 'positive' && $final === 'negative') {
+                $site['t1_t2_reactive_final_negative'] += 1;
+            }
+            // T1 reactive + T2 non-reactive must be inconclusive, never a resolved outcome.
+            if ($r1 === 'positive' && $r2 === 'negative' && ($final === 'positive' || $final === 'negative')) {
+                $site['discordant_resolved'] += 1;
+            }
+
+            unset($site);
             // Log::info($siteConcatName . json_encode($monthScoreMap[$yr . '-' . $mon][$siteConcatName]) . PHP_EOL);
 
             // Accumulate kit counts per site
