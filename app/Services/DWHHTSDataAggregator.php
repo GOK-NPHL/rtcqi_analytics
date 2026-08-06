@@ -32,6 +32,21 @@ class DWHHTSDataAggregator
     private $endDate = null;
     private $rawDataCache = null;
 
+    // Every bucket accumulateKitCount() can write to. Counters for kit1_/kit2_/kit3_ are
+    // generated from this list so a kit type can never be counted into a key that was
+    // never initialised. 'not_done' holds records where that tier carries no kit name -
+    // i.e. the test was not performed - and is kept out of the kit distribution charts.
+    private $kitTypes = [
+        'trinscreen',
+        'standardq',
+        'determine',
+        'dualkit',
+        'firstresponse',
+        'bioline',
+        'onestep',
+        'other',
+        'not_done',
+    ];
 
     public function __construct()
     {
@@ -195,32 +210,8 @@ class DWHHTSDataAggregator
             'final_null'    => 0,
             'final_inconclusive' => 0,
 
-            'kit1_trinscreen'    => 0,
-            'kit1_standardq'     => 0,
-            'kit1_determine'     => 0,
-            'kit1_dualkit'       => 0,
-            'kit1_firstresponse' => 0,
-            'kit1_bioline'       => 0,
-            'kit1_onestep'       => 0,
-            'kit1_other'         => 0,
-
-            'kit2_onestep'    => 0,
-            'kit2_trinscreen'    => 0,
-            'kit2_standardq'     => 0,
-            'kit2_dualkit'       => 0,
-            'kit2_firstresponse' => 0,
-            'kit2_bioline'       => 0,
-            'kit2_other'         => 0,
-
-            'kit3_trinscreen'    => 0,
-            'kit3_standardq'     => 0,
-            'kit3_dualkit'       => 0,
-            'kit3_firstresponse' => 0,
-            'kit3_bioline'       => 0,
-            'kit3_onestep'         => 0,
-            'kit3_other'         => 0,
             '_sites'             => [],
-        ];
+        ] + $this->emptyKitCounters();
     }
 
     private function accumulateSummaryRecord(array &$summary, array $record): void
@@ -264,10 +255,26 @@ class DWHHTSDataAggregator
         }
     }
 
+    private function emptyKitCounters(): array
+    {
+        $counters = [];
+        foreach (['kit1_', 'kit2_', 'kit3_'] as $prefix) {
+            foreach ($this->kitTypes as $kitType) {
+                $counters[$prefix . $kitType] = 0;
+            }
+        }
+        return $counters;
+    }
+
     private function accumulateKitCount(array &$summary, string $prefix, string $kitName): void
     {
         $kit = strtolower(trim($kitName));
-        if (str_contains($kit, 'trinscreen')) {
+        if ($kit === '') {
+            // No kit recorded for this tier: the test was not performed. Counting these as
+            // "Other" made the T2/T3 kit pies read as ~100% Other, because every client who
+            // stopped at a non-reactive T1 has no T2/T3 kit.
+            $summary[$prefix . 'not_done']++;
+        } elseif (str_contains($kit, 'trinscreen')) {
             $summary[$prefix . 'trinscreen']++;
         } elseif (str_contains($kit, 'standard q') || str_contains($kit, 'standardq') || str_contains($kit, 'standard')) {
             $summary[$prefix . 'standardq']++;
@@ -282,7 +289,7 @@ class DWHHTSDataAggregator
         } elseif (str_contains($kit, 'onestep') || str_contains($kit, 'one step')) {
             $summary[$prefix . 'onestep']++;
         } else {
-            // empty string or unrecognized kit name → "Other (+empty)"
+            // a kit name was recorded but is not one of the known kits
             $summary[$prefix . 'other']++;
         }
     }
@@ -346,6 +353,14 @@ class DWHHTSDataAggregator
                             $scores['total_t2_positive'] = 0;
                             $scores['total_t3_positive'] = 0;
 
+                            // Sites with no reactive and no non-reactive T1: there is no agreement
+                            // rate to place in a band, but they are still reporting sites and are
+                            // counted in total_sites and surfaced on their own.
+                            $scores['no_valid_t1'] = 0;
+                            $scores['no_valid_t1_tests'] = 0;
+                            $scores['no_valid_t1_invalid_only'] = 0;
+                            $scores['no_valid_t1_no_result'] = 0;
+
                             $signedSites = array();
                             $signedSites['signed'] = 0;
                             $signedSites['not_signed'] = 0;
@@ -365,32 +380,11 @@ class DWHHTSDataAggregator
                             // $monthlySites['emrs'] =   $this->emrs;
                             $monthlySites['hts_type'] =   $htsRegister;
 
-                            $kitDistTotals = [
-                                'kit1_trinscreen' => 0,
-                                'kit1_standardq' => 0,
-                                'kit1_dualkit' => 0,
-                                'kit1_firstresponse' => 0,
-                                'kit1_bioline' => 0,
-                                'kit1_determine' => 0,
-                                'kit1_other' => 0,
-
-                                'kit2_trinscreen' => 0,
-                                'kit2_standardq' => 0,
-                                'kit2_dualkit' => 0,
-                                'kit2_firstresponse' => 0,
-                                'kit2_bioline' => 0,
-                                'kit2_other' => 0,
-
-                                'kit3_trinscreen' => 0,
-                                'kit3_standardq' => 0,
-                                'kit3_dualkit' => 0,
-                                'kit3_firstresponse' => 0,
-                                'kit3_bioline' => 0,
-                                'kit3_other' => 0,
-                            ];
+                            $kitDistTotals = $this->emptyKitCounters();
 
                             $completnesScores = ['completness' => 0];
-                            $consistencyScores = ['consistent' => 0];
+                            $consistencyScores = ['consistent' => 0, 'contradictory_records' => 0];
+                            $positivityConsistencyScores = ['consistent' => 0, 'contradictory_records' => 0];
                             $invalidRateScores = ['invalid_results_rate' => 0];
 
                             $invalidScores['invalids'] = 0;
@@ -404,6 +398,7 @@ class DWHHTSDataAggregator
                                 '>98' => [],
                                 '95-98' => [],
                                 '<95' => [],
+                                'no_valid_t1' => [],
                             ];
 
                             $monthlySites['concordance_t1_reactive'] = 0;
@@ -473,13 +468,23 @@ class DWHHTSDataAggregator
                             ];
 
                             foreach ($monthlySites as $indicator => $site) { //sites per month -- sites in a month
+                                // $monthlySites also carries the aggregate buckets appended above
+                                // (totals, sitenames, concordance_*, positive-agreement-rate-*, ...).
+                                // They are not sites and must not be summed as such.
+                                if (!is_array($site) || !array_key_exists('t1_totals_tests', $site)) {
+                                    continue;
+                                }
                                 try {
                                     //3-test = (t3_reactive + t1_non_reactive) / (t1_reactive + t1_non_reactive)
-                                    $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / ($site['t1_reactive'] + $site['t1_non_reactive']);
+                                    $evaluableT1 = $site['t1_reactive'] + $site['t1_non_reactive'];
+                                    $agreementRate = null;
+                                    if ($evaluableT1 > 0) {
+                                        $agreement = ($site['t3_reactive'] + $site['t1_non_reactive']) / $evaluableT1;
+                                        $agreementRate = $agreement * 100;
+                                    }
 
                                     $monthlySites['totals']['total_sites'] += 1;
                                     $monthlySites['totals']['total_tests'] += $site['t1_totals_tests'];
-                                    $agreementRate = $agreement * 100;
 
                                     $monthlySites['concordance_t1_reactive'] += $site['t1_reactive'];
                                     $monthlySites['concordance_t2_reactive'] += $site['t2_reactive'];
@@ -490,10 +495,17 @@ class DWHHTSDataAggregator
                                         $completnesScores['completness'] += 1;
                                     }
 
-                                    //check for data consistncy
-                                    if ($site['t1_non_reactive'] == $site['t1_non_reactive_totals']) {
+                                    // Negativity consistency: every non-reactive T1 at this site ended as a negative final outcome.
+                                    if ($site['t1_non_reactive'] == $site['t1_non_reactive_final_negative']) {
                                         $consistencyScores['consistent'] += 1;
                                     }
+                                    $consistencyScores['contradictory_records'] += $site['t1_non_reactive_final_positive'];
+
+                                    // Positivity consistency: every T1 reactive + T2 reactive pair ended as a positive final outcome.
+                                    if ($site['t1_t2_reactive'] == $site['t1_t2_reactive_final_positive']) {
+                                        $positivityConsistencyScores['consistent'] += 1;
+                                    }
+                                    $positivityConsistencyScores['contradictory_records'] += $site['t1_t2_reactive_final_negative'];
 
                                     $invalidScores['totalTests'] += $site['t1_totals_tests'];
                                     $invalidScores['invalids'] += $site['t1_invalids'];
@@ -504,7 +516,17 @@ class DWHHTSDataAggregator
                                     $monthlySites['totals']['total_t2_positive'] += $site['t2_reactive'];
                                     $monthlySites['totals']['total_t3_positive'] += $site['t3_reactive'];
 
-                                    if ($agreementRate > 98) {
+                                    if ($agreementRate === null) {
+                                        // No T1 result to score: either every T1 was invalid, or none was recorded.
+                                        $monthlySites['totals']['no_valid_t1'] += 1;
+                                        $monthlySites['totals']['no_valid_t1_tests'] += $site['t1_totals_tests'];
+                                        if ($site['t1_invalids'] > 0) {
+                                            $monthlySites['totals']['no_valid_t1_invalid_only'] += 1;
+                                        } else {
+                                            $monthlySites['totals']['no_valid_t1_no_result'] += 1;
+                                        }
+                                        $monthlySites['sitenames']['no_valid_t1'][] = $indicator;
+                                    } else if ($agreementRate > 98) {
                                         $monthlySites['totals']['>98'] += 1;
                                         $monthlySites['totals']['>98_tests'] += $site['t1_totals_tests'];
                                         $monthlySites['sitenames']['>98'][] = $indicator;    ///
@@ -522,48 +544,54 @@ class DWHHTSDataAggregator
                                     // Log::info(json_encode($site) . " site['t3_reactive'] = " . $site['t3_reactive'] );
 
                                     // 3-test positive agreement rates
-                                    $t3_t1_pos_agreement = $site['t3_reactive'] * 100 / $site['t1_reactive'];
-                                    // Log::info("t3_t1_pos_agreement: " . $t3_t1_pos_agreement);
-                                    $monthlySites['positive-agreement-rate-t3_t1']['avg'] = $t3_t1_pos_agreement;
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalTests'] += $site['t1_totals_tests'];
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalT3Reactive'] += $site['t3_reactive'];
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalT2Reactive'] += $site['t2_reactive'];
                                     $monthlySites['positive-agreement-rate-t3_t1']['totalT1Reactive'] += $site['t1_reactive'];
-                                    if ($t3_t1_pos_agreement > 98) {
-                                        $monthlySites['positive-agreement-rate-t3_t1']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
-                                    } else if ($t3_t1_pos_agreement >= 95 && $t3_t1_pos_agreement <= 98) {
-                                        $monthlySites['positive-agreement-rate-t3_t1']['95-98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t1']['95-98']['sites'][] = $indicator; ///
-                                    } else if ($t3_t1_pos_agreement < 95) {
-                                        $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
+
+                                    // A site with no reactive T1 (or T2) has no positive agreement rate, so it is
+                                    // left out of the rate bands rather than scored as 0. Guarding the division also
+                                    // keeps the site in everything that follows: the warning it used to raise was
+                                    // converted to an ErrorException and aborted this iteration, which silently
+                                    // dropped ~2 of every 3 sites from the EMR and kit distributions.
+                                    if ($site['t1_reactive'] > 0) {
+                                        $t3_t1_pos_agreement = $site['t3_reactive'] * 100 / $site['t1_reactive'];
+                                        if ($t3_t1_pos_agreement > 98) {
+                                            $monthlySites['positive-agreement-rate-t3_t1']['>98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t1']['>98']['sites'][] = $indicator;   ///
+                                        } else if ($t3_t1_pos_agreement >= 95 && $t3_t1_pos_agreement <= 98) {
+                                            $monthlySites['positive-agreement-rate-t3_t1']['95-98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t1']['95-98']['sites'][] = $indicator; ///
+                                        } else if ($t3_t1_pos_agreement < 95) {
+                                            $monthlySites['positive-agreement-rate-t3_t1']['<95']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t1']['<95']['sites'][] = $indicator;   ///
+                                        }
+
+                                        $t2_t1_pos_agreement = $site['t2_reactive'] * 100 / $site['t1_reactive'];
+                                        if ($t2_t1_pos_agreement > 98) {
+                                            $monthlySites['positive-agreement-rate-t2_t1']['>98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
+                                        } else if ($t2_t1_pos_agreement >= 95 && $t2_t1_pos_agreement <= 98) {
+                                            $monthlySites['positive-agreement-rate-t2_t1']['95-98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t2_t1']['95-98']['sites'][] = $indicator; ///
+                                        } else if ($t2_t1_pos_agreement < 95) {
+                                            $monthlySites['positive-agreement-rate-t2_t1']['<95']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
+                                        }
                                     }
-                                    $t3_t2_pos_agreement = $site['t3_reactive'] * 100 / $site['t2_reactive'];
-                                    // Log::info("t3_t2_pos_agreement: " . $t3_t2_pos_agreement);
-                                    $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t3_t2_pos_agreement;
-                                    if ($t3_t2_pos_agreement > 98) {
-                                        $monthlySites['positive-agreement-rate-t3_t2']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
-                                    } else if ($t3_t2_pos_agreement >= 95 && $t3_t2_pos_agreement <= 98) {
-                                        $monthlySites['positive-agreement-rate-t3_t2']['95-98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t2']['95-98']['sites'][] = $indicator; ///
-                                    } else if ($t3_t2_pos_agreement < 95) {
-                                        $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
-                                    }
-                                    $t2_t1_pos_agreement = $site['t2_reactive'] * 100 / $site['t1_reactive'];
-                                    // Log::info("t2_t1_pos_agreement: " . $t2_t1_pos_agreement);
-                                    $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t2_t1_pos_agreement;
-                                    if ($t2_t1_pos_agreement > 98) {
-                                        $monthlySites['positive-agreement-rate-t2_t1']['>98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t2_t1']['>98']['sites'][] = $indicator;   ///
-                                    } else if ($t2_t1_pos_agreement >= 95 && $t2_t1_pos_agreement <= 98) {
-                                        $monthlySites['positive-agreement-rate-t2_t1']['95-98']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t2_t1']['95-98']['sites'][] = $indicator; ///
-                                    } else if ($t2_t1_pos_agreement < 95) {
-                                        $monthlySites['positive-agreement-rate-t2_t1']['<95']['totals'] += 1;
-                                        $monthlySites['positive-agreement-rate-t2_t1']['<95']['sites'][] = $indicator;   ///
+
+                                    if ($site['t2_reactive'] > 0) {
+                                        $t3_t2_pos_agreement = $site['t3_reactive'] * 100 / $site['t2_reactive'];
+                                        if ($t3_t2_pos_agreement > 98) {
+                                            $monthlySites['positive-agreement-rate-t3_t2']['>98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t2']['>98']['sites'][] = $indicator;   ///
+                                        } else if ($t3_t2_pos_agreement >= 95 && $t3_t2_pos_agreement <= 98) {
+                                            $monthlySites['positive-agreement-rate-t3_t2']['95-98']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t2']['95-98']['sites'][] = $indicator; ///
+                                        } else if ($t3_t2_pos_agreement < 95) {
+                                            $monthlySites['positive-agreement-rate-t3_t2']['<95']['totals'] += 1;
+                                            $monthlySites['positive-agreement-rate-t3_t2']['<95']['sites'][] = $indicator;   ///
+                                        }
                                     }
 
                                     // $monthlySites['overall-positive-test-agreement'] = [
@@ -615,7 +643,7 @@ class DWHHTSDataAggregator
 
                                     // Accumulate kit distribution totals
                                     foreach (['kit1_', 'kit2_', 'kit3_'] as $kprefix) {
-                                        foreach (['trinscreen', 'standardq', 'dualkit', 'firstresponse', 'bioline', 'other'] as $ktype) {
+                                        foreach ($this->kitTypes as $ktype) {
                                             $kkey = $kprefix . $ktype;
                                             $kitDistTotals[$kkey] += $site[$kkey] ?? 0;
                                         }
@@ -624,10 +652,23 @@ class DWHHTSDataAggregator
                                     //  Log::error($ex);
                                 }
                             }
+                            // Overall positive agreement rates for the month, derived from the accumulated
+                            // reactive totals. These used to be assigned inside the per site loop, so they
+                            // held whichever site happened to be processed last rather than a month figure.
+                            $t1ReactiveTotal = $monthlySites['positive-agreement-rate-t3_t1']['totalT1Reactive'];
+                            $t2ReactiveTotal = $monthlySites['positive-agreement-rate-t3_t1']['totalT2Reactive'];
+                            $t3ReactiveTotal = $monthlySites['positive-agreement-rate-t3_t1']['totalT3Reactive'];
+
+                            $monthlySites['positive-agreement-rate-t3_t1']['avg'] = $t1ReactiveTotal > 0 ? ($t3ReactiveTotal * 100 / $t1ReactiveTotal) : 0;
+                            $monthlySites['positive-agreement-rate-t3_t2']['avg'] = $t2ReactiveTotal > 0 ? ($t3ReactiveTotal * 100 / $t2ReactiveTotal) : 0;
+                            $monthlySites['positive-agreement-rate-t2_t1']['avg'] = $t1ReactiveTotal > 0 ? ($t2ReactiveTotal * 100 / $t1ReactiveTotal) : 0;
+
                             $totalConcordance = 0;
                             try {
-                                $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
-                                $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
+                                if ($monthlySites['concordance_t1_reactive'] > 0) {
+                                    $totalConcordance = ($monthlySites['concordance_t2_reactive'] * 100) / $monthlySites['concordance_t1_reactive'];
+                                    $totalConcordance = number_format((float)$totalConcordance, 1, '.', '');
+                                }
                             } catch (Exception $ex) {
                             }
 
@@ -642,6 +683,9 @@ class DWHHTSDataAggregator
                             //////////
                             $orgUnitArray['completeness'][$monthlyDate] = $completnesScores['completness'];
                             $orgUnitArray['consistency'][$monthlyDate] = $consistencyScores['consistent'];
+                            $orgUnitArray['consistency_contradictions'][$monthlyDate] = $consistencyScores['contradictory_records'];
+                            $orgUnitArray['positivity_consistency'][$monthlyDate] = $positivityConsistencyScores['consistent'];
+                            $orgUnitArray['positivity_consistency_contradictions'][$monthlyDate] = $positivityConsistencyScores['contradictory_records'];
                             $orgUnitArray['supervisory_signature'][$monthlyDate] = $monthlySites['supervisory_signature'];
                             $orgUnitArray['algorithm_followed'][$monthlyDate] = $monthlySites['algorithm_followed'];
                             $orgUnitArray['hts_type'][$monthlyDate] = $monthlySites['hts_type'];
@@ -766,7 +810,12 @@ class DWHHTSDataAggregator
                     't1_non_reactive' => 0,
                     't2_reactive' => 0,
                     't3_reactive' => 0,
-                    't1_non_reactive_totals' => 0,
+                    // consistency checks: eligible records vs records whose final outcome agrees
+                    't1_non_reactive_final_negative' => 0,
+                    't1_non_reactive_final_positive' => 0,
+                    't1_t2_reactive' => 0,
+                    't1_t2_reactive_final_positive' => 0,
+                    't1_t2_reactive_final_negative' => 0,
                     't1_invalids' => 0,
                     't1_totals_tests' => 0,
                     'inconclusives' => 0,
@@ -777,29 +826,7 @@ class DWHHTSDataAggregator
                         // 'hardcopy' => 0
                     ),
                     'emr' => $record['emr'] ?? null,
-                    'kit1_trinscreen' => 0,
-                    'kit1_standardq' => 0,
-                    'kit1_determine' => 0,
-                    'kit1_dualkit' => 0,
-                    'kit1_firstresponse' => 0,
-                    'kit1_bioline' => 0,
-                    'kit1_other' => 0,
-
-                    'kit2_trinscreen' => 0,
-                    'kit2_onestep' => 0,
-                    'kit2_standardq' => 0,
-                    'kit2_dualkit' => 0,
-                    'kit2_firstresponse' => 0,
-                    'kit2_bioline' => 0,
-                    'kit2_other' => 0,
-
-                    'kit3_trinscreen' => 0,
-                    'kit3_standardq' => 0,
-                    'kit3_dualkit' => 0,
-                    'kit3_firstresponse' => 0,
-                    'kit3_bioline' => 0,
-                    'kit3_other' => 0,
-                );
+                ) + $this->emptyKitCounters();
             }
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_reactive'] += (trim(strtolower($record['test_result1'])) == 'positive') ? 1 : 0;
 
@@ -819,9 +846,29 @@ class DWHHTSDataAggregator
 
             $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_totals_tests'] += (
                 trim(strtolower($record['test_result1'])) == 'positive' || trim(strtolower($record['test_result1'])) == 'negative' || trim(strtolower($record['test_result1'])) == 'invalid' ? 1 : 0);
-            try {
-                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_totals'] += (trim(strtolower($record['test_result3'])) == 'negative') ? 1 : 0;
-            } catch (Exception $ex) {
+            // Negativity consistency: a non-reactive T1 must end up as a negative final outcome.
+            $r1 = trim(strtolower($record['test_result1'] ?? ''));
+            $r2 = trim(strtolower($record['test_result2'] ?? ''));
+            $final = trim(strtolower($record['final_test_result'] ?? ''));
+
+            if ($r1 == 'negative') {
+                if ($final == 'negative') {
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_final_negative'] += 1;
+                } else if ($final == 'positive') {
+                    // contradictory: a non-reactive screening test reported as HIV positive
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_non_reactive_final_positive'] += 1;
+                }
+            }
+
+            // Positivity consistency: T1 reactive + T2 reactive must end up as a positive final outcome.
+            if ($r1 == 'positive' && $r2 == 'positive') {
+                $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive'] += 1;
+                if ($final == 'positive') {
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive_final_positive'] += 1;
+                } else if ($final == 'negative') {
+                    // contradictory: two reactive tests reported as HIV negative
+                    $monthScoreMap[$yr . '-' . $mon][$siteConcatName]['t1_t2_reactive_final_negative'] += 1;
+                }
             }
             // Log::info($siteConcatName . json_encode($monthScoreMap[$yr . '-' . $mon][$siteConcatName]) . PHP_EOL);
 

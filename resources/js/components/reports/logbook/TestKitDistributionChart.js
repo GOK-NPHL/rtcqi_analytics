@@ -3,16 +3,21 @@ import EchartsForReact from 'echarts-for-react';
 import RTCard from '../../utils/RTCard';
 import { v4 as uuidv4 } from 'uuid';
 
+// Kit types shown in the pies. 'not_done' is deliberately absent: those are records with no
+// kit recorded for that tier (the test was not performed), so they must stay out of the
+// denominator - otherwise the T2/T3 pies read as ~100% "Other".
 const KIT_LABELS = {
     trinscreen: 'Trinscreen',
     standardq: 'Standard Q',
+    determine: 'Determine',
     dualkit: 'Dual Kit',
     firstresponse: 'First Response',
     bioline: 'Bioline',
+    onestep: 'One Step',
     other: 'Other',
 };
 
-const KIT_COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272'];
+const KIT_COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#9a60b4', '#ea7ccc'];
 
 class TestKitDistributionChart extends React.Component {
 
@@ -29,10 +34,13 @@ class TestKitDistributionChart extends React.Component {
         const kitDist = dataObject.kit_distribution || {};
 
         // Aggregate totals across all periods
+        const emptyKitTotals = () =>
+            Object.keys(KIT_LABELS).reduce((acc, kitType) => ({ ...acc, [kitType]: 0 }), {});
+
         const totals = {
-            kit1: { trinscreen: 0, standardq: 0, dualkit: 0, firstresponse: 0, bioline: 0, other: 0 },
-            kit2: { trinscreen: 0, standardq: 0, dualkit: 0, firstresponse: 0, bioline: 0, other: 0 },
-            kit3: { trinscreen: 0, standardq: 0, dualkit: 0, firstresponse: 0, bioline: 0, other: 0 },
+            kit1: emptyKitTotals(),
+            kit2: emptyKitTotals(),
+            kit3: emptyKitTotals(),
         };
 
         Object.values(kitDist).forEach(monthData => {
