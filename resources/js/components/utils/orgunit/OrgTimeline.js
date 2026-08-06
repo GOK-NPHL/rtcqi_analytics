@@ -89,6 +89,24 @@ class OrgTimeline extends React.Component {
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow10')} href="#">
                             Follow-Up 10 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow11')} href="#">
+                            Follow-Up 11 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow12')} href="#">
+                            Follow-Up 12 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow13')} href="#">
+                            Follow-Up 13 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow14')} href="#">
+                            Follow-Up 14 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow15')} href="#">
+                            Follow-Up 15 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
+                        <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'follow16')} href="#">
+                            Follow-Up 16 <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
+                        </a>
                         <a className="dropdown-item" onClick={() => this.onOrgTimelineChange(event, 'otherFollowup')} href="#">
                             Other Follow-Up <i className="fa fa-check" style={{ "display": "none", "color": "green" }} aria-hidden="true"></i>
                         </a>
