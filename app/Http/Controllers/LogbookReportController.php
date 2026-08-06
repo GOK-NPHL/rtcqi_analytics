@@ -37,9 +37,18 @@ class LogbookReportController extends Controller
         return view('reports/logbook/index');
     }
 
+    /**
+     * Cache entries live for 23 hours, so a deploy that changes the shape of the aggregated
+     * payload would keep serving the previous shape until they expire - the report then
+     * renders against keys that are no longer there. Bump this whenever the aggregators
+     * add, rename or redefine a key, so old entries are simply never looked up again.
+     */
+    public const PAYLOAD_SCHEMA_VERSION = 'v2-consistency-record-level';
+
     public static function buildCacheKey(string $method, string $path, array $params): string
     {
-        return strtolower($method) . ':' . $path . ':' . md5($path . json_encode($params));
+        return strtolower($method) . ':' . $path . ':' . self::PAYLOAD_SCHEMA_VERSION
+            . ':' . md5($path . json_encode($params));
     }
 
     public function getDwhDataRaw(Request $request)

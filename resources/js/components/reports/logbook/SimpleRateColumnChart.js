@@ -25,7 +25,9 @@ class SimpleRateColumnChart extends React.Component {
         if (dataObject.orgName) orgName += ' ' + (dataObject['OrgUniType'] != undefined ? dataObject['OrgUniType'] : '');
         orgName = orgName.toUpperCase();
 
-        let rateData = dataObject[this.props.dataKey];
+        // A payload that predates the indicator carries no series under this key. Chart it as
+        // empty rather than throwing, so one missing indicator cannot blank the whole report.
+        let rateData = dataObject[this.props.dataKey] || {};
         let overallDataObject = dataObject.overall_agreement_rate;
 
         let category = [];
